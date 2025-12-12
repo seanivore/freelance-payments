@@ -1,0 +1,70 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Specification Writing Standards
+
+Establish consistent, actionable specification format for development tasks.
+
+## Core Principles
+- **Clarity Over Cleverness**: Single, unambiguous objective per spec
+- **Actionable Structure**: Ordered tasks with specific file operations
+- **Cost Efficiency**: Front-load decisions, eliminate ambiguity
+
+## Required Template Structure
+
+### Header Format
+```markdown
+# [Descriptive Feature Name]
+> Ingest the information from this file, implement the Low-Level Tasks, and generate the code that will satisfy the High and Mid-Level Objectives.
+```
+
+### High-Level Objective
+Single sentence describing the end goal, focusing on business value.
+
+**Good Examples:**
+- "Add ollama support to our autocomplete live benchmarking tool"
+- "Create a front-end app for drag-and-drop YAML benchmark testing"
+
+**Bad Examples:**
+- "Update files and add functions for ollama integration"
+- "Implement various features and improvements"
+
+### Mid-Level Objective
+3-7 concrete, measurable steps that bridge vision and implementation.
+
+### Implementation Notes
+- Technical constraints and requirements
+- Dependencies and libraries to use
+- Existing patterns to mirror
+- Performance requirements
+
+### Context Section
+- **Beginning context**: Files that exist at start
+- **Ending context**: Files that will exist at end
+
+### Low-Level Tasks
+Ordered sequence with specific file operations:
+```markdown
+1. [Task description]
+```aider
+[CREATE/UPDATE] [file path]
+[Exact changes to make]
+```
+
+## Quality Checklist
+- [ ] Single, clear high-level objective
+- [ ] 3-7 concrete mid-level objectives
+- [ ] Complete technical context
+- [ ] Ordered, actionable low-level tasks
+- [ ] Specific file operations for each task
+- [ ] No ambiguous requirements
+
+## Integration with Mao Philosophy
+- Maintain variable-input architecture
+- Avoid hardcoded specifics
+- Preserve modular design patterns
+- Support universal model compatibility
+
+@.archive/specs/spec_template.example.md

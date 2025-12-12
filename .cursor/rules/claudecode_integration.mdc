@@ -1,0 +1,56 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# ClaudeCode Integration Workflow
+
+Establish hybrid workflow combining Sean's creative planning with ClaudeCode's efficient execution.
+
+## When to Use ClaudeCode
+- Complex feature implementation requiring precision
+- Parallel development/testing of multiple approaches  
+- When budget efficiency is critical
+- Large-scale refactoring or systematic changes
+
+## Workflow Pattern
+
+### Phase 1: Creative Planning (with Claude in Cursor)
+- Sean provides context and vision (natural storytelling style)
+- Collaborative exploration of approaches and trade-offs
+- Identify key decisions and potential challenges
+- Document strategy and reasoning
+
+### Phase 2: Specification Creation
+Convert planning into structured ClaudeCode specs using IndyDevDan's template:
+- High-Level Objective (single clear goal)
+- Mid-Level Objective (concrete, measurable steps)
+- Implementation Notes (technical constraints)
+- Context (beginning/ending file states)
+- Low-Level Tasks (ordered, actionable)
+
+### Phase 3: ClaudeCode Execution
+- Clean, targeted execution with minimal token usage
+- Parallel development when testing multiple approaches
+- Focus on implementation, not exploration
+
+### Phase 4: Review and Integration
+- Return to Cursor Claude for review and refinement
+- Integrate learnings back into project knowledge
+- Update memory systems and documentation
+
+## Specification Quality Standards
+- [ ] Single, clear high-level objective
+- [ ] 3-7 concrete mid-level objectives
+- [ ] Complete technical context
+- [ ] Ordered, actionable low-level tasks
+- [ ] Specific file operations for each task
+- [ ] No ambiguous requirements
+
+## Cost Optimization
+- Front-load all decision making in Cursor
+- Eliminate ambiguity that causes iteration
+- Provide complete context upfront
+- Enable single-pass execution in ClaudeCode
+
+@.archive/specs/spec_template.example.md
