@@ -48,13 +48,19 @@
   }
 
   /**
-   * Create PaymentIntent via GitHub Actions API
-   * This will be called via a serverless function (Vercel/Netlify) for security
+   * Create PaymentIntent via serverless function
+   * Uses stripe_price_id from JSON to ensure correct payment amount
+   * 
+   * Flow: Frontend → Serverless Function → Stripe API → Returns client_secret
    */
   async function createPaymentIntent(jobData, payment) {
-    // TODO: Replace with actual serverless function endpoint
-    // For now, this is a placeholder that will be implemented in Phase 2
+    // TODO: Replace with actual serverless function endpoint (Phase 2)
     const serverlessEndpoint = '/api/create-payment-intent'; // Will be Vercel/Netlify function
+
+    // Validate Stripe Price ID exists
+    if (!payment.stripe_price_id) {
+      throw new Error('Stripe Price ID not found. Payment may not be set up in Stripe catalog yet.');
+    }
 
     try {
       const response = await fetch(serverlessEndpoint, {
@@ -63,16 +69,22 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          job_id: jobData.job_id,
-          payment_number: payment.payment_number,
-          amount: Math.round(payment.amount * 100), // Convert to cents
-          currency: payment.currency || 'usd',
-          stripe_price_id: payment.stripe_price_id
+          // Use stripe_price_id to ensure exact payment amount
+          price_id: payment.stripe_price_id,
+          // Additional metadata for webhook handling
+          metadata: {
+            job_id: jobData.job_id,
+            invoice_number: jobData.invoice_number || jobData.job_id,
+            payment_number: payment.payment_number,
+            client_last_name: jobData.client?.last_name,
+            project_keyword: jobData.client?.project_keyword
+          }
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to create payment intent: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to create payment intent: ${response.status}`);
       }
 
       const data = await response.json();
