@@ -22,13 +22,13 @@ todos:
     status: completed
   - id: build-contract-page
     content: Build contract.html dynamic page that populates from JSON. Include signature fields (typed name + date), sign button that updates JSON, download PDF button, navigation links.
-    status: pending
+    status: completed
   - id: build-invoice-page
     content: Build invoice.html dynamic page that shows specific payment details. Display payment number, amount, due date/term, status. Download PDF button, navigation to contract/checkout.
-    status: pending
+    status: completed
   - id: build-checkout-page
     content: Build checkout.html with Stripe Payment Element integration. On payment success, update JSON payment status, commit to repo, route to next payment or completion.
-    status: pending
+    status: completed
   - id: create-manifest-script
     content: "Create generate_manifest.py script to scan jobs directory and create manifest.json mapping. Lookup key format: last_name-project_keyword (lowercase, hyphenated)."
     status: completed

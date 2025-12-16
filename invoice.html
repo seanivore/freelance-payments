@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice - Freelance Payments</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
+
+  <!-- Tailwind CSS -->
+  <link rel="stylesheet" href="/assets/css/styles.css">
+
+  <!-- Print styles -->
+  <style>
+    @media print {
+      .no-print {
+        display: none;
+      }
+
+      @page {
+        margin: 0.75in;
+      }
+
+      body {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-background text-foreground">
+  <div id="loading" class="min-h-screen flex items-center justify-center">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p class="text-muted-foreground">Loading invoice...</p>
+    </div>
+  </div>
+
+  <div id="invoice-content" class="hidden max-w-4xl mx-auto p-6 print:p-0">
+    <!-- Invoice will be populated here -->
+  </div>
+
+  <script src="/assets/js/invoice-controller.js"></script>
+</body>
+
+</html>
