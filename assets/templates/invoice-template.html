@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice {{INVOICE_NUMBER}}</title>
+  <style>
+    /* Print-optimized styles */
+    @media print {
+      @page {
+        margin: 0.75in;
+      }
+
+      body {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .no-print {
+        display: none;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 8.5in;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #fff;
+    }
+
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #000;
+    }
+
+    .invoice-header-left h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 0.5rem;
+    }
+
+    .invoice-header-right {
+      text-align: right;
+    }
+
+    .invoice-number {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .invoice-date {
+      color: #666;
+    }
+
+    .parties-section {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    .party {
+      width: 48%;
+    }
+
+    .party h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #000;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .party p {
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .invoice-details {
+      margin-bottom: 2rem;
+    }
+
+    .invoice-details h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #000;
+    }
+
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+
+    .invoice-table th {
+      background: #f5f5f5;
+      padding: 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #000;
+      font-size: 0.9rem;
+    }
+
+    .invoice-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .invoice-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .total-row {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .payment-info {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+    }
+
+    .payment-info h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #000;
+    }
+
+    .payment-info p {
+      margin-bottom: 0.5rem;
+    }
+
+    .due-date {
+      font-weight: 600;
+      color: #d32f2f;
+      font-size: 1.1rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-paid {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-overdue {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .button-group {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      border: 2px solid #333;
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #333;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: #333;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #000;
+    }
+
+    .placeholder {
+      background: #f0f0f0;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="invoice-header">
+    <div class="invoice-header-left">
+      <h1>INVOICE</h1>
+      <p><strong>Sean August Horvath</strong><br>
+        102 Lunenburg Ave<br>
+        West Townsend, MA 01474<br>
+        Phone: +1 424-744-7687<br>
+        Email: sean@august.style<br>
+        Website: https://august.style</p>
+    </div>
+    <div class="invoice-header-right">
+      <div class="invoice-number">Invoice #{{INVOICE_NUMBER}}</div>
+      <div class="invoice-date">Date: {{INVOICE_DATE}}</div>
+      <div style="margin-top: 1rem;">
+        <span class="status-badge status-{{PAYMENT_STATUS}}">{{PAYMENT_STATUS}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="parties-section">
+    <div class="party">
+      <h2>Bill To</h2>
+      <p><strong>{{CLIENT_NAME}}</strong></p>
+      <p>{{CLIENT_CONTACT_NAME}}</p>
+      <p>{{CLIENT_ADDRESS}}</p>
+      <p>{{CLIENT_EMAIL}}</p>
+      <p>{{CLIENT_PHONE}}</p>
+    </div>
+    <div class="party">
+      <h2>Project</h2>
+      <p><strong>{{PROJECT_NAME}}</strong></p>
+      <p>Payment #{{PAYMENT_NUMBER}} of {{TOTAL_PAYMENTS}}</p>
+      <p>Contract Date: {{CONTRACT_DATE}}</p>
+    </div>
+  </div>
+
+  <div class="invoice-details">
+    <h2>Invoice Details</h2>
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th class="text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong>{{PAYMENT_DESCRIPTION}}</strong><br>
+            <small>{{PAYMENT_DETAILS}}</small>
+          </td>
+          <td class="text-right">${{PAYMENT_AMOUNT}}</td>
+        </tr>
+        <tr class="total-row">
+          <td class="text-right"><strong>Total Due</strong></td>
+          <td class="text-right"><strong>${{PAYMENT_AMOUNT}}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="payment-info">
+    <h3>Payment Information</h3>
+    <p><strong>Due Date:</strong> <span class="due-date">{{DUE_DATE_OR_TERM}}</span></p>
+    <p><strong>Payment Terms:</strong> Payment due within {{INVOICE_DAYS}} days of invoice date.</p>
+    {{#if LATE_FEE}}
+    <p><strong>Late Fee:</strong> {{LATE_FEE}} per month for overdue payments.</p>
+    {{/if}}
+    {{#if PAYMENT_LINK}}
+    <p style="margin-top: 1rem;"><strong>Pay Online:</strong> <a href="{{PAYMENT_LINK}}" class="btn btn-primary no-print">Pay Now</a></p>
+    {{/if}}
+  </div>
+
+  <div class="button-group no-print">
+    {{#if PAYMENT_LINK}}
+    <a href="{{PAYMENT_LINK}}" class="btn btn-primary">Pay Now</a>
+    {{/if}}
+    <button class="btn" onclick="window.print()">Download PDF</button>
+    <a href="/contract.html?job={{JOB_ID}}" class="btn">View Contract</a>
+  </div>
+
+  <script>
+    // Invoice status updates will be handled by invoice-controller.js
+  </script>
+</body>
+
+</html>

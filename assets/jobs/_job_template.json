@@ -1,0 +1,91 @@
+{
+  "job_id": "uid-xxx-###",
+  "invoice_number": "uid-xxx-###",
+  "status": "active",
+  "client": {
+    "name": "Client Business Name",
+    "last_name": "Smith",
+    "project_keyword": "art-website",
+    "contact": {
+      "name": "Client Contact Name",
+      "title": "Owner / Manager",
+      "email": "client@example.com",
+      "phone": "+1-555-0123"
+    },
+    "address": {
+      "street": "123 Main St",
+      "city": "Boston",
+      "state": "MA",
+      "zip": "02101"
+    }
+  },
+  "contract": {
+    "date": "2025-01-15",
+    "start_date": "2025-01-20",
+    "end_date": "2025-03-15",
+    "rate_type": "Flat Rate",
+    "total_fee": 5000.00,
+    "deposit_percent": 25,
+    "invoice_days": 30,
+    "late_fee": 100.00,
+    "hourly_fee": 150.00,
+    "location": "Massachusetts",
+    "maintenance_period_months": 3,
+    "signed": false,
+    "signed_date": null,
+    "signed_by": null,
+    "contractor_signature": null,
+    "contractor_date": null,
+    "client_date": null
+  },
+  "payments": [
+    {
+      "payment_number": 1,
+      "amount": 1250.00,
+      "currency": "usd",
+      "description": "Deposit (25%)",
+      "due_type": "date",
+      "due_date": "2025-01-20",
+      "due_date_unix": 1737417600,
+      "due_term": null,
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {
+        "job_id": null,
+        "invoice_number": null,
+        "payment_number": null,
+        "client_last_name": null,
+        "project_keyword": null
+      }
+    },
+    {
+      "payment_number": 2,
+      "amount": 3750.00,
+      "currency": "usd",
+      "description": "Final payment before launch",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "before launch",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {
+        "job_id": null,
+        "invoice_number": null,
+        "payment_number": null,
+        "client_last_name": null,
+        "project_keyword": null
+      }
+    }
+  ],
+  "project_scope_summary": "This project delivers a professional, custom-built e-commerce website. The Contractor will build a custom dynamic website using a JSON-based product catalog system, hosted on GitHub Pages with Cloudflare R2 CDN for images. The site will include Stripe Prebuilt Checkout integration for e-commerce functionality. The Contractor will create a brand-aligned visual design with mobile-first responsive design and professional typography. Key features include homepage with dynamic product rotation, collection pages with filterable product grid, product pages with photo galleries and story cards, newsletter collection, contact form, SEO optimization, and Google Analytics. The Contractor will provide 30 days of post-launch support, complete technical documentation, content template guidance, and training on adding new products.",
+  "project_scope_full": "Full detailed project scope document stored separately. Includes technical infrastructure details, design specifications, complete feature list, content management system details, support terms, deliverables checklist, timeline breakdown, client responsibilities, and success criteria."
+}
