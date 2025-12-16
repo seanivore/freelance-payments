@@ -21,10 +21,10 @@
   + This is a GitHub Pages website build 
     - We have done a million of these and have the files needed prepared already 
     - Both `./CNAME` and the `./_config.yml` 
-    - READ: `/Users/seanivore/Development/freelance-payments/CNAME` 
-    - READ: `/Users/seanivore/Development/freelance-payments/_config.yml` 
+      `/Users/seanivore/Development/freelance-payments/CNAME` 
+      `/Users/seanivore/Development/freelance-payments/_config.yml` 
   + Use the included style guide `styles.css` to match my portfolio which lives at the apex of the domain `august.style` 
-  + READ: `/Users/seanivore/Development/freelance-payments/styles.css`
+  + READ: `/Users/seanivore/Development/freelance-payments/assets/docs/planning-resources/styles.css`
   + We will probably need to update the `./.env` and `./.example.env` 
     - Both are empty 
     - I know we'll need Stripe but I think that is it 
@@ -59,14 +59,15 @@
     - Read this document to fully understand how this architecture works for the portfolio 
     - You'll then need to understand how we'll be adjusting it for the client 
     - In understanding both we'll be able to investigate parallels to build into our payments micro-site
-    - READ: `/Users/seanivore/Development/360-design/assets/docs/AI_CONTEXT_PRIMER.md` 
+    - READ: `/Users/seanivore/Development/freelance-payments/assets/docs/planning-resources/AI_CONTEXT_PRIMER.md` 
 
   * **Specifics detailing the automation currently functional on the the portfolio `august.style` site** 
 
     - This is from the website described in the `AI_CONTEXT_PRIMER.md` you just read above 
     - Review the details and location of this file in the repository 
     - When planning "Payments Micro-Site Automations" section below reference when creating payment micro-site automations, if any
-    - READ: `/Users/seanivore/Development/360-design/.github/workflows/manifest.yml` 
+    - REMOVED FROM: `/Users/seanivore/Development/freelance-payments/.github/workflows/...` 
+    - READ: `/Users/seanivore/Development/freelance-payments/assets/docs/planning-resources/manifest.yml`
 
   * **Comprehensive understanding of Stripe Development capabilities via their `llm.txt`** 
 
@@ -143,7 +144,7 @@
 
     + We should then create a contract for the current client 
     + The copy of the Project Scope already created is far larger than we needed 
-      READ: `/Users/seanivore/Development/everlastings-website/assets/docs/reference-files/draft_long_PROJECT_SCOPE.md` 
+      READ: `/Users/seanivore/Development/freelance-payments/assets/docs/planning-resources/draft_long_PROJECT_SCOPE.md` 
     + And we have the costs to charge, which is paid part now, then a smaller remaining amount before going live 
 
 ### Payments Micro-Site Automations 

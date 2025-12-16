@@ -1,0 +1,57 @@
+name: Generate Manifest
+
+permissions:
+    contents: write
+
+on:
+    push:
+        branches:
+            - design-360
+        paths:
+            - "assets/entries/**"
+            - "generate_manifest.py"
+    workflow_dispatch:
+
+jobs:
+    generate-manifest:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  fetch-depth: 0
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.x"
+
+            - name: Generate manifest
+              run: python3 generate_manifest.py
+
+            - name: Check for changes
+              id: verify-changed-files
+              run: |
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "changed=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "changed=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Commit changes
+              if: steps.verify-changed-files.outputs.changed == 'true'
+              run: |
+                  git config --local user.email "action@github.com"
+                  git config --local user.name "GitHub Action"
+                  git add assets/js/manifest.json
+                  git commit -m "🤖 Auto-generate manifest.json
+
+                  Co-Authored-By: GitHub Actions <action@github.com>"
+
+            - name: Push changes
+              if: steps.verify-changed-files.outputs.changed == 'true'
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
