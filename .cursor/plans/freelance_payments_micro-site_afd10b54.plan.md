@@ -133,8 +133,7 @@ freelance-payments/
 │       └── invoice-template.html  # HTML invoice template with placeholders
 ├── .github/
 │   └── workflows/
-│       ├── process-job.yml       # Triggered on new/updated job JSON
-│       └── generate-manifest.yml # Updates manifest.json
+│       └── process-job.yml       # Combined: Generates manifest AND creates Stripe products
 └── _config.yml                   # GitHub Pages config
 ```
 
@@ -144,7 +143,8 @@ Each job JSON file (`assets/jobs/uid-xxx.json`) contains:
 
 ```json
 {
-  "job_id": "uid-abc-123",
+  "job_id": "uid-abc-123",  // Generated via `uid` command (unique, never duplicates)
+  "invoice_number": "uid-abc-123",  // Same as job_id (unique identifier, no separate counter needed)
   "client": {
     "name": "Client Business Name",
     "last_name": "Smith",  // For lookup form
@@ -161,7 +161,6 @@ Each job JSON file (`assets/jobs/uid-xxx.json`) contains:
     }
   },
   "contract": {
-    "invoice_number": "11011",
     "date": "2025-01-15",
     "start_date": "2025-01-20",
     "end_date": "2025-03-15",
@@ -172,7 +171,11 @@ Each job JSON file (`assets/jobs/uid-xxx.json`) contains:
     "invoice_days": 30,
     "late_fee": 100.00,
     "hourly_fee": 150.00,
-    "location": "Massachusetts"
+    "location": "Massachusetts",
+    "maintenance_period_months": 3,  // Optional: X months client must use Contractor for updates
+    "signed": false,  // Track if contract has been signed
+    "signed_date": null,  // When contract was signed
+    "signed_by": null  // Client name who signed
   },
   "payments": [
     {
@@ -200,13 +203,9 @@ Each job JSON file (`assets/jobs/uid-xxx.json`) contains:
       "stripe_price_id": "price_yyy"
     }
   ],
-  "contract": {
-    "signed": false,  // Track if contract has been signed
-    "signed_date": null,  // When contract was signed
-    "signed_by": null  // Client name who signed
-  },
-  "project_scope_summary": "2-3 paragraph summary for contract insertion",
-  "project_scope_full": "Full detailed scope (stored separately, referenced in contract)"
+  "project_scope_summary": "2-3 paragraph summary for contract insertion (cleaned up from draft_long_PROJECT_SCOPE.md)",
+  "project_scope_full": "Full detailed scope - large text field (cleaned up from draft_long_PROJECT_SCOPE.md, referenced separately in contract)",
+  "status": "active"  // "active", "completed", "archived" - for future archive functionality (not urgent)
 }
 ```
 
@@ -254,7 +253,7 @@ Create a **hybrid template** that:
 **0.1 Contract Template Creation**
 
 - Review all contract examples provided
-- Create `assets/templates/contract-template.md` with:
+- Create `assets/templates/contract-template.html` with:
   - Essential sections only (Deliverables, Payment, Ownership, Termination)
   - Portfolio/attribution rights (you need this!)
   - Clear placeholders: `[[CLIENT NAME]]`, `[[DATE]]`, `[[PROJECT SCOPE]]`, etc.
@@ -263,17 +262,28 @@ Create a **hybrid template** that:
 
 **0.2 Invoice Template Creation**
 
-- Create `assets/templates/invoice-template.md` matching contract styling
+- Create `assets/templates/invoice-template.html` matching contract styling
 - Include:
-  - Your business info (hardcoded)
+  - Your business info (hardcoded - from dev_planning.md)
   - Client info placeholders
-  - Payment details (amount, description, due date)
-  - Invoice number format
-  - Professional layout
+  - Payment details (amount, description, due date/term)
+  - Invoice number (uses job_id - same as invoice_number)
+  - Professional layout with print-optimized CSS
 
-**0.3 Template Testing**
+**0.3 Template Testing & Scope Cleanup**
 
-- Use real project scope document (`draft_long_PROJECT_SCOPE.md`) as test data
+- **Clean up project scope document** (`draft_long_PROJECT_SCOPE.md`):
+  - Current: ~1.8k tokens / 1k words (too long for contract insertion)
+  - Remove sales language (e.g., "you're saving $954/year" - inappropriate for contract)
+  - Condense to essential project details
+  - **Identify scope elements** that should be standardized:
+    - Technical infrastructure
+    - Design & UX features
+    - Deliverables list
+    - Timeline/milestones
+    - Client responsibilities
+  - Create `project_scope_summary` (2-3 paragraphs for contract insertion)
+  - Keep `project_scope_full` (detailed version, referenced separately in contract)
 - Fill templates manually to identify:
   - Missing fields
   - Overly complex sections
@@ -286,6 +296,12 @@ Create a **hybrid template** that:
 - Document all required fields
 - Identify optional vs required fields
 - Create `_job_template.json` with complete structure
+- **Key decisions**:
+  - `job_id` = `invoice_number` (same unique ID, generated via `uid` command - ensures uniqueness, no separate invoice counter needed)
+  - `status` field: "active", "completed", "archived" (for future archive functionality - not urgent, plan structure now)
+  - `project_scope_summary` (2-3 paragraphs for contract) vs `project_scope_full` (detailed, large text field)
+  - Payment milestones: Framework for options (deposit, milestone, final, monthly, etc.) but always defined per job in JSON
+  - Archive logic: When `contract.signed = true` AND all `payments[].status = "paid"` → Can mark `status: "completed"` (future: filter from manifest or move to archive/)
 
 **Expert Feedback on Approach:**
 
@@ -418,21 +434,32 @@ function determineRoute(jobData) {
 - Triggered via `workflow_dispatch` with inputs (job_id, payment_number, amount)
 - Uses Stripe API to create PaymentIntent
 - Returns `client_secret` to frontend
-- Stores secret key in GitHub Secrets: `STRIPE_SECRET_KEY`
+- **Stripe API Key**: 
+  - **Local `.env`**: `STRIPE_API_KEY` (live key) and `STRIPE_SANDBOX_SECRET` (test key)
+  - **GitHub Secrets**: `STRIPE_API_KEY` for production, `STRIPE_SANDBOX_SECRET` for development
+  - **Development**: Use `STRIPE_SANDBOX_SECRET` (test API key - recommended for MVP)
+  - **Production**: Use `STRIPE_API_KEY` (live key) in GitHub Secrets only
+- **Note**: No separate GitHub API key needed - Actions provides `GITHUB_TOKEN` automatically (like portfolio manifest workflow)
 
-**2.2 Job Processing Workflow** (`.github/workflows/process-job.yml`)
+**2.2 Combined Job Processing Workflow** (`.github/workflows/process-job.yml`)
 
-- Triggered on: push to `assets/jobs/**/*.json`
+**Clarification**: Single workflow handles both manifest generation AND Stripe product creation (not separate workflows)
+
+- Triggered on: push to `assets/jobs/**/*.json` OR `generate_manifest.py` changes
 - Steps:
 
-  1. Read new/updated JSON file
-  2. Extract contract and payment details
-  3. Create Stripe Products/Prices via API for each payment
-  4. Update JSON file with Stripe IDs
-  5. Commit updated JSON
-  6. Trigger manifest regeneration
+  1. Read all JSON files in `assets/jobs/`
+  2. **Generate manifest.json** (like portfolio - creates lookup mapping)
+  3. **For each new/updated JSON file**:
+     - Extract payment details
+     - Create Stripe Products/Prices via API for each payment
+     - Update JSON file with Stripe IDs (`stripe_product_id`, `stripe_price_id`)
+  4. Commit updated JSON files + manifest.json
+  5. Push changes
 
 **Note**: No PDF generation needed! HTML pages populate dynamically from JSON. PDFs generated on-demand via browser print-to-PDF.
+
+**Why Combined**: When JSON changes, we need both manifest update AND Stripe product creation. One workflow is simpler than two separate ones.
 
 **2.3 Stripe Product Creation**
 
@@ -548,13 +575,19 @@ Your insight is spot-on! Instead of pre-generating PDFs, we'll create **HTML pag
 - Creates Stripe PaymentIntent
 - Returns JSON: `{ client_secret: "pi_xxx_secret_yyy" }`
 
-### Phase 5: Payment Status Updates & Email Reminders (Future Enhancement)
+### Phase 5: Payment Status Updates & Future Enhancements
 
 **5.1 Payment Status Updates**
 
 - Stripe webhook → GitHub Actions
 - Updates payment status in JSON automatically
 - Commits updated JSON to repo
+- **Webhook Setup**: 
+  - **Don't configure yet** - wait until we identify needed events
+  - Likely events: `payment_intent.succeeded`, `payment_intent.payment_failed`
+  - Stripe Dashboard warns against selecting "all events" (too many)
+  - After identifying events → Configure webhook → Store secret in `.env` as `STRIPE_WEBHOOK_SECRET`
+  - **MVP**: Can skip webhooks initially, update JSON manually or via payment success callback
 
 **5.2 Email Reminders (Optional)**
 
@@ -562,6 +595,15 @@ Your insight is spot-on! Instead of pre-generating PDFs, we'll create **HTML pag
 - Sends reminder email via Claude hook or email service
 - **Note**: "Before launch" payments require manual follow-up (no fixed date)
 - **MVP**: Skip email reminders, add later if needed
+
+**5.3 Archive Completed Jobs (Future)**
+
+- When `contract.signed = true` AND all `payments[].status = "paid"`:
+  - Option A: Add `status: "completed"` field (keep in same directory, filter in manifest)
+  - Option B: Move to `assets/jobs/archive/` directory
+  - **Recommendation**: Option A (simpler, no file moving needed)
+  - Update manifest generator to skip archived jobs
+  - **Not urgent**: Plain text JSON files are lightweight, won't slow down until thousands
 
 ## Technical Decisions
 
@@ -605,10 +647,15 @@ Your insight is spot-on! Instead of pre-generating PDFs, we'll create **HTML pag
 
 ## Security Considerations
 
-1. **Stripe Keys**: Store in GitHub Secrets
+1. **Stripe Keys**: 
+   - Store in GitHub Secrets for Actions workflows
+   - Use `.env` file locally (already set up: `STRIPE_API_KEY` for live, `STRIPE_SANDBOX_SECRET` for test)
+   - **For development**: Use `STRIPE_SANDBOX_SECRET` (test API key - recommended for MVP)
+   - **For production**: Use `STRIPE_API_KEY` (live key) in GitHub Secrets only
 2. **API Endpoints**: Validate inputs, rate limit
 3. **Client-side**: Never expose secret keys
 4. **JSON Files**: No sensitive data (only invoice numbers, amounts)
+5. **Webhook Secret**: Store in `.env` as `STRIPE_WEBHOOK_SECRET` (configure after identifying needed events)
 
 ## Testing Strategy
 
@@ -678,15 +725,25 @@ Your insight is spot-on! Instead of pre-generating PDFs, we'll create **HTML pag
 - `assets/templates/contract-template.html` - HTML contract template
 - `assets/templates/invoice-template.html` - HTML invoice template
 - `generate_manifest.py` - Manifest generator script (adapt from `assets/docs/planning-resources/generate_manifest_example.py`)
-- `.github/workflows/process-job.yml` - Job processing automation
-- `.github/workflows/create-payment-intent.yml` - PaymentIntent API
-- `.github/workflows/generate-manifest.yml` - Manifest regeneration (adapt from `assets/docs/planning-resources/manifest_example.yml`)
+  - **Key change**: Lookup key format `{last_name}-{project_keyword}` instead of URL paths
+  - **Key change**: Scan `assets/jobs/` instead of `assets/entries/`
+- `.github/workflows/process-job.yml` - **Combined workflow**: Generates manifest AND creates Stripe products (adapt from `assets/docs/planning-resources/manifest_example.yml`)
+  - **Key changes**: 
+    - Paths: `assets/jobs/**` instead of `assets/entries/**`
+    - Branch: `freelance-payments` (or your main branch)
+    - Add Stripe product creation step before manifest generation
+- `.github/workflows/create-payment-intent.yml` - PaymentIntent API endpoint
 - `404.html` - SPA routing helper (adapt from `assets/docs/planning-resources/404_example.html`)
 
 ### Modified Files
 
 - `_config.yml` - GitHub Pages config (already exists)
-- `.example.env` - Add Stripe keys documentation
+- `.example.env` - Add Stripe keys documentation:
+  ```
+  STRIPE_API_KEY=sk_live_... (live key for production)
+  STRIPE_SANDBOX_SECRET=sk_test_... (test key for development - use this for MVP)
+  STRIPE_WEBHOOK_SECRET=whsec_... (configure after identifying needed events)
+  ```
 - `README.md` - Usage instructions
 
 ## Questions to Resolve
@@ -732,6 +789,66 @@ Your insight is spot-on! Instead of pre-generating PDFs, we'll create **HTML pag
 - ✅ Stripe products created with proper metadata
 - ✅ All automation runs via GitHub Actions
 - ✅ Site works on GitHub Pages (static hosting)
+
+## Implementation Clarifications & Decisions
+
+### Workflow Consolidation
+
+**Single Combined Workflow** (`.github/workflows/process-job.yml`):
+- When JSON files in `assets/jobs/` change → Triggers workflow
+- **Step 1**: Generate manifest.json (like portfolio pattern)
+- **Step 2**: Create Stripe products/prices for new/updated jobs
+- **Step 3**: Update JSON files with Stripe IDs
+- **Step 4**: Commit all changes
+- **No separate manifest workflow needed** - portfolio pattern shows this works perfectly
+
+### Unique ID Generation
+
+- Use `uid` command in terminal to generate job IDs
+- Format: `uid-xxx-###` (e.g., `uid-jcm-519`)
+- **Same ID used for**: `job_id` AND `invoice_number` (no separate invoice counter needed)
+- Mathematical operations ensure uniqueness (never duplicates)
+- Example: Run `> uid` → Get `uid-jcm-519` → Use as both job identifier and invoice number
+
+### Archive Functionality (Future)
+
+- Add `status` field: "active", "completed", "archived"
+- When `contract.signed = true` AND all `payments[].status = "paid"` → Mark `status: "completed"`
+- **Future options**:
+  - Filter completed jobs from manifest (simpler)
+  - Move to `assets/jobs/archive/` directory (more organized)
+- **Not urgent**: Plain text JSON files are lightweight, won't slow down until thousands exist
+- **Plan structure now** for easy implementation later
+
+### Contract Elements
+
+- **Portfolio attribution**: Always featuring unless NDA discussed ahead of time
+- **Maintenance period**: Require client to use Contractor for first X months (prevents reputation issues early on)
+- **IP ownership**: Client owns deliverables, but Contractor retains portfolio/marketing rights (unless NDA)
+- **Scope elements**: Identify standardized elements when cleaning up draft scope document
+- **Scope fields**: `project_scope_summary` (2-3 paragraphs) + `project_scope_full` (large text field)
+
+### Payment Milestones
+
+- Framework supports: deposit, milestone, final, monthly, etc.
+- Always defined per job in JSON (flexible, not prescriptive)
+- Payment structure comes from job JSON submission
+
+### Stripe Configuration
+
+- **API Key**: Use `STRIPE_SANDBOX_SECRET` (test key) in `.env` for development (recommended for MVP)
+- **Webhook Secret**: Wait until we identify needed events (don't configure yet)
+  - Likely events: `payment_intent.succeeded`, `payment_intent.payment_failed`
+  - Stripe warns against selecting "all events"
+- **GitHub Actions**: No separate GitHub API key needed - `GITHUB_TOKEN` auto-provided (like portfolio)
+
+### Project Scope Cleanup
+
+- Current document: ~1.8k tokens / 1k words (too long for contract)
+- **Remove**: Sales language (e.g., "you're saving $954/year")
+- **Condense**: To essential project details
+- **Identify**: Standardized scope elements for future contracts
+- **Create**: `project_scope_summary` (2-3 paragraphs) + `project_scope_full` (detailed, large text field)
 
 ## Overall Expert Assessment & Recommendations
 
