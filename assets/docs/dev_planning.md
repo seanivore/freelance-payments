@@ -3,7 +3,7 @@
 
 ## Objective 
 
-Acquire experience building Stripe custom integrations for client projects by creating a reusable micro-site at the subdomain `payments.august.style` that is designed to allow my freelance clients to access payment processing by entering their invoice number. 
+- Acquire experience building Stripe custom integrations for client projects by creating a reusable micro-site at the subdomain `payments.august.style` that is designed to allow my freelance clients to access payment processing by entering their invoice number. 
 
 ### Overview 
 
@@ -19,9 +19,27 @@ Acquire experience building Stripe custom integrations for client projects by cr
 ### Tech Stack & Page Design 
 
   + This is a GitHub Pages website build 
-    - We have done a million of these and 
+    - We have done a million of these and have the files needed prepared already 
+    - Both `./CNAME` and the `./_config.yml` 
+    - READ: `/Users/seanivore/Development/freelance-payments/CNAME` 
+    - READ: `/Users/seanivore/Development/freelance-payments/_config.yml` 
   + Use the included style guide `styles.css` to match my portfolio which lives at the apex of the domain `august.style` 
   + READ: `/Users/seanivore/Development/freelance-payments/styles.css`
+  + We will probably need to update the `./.env` and `./.example.env` 
+    - Both are empty 
+    - I know we'll need Stripe but I think that is it 
+  + Please make sure the HTML includes all META essentials 
+    - Favicon formats are here:
+    `/Users/seanivore/Development/freelance-payments/assets/favicon/apple-touch-icon.png`
+    `/Users/seanivore/Development/freelance-payments/assets/favicon/favicon-96x96.png`
+    `/Users/seanivore/Development/freelance-payments/assets/favicon/favicon.ico`
+    `/Users/seanivore/Development/freelance-payments/assets/favicon/favicon.svg`
+    `/Users/seanivore/Development/freelance-payments/assets/favicon/site.webmanifest`
+    `/Users/seanivore/Development/freelance-payments/assets/favicon/web-app-manifest-192x192.png`
+    `/Users/seanivore/Development/freelance-payments/assets/favicon/web-app-manifest-512x512.png`
+    - Meta thumbnail is here: 
+    `/Users/seanivore/Development/freelance-payments/assets/media/thumbnail-image-sean-august-horvath-freelance-payments.webp`
+    - Meta title and description are already included in the `_config.yml` file that GitHub Pages/Jekyll uses to make the website URL proper 
 
 ### Client Project Scope 
 
