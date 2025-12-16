@@ -4,16 +4,16 @@ overview: Build a reusable payment micro-site at payments.august.style using JSO
 todos:
   - id: create-contract-template
     content: Create contract-template.html by analyzing all provided examples, combining best elements (Plain Contract base + essential protections), removing corporate bloat, testing with real project scope data. HTML format with CSS styling for professional typography.
-    status: pending
+    status: completed
   - id: create-invoice-template
     content: Create invoice-template.html matching contract styling, including all payment details and professional layout. Print-optimized CSS for PDF generation.
-    status: pending
+    status: completed
   - id: test-templates-with-real-data
     content: Manually fill HTML templates using draft_long_PROJECT_SCOPE.md to identify missing fields, overly complex sections, and exact JSON requirements. Test browser print-to-PDF quality.
-    status: pending
+    status: completed
   - id: create-json-schema
     content: Create _job_template.json with complete structure based on template testing results. Include contract.signed fields, payment status tracking, due_type/due_term fields, project_keyword for lookup. Include both project_scope_summary (for contract) and project_scope_full (detailed, separate).
-    status: pending
+    status: completed
   - id: build-lookup-page
     content: Build index.html payment lookup form with last name + project keyword inputs. Implement lookup logic to find JSON file from manifest.
     status: pending
