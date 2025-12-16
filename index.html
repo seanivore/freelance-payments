@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Lookup - Freelance Payments</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
+
+  <!-- Tailwind CSS -->
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+
+<body class="min-h-screen bg-background flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Card Container -->
+    <div class="card p-6 space-y-6">
+      <!-- Header -->
+      <div class="card-header pb-4">
+        <h1 class="card-title">Payment Lookup</h1>
+        <p class="text-sm text-muted-foreground mt-2">
+          Enter your last name and project keyword to access your payment information.
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form id="lookup-form" class="space-y-4">
+        <!-- Last Name Input -->
+        <div class="space-y-2">
+          <label for="last-name" class="label">Last Name</label>
+          <input type="text" id="last-name" name="last_name" class="input" placeholder="Enter your last name" required autocomplete="family-name" />
+        </div>
+
+        <!-- Project Keyword Input -->
+        <div class="space-y-2">
+          <label for="project-keyword" class="label">Project Keyword</label>
+          <input type="text" id="project-keyword" name="project_keyword" class="input" placeholder="e.g., art-website, logo-design" required autocomplete="off" />
+          <p class="text-xs text-muted-foreground">
+            This should match the keyword provided in your contract.
+          </p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="hidden text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+          <p id="error-text"></p>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary w-full">
+          Look Up Payment
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-sm text-muted-foreground mt-6">
+      Need help? Contact <a href="mailto:sean@august.style" class="text-primary hover:underline">sean@august.style</a>
+    </p>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/payment-lookup.js"></script>
+</body>
+
+</html>

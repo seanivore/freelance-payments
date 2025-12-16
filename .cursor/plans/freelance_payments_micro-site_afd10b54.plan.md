@@ -16,10 +16,10 @@ todos:
     status: completed
   - id: build-lookup-page
     content: Build index.html payment lookup form with last name + project keyword inputs. Implement lookup logic to find JSON file from manifest.
-    status: pending
+    status: completed
   - id: build-payment-router
     content: "Create payment-router.js state machine to determine user routing based on contract.signed and payment status. Handles all scenarios: first visit, return visits, partial payments, completed payments."
-    status: pending
+    status: completed
   - id: build-contract-page
     content: Build contract.html dynamic page that populates from JSON. Include signature fields (typed name + date), sign button that updates JSON, download PDF button, navigation links.
     status: pending
@@ -31,7 +31,7 @@ todos:
     status: pending
   - id: create-manifest-script
     content: "Create generate_manifest.py script to scan jobs directory and create manifest.json mapping. Lookup key format: last_name-project_keyword (lowercase, hyphenated)."
-    status: pending
+    status: completed
   - id: payment-intent-workflow
     content: Create GitHub Actions workflow to handle PaymentIntent creation via API endpoint. Triggered from serverless function (Vercel/Netlify) for security.
     status: pending
