@@ -5,7 +5,9 @@ Scans job JSON files and builds lookup key → file path mapping
 Lookup key format: "{last_name}-{project_keyword}" (lowercase, hyphenated)
 
 Usage:
-    python generate_manifest.py
+    python3 generate_manifest.py
+    
+Note: GitHub Actions workflow should use: python3 generate_manifest.py
     
 Output:
     /assets/js/manifest.json

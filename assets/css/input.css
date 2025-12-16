@@ -4,26 +4,43 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Portfolio-inspired dark theme with professional payment feel */
+    --background: 12 12% 12%;
+    /* #1f1f1f - dark charcoal */
+    --foreground: 0 0% 92%;
+    /* #EBEBEB - light text */
+    --card: 12 12% 15%;
+    /* Slightly lighter than background */
+    --card-foreground: 0 0% 92%;
+    --popover: 12 12% 15%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 156 33% 38%;
+    /* #9C528B converted - mauve accent */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 12 12% 20%;
+    /* #363635 - secondary dark */
+    --secondary-foreground: 0 0% 92%;
+    --muted: 12 12% 18%;
+    --muted-foreground: 0 0% 65%;
+    /* #D7CDCC - muted text */
+    --accent: 156 33% 38%;
+    /* Mauve accent */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 12 12% 28%;
+    /* #474545 - subtle borders */
+    --input: 12 12% 18%;
+    --ring: 156 33% 38%;
     --radius: 0.5rem;
+
+    /* Cereal aesthetic colors for accents */
+    --color-terracotta: 25 35% 70%;
+    /* #C9A68A */
+    --color-blue: 195 25% 65%;
+    /* #8FA9B3 */
+    --color-mauve: 330 30% 72%;
+    /* #C99CAD */
   }
 
   .dark {
@@ -56,6 +73,30 @@
 
   body {
     @apply bg-background text-foreground;
+    position: relative;
+  }
+
+  /* Portfolio-inspired gradient depth effect */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(110, 110, 110, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 35%;
+    transform: translateX(-50%);
+    width: 60vw;
+    height: 100vh;
+    background: linear-gradient(to right, transparent 0%, rgba(110, 110, 110, 0.12) 50%, transparent 100%);
+    pointer-events: none;
+    z-index: -1;
   }
 }
 
@@ -111,5 +152,29 @@
 
   .card-content {
     @apply p-6 pt-0;
+  }
+
+  /* Cereal aesthetic accent lines (optional decorative element) */
+  .cereal-lines {
+    @apply flex flex-col gap-1 my-4;
+  }
+
+  .cereal-line {
+    @apply h-1 rounded-full;
+  }
+
+  .cereal-line-terracotta {
+    background-color: hsl(var(--color-terracotta));
+    width: 100%;
+  }
+
+  .cereal-line-blue {
+    background-color: hsl(var(--color-blue));
+    width: 85%;
+  }
+
+  .cereal-line-mauve {
+    background-color: hsl(var(--color-mauve));
+    width: 70%;
   }
 }
