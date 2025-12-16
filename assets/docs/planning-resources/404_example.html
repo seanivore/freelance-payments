@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading...</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/styles.css">
+
+  <!-- Load core JavaScript files FIRST (before template injection) -->
+  <script src="/assets/js/data-loader.js"></script>
+  <script src="/assets/js/tile-renderer.js"></script>
+  <script src="/assets/js/filter-controller.js"></script>
+
+  <script>
+    /**
+     * 404 ROUTING HANDLER - Single Page Architecture
+     *
+     * This page IS the entry/section page - we don't redirect
+     * Instead, we load the correct template content dynamically
+     */
+    (async function () {
+      const path = window.location.pathname;
+      const cleanPath = path.replace(/^\/|\/$/g, '');
+
+      try {
+        // Load manifest to determine page type
+        const response = await fetch('/assets/js/manifest.json');
+        const manifest = response.ok ? await response.json() : { entries: {} };
+
+        let templatePath;
+
+        if (manifest.entries && manifest.entries[cleanPath]) {
+          // Entry page
+          console.log('📄 Loading entry page template');
+          templatePath = '/entry.html';
+          sessionStorage.setItem('entryPath', path);
+          sessionStorage.setItem('pageType', 'entry');
+        } else {
+          // Section page
+          console.log('📄 Loading section page template');
+          templatePath = '/section.html';
+          sessionStorage.setItem('sectionPath', path);
+          sessionStorage.setItem('pageType', 'section');
+        }
+
+        // Fetch the template HTML
+        const templateResponse = await fetch(templatePath);
+        const templateHTML = await templateResponse.text();
+
+        // Parse the template to extract body content and scripts
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(templateHTML, 'text/html');
+
+        // Replace body content
+        document.body.innerHTML = doc.body.innerHTML;
+
+        // Copy over title and meta tags
+        document.title = doc.title;
+        Array.from(doc.head.querySelectorAll('meta')).forEach(meta => {
+          const existing = document.head.querySelector(`meta[name="${meta.getAttribute('name')}"]`) ||
+            document.head.querySelector(`meta[property="${meta.getAttribute('property')}"]`);
+          if (existing) {
+            existing.parentNode.replaceChild(meta.cloneNode(true), existing);
+          } else {
+            document.head.appendChild(meta.cloneNode(true));
+          }
+        });
+
+        // Execute controller scripts from template (dependencies already loaded)
+        const scripts = Array.from(doc.querySelectorAll('script[src]'));
+        for (const script of scripts) {
+          const scriptSrc = script.src;
+
+          // Skip core files (already loaded in head)
+          if (scriptSrc.includes('data-loader.js') ||
+            scriptSrc.includes('tile-renderer.js') ||
+            scriptSrc.includes('filter-controller.js')) {
+            continue;
+          }
+
+          // Load controller scripts
+          const newScript = document.createElement('script');
+          newScript.src = script.getAttribute('src'); // Use relative path
+          document.body.appendChild(newScript);
+          await new Promise(resolve => {
+            newScript.onload = resolve;
+            newScript.onerror = resolve;
+          });
+        }
+
+      } catch (error) {
+        console.error('❌ Error loading page:', error);
+        document.body.innerHTML = `
+                    <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+                        <h1>Page Not Found</h1>
+                        <p>Sorry, the page you're looking for doesn't exist.</p>
+                        <a href="/" style="color: #4a9eff;">Return to Homepage</a>
+                    </div>
+                `;
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <p style="text-align: center; margin-top: 50px; font-family: sans-serif; color: #666;">
+    Loading...
+  </p>
+</body>
+
+</html>
