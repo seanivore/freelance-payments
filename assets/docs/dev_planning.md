@@ -19,7 +19,8 @@
 ### Tech Stack & Page Design 
 
   + This is a GitHub Pages website build 
-    - We have done a million of these and have the files needed prepared already 
+    - We have done a million of these and have the files needed prepared already
+    - CREATE: `./index.html` 
     - Both `./CNAME` and the `./_config.yml` 
       `/Users/seanivore/Development/freelance-payments/CNAME` 
       `/Users/seanivore/Development/freelance-payments/_config.yml` 
