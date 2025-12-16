@@ -109,6 +109,28 @@
       - Ideally we'd be able to create the invoice at the same time as the contract, with the same input information 
       - Along with these things produced, we could create whatever format of file is needed to use the API setup 
 
+    + Collection of templates with varying degrees of detail to pull from in creating our template: 
+      `/Users/seanivore/Development/freelance-payments/assets/docs/contract-template-drafts/atpExample.md`
+      `/Users/seanivore/Development/freelance-payments/assets/docs/contract-template-drafts/ClickUp Freelancing Contract Template.md`
+      `/Users/seanivore/Development/freelance-payments/assets/docs/contract-template-drafts/Consulting Agreement Template.md`
+      `/Users/seanivore/Development/freelance-payments/assets/docs/contract-template-drafts/Consulting agreement.md`
+      `/Users/seanivore/Development/freelance-payments/assets/docs/contract-template-drafts/CONTRACT_TEMPLATE.md`
+      `/Users/seanivore/Development/freelance-payments/assets/docs/contract-template-drafts/CONTRACTOR_AGREEMENT.md`
+      `/Users/seanivore/Development/freelance-payments/assets/docs/contract-template-drafts/termsExample.md`
+
+    + My information can be "Hardcoded" so to speak 
+      - I'm no longer running thing through an LLC for now it is just Sole Proprietorship, not sure I need to include that detail, but I do know in Massachusetts it must be under my name (they charge for a sole proprietorship DBA here which is new to me) 
+      - Details are as follows
+
+      ```plaintext 
+      Sean August Horvath 
+      102 Lunenburg Ave 
+      West Townsend MA 01474 
+      +1 424-744-7687 
+      sean@august.style 
+      https://august.style 
+      ```
+
   * **Consider means of adding custom one-time charge options to Stripe Catalog** 
 
     + We would need to have things like, first and second payment 
