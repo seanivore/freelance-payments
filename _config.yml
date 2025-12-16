@@ -1,0 +1,9 @@
+permalink: /:basename/
+title: Payments to Sean August Horvath 
+description: Architect of your digital business needs. Consulting and freelance custom web development, AI and end-to-end automation solutions, social production, viral strategy, user design, digital marketing optimization 
+baseurl: "/"
+url: "https://payments.august.style/"
+collections:
+  pages:
+    output: true
+    permalink: /:basename/

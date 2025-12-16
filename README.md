@@ -1,27 +1,16 @@
-# README — New Project Setup + AI Context Primer
-Agnostic starter README for any repo. Use this to prime AI before touching code or docs.
+# README
 
----
+## Stripe Payments Micro-site 
 
-## Quick Start
-1. Create project directory named with slug.
-2. Copy starter:
-   ```bash
-   cp -R /Users/seanivore/Development/_ai.resources/repo-starter/. .
-   ```
-3. Ensure secrets ignored before git:
-   - `.env` and `.env.example` present
-   - `.gitignore` includes `.env` and any secret files
+  * **Sean August Horvath freelance and consulting**
+  
+  Architect of your digital business needs. Consulting and freelance custom web development, AI and end-to-end automation solutions, social production, viral strategy, user design, digital marketing optimization. 
 
----
+    - https://www.payments.august.style 
 
-## Secrets & Environment
-- `.env` contains prepared tokens. Review/prune before production.
-- `.env.example` provides safe defaults for onboarding.
-- `.gitignore` must ignore `.env` from the start to prevent exposure for the repo’s lifetime.
-- If secrets ever commit, rotate immediately.
+===
 
----
+# README TEMPLATE  
 
 ## Project Declaration
 Fill now. AI uses this first.
@@ -74,29 +63,6 @@ When an AI session starts:
    - Known Pitfalls / Do-Not-Fix
    - Open Questions
 4. Stop. Do not rewrite other sections. Do not change architecture.
-
----
-
-## Included Starter Resources (Evergreen)
-Copied by repo-starter; reference as needed.
-- `_ai/` workspace docs:
-  - Project memory protocol, keywords
-  - JSON tool lists
-  - Master map for planning/task management
-- `.gitignore` optimized for AI/dev
-- `.cursor/rules/` for Cursor
-- `.vscode/` settings + template workspace
-- CORE DOCS templates
-- `resources/`:
-  - MCP Core Concepts, Spec Schemas, Test & Debug
-  - Aider How To
-  - Single File Agents (SFA)
-  - LLM Context How-To
-- Markdown CSS directory
-- Sample Aider config
-- MASTER MAP (`AI.MASTER_MAP.md`): Projects, priorities, emoji statuses
-
-Note: Mention only resources actually used when updating.
 
 ---
 
