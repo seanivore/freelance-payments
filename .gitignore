@@ -39,3 +39,5 @@ rusty-tags.vi
 
 # Logistical Files 
 .archive/
+.vercel
+.env*.local

@@ -1,27 +1,20 @@
 {
   "name": "freelance-payments",
   "version": "1.0.0",
-  "description": "* **Sean August Horvath freelance and consulting**",
-  "main": "index.js",
+  "description": "Freelance payment micro-site with Stripe integration",
+  "engines": {
+    "node": ">=18.x"
+  },
   "scripts": {
     "build:css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify",
     "watch:css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --watch",
     "dev": "npm run watch:css",
     "build": "npm run build:css"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/seanivore/freelance-payments.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/seanivore/freelance-payments/issues"
-  },
-  "homepage": "https://github.com/seanivore/freelance-payments#readme",
   "devDependencies": {
     "tailwindcss": "^3.4.1"
+  },
+  "dependencies": {
+    "stripe": "^14.21.0"
   }
 }

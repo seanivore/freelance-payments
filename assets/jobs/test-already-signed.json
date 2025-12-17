@@ -1,0 +1,79 @@
+{
+  "job_id": "uid-test-003",
+  "invoice_number": "uid-test-003",
+  "status": "active",
+  "client": {
+    "name": "Signed Contract LLC",
+    "last_name": "Signed",
+    "project_keyword": "already-signed",
+    "contact": {
+      "name": "Alice Signed",
+      "title": "CEO",
+      "email": "alice@signedcontract.com",
+      "phone": "+1-555-0003"
+    },
+    "address": {
+      "street": "300 Signed Blvd",
+      "city": "San Francisco",
+      "state": "CA",
+      "zip": "94102"
+    }
+  },
+  "contract": {
+    "date": "2025-01-10",
+    "start_date": "2025-01-15",
+    "end_date": "2025-03-15",
+    "rate_type": "Flat Rate",
+    "total_fee": 8000.00,
+    "deposit_percent": 50,
+    "invoice_days": 30,
+    "late_fee": 150.00,
+    "hourly_fee": null,
+    "location": "California",
+    "maintenance_period_months": 3,
+    "signed": true,
+    "signed_date": "2025-01-12",
+    "signed_by": "Alice Signed",
+    "contractor_signature": "Sean Horvath",
+    "contractor_date": "2025-01-12",
+    "client_date": "2025-01-12"
+  },
+  "payments": [
+    {
+      "payment_number": 1,
+      "amount": 4000.00,
+      "currency": "usd",
+      "description": "Deposit (50%)",
+      "due_type": "date",
+      "due_date": "2025-01-15",
+      "due_date_unix": 1737417600,
+      "due_term": null,
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 2,
+      "amount": 4000.00,
+      "currency": "usd",
+      "description": "Final payment (50%)",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Before launch",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    }
+  ],
+  "project_scope_summary": "Test project with already signed contract. Should skip contract page and go straight to invoice.",
+  "project_scope_full": "Full project scope for already-signed contract test. This tests the flow when a contract has already been signed."
+}

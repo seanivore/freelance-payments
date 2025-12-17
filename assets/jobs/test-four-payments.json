@@ -1,0 +1,113 @@
+{
+  "job_id": "uid-test-008",
+  "invoice_number": "uid-test-008",
+  "status": "active",
+  "client": {
+    "name": "Four Payment Systems",
+    "last_name": "Fourpay",
+    "project_keyword": "four-payments",
+    "contact": {
+      "name": "Grace Fourpay",
+      "title": "Project Manager",
+      "email": "grace@fourpayments.com",
+      "phone": "+1-555-0008"
+    },
+    "address": {
+      "street": "800 Four Payment Drive",
+      "city": "Denver",
+      "state": "CO",
+      "zip": "80201"
+    }
+  },
+  "contract": {
+    "date": "2025-01-15",
+    "start_date": "2025-01-20",
+    "end_date": "2025-06-20",
+    "rate_type": "Flat Rate",
+    "total_fee": 20000.00,
+    "deposit_percent": 20,
+    "invoice_days": 30,
+    "late_fee": 300.00,
+    "hourly_fee": null,
+    "location": "Colorado",
+    "maintenance_period_months": 12,
+    "signed": false,
+    "signed_date": null,
+    "signed_by": null,
+    "contractor_signature": null,
+    "contractor_date": null,
+    "client_date": null
+  },
+  "payments": [
+    {
+      "payment_number": 1,
+      "amount": 4000.00,
+      "currency": "usd",
+      "description": "Initial deposit (20%)",
+      "due_type": "date",
+      "due_date": "2025-01-20",
+      "due_date_unix": 1737417600,
+      "due_term": null,
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 2,
+      "amount": 5000.00,
+      "currency": "usd",
+      "description": "Phase 1 completion (25%)",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Upon Phase 1 completion",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 3,
+      "amount": 5000.00,
+      "currency": "usd",
+      "description": "Phase 2 completion (25%)",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Upon Phase 2 completion",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 4,
+      "amount": 6000.00,
+      "currency": "usd",
+      "description": "Final payment (30%)",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Before launch",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    }
+  ],
+  "project_scope_summary": "Test project with four payments to test sequential payment flow with multiple milestones.",
+  "project_scope_full": "Full project scope for four-payment test. This project has four distinct payment milestones to thoroughly test the sequential payment routing logic and ensure the system correctly handles multiple payment steps."
+}

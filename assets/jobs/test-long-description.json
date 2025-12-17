@@ -1,0 +1,96 @@
+{
+  "job_id": "uid-test-007",
+  "invoice_number": "uid-test-007",
+  "status": "active",
+  "client": {
+    "name": "Long Description Company",
+    "last_name": "Longdesc",
+    "project_keyword": "long-description",
+    "contact": {
+      "name": "Frank Longdesc",
+      "title": "Creative Director",
+      "email": "frank@longdescription.com",
+      "phone": "+1-555-0007"
+    },
+    "address": {
+      "street": "700 Long Description Boulevard",
+      "city": "Austin",
+      "state": "TX",
+      "zip": "73301"
+    }
+  },
+  "contract": {
+    "date": "2025-01-15",
+    "start_date": "2025-01-20",
+    "end_date": "2025-05-20",
+    "rate_type": "Flat Rate",
+    "total_fee": 12000.00,
+    "deposit_percent": 25,
+    "invoice_days": 30,
+    "late_fee": 250.00,
+    "hourly_fee": null,
+    "location": "Texas",
+    "maintenance_period_months": 6,
+    "signed": false,
+    "signed_date": null,
+    "signed_by": null,
+    "contractor_signature": null,
+    "contractor_date": null,
+    "client_date": null
+  },
+  "payments": [
+    {
+      "payment_number": 1,
+      "amount": 3000.00,
+      "currency": "usd",
+      "description": "Deposit payment (25% of total project fee) - This is a very long description to test how the system handles extended payment descriptions that might include additional context, terms, conditions, or special instructions for the client regarding this particular payment milestone in the project timeline.",
+      "due_type": "date",
+      "due_date": "2025-01-20",
+      "due_date_unix": 1737417600,
+      "due_term": null,
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 2,
+      "amount": 4500.00,
+      "currency": "usd",
+      "description": "Mid-project milestone payment (37.5% of total) - This payment is due upon completion of Phase 1 deliverables including initial design concepts, wireframes, and client feedback incorporation. This milestone represents significant progress in the project.",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Upon completion of Phase 1 deliverables",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 3,
+      "amount": 4500.00,
+      "currency": "usd",
+      "description": "Final payment (37.5% of total) - Due before project launch and includes final revisions, quality assurance testing, deployment, and handoff documentation. This final payment ensures all project deliverables are complete and approved.",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Before launch and final handoff",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    }
+  ],
+  "project_scope_summary": "Test project with very long payment descriptions to test text truncation, wrapping, and display in various UI components including invoices, contracts, and Stripe product descriptions.",
+  "project_scope_full": "Full project scope for long description test. This project includes extremely detailed payment descriptions to test how the system handles lengthy text in various contexts including Stripe product descriptions (which have character limits), invoice displays, contract documents, and UI components that may need to truncate or wrap text appropriately."
+}

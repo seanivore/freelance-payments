@@ -1,0 +1,83 @@
+name: Process Job & Update Stripe Catalog
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - freelance-payments # Update to your branch name
+    paths:
+      - "assets/jobs/**/*.json"
+      - "generate_manifest.py"
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: "Optional: Specific job ID to process"
+        required: false
+      action:
+        description: "Action to perform (sign-contract, update-payment)"
+        required: false
+
+jobs:
+  process-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install stripe
+
+      - name: Generate manifest
+        run: python3 generate_manifest.py
+
+      - name: Check for manifest changes
+        id: manifest-changed
+        run: |
+          if [ -n "$(git status --porcelain manifest.json 2>/dev/null)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Process Stripe Products
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          python3 .github/scripts/process_stripe_products.py
+
+      - name: Check for JSON changes
+        id: json-changed
+        run: |
+          if [ -n "$(git status --porcelain assets/jobs/**/*.json 2>/dev/null)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes
+        if: steps.manifest-changed.outputs.changed == 'true' || steps.json-changed.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add manifest.json assets/jobs/**/*.json
+          git commit -m "🤖 Auto-update manifest and Stripe catalog
+
+          Co-Authored-By: GitHub Actions <action@github.com>"
+
+      - name: Push changes
+        if: steps.manifest-changed.outputs.changed == 'true' || steps.json-changed.outputs.changed == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

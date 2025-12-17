@@ -54,8 +54,8 @@
    * Flow: Frontend → Serverless Function → Stripe API → Returns client_secret
    */
   async function createPaymentIntent(jobData, payment) {
-    // TODO: Replace with actual serverless function endpoint (Phase 2)
-    const serverlessEndpoint = '/api/create-payment-intent'; // Will be Vercel/Netlify function
+    // Use relative path (works if same domain) or set full Vercel URL
+    const serverlessEndpoint = '/api/create-payment-intent';
 
     // Validate Stripe Price ID exists
     if (!payment.stripe_price_id) {
@@ -99,9 +99,15 @@
    * Initialize Stripe Payment Element
    */
   async function initializePaymentElement(clientSecret) {
-    // Initialize Stripe (publishable key will be in environment/config)
-    // TODO: Get from environment or config
-    const publishableKey = 'pk_test_...'; // Will be set via environment variable
+    // Initialize Stripe with publishable key
+    // TODO: Replace with your Stripe publishable key (from Stripe Dashboard)
+    // Option 1: Set directly here (for testing)
+    // Option 2: Load from config.js file (see PHASE2_SETUP.md)
+    const publishableKey = window.STRIPE_PUBLISHABLE_KEY || 'pk_test_YOUR_KEY_HERE';
+
+    if (!publishableKey || publishableKey === 'pk_test_YOUR_KEY_HERE') {
+      throw new Error('Stripe publishable key not configured. Please set window.STRIPE_PUBLISHABLE_KEY or update checkout-controller.js');
+    }
 
     stripe = Stripe(publishableKey);
 
