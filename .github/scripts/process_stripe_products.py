@@ -4,7 +4,7 @@ Process Stripe Products for Job JSON Files
 - Detects new/updated payments
 - Creates/updates Stripe Products and Prices
 - Updates JSON files with Stripe IDs
-- Archives Stripe products for deleted JSON files
+- gs Stripe products for deleted JSON files
 """
 
 import os
