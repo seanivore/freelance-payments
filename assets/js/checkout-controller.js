@@ -104,7 +104,7 @@
     // TODO: Replace with your Stripe publishable key (from Stripe Dashboard)
     // Option 1: Set directly here (for testing)
     // Option 2: Load from config.js file (see PHASE2_SETUP.md)
-    const publishableKey = window.STRIPE_PUBLISHABLE_KEY || 'pk_test_YOUR_KEY_HERE';
+    const publishableKey = 'pk_test_51Sbjhg9fljwH26CPk5PQKftpMaVQ7D7kIH3O3tYVEFSkOzVdqI5DWtT7EMcJDUqQLKEgIosx7q4nfgjrB1KMf85100WsuWFKNr';
 
     if (!publishableKey || publishableKey === 'pk_test_YOUR_KEY_HERE') {
       throw new Error('Stripe publishable key not configured. Please set window.STRIPE_PUBLISHABLE_KEY or update checkout-controller.js');
