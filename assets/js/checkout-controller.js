@@ -54,8 +54,9 @@
    * Flow: Frontend → Serverless Function → Stripe API → Returns client_secret
    */
   async function createPaymentIntent(jobData, payment) {
-    // Use relative path (works if same domain) or set full Vercel URL
-    const serverlessEndpoint = '/api/create-payment-intent';
+    // Vercel API endpoint (backend serverless functions)
+    // Frontend is on GitHub Pages, API is on Vercel
+    const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-payment-intent';
 
     // Validate Stripe Price ID exists
     if (!payment.stripe_price_id) {

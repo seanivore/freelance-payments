@@ -210,9 +210,35 @@
     // Update sessionStorage
     sessionStorage.setItem('jobData', JSON.stringify(jobData));
 
-    // TODO: Update JSON file via GitHub Actions API
-    // For now, show success and redirect
-    alert('Contract signed! Redirecting to payment...');
+    // Call Vercel API to update JSON file via GitHub Actions
+    try {
+      const response = await fetch('https://freelance-payments-neon.vercel.app/api/sign-contract', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          job_id: jobData.job_id,
+          signature_data: {
+            signed: true,
+            signed_date: jobData.contract.signed_date,
+            signed_by: jobData.contract.signed_by,
+            contractor_signature: jobData.contract.contractor_signature,
+            contractor_date: jobData.contract.contractor_date,
+            client_date: jobData.contract.client_date,
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update contract');
+      }
+
+      alert('Contract signed! Redirecting to payment...');
+    } catch (error) {
+      console.error('Error signing contract:', error);
+      alert('Contract signed locally, but failed to update server. Please contact support.');
+    }
 
     // Route to next step (invoice/checkout)
     if (typeof PaymentRouter !== 'undefined') {
