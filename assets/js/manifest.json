@@ -1,7 +1,9 @@
 {
   "jobs": {
-    "partial-partially-paid": "assets/jobs/test-partially-paid.json",
-    "single-single-payment-test": "assets/jobs/test-single-payment.json"
+    "allpaid-all-paid": "assets/jobs/test-all-paid.json",
+    "signed-already-signed": "assets/jobs/test-already-signed.json",
+    "longdesc-long-description": "assets/jobs/test-long-description.json",
+    "o'brien-special-chars-test": "assets/jobs/test-special-chars.json"
   },
   "generated_at": null
 }

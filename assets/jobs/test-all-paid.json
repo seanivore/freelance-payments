@@ -24,10 +24,10 @@
     "start_date": "2025-01-08",
     "end_date": "2025-02-08",
     "rate_type": "Flat Rate",
-    "total_fee": 4000.00,
+    "total_fee": 4000.0,
     "deposit_percent": 50,
     "invoice_days": 30,
-    "late_fee": 75.00,
+    "late_fee": 75.0,
     "hourly_fee": null,
     "location": "Washington",
     "maintenance_period_months": 1,
@@ -41,7 +41,7 @@
   "payments": [
     {
       "payment_number": 1,
-      "amount": 2000.00,
+      "amount": 2000.0,
       "currency": "usd",
       "description": "Deposit (50%)",
       "due_type": "date",
@@ -51,14 +51,20 @@
       "status": "paid",
       "paid_date": "2025-01-08",
       "paid_date_unix": 1737417600,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TcSejo6Qnbnau3",
+      "stripe_price_id": "price_1SfDjd9fljwH26CPVrzHuwgM",
+      "stripe_product_name": "uid-test-005-1",
+      "stripe_metadata": {
+        "job_id": "uid-test-005",
+        "invoice_number": "uid-test-005",
+        "payment_number": "1",
+        "client_last_name": "Allpaid",
+        "project_keyword": "all-paid"
+      }
     },
     {
       "payment_number": 2,
-      "amount": 2000.00,
+      "amount": 2000.0,
       "currency": "usd",
       "description": "Final payment (50%)",
       "due_type": "term",
@@ -68,10 +74,16 @@
       "status": "paid",
       "paid_date": "2025-01-25",
       "paid_date_unix": 1737763200,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TcSenXtTB4MxvK",
+      "stripe_price_id": "price_1SfDjd9fljwH26CPMWXXd93f",
+      "stripe_product_name": "uid-test-005-2",
+      "stripe_metadata": {
+        "job_id": "uid-test-005",
+        "invoice_number": "uid-test-005",
+        "payment_number": "2",
+        "client_last_name": "Allpaid",
+        "project_keyword": "all-paid"
+      }
     }
   ],
   "project_scope_summary": "Test project with all payments completed. Should route to completion page.",

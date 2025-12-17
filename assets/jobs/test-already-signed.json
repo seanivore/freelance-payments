@@ -24,10 +24,10 @@
     "start_date": "2025-01-15",
     "end_date": "2025-03-15",
     "rate_type": "Flat Rate",
-    "total_fee": 8000.00,
+    "total_fee": 8000.0,
     "deposit_percent": 50,
     "invoice_days": 30,
-    "late_fee": 150.00,
+    "late_fee": 150.0,
     "hourly_fee": null,
     "location": "California",
     "maintenance_period_months": 3,
@@ -41,7 +41,7 @@
   "payments": [
     {
       "payment_number": 1,
-      "amount": 4000.00,
+      "amount": 4000.0,
       "currency": "usd",
       "description": "Deposit (50%)",
       "due_type": "date",
@@ -51,14 +51,20 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TcSeid1MDHAIv8",
+      "stripe_price_id": "price_1SfDjc9fljwH26CPT5nFkJhd",
+      "stripe_product_name": "uid-test-003-1",
+      "stripe_metadata": {
+        "job_id": "uid-test-003",
+        "invoice_number": "uid-test-003",
+        "payment_number": "1",
+        "client_last_name": "Signed",
+        "project_keyword": "already-signed"
+      }
     },
     {
       "payment_number": 2,
-      "amount": 4000.00,
+      "amount": 4000.0,
       "currency": "usd",
       "description": "Final payment (50%)",
       "due_type": "term",
@@ -68,10 +74,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TcSeLGbJTUaGMZ",
+      "stripe_price_id": "price_1SfDjc9fljwH26CPpHNDVRBd",
+      "stripe_product_name": "uid-test-003-2",
+      "stripe_metadata": {
+        "job_id": "uid-test-003",
+        "invoice_number": "uid-test-003",
+        "payment_number": "2",
+        "client_last_name": "Signed",
+        "project_keyword": "already-signed"
+      }
     }
   ],
   "project_scope_summary": "Test project with already signed contract. Should skip contract page and go straight to invoice.",
