@@ -8,7 +8,7 @@ on:
     branches:
       - freelance-payments # Update to your branch name
     paths:
-      - "assets/jobs/**/*.json"
+      - "assets/jobs/*.json"
       - "generate_manifest.py"
   workflow_dispatch:
     inputs:
@@ -60,7 +60,7 @@ jobs:
       - name: Check for JSON changes
         id: json-changed
         run: |
-          if [ -n "$(git status --porcelain assets/jobs/**/*.json 2>/dev/null)" ]; then
+          if [ -n "$(git status --porcelain assets/jobs/*.json 2>/dev/null)" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
@@ -71,7 +71,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add assets/js/manifest.json assets/jobs/**/*.json
+          git add assets/js/manifest.json assets/jobs/*.json
           git commit -m "🤖 Auto-update manifest and Stripe catalog
 
           Co-Authored-By: GitHub Actions <action@github.com>"
