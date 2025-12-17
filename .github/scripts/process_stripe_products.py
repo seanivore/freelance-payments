@@ -413,8 +413,8 @@ def main():
     
     if not json_files:
         print("No job JSON files found")
-        if archived > 0:
-            print("(But archived products from deleted files)")
+        if deleted > 0:
+            print("(But deleted products from removed files)")
         return
     
     print(f"\n📁 Found {len(json_files)} job file(s)")
