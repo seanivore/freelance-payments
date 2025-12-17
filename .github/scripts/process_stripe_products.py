@@ -238,159 +238,96 @@ def process_job_file(filepath: Path) -> bool:
     return False
 
 
-def get_deleted_json_files():
-    """Get list of JSON files that were deleted."""
-    import subprocess
+def get_orphaned_stripe_products():
+    """
+    Find Stripe products that don't have corresponding JSON files.
     
-    deleted_files = []
+    This is more robust than git diff because:
+    - Works even if files were deleted before script existed
+    - Doesn't depend on git history depth
+    - Handles any orphaned products (manual deletions, etc.)
+    
+    Returns: List of Stripe Product objects that should be deleted
+    """
+    # Get all JSON files currently in jobs folder
+    current_json_files = list(JOBS_DIR.glob('*.json'))
+    current_json_files = [f for f in current_json_files if not f.name.startswith('_')]
+    
+    # Extract job_ids from current JSON files
+    current_job_ids = set()
+    for json_file in current_json_files:
+        job_data = load_json_file(json_file)
+        if job_data and job_data.get('job_id'):
+            current_job_ids.add(job_data.get('job_id'))
+    
+    print(f"📁 Found {len(current_job_ids)} active job(s) in folder")
+    
+    # Get all Stripe products
+    orphaned_products = []
     try:
-        # Get deleted files from git diff
-        result = subprocess.run(
-            ['git', 'diff', '--name-only', '--diff-filter=D', 'HEAD'],
-            capture_output=True,
-            text=True,
-            check=False
-        )
-        
-        if result.returncode == 0:
-            for line in result.stdout.strip().split('\n'):
-                if line.startswith('assets/jobs/') and line.endswith('.json'):
-                    deleted_files.append(line)
-        
-        # Also check against previous commit
-        result = subprocess.run(
-            ['git', 'diff', '--name-only', '--diff-filter=D', 'HEAD~1', 'HEAD'],
-            capture_output=True,
-            text=True,
-            check=False
-        )
-        
-        if result.returncode == 0:
-            for line in result.stdout.strip().split('\n'):
-                if line.startswith('assets/jobs/') and line.endswith('.json'):
-                    if line not in deleted_files:
-                        deleted_files.append(line)
-    
-    except Exception as e:
-        print(f"Warning: Could not detect deleted files: {e}")
-    
-    return deleted_files
-
-
-def get_stripe_products_for_job(job_id):
-    """Get all Stripe products for a given job_id."""
-    products = []
-    try:
-        # Search products by metadata (paginate through all products)
-        all_products = stripe.Product.list(limit=100)
+        all_products = stripe.Product.list(limit=100, active=True)  # Only active products
         
         # Handle pagination
         while True:
             for product in all_products.data:
-                if product.metadata.get('job_id') == job_id:
-                    products.append(product)
+                job_id = product.metadata.get('job_id')
+                
+                # If product has job_id but no corresponding JSON file → orphaned
+                if job_id and job_id not in current_job_ids:
+                    orphaned_products.append(product)
             
             if not all_products.has_more:
                 break
             
-            all_products = stripe.Product.list(limit=100, starting_after=all_products.data[-1].id)
+            all_products = stripe.Product.list(
+                limit=100,
+                active=True,
+                starting_after=all_products.data[-1].id
+            )
     
     except Exception as e:
-        print(f"Error fetching Stripe products for job {job_id}: {e}")
+        print(f"⚠️  Error fetching Stripe products: {e}")
+        return []
     
-    return products
+    return orphaned_products
 
 
-def delete_products_for_removed_files():
+
+
+def delete_orphaned_products():
     """
-    Delete Stripe products for JSON files removed from assets/jobs/.
+    Delete Stripe products that don't have corresponding JSON files.
     
-    Works with:
-    - Files deleted from jobs folder (git rm or drag out)
-    - Files moved to other folders (git sees as delete + add)
+    This approach is more robust than git diff because:
+    - Compares current folder state vs Stripe catalog (source of truth)
+    - Works even if files were deleted before script existed
+    - Doesn't depend on git history depth
+    - Handles any orphaned products (manual deletions, etc.)
     
-    Loads deleted file from git history to get job_id, then finds and deletes
-    all Stripe products with matching job_id in metadata.
+    Logic:
+    1. Get all JSON files currently in jobs folder → Extract job_ids
+    2. Get all Stripe products → Check if job_id exists in folder
+    3. Delete products whose job_id doesn't exist in folder
     """
-    import subprocess
+    orphaned_products = get_orphaned_stripe_products()
     
-    deleted_files = get_deleted_json_files()
-    
-    if not deleted_files:
+    if not orphaned_products:
         return 0
     
-    print(f"\n🗑️  Found {len(deleted_files)} removed JSON file(s)")
+    print(f"\n🗑️  Found {len(orphaned_products)} orphaned Stripe product(s)")
     
     deleted_count = 0
-    
-    for deleted_file in deleted_files:
-        # Extract job_id from filename (fallback if git history fails)
-        filename = deleted_file.split('/')[-1]
-        job_id = filename.replace('.json', '')
-        
-        # Skip template files
-        if job_id.startswith('_'):
-            continue
-        
-        # Load the deleted file from git history to get the actual job_id
-        # Git stores file history, so we can read what was there before deletion
+    for product in orphaned_products:
+        job_id = product.metadata.get('job_id', 'unknown')
         try:
-            # Try current commit first (if file was just deleted)
-            result = subprocess.run(
-                ['git', 'show', f'HEAD:{deleted_file}'],
-                capture_output=True,
-                text=True,
-                check=False
-            )
-            
-            # If not found, try previous commit (file was deleted in previous commit)
-            if result.returncode != 0:
-                result = subprocess.run(
-                    ['git', 'show', f'HEAD~1:{deleted_file}'],
-                    capture_output=True,
-                    text=True,
-                    check=False
-                )
-            
-            # If still not found, try HEAD~2, HEAD~3, etc. (up to 5 commits back)
-            commit_depth = 2
-            while result.returncode != 0 and commit_depth < 6:
-                result = subprocess.run(
-                    ['git', 'show', f'HEAD~{commit_depth}:{deleted_file}'],
-                    capture_output=True,
-                    text=True,
-                    check=False
-                )
-                commit_depth += 1
-            
-            if result.returncode == 0:
-                deleted_job_data = json.loads(result.stdout)
-                job_id = deleted_job_data.get('job_id') or job_id
-                print(f"  📄 Loaded deleted file from git history: {job_id}")
-            else:
-                print(f"  ⚠️  Could not find {deleted_file} in git history, using filename: {job_id}")
+            stripe.Product.delete(product.id)
+            print(f"  ✅ Deleted orphaned product: {product.name} (job: {job_id})")
+            deleted_count += 1
         except Exception as e:
-            print(f"  ⚠️  Could not load deleted file {deleted_file}: {e}")
-            print(f"  ⚠️  Using filename as job_id: {job_id}")
-        
-        # Find all Stripe products for this job
-        products = get_stripe_products_for_job(job_id)
-        
-        if not products:
-            print(f"  ℹ️  No Stripe products found for removed job: {job_id}")
-            continue
-        
-        # Delete each product (completely remove from Stripe)
-        for product in products:
-            try:
-                stripe.Product.delete(product.id)
-                print(f"  ✅ Deleted Stripe product: {product.name} ({product.id})")
-                deleted_count += 1
-            except Exception as e:
-                print(f"  ❌ Error deleting product {product.id}: {e}")
+            print(f"  ❌ Error deleting product {product.id}: {e}")
     
     if deleted_count > 0:
-        print(f"\n✅ Deleted {deleted_count} Stripe product(s) for removed files")
+        print(f"\n✅ Deleted {deleted_count} orphaned Stripe product(s)")
     
     return deleted_count
 
@@ -401,9 +338,9 @@ def main():
         print(f"Jobs directory not found: {JOBS_DIR}")
         return
     
-    # First, handle removed files (delete Stripe products)
-    # This handles both deleted files and files moved to other folders
-    deleted = delete_products_for_removed_files()
+    # First, clean up orphaned Stripe products (products without JSON files)
+    # This compares current folder state vs Stripe catalog (more robust than git diff)
+    deleted = delete_orphaned_products()
     
     # Find all JSON files in jobs directory
     json_files = list(JOBS_DIR.glob('*.json'))
