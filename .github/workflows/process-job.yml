@@ -45,7 +45,7 @@ jobs:
       - name: Check for manifest changes
         id: manifest-changed
         run: |
-          if [ -n "$(git status --porcelain manifest.json 2>/dev/null)" ]; then
+          if [ -n "$(git status --porcelain assets/js/manifest.json 2>/dev/null)" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
@@ -71,7 +71,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add manifest.json assets/jobs/**/*.json
+          git add assets/js/manifest.json assets/jobs/**/*.json
           git commit -m "🤖 Auto-update manifest and Stripe catalog
 
           Co-Authored-By: GitHub Actions <action@github.com>"

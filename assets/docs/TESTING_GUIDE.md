@@ -5,7 +5,7 @@
 Before testing, make sure:
 - [x] STRIPE_SECRET_KEY added to Vercel ✅
 - [x] STRIPE_WEBHOOK_SECRET added to Vercel ✅
-- [ ] Stripe publishable key added to frontend (see below)
+- [x] Stripe publishable key added to frontend (see below)
 - [x] GitHub Pages enabled ✅
 - [x] Site live at payments.august.style ✅
 
@@ -17,14 +17,8 @@ Before testing, make sure:
 Edit `assets/js/checkout-controller.js` line ~105:
 
 ```javascript
-const publishableKey = 'pk_test_YOUR_ACTUAL_KEY_HERE';
+const publishableKey = 'pk_test_51Sbjhg9fljwH26CPk5PQKftpMaVQ7D7kIH3O3tYVEFSkOzVdqI5DWtT7EMcJDUqQLKEgIosx7q4nfgjrB1KMf85100WsuWFKNr';
 ```
-
-Replace `YOUR_ACTUAL_KEY_HERE` with your actual Stripe publishable key (starts with `pk_test_...`)
-
-**Get your key:**
-- Stripe Dashboard → Developers → API keys
-- Copy "Publishable key" (test mode)
 
 ---
 

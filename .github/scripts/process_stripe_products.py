@@ -4,6 +4,7 @@ Process Stripe Products for Job JSON Files
 - Detects new/updated payments
 - Creates/updates Stripe Products and Prices
 - Updates JSON files with Stripe IDs
+- Archives Stripe products for deleted JSON files
 """
 
 import os
@@ -237,11 +238,172 @@ def process_job_file(filepath: Path) -> bool:
     return False
 
 
+def get_deleted_json_files():
+    """Get list of JSON files that were deleted."""
+    import subprocess
+    
+    deleted_files = []
+    try:
+        # Get deleted files from git diff
+        result = subprocess.run(
+            ['git', 'diff', '--name-only', '--diff-filter=D', 'HEAD'],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        
+        if result.returncode == 0:
+            for line in result.stdout.strip().split('\n'):
+                if line.startswith('assets/jobs/') and line.endswith('.json'):
+                    deleted_files.append(line)
+        
+        # Also check against previous commit
+        result = subprocess.run(
+            ['git', 'diff', '--name-only', '--diff-filter=D', 'HEAD~1', 'HEAD'],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        
+        if result.returncode == 0:
+            for line in result.stdout.strip().split('\n'):
+                if line.startswith('assets/jobs/') and line.endswith('.json'):
+                    if line not in deleted_files:
+                        deleted_files.append(line)
+    
+    except Exception as e:
+        print(f"Warning: Could not detect deleted files: {e}")
+    
+    return deleted_files
+
+
+def get_stripe_products_for_job(job_id):
+    """Get all Stripe products for a given job_id."""
+    products = []
+    try:
+        # Search products by metadata (paginate through all products)
+        all_products = stripe.Product.list(limit=100)
+        
+        # Handle pagination
+        while True:
+            for product in all_products.data:
+                if product.metadata.get('job_id') == job_id:
+                    products.append(product)
+            
+            if not all_products.has_more:
+                break
+            
+            all_products = stripe.Product.list(limit=100, starting_after=all_products.data[-1].id)
+    
+    except Exception as e:
+        print(f"Error fetching Stripe products for job {job_id}: {e}")
+    
+    return products
+
+
+def delete_products_for_removed_files():
+    """
+    Delete Stripe products for JSON files removed from assets/jobs/.
+    
+    Works with:
+    - Files deleted from jobs folder (git rm or drag out)
+    - Files moved to other folders (git sees as delete + add)
+    
+    Loads deleted file from git history to get job_id, then finds and deletes
+    all Stripe products with matching job_id in metadata.
+    """
+    import subprocess
+    
+    deleted_files = get_deleted_json_files()
+    
+    if not deleted_files:
+        return 0
+    
+    print(f"\n🗑️  Found {len(deleted_files)} removed JSON file(s)")
+    
+    deleted_count = 0
+    
+    for deleted_file in deleted_files:
+        # Extract job_id from filename (fallback if git history fails)
+        filename = deleted_file.split('/')[-1]
+        job_id = filename.replace('.json', '')
+        
+        # Skip template files
+        if job_id.startswith('_'):
+            continue
+        
+        # Load the deleted file from git history to get the actual job_id
+        # Git stores file history, so we can read what was there before deletion
+        try:
+            # Try current commit first (if file was just deleted)
+            result = subprocess.run(
+                ['git', 'show', f'HEAD:{deleted_file}'],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            
+            # If not found, try previous commit (file was deleted in previous commit)
+            if result.returncode != 0:
+                result = subprocess.run(
+                    ['git', 'show', f'HEAD~1:{deleted_file}'],
+                    capture_output=True,
+                    text=True,
+                    check=False
+                )
+            
+            # If still not found, try HEAD~2, HEAD~3, etc. (up to 5 commits back)
+            commit_depth = 2
+            while result.returncode != 0 and commit_depth < 6:
+                result = subprocess.run(
+                    ['git', 'show', f'HEAD~{commit_depth}:{deleted_file}'],
+                    capture_output=True,
+                    text=True,
+                    check=False
+                )
+                commit_depth += 1
+            
+            if result.returncode == 0:
+                deleted_job_data = json.loads(result.stdout)
+                job_id = deleted_job_data.get('job_id') or job_id
+                print(f"  📄 Loaded deleted file from git history: {job_id}")
+            else:
+                print(f"  ⚠️  Could not find {deleted_file} in git history, using filename: {job_id}")
+        except Exception as e:
+            print(f"  ⚠️  Could not load deleted file {deleted_file}: {e}")
+            print(f"  ⚠️  Using filename as job_id: {job_id}")
+        
+        # Find all Stripe products for this job
+        products = get_stripe_products_for_job(job_id)
+        
+        if not products:
+            print(f"  ℹ️  No Stripe products found for removed job: {job_id}")
+            continue
+        
+        # Delete each product (completely remove from Stripe)
+        for product in products:
+            try:
+                stripe.Product.delete(product.id)
+                print(f"  ✅ Deleted Stripe product: {product.name} ({product.id})")
+                deleted_count += 1
+            except Exception as e:
+                print(f"  ❌ Error deleting product {product.id}: {e}")
+    
+    if deleted_count > 0:
+        print(f"\n✅ Deleted {deleted_count} Stripe product(s) for removed files")
+    
+    return deleted_count
+
+
 def main():
     """Main execution."""
     if not JOBS_DIR.exists():
         print(f"Jobs directory not found: {JOBS_DIR}")
         return
+    
+    # First, handle removed files (delete Stripe products)
+    # This handles both deleted files and files moved to other folders
+    deleted = delete_products_for_removed_files()
     
     # Find all JSON files in jobs directory
     json_files = list(JOBS_DIR.glob('*.json'))
@@ -251,9 +413,11 @@ def main():
     
     if not json_files:
         print("No job JSON files found")
+        if archived > 0:
+            print("(But archived products from deleted files)")
         return
     
-    print(f"Found {len(json_files)} job file(s)")
+    print(f"\n📁 Found {len(json_files)} job file(s)")
     
     processed = 0
     for json_file in json_files:
@@ -261,6 +425,8 @@ def main():
             processed += 1
     
     print(f"\n✅ Processed {processed} file(s) with Stripe updates")
+    if deleted > 0:
+        print(f"✅ Deleted {deleted} product(s) for removed files")
 
 
 if __name__ == '__main__':

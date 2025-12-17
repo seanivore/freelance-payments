@@ -1,0 +1,13 @@
+{
+  "jobs": {
+    "allpaid-all-paid": "assets/jobs/test-all-paid.json",
+    "signed-already-signed": "assets/jobs/test-already-signed.json",
+    "fourpay-four-payments": "assets/jobs/test-four-payments.json",
+    "longdesc-long-description": "assets/jobs/test-long-description.json",
+    "multi-multi-payment-test": "assets/jobs/test-multi-payment.json",
+    "partial-partially-paid": "assets/jobs/test-partially-paid.json",
+    "single-single-payment-test": "assets/jobs/test-single-payment.json",
+    "o'brien-special-chars-test": "assets/jobs/test-special-chars.json"
+  },
+  "generated_at": null
+}
