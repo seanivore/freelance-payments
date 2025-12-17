@@ -24,10 +24,10 @@
     "start_date": "2025-01-10",
     "end_date": "2025-02-28",
     "rate_type": "Flat Rate",
-    "total_fee": 6000.00,
+    "total_fee": 6000.0,
     "deposit_percent": 50,
     "invoice_days": 30,
-    "late_fee": 100.00,
+    "late_fee": 100.0,
     "hourly_fee": null,
     "location": "Illinois",
     "maintenance_period_months": 2,
@@ -41,7 +41,7 @@
   "payments": [
     {
       "payment_number": 1,
-      "amount": 3000.00,
+      "amount": 3000.0,
       "currency": "usd",
       "description": "Deposit (50%)",
       "due_type": "date",
@@ -51,14 +51,20 @@
       "status": "paid",
       "paid_date": "2025-01-10",
       "paid_date_unix": 1737417600,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TcSQrBLFtyj7dL",
+      "stripe_price_id": "price_1SfDVl9fljwH26CPY6nPcXTI",
+      "stripe_product_name": "uid-test-004-1",
+      "stripe_metadata": {
+        "job_id": "uid-test-004",
+        "invoice_number": "uid-test-004",
+        "payment_number": "1",
+        "client_last_name": "Partial",
+        "project_keyword": "partially-paid"
+      }
     },
     {
       "payment_number": 2,
-      "amount": 3000.00,
+      "amount": 3000.0,
       "currency": "usd",
       "description": "Final payment (50%)",
       "due_type": "term",
@@ -68,10 +74,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TcSQgVY2hpIdFP",
+      "stripe_price_id": "price_1SfDVl9fljwH26CPx752Z5eP",
+      "stripe_product_name": "uid-test-004-2",
+      "stripe_metadata": {
+        "job_id": "uid-test-004",
+        "invoice_number": "uid-test-004",
+        "payment_number": "2",
+        "client_last_name": "Partial",
+        "project_keyword": "partially-paid"
+      }
     }
   ],
   "project_scope_summary": "Test project with first payment already completed. Should route to second payment invoice.",
