@@ -1,4 +1,6 @@
 {
-  "jobs": {},
+  "jobs": {
+    "single-single-payment-test": "assets/jobs/test-single-payment.json"
+  },
   "generated_at": null
 }

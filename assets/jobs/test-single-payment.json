@@ -51,10 +51,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TdiNYn8YV4SQsC",
+      "stripe_price_id": "price_1SgQwd9fljwH26CPntnk5fQ5",
+      "stripe_product_name": "uid-test-001-1",
+      "stripe_metadata": {
+        "job_id": "uid-test-001",
+        "invoice_number": "uid-test-001",
+        "payment_number": "1",
+        "client_last_name": "Single",
+        "project_keyword": "single-payment-test"
+      }
     }
   ],
   "project_scope_summary": "Single payment test project. Simple website design.",
