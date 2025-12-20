@@ -383,6 +383,12 @@ Any expiry date (future), any CVC, any ZIP.
 - Verify Stripe publishable key is correct
 - Check network tab - is API call succeeding?
 
+**Workflow cancellation pattern:**
+- **Normal behavior**: User push with JSON changes → Initial checks may cancel → Auto-update commit → All checks pass
+- **This is expected**: The auto-update commit is what actually does the work
+- **If all checks pass on user push**: No JSON changes detected, no Stripe operations needed
+- **If checks cancel on user push**: JSON changes detected, Stripe operations will happen in auto-update commit
+
 ---
 
 ## Common Pitfalls
@@ -614,11 +620,15 @@ freelance-payments/
 
 ### Medium Priority
 
-5. **GitHub Pages build cancellation**
-   - After Vercel setting change, Pages builds cancel on first push
-   - Auto-update commit then triggers successful build
-   - **Impact**: Extra workflow run, but eventually works
-   - **Next**: Investigate if this can be optimized
+5. **GitHub Pages build cancellation pattern**
+   - **Observation**: When NO JSON changes → All 4 checks pass ✅
+   - **Observation**: When JSON changes → Initial push fails/cancels, auto-update commit succeeds ✅
+   - **Pattern**: 
+     - User push (no JSON) → All checks pass (no Stripe operations needed)
+     - User push (with JSON) → Checks cancel/fail → Auto-update commit → All checks pass
+   - **Likely cause**: Multiple workflows triggering simultaneously, causing conflicts
+   - **Impact**: Extra workflow run, but eventually works correctly
+   - **Next**: Investigate if workflow dependencies can prevent conflicts
 
 6. **Vercel deployment cancellation**
    - "Unverified commit" error (harmless but annoying)
