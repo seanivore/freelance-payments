@@ -1,0 +1,62 @@
+{
+  "job_id": "uid-test-001",
+  "invoice_number": "uid-test-001",
+  "status": "active",
+  "client": {
+    "name": "Test Single Payment Co",
+    "last_name": "Single",
+    "project_keyword": "single-payment-test",
+    "contact": {
+      "name": "Jane Single",
+      "title": "Owner",
+      "email": "jane@singlepayment.com",
+      "phone": "+1-555-0001"
+    },
+    "address": {
+      "street": "100 Single St",
+      "city": "Boston",
+      "state": "MA",
+      "zip": "02101"
+    }
+  },
+  "contract": {
+    "date": "2025-01-15",
+    "start_date": "2025-01-20",
+    "end_date": "2025-02-20",
+    "rate_type": "Flat Rate",
+    "total_fee": 1000.0,
+    "deposit_percent": null,
+    "invoice_days": 30,
+    "late_fee": 50.0,
+    "hourly_fee": null,
+    "location": "Massachusetts",
+    "maintenance_period_months": 1,
+    "signed": false,
+    "signed_date": null,
+    "signed_by": null,
+    "contractor_signature": null,
+    "contractor_date": null,
+    "client_date": null
+  },
+  "payments": [
+    {
+      "payment_number": 1,
+      "amount": 1000.0,
+      "currency": "usd",
+      "description": "Full payment upfront",
+      "due_type": "date",
+      "due_date": "2025-01-20",
+      "due_date_unix": 1737417600,
+      "due_term": null,
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    }
+  ],
+  "project_scope_summary": "Single payment test project. Simple website design.",
+  "project_scope_full": "Full project scope for single payment test. This is a straightforward project with one payment due upfront."
+}
