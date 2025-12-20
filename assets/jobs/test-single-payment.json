@@ -24,7 +24,7 @@
     "start_date": "2025-01-20",
     "end_date": "2025-02-20",
     "rate_type": "Flat Rate",
-    "total_fee": 1000.0,
+    "total_fee": 1250.0,
     "deposit_percent": null,
     "invoice_days": 30,
     "late_fee": 50.0,
@@ -41,9 +41,9 @@
   "payments": [
     {
       "payment_number": 1,
-      "amount": 1000.0,
+      "amount": 1250.0,
       "currency": "usd",
-      "description": "Full payment upfront",
+      "description": "Full payment upfront (updated amount)",
       "due_type": "date",
       "due_date": "2025-01-20",
       "due_date_unix": 1737417600,
