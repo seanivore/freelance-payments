@@ -51,16 +51,10 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": "prod_TcSeid1MDHAIv8",
-      "stripe_price_id": "price_1SfDjc9fljwH26CPT5nFkJhd",
-      "stripe_product_name": "uid-test-003-1",
-      "stripe_metadata": {
-        "job_id": "uid-test-003",
-        "invoice_number": "uid-test-003",
-        "payment_number": "1",
-        "client_last_name": "Signed",
-        "project_keyword": "already-signed"
-      }
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
     },
     {
       "payment_number": 2,
@@ -74,16 +68,10 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": "prod_TcSeLGbJTUaGMZ",
-      "stripe_price_id": "price_1SfDjc9fljwH26CPpHNDVRBd",
-      "stripe_product_name": "uid-test-003-2",
-      "stripe_metadata": {
-        "job_id": "uid-test-003",
-        "invoice_number": "uid-test-003",
-        "payment_number": "2",
-        "client_last_name": "Signed",
-        "project_keyword": "already-signed"
-      }
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
     }
   ],
   "project_scope_summary": "Test project with already signed contract. Should skip contract page and go straight to invoice.",

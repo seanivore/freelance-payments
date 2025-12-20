@@ -31,12 +31,12 @@
     "hourly_fee": null,
     "location": "Illinois",
     "maintenance_period_months": 2,
-    "signed": true,
-    "signed_date": "2025-01-09",
-    "signed_by": "Charlie Partial",
-    "contractor_signature": "Sean Horvath",
-    "contractor_date": "2025-01-09",
-    "client_date": "2025-01-09"
+    "signed": false,
+    "signed_date": null,
+    "signed_by": null,
+    "contractor_signature": null,
+    "contractor_date": null,
+    "client_date": null
   },
   "payments": [
     {
@@ -49,18 +49,12 @@
       "due_date_unix": 1737417600,
       "due_term": null,
       "status": "paid",
-      "paid_date": "2025-01-10",
-      "paid_date_unix": 1737417600,
-      "stripe_product_id": "prod_TcSQrBLFtyj7dL",
-      "stripe_price_id": "price_1SfDVl9fljwH26CPY6nPcXTI",
-      "stripe_product_name": "uid-test-004-1",
-      "stripe_metadata": {
-        "job_id": "uid-test-004",
-        "invoice_number": "uid-test-004",
-        "payment_number": "1",
-        "client_last_name": "Partial",
-        "project_keyword": "partially-paid"
-      }
+      "paid_date": "2025-12-20",
+      "paid_date_unix": 1734739200,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
     },
     {
       "payment_number": 2,
@@ -74,16 +68,10 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": "prod_TcSQgVY2hpIdFP",
-      "stripe_price_id": "price_1SfDVl9fljwH26CPx752Z5eP",
-      "stripe_product_name": "uid-test-004-2",
-      "stripe_metadata": {
-        "job_id": "uid-test-004",
-        "invoice_number": "uid-test-004",
-        "payment_number": "2",
-        "client_last_name": "Partial",
-        "project_keyword": "partially-paid"
-      }
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
     }
   ],
   "project_scope_summary": "Test project with first payment already completed. Should route to second payment invoice.",
