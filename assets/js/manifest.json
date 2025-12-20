@@ -1,9 +1,4 @@
 {
-  "jobs": {
-    "longdesc-long-description": "assets/jobs/test-long-description.json",
-    "multi-multi-payment-test": "assets/jobs/test-multi-payment.json",
-    "single-single-payment-test": "assets/jobs/test-single-payment.json",
-    "o'brien-special-chars-test": "assets/jobs/test-special-chars.json"
-  },
+  "jobs": {},
   "generated_at": null
 }
