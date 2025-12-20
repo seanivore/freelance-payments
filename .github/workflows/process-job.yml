@@ -111,7 +111,7 @@ jobs:
             COMMIT_MSG="🤖 Auto-update: Manifest and Stripe catalog"
           fi
 
-          git commit -m "$COMMIT_MSG
+          git commit -m "$COMMIT_MSG [skip ci]
 
           Co-Authored-By: GitHub Actions <action@github.com>"
 
