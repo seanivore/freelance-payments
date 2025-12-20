@@ -1,0 +1,79 @@
+{
+  "job_id": "uid-test-006",
+  "invoice_number": "uid-test-006",
+  "status": "active",
+  "client": {
+    "name": "O'Brien & Associates, Inc.",
+    "last_name": "O'Brien",
+    "project_keyword": "special-chars-test",
+    "contact": {
+      "name": "Eve O'Brien-Smith",
+      "title": "VP of Operations",
+      "email": "eve@obrien-associates.com",
+      "phone": "+1-555-0006"
+    },
+    "address": {
+      "street": "600 O'Brien Ave, Suite 100",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zip": "90001"
+    }
+  },
+  "contract": {
+    "date": "2025-01-15",
+    "start_date": "2025-01-20",
+    "end_date": "2025-03-20",
+    "rate_type": "Flat Rate",
+    "total_fee": 7500.0,
+    "deposit_percent": 40,
+    "invoice_days": 30,
+    "late_fee": 125.0,
+    "hourly_fee": null,
+    "location": "California",
+    "maintenance_period_months": 4,
+    "signed": false,
+    "signed_date": null,
+    "signed_by": null,
+    "contractor_signature": null,
+    "contractor_date": null,
+    "client_date": null
+  },
+  "payments": [
+    {
+      "payment_number": 1,
+      "amount": 3000.0,
+      "currency": "usd",
+      "description": "Deposit (40%) - Special characters: O'Brien & Associates",
+      "due_type": "date",
+      "due_date": "2025-01-20",
+      "due_date_unix": 1737417600,
+      "due_term": null,
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 2,
+      "amount": 4500.0,
+      "currency": "usd",
+      "description": "Final payment (60%) - O'Brien & Associates",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Before launch",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    }
+  ],
+  "project_scope_summary": "Test project with special characters in names (apostrophes, ampersands, hyphens). Tests encoding and URL handling.",
+  "project_scope_full": "Full project scope for special characters test. This project includes names with apostrophes (O'Brien), ampersands (&), and hyphens (O'Brien-Smith) to test proper encoding and URL handling throughout the system."
+}

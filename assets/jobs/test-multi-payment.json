@@ -1,0 +1,96 @@
+{
+  "job_id": "uid-test-002",
+  "invoice_number": "uid-test-002",
+  "status": "active",
+  "client": {
+    "name": "Multi Payment Industries",
+    "last_name": "Multi",
+    "project_keyword": "multi-payment-test",
+    "contact": {
+      "name": "Bob Multi",
+      "title": "Director",
+      "email": "bob@multipayment.com",
+      "phone": "+1-555-0002"
+    },
+    "address": {
+      "street": "200 Multi Ave",
+      "city": "New York",
+      "state": "NY",
+      "zip": "10001"
+    }
+  },
+  "contract": {
+    "date": "2025-01-15",
+    "start_date": "2025-01-20",
+    "end_date": "2025-04-20",
+    "rate_type": "Flat Rate",
+    "total_fee": 15000.0,
+    "deposit_percent": 33,
+    "invoice_days": 30,
+    "late_fee": 200.0,
+    "hourly_fee": null,
+    "location": "New York",
+    "maintenance_period_months": 6,
+    "signed": false,
+    "signed_date": null,
+    "signed_by": null,
+    "contractor_signature": null,
+    "contractor_date": null,
+    "client_date": null
+  },
+  "payments": [
+    {
+      "payment_number": 1,
+      "amount": 5000.0,
+      "currency": "usd",
+      "description": "Deposit (33%)",
+      "due_type": "date",
+      "due_date": "2025-01-20",
+      "due_date_unix": 1737417600,
+      "due_term": null,
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 2,
+      "amount": 5000.0,
+      "currency": "usd",
+      "description": "Mid-project payment (33%)",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Upon completion of Phase 1",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    },
+    {
+      "payment_number": 3,
+      "amount": 5000.0,
+      "currency": "usd",
+      "description": "Final payment (34%)",
+      "due_type": "term",
+      "due_date": null,
+      "due_date_unix": null,
+      "due_term": "Before launch",
+      "status": "pending",
+      "paid_date": null,
+      "paid_date_unix": null,
+      "stripe_product_id": null,
+      "stripe_price_id": null,
+      "stripe_product_name": null,
+      "stripe_metadata": {}
+    }
+  ],
+  "project_scope_summary": "Multi-payment test project with three payments: deposit, mid-project, and final.",
+  "project_scope_full": "Full project scope for multi-payment test. This project has three distinct payment milestones to test the sequential payment flow."
+}
