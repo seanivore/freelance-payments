@@ -51,10 +51,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_Tdik1ufhfnEBzA",
+      "stripe_price_id": "price_1SgRId9fljwH26CPU85j1REA",
+      "stripe_product_name": "uid-test-007-1",
+      "stripe_metadata": {
+        "job_id": "uid-test-007",
+        "invoice_number": "uid-test-007",
+        "payment_number": "1",
+        "client_last_name": "Longdesc",
+        "project_keyword": "long-description"
+      }
     },
     {
       "payment_number": 2,
@@ -68,10 +74,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TdikW8uAFIRFPe",
+      "stripe_price_id": "price_1SgRId9fljwH26CPjWGxRmkn",
+      "stripe_product_name": "uid-test-007-2",
+      "stripe_metadata": {
+        "job_id": "uid-test-007",
+        "invoice_number": "uid-test-007",
+        "payment_number": "2",
+        "client_last_name": "Longdesc",
+        "project_keyword": "long-description"
+      }
     },
     {
       "payment_number": 3,
@@ -85,10 +97,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TdikCjTfMclZWR",
+      "stripe_price_id": "price_1SgRId9fljwH26CPWMxBCr32",
+      "stripe_product_name": "uid-test-007-3",
+      "stripe_metadata": {
+        "job_id": "uid-test-007",
+        "invoice_number": "uid-test-007",
+        "payment_number": "3",
+        "client_last_name": "Longdesc",
+        "project_keyword": "long-description"
+      }
     }
   ],
   "project_scope_summary": "Test project with very long payment descriptions to test text truncation, wrapping, and display in various UI components including invoices, contracts, and Stripe product descriptions.",

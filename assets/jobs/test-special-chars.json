@@ -51,10 +51,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TdikFXZV5zka51",
+      "stripe_price_id": "price_1SgRIa9fljwH26CPRRmYv0W0",
+      "stripe_product_name": "uid-test-006-1",
+      "stripe_metadata": {
+        "job_id": "uid-test-006",
+        "invoice_number": "uid-test-006",
+        "payment_number": "1",
+        "client_last_name": "O'Brien",
+        "project_keyword": "special-chars-test"
+      }
     },
     {
       "payment_number": 2,
@@ -68,10 +74,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_Tdik8kfNaXwJIT",
+      "stripe_price_id": "price_1SgRIb9fljwH26CPOoNk7CNR",
+      "stripe_product_name": "uid-test-006-2",
+      "stripe_metadata": {
+        "job_id": "uid-test-006",
+        "invoice_number": "uid-test-006",
+        "payment_number": "2",
+        "client_last_name": "O'Brien",
+        "project_keyword": "special-chars-test"
+      }
     }
   ],
   "project_scope_summary": "Test project with special characters in names (apostrophes, ampersands, hyphens). Tests encoding and URL handling.",

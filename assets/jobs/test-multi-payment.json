@@ -51,10 +51,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TdikMezcNm2KL6",
+      "stripe_price_id": "price_1SgRIb9fljwH26CPI5ObDxia",
+      "stripe_product_name": "uid-test-002-1",
+      "stripe_metadata": {
+        "job_id": "uid-test-002",
+        "invoice_number": "uid-test-002",
+        "payment_number": "1",
+        "client_last_name": "Multi",
+        "project_keyword": "multi-payment-test"
+      }
     },
     {
       "payment_number": 2,
@@ -68,10 +74,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TdikCyytK3rG09",
+      "stripe_price_id": "price_1SgRIc9fljwH26CPQxsGB3Pw",
+      "stripe_product_name": "uid-test-002-2",
+      "stripe_metadata": {
+        "job_id": "uid-test-002",
+        "invoice_number": "uid-test-002",
+        "payment_number": "2",
+        "client_last_name": "Multi",
+        "project_keyword": "multi-payment-test"
+      }
     },
     {
       "payment_number": 3,
@@ -85,10 +97,16 @@
       "status": "pending",
       "paid_date": null,
       "paid_date_unix": null,
-      "stripe_product_id": null,
-      "stripe_price_id": null,
-      "stripe_product_name": null,
-      "stripe_metadata": {}
+      "stripe_product_id": "prod_TdikB93lB8Zqxn",
+      "stripe_price_id": "price_1SgRIc9fljwH26CPVcjV3o43",
+      "stripe_product_name": "uid-test-002-3",
+      "stripe_metadata": {
+        "job_id": "uid-test-002",
+        "invoice_number": "uid-test-002",
+        "payment_number": "3",
+        "client_last_name": "Multi",
+        "project_keyword": "multi-payment-test"
+      }
     }
   ],
   "project_scope_summary": "Multi-payment test project with three payments: deposit, mid-project, and final.",
