@@ -315,20 +315,38 @@ def delete_orphaned_products():
         return 0
     
     print(f"\n🗑️  Found {len(orphaned_products)} orphaned Stripe product(s)")
-    
+
     deleted_count = 0
     for product in orphaned_products:
         job_id = product.metadata.get('job_id', 'unknown')
         try:
+            # STEP 1: Delete all prices associated with this product
+            print(f"  📋 Processing product: {product.name} (job: {job_id})")
+            prices = stripe.Price.list(product=product.id, limit=100)
+
+            prices_deleted = 0
+            for price in prices.auto_paging_iter():
+                try:
+                    stripe.Price.delete(price.id)
+                    prices_deleted += 1
+                    print(f"    ✅ Deleted price: {price.id}")
+                except Exception as e:
+                    print(f"    ⚠️  Could not delete price {price.id}: {e}")
+
+            if prices_deleted > 0:
+                print(f"    💳 Deleted {prices_deleted} price(s)")
+
+            # STEP 2: Now delete the product (no prices attached)
             stripe.Product.delete(product.id)
-            print(f"  ✅ Deleted orphaned product: {product.name} (job: {job_id})")
+            print(f"  ✅ Deleted product: {product.name}")
             deleted_count += 1
+
         except Exception as e:
             print(f"  ❌ Error deleting product {product.id}: {e}")
-    
+
     if deleted_count > 0:
         print(f"\n✅ Deleted {deleted_count} orphaned Stripe product(s)")
-    
+
     return deleted_count
 
 

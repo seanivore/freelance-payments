@@ -10,8 +10,17 @@ Usage:
 
 import json
 import sys
+import os
 from pathlib import Path
 from typing import Dict, Optional
+
+try:
+    import stripe
+    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+    STRIPE_AVAILABLE = True
+except ImportError:
+    STRIPE_AVAILABLE = False
+    print("⚠️  Stripe module not available, skipping Stripe operations", file=sys.stderr)
 
 
 JOBS_DIR = Path('assets/jobs')
@@ -106,6 +115,39 @@ def update_contract_signed(job_id: str, signature_data: Dict) -> bool:
     return False
 
 
+def archive_stripe_price(price_id: str) -> bool:
+    """Archive a Stripe price (set active=false)."""
+    if not STRIPE_AVAILABLE:
+        return True  # Skip if Stripe not available
+
+    try:
+        stripe.Price.modify(price_id, active=False)
+        print(f"  ✅ Archived Stripe price: {price_id}")
+        return True
+    except Exception as e:
+        print(f"  ⚠️  Failed to archive price {price_id}: {e}", file=sys.stderr)
+        return False
+
+
+def archive_stripe_product(product_id: str) -> bool:
+    """Archive a Stripe product (set active=false)."""
+    if not STRIPE_AVAILABLE:
+        return True  # Skip if Stripe not available
+
+    try:
+        stripe.Product.modify(product_id, active=False)
+        print(f"  ✅ Archived Stripe product: {product_id}")
+        return True
+    except Exception as e:
+        print(f"  ⚠️  Failed to archive product {product_id}: {e}", file=sys.stderr)
+        return False
+
+
+def check_all_payments_paid(payments: list) -> bool:
+    """Check if all payments in the list are paid."""
+    return all(payment.get('status') == 'paid' for payment in payments)
+
+
 def update_payment_status(job_id: str, payment_number: int, payment_data: Dict) -> bool:
     """
     Update payment status when payment succeeds.
@@ -135,6 +177,7 @@ def update_payment_status(job_id: str, payment_number: int, payment_data: Dict) 
         return False
 
     payment_found = False
+    current_payment = None
     for payment in payments:
         if payment.get('payment_number') == payment_number:
             # Update payment status
@@ -146,6 +189,7 @@ def update_payment_status(job_id: str, payment_number: int, payment_data: Dict) 
             if 'stripe_payment_intent_id' in payment_data:
                 payment['stripe_payment_intent_id'] = payment_data['stripe_payment_intent_id']
 
+            current_payment = payment
             payment_found = True
             break
 
@@ -154,15 +198,36 @@ def update_payment_status(job_id: str, payment_number: int, payment_data: Dict) 
         return False
 
     # Save updated data
-    if save_json_file(job_file, job_data):
-        print(f"✅ Payment updated for {job_id}")
-        print(f"   File: {job_file.name}")
-        print(f"   Payment: #{payment_number}")
-        print(f"   Status: {payment_data.get('status')}")
-        print(f"   Paid date: {payment_data.get('paid_date')}")
-        return True
+    if not save_json_file(job_file, job_data):
+        return False
 
-    return False
+    print(f"✅ Payment updated for {job_id}")
+    print(f"   File: {job_file.name}")
+    print(f"   Payment: #{payment_number}")
+    print(f"   Status: {payment_data.get('status')}")
+    print(f"   Paid date: {payment_data.get('paid_date')}")
+
+    # === STRIPE ARCHIVING ===
+    # Archive the price that was just paid
+    price_id = current_payment.get('stripe_price_id')
+    if price_id:
+        print(f"\n💳 Archiving Stripe price...")
+        archive_stripe_price(price_id)
+    else:
+        print(f"⚠️  No stripe_price_id found, skipping price archiving", file=sys.stderr)
+
+    # Check if ALL payments are now paid
+    all_paid = check_all_payments_paid(payments)
+    if all_paid:
+        print(f"\n🎉 All payments complete! Archiving product...")
+        # Archive the product (get product_id from any payment)
+        product_id = current_payment.get('stripe_product_id')
+        if product_id:
+            archive_stripe_product(product_id)
+        else:
+            print(f"⚠️  No stripe_product_id found, skipping product archiving", file=sys.stderr)
+
+    return True
 
 
 def main():
