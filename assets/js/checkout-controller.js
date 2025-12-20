@@ -110,7 +110,7 @@
       throw new Error('Stripe publishable key not configured. Please set window.STRIPE_PUBLISHABLE_KEY or update checkout-controller.js');
     }
 
-    stripe = Stripe(publishableKey);
+    stripe = stripe(publishableKey);
 
     // Create Elements instance
     elements = stripe.elements({

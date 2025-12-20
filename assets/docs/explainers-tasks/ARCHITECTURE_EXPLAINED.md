@@ -60,38 +60,19 @@ Vercel function updates JSON via GitHub Actions
 
 ## What You Need to Do
 
-### 1. Set Up GitHub Pages ✅ (Do This First!)
+### 1. Set Up GitHub Pages **DONE** ✅ 
+  - Site at: `https://seanivore.github.io/freelance-payments/`
+  - Has custom domain: `https://payments.august.style`
 
-1. Go to: https://github.com/seanivore/freelance-payments/settings/pages
-2. Under "Source":
-   - Select branch: `freelance-payments`
-   - Select folder: `/ (root)`
-3. Click "Save"
-4. Wait a few minutes for GitHub Pages to build
-5. Your site will be at: `https://seanivore.github.io/freelance-payments/`
-6. Then add custom domain: `payments.august.style` (in same settings page)
+### 2. Update Frontend to Point to Vercel API **DONE** ✅
+  - Line 59 in `checkout-controller.js` updated to: 
+  `const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-payment-intent';`
+  - Line 215 in `checkout-controller.js` updated to:
+  `const response = await fetch('https://freelance-payments-neon.vercel.app/api/sign-contract', {`
 
-### 2. Update Frontend to Point to Vercel API
-
-The frontend needs to know where the API is. Update `checkout-controller.js`:
-
-**Current (line ~57):**
-```javascript
-const serverlessEndpoint = '/api/create-payment-intent';
-```
-
-**Change to:**
-```javascript
-const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-payment-intent';
-```
-
-**Also update in:**
-- `contract-controller.js` - if it calls `/api/sign-contract`
-- Any other places that call API endpoints
-
-### 3. Webhook URL
-
-The webhook URL (`https://freelance-payments-neon.vercel.app/api/webhook`) is correct - this is where Stripe sends events. Users never see this URL.
+### 3. Webhook URL **DONE** ✅
+  - The webhook URL (`https://freelance-payments-neon.vercel.app/api/webhook`) is correct 
+  This is where Stripe sends events. Users never see this URL.
 
 ---
 
@@ -109,11 +90,8 @@ The webhook URL (`https://freelance-payments-neon.vercel.app/api/webhook`) is co
 
 ---
 
-## Next Steps
+## Completed Steps
 
-1. ✅ Set up GitHub Pages (enable it in repo settings)
-2. ✅ Update frontend API endpoints to point to Vercel URL
-3. ✅ Add Stripe publishable key to frontend
-4. ✅ Test the full flow
-
-The Vercel URL is your backend - users never see it, but your frontend needs to call it!
+1. ✅ Set up GitHub Pages (enable it in repo settings) **DONE** ✅
+2. ✅ Update frontend API endpoints to point to Vercel URL **DONE** ✅
+3. ✅ Webhook URL **DONE** ✅

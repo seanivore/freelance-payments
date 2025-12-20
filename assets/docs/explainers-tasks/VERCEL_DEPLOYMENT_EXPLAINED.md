@@ -1,5 +1,7 @@
 # Vercel "Unverified Commit" Error Explained
 
+I BELIEVE THIS WAS FIXED BECAUSE I WENT INTO VERCEL SETTINGS AND SET IT TO ALLOW DEPLOYMENTS FROM ANY USER 
+
 ## Why It's Happening
 
 The error occurs because:

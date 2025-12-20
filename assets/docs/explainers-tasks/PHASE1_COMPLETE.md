@@ -1,5 +1,7 @@
 # Phase 1 Complete: Core Site Structure ✅
 
+THIS IS DATED. NOTE THAT WE FOUND "`assets/jobs/**/*.json`" IN CASES WHERE "`assets/jobs/*.json`" IS THE ONLY REAL LOCATION. 
+
 ## What's Been Built
 
 ### ✅ Setup & Infrastructure
@@ -67,7 +69,7 @@
 
 1. **GitHub Actions Workflow** (`.github/workflows/process-job.yml`)
    - Combined workflow: Generates manifest AND creates Stripe products
-   - Triggers on: `assets/jobs/**/*.json` changes
+   - Triggers on:changes
    - Steps:
      - Run `python3 generate_manifest.py`
      - For each new/updated JSON: Create Stripe Products/Prices

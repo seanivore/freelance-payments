@@ -1,5 +1,7 @@
 # Environment Variables Clarification
 
+THIS SHOULD BE DONE BUT BE AWARE THAT MANY ELEMENTS WERE NEW TO ME LIKE GITHUB SECRETS AND MANUAL PATS
+
 ## Stripe Keys
 
 ### ✅ STRIPE_SECRET_KEY (Correct)

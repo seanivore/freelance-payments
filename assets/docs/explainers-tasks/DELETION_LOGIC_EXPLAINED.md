@@ -1,5 +1,7 @@
 # Deletion Logic Explained
 
+THIS IS DATED AND ANY UPDATES INCLUDED IN IT DID NOT PASS TESTING 
+
 ## How It Works
 
 ### Loading Deleted Files from Git History

@@ -1,5 +1,7 @@
 # Remaining Steps Checklist ✅
 
+THIS IS DATED AND ANY UPDATES INCLUDED IN IT DID NOT PASS TESTING
+
 ## What's Done ✅
 
 - ✅ Vercel project deployed: https://freelance-payments-neon.vercel.app/

@@ -1,5 +1,7 @@
 # Vercel Setup Guide
 
+DATED - COMPLETE. 
+
 ## 1. Install Vercel CLI (if not already installed)
 
 ```bash
