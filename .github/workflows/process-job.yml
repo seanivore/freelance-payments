@@ -94,6 +94,14 @@ jobs:
             echo "No changes detected"
           fi
 
+      # === WAIT FOR PAGES BUILD (if push event) ===
+      - name: Wait for initial Pages build
+        if: github.event_name == 'push' && steps.changes-detected.outputs.changed == 'true'
+        run: |
+          echo "⏳ Waiting 45 seconds for initial Pages build to complete..."
+          echo "This prevents race condition with auto-commit triggering second Pages build"
+          sleep 45
+
       # === COMMIT CHANGES (if any) ===
       - name: Commit changes
         if: steps.changes-detected.outputs.changed == 'true'
@@ -111,7 +119,7 @@ jobs:
             COMMIT_MSG="🤖 Auto-update: Manifest and Stripe catalog"
           fi
 
-          git commit -m "$COMMIT_MSG [skip ci]
+          git commit -m "$COMMIT_MSG
 
           Co-Authored-By: GitHub Actions <action@github.com>"
 
