@@ -1,9 +1,4 @@
 {
-  "jobs": {
-    "allpaid-all-paid": "assets/jobs/test-all-paid.json",
-    "signed-already-signed": "assets/jobs/test-already-signed.json",
-    "longdesc-long-description": "assets/jobs/test-long-description.json",
-    "o'brien-special-chars-test": "assets/jobs/test-special-chars.json"
-  },
+  "jobs": {},
   "generated_at": null
 }
