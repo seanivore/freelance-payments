@@ -277,46 +277,28 @@ Commits and pushes
 - Payment routing logic implemented
 - Contract/invoice templates created
 
-### ⚠️ Known Issues
+### ⚠️ Known Issues & Recent Fixes
 
-1. **Stripe Publishable Key**
+**Current Status (2025-01-20):**
+
+1. **Workflow Consolidation Required** ⚠️
+   - GitHub Actions workflow handles JSON file changes ✅
+   - But does NOT handle `workflow_dispatch` events for user actions ❌
+   - Missing: Contract signing handler
+   - Missing: Payment update handler
+   - **Impact**: User interactions don't update JSON files
+   - **Fix**: Consolidated workflow with conditional steps (see UPDATES_AND_FINAL_TESTING.md)
+
+2. **Stripe Publishable Key**
    - Currently hardcoded in `checkout-controller.js` line ~107
    - Should be moved to config file or environment variable
+   - **Priority**: Low (works fine for now)
 
-2. **JSON Files Not Updated with Stripe IDs**
-   - Products created in Stripe ✅
-   - But JSON files still have `stripe_product_id: null`
-   - **Cause**: Workflow was canceled before commit step
-   - **Status**: Fixed code errors, needs testing
-
-3. **Stripe Products Not Being Deleted**
-   - When JSON files removed, products should be deleted from Stripe
-   - **Current**: Had to delete manually from Stripe Dashboard
-   - **Expected**: Deletion logic should work (compares folder vs catalog)
-   - **Status**: Code exists, needs testing
-
-4. **GitHub Pages Build Cancellation**
-   - After turning off Vercel "must be authorized" setting, GitHub Pages builds cancel
-   - **Behavior**: Your push → Vercel + Process Job run → GitHub Pages builds cancel
-   - **Then**: Auto-update commit triggers → GitHub Pages builds successfully
-   - **Impact**: Extra workflow run, but eventually works
-   - **Note**: This is likely because GitHub Pages builds are triggered by the first push, then canceled when auto-update commit happens
-
-5. **Vercel Deployment Cancellation**
+3. **Vercel Deployment Cancellation**
    - "Unverified commit" error (harmless)
    - Vercel cancels deployments from GitHub Actions bot commits
    - **Impact**: None (frontend is on GitHub Pages, APIs already deployed)
    - **Solution**: Ignore or disable Vercel auto-deploy
-
-6. **Contract Signing Not Updating JSON**
-   - Currently only updates `sessionStorage`
-   - Should call `/api/sign-contract` → GitHub Actions
-   - **Status**: Code exists but needs testing
-
-7. **Payment Success Not Updating JSON**
-   - Webhook handler exists
-   - Should call `/api/update-payment` → GitHub Actions
-   - **Status**: Code exists but needs testing
 
 ### 🐛 Recent Fixes
 
@@ -329,7 +311,7 @@ Commits and pushes
 
 ## Testing & Debugging
 
-### Local Testing
+### Local Testing — **WE ARE NOT TESTING LOCALLY; EVERYTHING IS LIVE AND DEPLOYED AND TESTING IS DONE ON THE LIVE SITE**
 
 **Start local server:**
 ```bash
@@ -342,52 +324,36 @@ python3 -m http.server 5500 --bind 127.0.0.1
 
 **Note:** GitHub Pages 404 routing doesn't work locally. Use direct page URLs.
 
-### Testing Workflow
+**For comprehensive testing protocol, see:** `assets/docs/UPDATES_AND_FINAL_TESTING.md`
 
-1. **Add test JSON file** to `assets/jobs/`
-2. **Commit and push**
-3. **Check GitHub Actions** - Should run workflow
-4. **Check Stripe Dashboard** - Should see new products
-5. **Check JSON file** - Should have Stripe IDs added
-6. **Check manifest.json** - Should have new entry
+**Testing Environment:**
+- Live site: https://payments.august.style
+- Test mode: Stripe test keys
+- Test files: `assets/docs/W_I_P/*.json`
 
-### Stripe Test Cards
+**Key Debugging Commands:**
+```bash
+# GitHub Actions
+gh run list --repo seanivore/freelance-payments --limit 10
+gh run view <run-id> --log
+gh run watch  # Real-time
 
-- **Success**: `4242 4242 4242 4242`
-- **Decline**: `4000 0000 0000 0002`
-- **3D Secure**: `4000 0027 6000 3184`
+# Stripe
+stripe logs tail
+stripe products list
+stripe events list --limit 10
 
-Any expiry date (future), any CVC, any ZIP.
+# Vercel
+vercel logs --prod
+vercel logs --function api/webhook --follow
+```
 
-### Debugging Checklist
+**Stripe Test Cards:**
+- Success: `4242 4242 4242 4242`
+- Decline: `4000 0000 0000 0002`
+- 3D Secure: `4000 0027 6000 3184`
 
-**If workflow fails:**
-- Check GitHub Actions logs
-- Verify `STRIPE_SECRET_KEY` secret exists
-- Check Python script errors
-- Verify JSON file structure matches template
-
-**If products not created:**
-- Check Stripe Dashboard → Products
-- Check workflow logs for API errors
-- Verify Stripe secret key is correct (test mode)
-
-**If manifest not updating:**
-- Check if `generate_manifest.py` ran successfully
-- Check if manifest.json changed (git diff)
-- Verify commit step ran
-
-**If payment fails:**
-- Check browser console for errors
-- Check Vercel function logs: `vercel logs`
-- Verify Stripe publishable key is correct
-- Check network tab - is API call succeeding?
-
-**Workflow cancellation pattern:**
-- **Normal behavior**: User push with JSON changes → Initial checks may cancel → Auto-update commit → All checks pass
-- **This is expected**: The auto-update commit is what actually does the work
-- **If all checks pass on user push**: No JSON changes detected, no Stripe operations needed
-- **If checks cancel on user push**: JSON changes detected, Stripe operations will happen in auto-update commit
+(Any expiry date, any CVC, any ZIP)
 
 ---
 
@@ -592,81 +558,7 @@ freelance-payments/
 
 ---
 
-## Current Bugs to Fix
-
-### High Priority
-
-1. **Stripe IDs not in JSON files**
-   - Products created in Stripe ✅
-   - But JSON files have `stripe_product_id: null`
-   - **Cause**: Workflow was canceled before commit step
-   - **Next**: Test workflow with one JSON file, verify IDs get added
-
-2. **Stripe products not being deleted**
-   - When JSON files removed, products should auto-delete
-   - **Current**: Had to delete manually from Stripe Dashboard
-   - **Expected**: Deletion logic compares folder vs catalog, deletes orphans
-   - **Next**: Test by removing a JSON file, verify product gets deleted
-
-3. **Contract signing not updating JSON**
-   - Code exists in `contract-controller.js`
-   - Calls `/api/sign-contract` → Should trigger GitHub Actions
-   - **Next**: Test contract signing flow end-to-end
-
-4. **Payment success not updating JSON**
-   - Webhook handler exists
-   - Should update JSON when payment succeeds
-   - **Next**: Test payment flow, verify webhook triggers
-
-### Medium Priority
-
-5. **GitHub Pages build cancellation pattern**
-   - **Observation**: When NO JSON changes → All 4 checks pass ✅
-   - **Observation**: When JSON changes → Initial push fails/cancels, auto-update commit succeeds ✅
-   - **Pattern**: 
-     - User push (no JSON) → All checks pass (no Stripe operations needed)
-     - User push (with JSON) → Checks cancel/fail → Auto-update commit → All checks pass
-   - **Likely cause**: Multiple workflows triggering simultaneously, causing conflicts
-   - **Impact**: Extra workflow run, but eventually works correctly
-   - **Next**: Investigate if workflow dependencies can prevent conflicts
-
-6. **Vercel deployment cancellation**
-   - "Unverified commit" error (harmless but annoying)
-   - **Solution**: Ignore or disable Vercel auto-deploy
-
-7. **Stripe publishable key hardcoded**
-   - Should be in config file or environment variable
-   - **Next**: Create `assets/js/config.js` or use environment
-
-### Low Priority
-
-8. **Test files cleanup**
-   - 8 test JSON files in `assets/docs/W_I_P/`
-   - 19 test products in Stripe catalog
-   - **Next**: Add one test file back, verify deletion logic works
-
----
-
-## Next Steps for Debugging
-
-1. **Add one test JSON file** to `assets/jobs/`
-2. **Push and verify**:
-   - GitHub Actions runs successfully
-   - Stripe product created
-   - JSON file updated with Stripe IDs
-   - Manifest updated
-3. **Test payment flow**:
-   - Lookup → Contract → Invoice → Checkout
-   - Use test card: `4242 4242 4242 4242`
-   - Verify webhook updates JSON
-4. **Test deletion logic**:
-   - Remove JSON file
-   - Push
-   - Verify Stripe product deleted
-
----
-
-*Document created: 2025-01-17*
-*Last updated: 2025-01-17*
+*Document created: 2025-12-17*
+*Last updated: 2025-12-20*
 *For project: Freelance Payments Micro-Site (payments.august.style)*
 *Architecture by: Sean August Horvath + Claude (Composer)*
