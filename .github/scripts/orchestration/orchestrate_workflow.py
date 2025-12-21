@@ -83,11 +83,22 @@ def run_script(script_path: str, **kwargs) -> dict:
     # Try to parse as JSON, but some scripts (like generate_manifest.py) don't output JSON
     if result.stdout:
         try:
-            return json.loads(result.stdout)
+            parsed = json.loads(result.stdout)
+            # Include stderr in output if present (for debugging)
+            if result.stderr:
+                parsed['_stderr'] = result.stderr
+            return parsed
         except json.JSONDecodeError:
             # Script doesn't output JSON (e.g., generate_manifest.py just prints messages)
-            # Return success indicator
-            return {"success": True, "output": result.stdout}
+            # Return success indicator with stderr if present
+            output = {"success": True, "output": result.stdout}
+            if result.stderr:
+                output['_stderr'] = result.stderr
+            return output
+    
+    # No stdout, but check for stderr
+    if result.stderr:
+        return {"success": False, "_stderr": result.stderr}
     
     return {}
 
@@ -195,7 +206,9 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 if needs_sync:
                     sync_result = run_script('orchestration/sync_catalog.py', jobs_dir='assets/jobs')
                     results['steps_run'].append('sync_catalog')
-                    # Log sync stats for debugging
+                    # Log sync stats and stderr for debugging
+                    if sync_result.get('_stderr'):
+                        results['errors'].append(f"sync_catalog stderr: {sync_result.get('_stderr')}")
                     if sync_result.get('products_created', 0) == 0 and sync_result.get('prices_created', 0) == 0:
                         results['errors'].append(f"sync_catalog completed but created no products/prices. Stats: {sync_result}")
             except subprocess.CalledProcessError as e:
