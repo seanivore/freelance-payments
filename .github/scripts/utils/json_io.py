@@ -139,11 +139,13 @@ def list_all_jobs(jobs_dir: str = "assets/jobs") -> List[Dict]:
         for job in all_jobs:
             print(job['_metadata']['job_id'])
     """
-    # Resolve path relative to project root (3 levels up from utils/json_io.py)
+    # Resolve path relative to project root (2 levels up from utils/json_io.py)
+    # utils/json_io.py -> .github/scripts/utils -> .github/scripts -> .github -> project_root
     # This ensures it works regardless of where the script is called from
-    utils_dir = Path(__file__).parent
-    scripts_dir = utils_dir.parent
-    project_root = scripts_dir.parent
+    utils_dir = Path(__file__).parent  # .github/scripts/utils
+    scripts_dir = utils_dir.parent     # .github/scripts
+    github_dir = scripts_dir.parent    # .github
+    project_root = github_dir.parent   # project root
     jobs_path = project_root / jobs_dir
 
     if not jobs_path.exists():
