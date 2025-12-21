@@ -64,9 +64,14 @@ def cleanup_orphans(jobs_dir: str = "assets/jobs") -> dict:
     Raises:
         subprocess.CalledProcessError: If Stripe API calls fail
     """
-    # Get all current job_ids from JSON files
+    # Get all current job_ids from JSON files (new schema: _metadata.job_id)
     all_jobs = list_all_jobs(jobs_dir)
-    current_job_ids = set(job.get('job_id') for job in all_jobs if job.get('job_id'))
+    current_job_ids = set()
+    for job in all_jobs:
+        # Check new schema first (_metadata.job_id), fallback to old schema (job_id)
+        job_id = job.get('_metadata', {}).get('job_id') or job.get('job_id')
+        if job_id:
+            current_job_ids.add(job_id)
 
     stats = {
         'orphaned_products': 0,
@@ -100,24 +105,34 @@ def cleanup_orphans(jobs_dir: str = "assets/jobs") -> dict:
         stats['orphaned_products'] += 1
 
         try:
-            # STEP 1: Delete all prices for this product
+            # STEP 1: Delete/archive all prices for this product
             prices_result = call_script('stripe/price/list_prices.py', product=product_id, limit=100)
             prices = prices_result.get('prices', [])
-
+            
+            all_prices_handled = True
             for price in prices:
                 price_id = price.get('price_id')
+                price_handled = False
                 try:
                     call_script('stripe/price/delete_price.py', price_id=price_id)
                     stats['prices_deleted'] += 1
+                    price_handled = True
                 except subprocess.CalledProcessError as e:
                     # If delete fails, try archive instead
                     try:
                         call_script('stripe/price/archive_price.py', price_id=price_id)
                         print(f"Archived price {price_id} instead of deleting", file=sys.stderr)
-                    except:
-                        print(f"Warning: Could not delete or archive price {price_id}", file=sys.stderr)
+                        price_handled = True
+                    except subprocess.CalledProcessError:
+                        print(f"Warning: Could not delete or archive price {price_id}. Skipping product deletion.", file=sys.stderr)
+                        all_prices_handled = False
+                        break  # Can't proceed with product deletion if price can't be handled
 
-            # STEP 2: Delete the product (after all prices deleted)
+            # STEP 2: Only delete/archive product if all prices were handled
+            if not all_prices_handled:
+                print(f"Skipping product {product_id} deletion - not all prices could be handled", file=sys.stderr)
+                continue
+            
             try:
                 call_script('stripe/product/delete_product.py', product_id=product_id)
                 stats['products_deleted'] += 1
@@ -126,7 +141,7 @@ def cleanup_orphans(jobs_dir: str = "assets/jobs") -> dict:
                 try:
                     call_script('stripe/product/archive_product.py', product_id=product_id)
                     print(f"Archived product {product_id} instead of deleting", file=sys.stderr)
-                except:
+                except subprocess.CalledProcessError:
                     print(f"Warning: Could not delete or archive product {product_id}", file=sys.stderr)
 
         except subprocess.CalledProcessError as e:
