@@ -2,7 +2,9 @@
 """
 Detect which job files need Stripe sync by comparing to git HEAD.
 
-Sets section_updated flags on product and prices that have changed.
+Sets sync flags on product and prices that have changed.
+
+Updated for new schema: Uses sync flags (not section_updated), price[] array, _metadata.job_id
 
 Usage:
     python3 detect_sync_needs.py --jobs-dir "assets/jobs"
@@ -107,7 +109,7 @@ def detect_price_changes(current: dict, previous: dict) -> bool:
 
 def detect_sync_needs(jobs_dir: str = "assets/jobs") -> dict:
     """
-    Scan all job files and set section_updated flags where needed.
+    Scan all job files and set sync flags where needed.
 
     Args:
         jobs_dir: Directory containing job JSON files
@@ -126,13 +128,14 @@ def detect_sync_needs(jobs_dir: str = "assets/jobs") -> dict:
     details = []
 
     for job_data in all_jobs:
-        job_id = job_data.get('job_id')
+        # Get job_id from _metadata (new schema)
+        job_id = job_data.get('_metadata', {}).get('job_id')
         if not job_id:
             continue
 
         files_scanned += 1
 
-        # Find the file path
+        # Find the file path (files are named by job_id)
         job_file = jobs_path / f"{job_id}.json"
         if not job_file.exists():
             # Try to find by searching
@@ -141,7 +144,8 @@ def detect_sync_needs(jobs_dir: str = "assets/jobs") -> dict:
                     try:
                         with open(f, 'r') as file:
                             data = json.load(file)
-                            if data.get('job_id') == job_id:
+                            data_job_id = data.get('_metadata', {}).get('job_id') or data.get('job_id')
+                            if data_job_id == job_id:
                                 job_file = f
                                 break
                     except:
@@ -160,7 +164,7 @@ def detect_sync_needs(jobs_dir: str = "assets/jobs") -> dict:
         previous_product = previous.get('product', {})
 
         if detect_product_changes(current_product, previous_product):
-            current_product['section_updated'] = True
+            current_product['sync'] = True  # New schema: sync not section_updated
             job_data['product'] = current_product
             changes_made = True
             details.append({
@@ -169,9 +173,9 @@ def detect_sync_needs(jobs_dir: str = "assets/jobs") -> dict:
                 'reason': 'Product fields changed'
             })
 
-        # Check price changes
-        current_prices = job_data.get('prices', [])
-        previous_prices = previous.get('prices', [])
+        # Check price changes (new schema: price[] not prices[])
+        current_prices = job_data.get('price', [])
+        previous_prices = previous.get('price', [])
 
         for i, current_price in enumerate(current_prices):
             payment_num = current_price.get('payment_number')
@@ -184,7 +188,7 @@ def detect_sync_needs(jobs_dir: str = "assets/jobs") -> dict:
                     break
 
             if detect_price_changes(current_price, prev_price):
-                current_price['section_updated'] = True
+                current_price['sync'] = True  # New schema: sync not section_updated
                 current_prices[i] = current_price
                 changes_made = True
                 details.append({
@@ -194,11 +198,10 @@ def detect_sync_needs(jobs_dir: str = "assets/jobs") -> dict:
                     'reason': 'Price fields changed'
                 })
 
-        job_data['prices'] = current_prices
+        job_data['price'] = current_prices  # New schema: price[] not prices[]
 
         # Save if changes were made
         if changes_made:
-            from utils.json_io import save_job
             if save_job(job_id, job_data):
                 files_updated += 1
 

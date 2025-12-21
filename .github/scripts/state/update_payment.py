@@ -5,9 +5,11 @@ Update payment status when payment is completed.
 Called by Vercel webhook when Stripe payment succeeds.
 
 Actions:
-1. Update payment status to "paid"
-2. Archive the Stripe price (active=false)
-3. If all prices paid, archive the Stripe product (active=false)
+1. Update price.paid = true
+2. Set price.active = false (archive paid price)
+3. If all prices paid → Set product.active = false
+
+Updated for new schema: Uses price[] array, price.paid boolean, _metadata.job_id
 
 Usage:
     python3 update_payment.py --job-id "uid-001" --payment-number 1 --paid-date "2025-12-20"
@@ -39,7 +41,7 @@ def call_script(script_path: str, **kwargs) -> dict:
     Call another script and return its JSON output.
 
     Args:
-        script_path: Relative path to script (e.g., "../stripe/price/archive_price.py")
+        script_path: Relative path to script (e.g., "stripe/price/archive_price.py")
         **kwargs: Arguments to pass to script
 
     Returns:
@@ -71,7 +73,7 @@ def update_payment(job_id: str, payment_number: int, paid_date: str = None) -> d
     Update payment status and archive Stripe price/product.
 
     Args:
-        job_id: Job identifier
+        job_id: Job identifier (from _metadata.job_id)
         payment_number: Which payment (1, 2, 3, etc.)
         paid_date: Date payment was received (ISO format)
 
@@ -87,8 +89,8 @@ def update_payment(job_id: str, payment_number: int, paid_date: str = None) -> d
     if not job_data:
         raise ValueError(f"Job not found: {job_id}")
 
-    # Find the payment
-    prices = job_data.get('prices', [])
+    # Find the payment (new schema: price[] not prices[])
+    prices = job_data.get('price', [])
     payment = None
     payment_index = None
 
@@ -101,33 +103,33 @@ def update_payment(job_id: str, payment_number: int, paid_date: str = None) -> d
     if not payment:
         raise ValueError(f"Payment {payment_number} not found in job {job_id}")
 
-    # Update payment status
+    # Update payment status (new schema: price.paid boolean)
     if not paid_date:
         paid_date = datetime.now().isoformat()[:10]
 
-    payment['payment_status'] = 'paid'
+    payment['paid'] = True  # New schema: paid boolean, not payment_status string
     payment['paid_date'] = paid_date
     payment['paid_date_unix'] = int(datetime.fromisoformat(paid_date).timestamp())
+    payment['active'] = False  # Archive paid price
 
     # Archive the Stripe price (active=false)
-    price_id = payment.get('metadata', {}).get('stripe_price_id')
+    price_id = payment.get('stripe_price_id')  # New schema: direct field, not nested
     if price_id:
         try:
             call_script('stripe/price/archive_price.py', price_id=price_id)
-            payment['active'] = False  # Update JSON to match Stripe
         except subprocess.CalledProcessError as e:
             print(f"Warning: Failed to archive price {price_id}: {e.stderr}", file=sys.stderr)
 
     # Update the payment in the list
     prices[payment_index] = payment
-    job_data['prices'] = prices
+    job_data['price'] = prices  # New schema: price[] not prices[]
 
-    # Check if ALL prices are now paid
-    all_paid = all(p.get('payment_status') == 'paid' for p in prices)
+    # Check if ALL prices are now paid (new schema: price.paid boolean)
+    all_paid = all(p.get('paid', False) for p in prices)
 
     # If all paid, archive the product
     if all_paid:
-        product_id = job_data.get('product', {}).get('metadata', {}).get('stripe_product_id')
+        product_id = job_data.get('product', {}).get('stripe_product_id')  # New schema: direct field
         if product_id:
             try:
                 call_script('stripe/product/archive_product.py', product_id=product_id)
@@ -143,14 +145,14 @@ def update_payment(job_id: str, payment_number: int, paid_date: str = None) -> d
         'job_id': job_id,
         'payment_number': payment_number,
         'updated': True,
-        'payment_status': 'paid',
+        'paid': True,
         'all_paid': all_paid
     }
 
 
 def main():
     parser = argparse.ArgumentParser(description="Update payment status")
-    parser.add_argument('--job-id', required=True, help="Job ID")
+    parser.add_argument('--job-id', required=True, help="Job ID (from _metadata.job_id)")
     parser.add_argument('--payment-number', type=int, required=True, help="Payment number")
     parser.add_argument('--paid-date', help="Date paid (ISO format, default: today)")
 
