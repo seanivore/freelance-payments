@@ -76,6 +76,6 @@
       "sync": true
     }
   ],
-  "project_scope_summary": "This is a test project to verify the payment system works correctly with the new schema. Testing Stripe API call logging.",
+  "project_scope_summary": "This is a test project to verify the payment system works correctly with the new schema. Testing improved error logging.",
   "project_scope_full": "Full test project scope for validation."
 }
