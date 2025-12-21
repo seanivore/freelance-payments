@@ -111,6 +111,10 @@ def main():
     """Main execution"""
     print("🔍 Generating manifest.json...")
     
+    # Get project root (3 levels up from .github/scripts/generate_manifest.py)
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent.parent
+    
     manifest_data = {
         "jobs": generate_manifest(),
         "generated_at": None  # Will be set by GitHub Actions or manually
