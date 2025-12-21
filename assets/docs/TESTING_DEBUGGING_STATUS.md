@@ -38,9 +38,11 @@
 - Review workflow logs for Stripe API responses
 - Check if `sync_job()` is being called
 - Verify error handling isn't swallowing failures
+- **FIXED**: Added debug logging to orchestrator to detect when sync_catalog returns empty stats
 
 #### 2. Check if JSON is being saved after Stripe updates
 - `sync_catalog.py` calls `save_job()` after syncing
+- **FIXED**: `save_job()` wasn't receiving `jobs_dir` parameter - fixed in `sync_catalog.py` line 235
 - Verify `save_job()` is working correctly
 - Check if changes are being detected by git
 
@@ -49,13 +51,11 @@
 - Verify this is happening correctly
 
 #### 4. Clean test case needed
-- Create a fresh test JSON with `sync: true`
-- Push it and watch the workflow
-- Check logs for each step:
-  - `detect_sync_needs` output
-  - `sync_catalog` output (should show products_created, prices_created)
-  - Git status after sync
-  - Final JSON state
+- ✅ Created test JSON: `test-single-payment-v2.json` with `sync: true`
+- ✅ Pushed and watched workflow
+- ⚠️ Workflow runs `sync_catalog` but no products created
+- ⚠️ JSON still shows `sync: true` and `stripe_product_id: null`
+- **Next**: Check workflow logs for sync_catalog stats output
 
 ## 📋 Next Steps
 
