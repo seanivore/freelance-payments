@@ -82,50 +82,125 @@
 
   * **Again, no clue what in the scripts, other than GIT could be the issue, but it doesn't matter** 
 
+  + Ironically after this is does another GIT script call to find changes and discovers "No changes detected" 
+    - Though this is partially because it seems to be looking for `"changes:true"` in the JSON files 
+    - Changes are currently identified by `"sync":true` 
+    - However it is unclear how that script would have handled different files with different number of changes 
+  + In the end though, no changes meant no new page build, no push deployed 
+
 ---
 
 ## Over Engineering Identified As Primary Culprit 
+
+  * **Our solution was actually already planned** 
+   
+  + It all comes back to creating those `"sync":true` flags 
+    - It was intended to be the sole method used to identify changes 
+    - JSON schema overhaul's grouping plus flags meant to be sole method to create conditional workflows 
+  + For recall, it is `"sync":true` as in, true this needs to be synced 
+
+  * **Poorly communicated solution that could be even bigger but same simplicity** 
+
+  + If `"product.sync": true` follow just five steps 
+
+    1. `sync` = true, then search for matching `stripe_product_id` 
+    2. No matches? CREATE NEW PRODUCT 
+    3. Find match? OVERWRITE ALL PRODUCT FIELDS PROVIDED 
+    4. New product, place `stripe_product_id` on JSON 
+    5. New or updated product, change `sync` to FALSE 
+
+  + If `"price.sync": true` the steps are almost identical 
+
+    1. `sync` = true, then search for matching `stripe_price_id`
+    2. No matches? CREATE NEW PRICE OBJECT 
+    3. Find match? CHANGE IT TO ACTIVE:FALSE AND CREATE NEW PRICE OBJECT 
+    4. New price, place stripe_price_id on JSON 
+    5. New or updated product, change `sync` to FALSE  
+  
+  * **Not dynamic and clean, but doesn't cause any issues** 
+
+  + What we wanted is *ONE TRIGGER* and then *ONE ACTION* that solves many possible adjustments 
+    - No new price allowed but all other field updates permitted? OH WELL, just always make a new one 
+    - Use the action response as opportunity to reset our wildly simple solution 
+
+### Making Super Simple More Robust 
+
+  * **We've come full circle from creating the method to rehashing it for a reason**
+
+  + Now we're going to make it even more all encompassing 
+    - No need for a handful of types of Stripe API call scripts 
+    - One-size, or solution, fits all is the way to go 
+  
+  * **Two options, both simple** 
+
+  + Price Object updates can edit any field except the amount 
+  1. We could accommodate their versatility, if it benefits us 
+    - `"sync": "price change"`
+    - `"sync": "new"` 
+    - `"sync": "update"` or delete or archive, etc. 
+  2. Or we could not care and just over write everything no matter what 
+
+  * **Product update**
+
+    - Include all fields and change only any needed 
+    - Or don't and the field doesn't change 
+
+  * **Price update**
+
+    + Include all fields with any changes 
+    + Ignore the price stipulations 
+      - ALWAYS ARCHIVE 
+      - NEVER UPDATE 
+    + Then ALWAYS CREATE 
+      - Make a new Price Object 
+      - Never worry about scripts to check price difference 
+
+### Broadening The Simplicity By Eliminating Unnecessary 
+
+  * **Deleting is overly complicated; let's just always archive**
+
+    - Archive is simple field change to `"active": false` for any Stripe catalog object 
+    - Delete `cleanup_orphans.py` 
+
+GET 
+/v1/products
+
+import stripe
+stripe.api_key = "sk_test_51Sbjhg9fljwH26CP5dqLjALcPFtHBhftOCYTqkIGvmZwDN33dismfwKzDQLyKb4QXynGFdrblhEpi89fiK3bQ0TM00mxCMX98p"
+
+products = stripe.Product.list(limit=3)
+
+
+  + DELETE THESE SCRIPTS 
+    - archive_price.py
+    - delete_price.py
+    - list_prices.py 
+    - archive_product.py 
+    - delete_product.py 
+    - list_product.py 
+
+  + KEEP OR CREATE THESE SCRIPTS 
+    - create_price.py 
+    - modify_price.py 
+    - create_product.py 
+    - modify_product.py 
+
+```python 
+POST /v1/prices/:id
+
+import stripe
+stripe.api_key = "sk_test_..."
+price = stripe.Price.modify(
+  "price_1MoBy5LkdIwHu7ixZhnattbh",
+  metadata={"order_id": "6735"},
+)
+```
+
 
 
 
 -----
 
-This makes me suspect that things aren't at all as simple as the logic steps I was asking about at the start. I think that updating our workflows to the following logic might solve a lot of issues. We will be able to use fewer 
-
-the JSON object is organized for a product object then price objects 
-if the product object says "sync = true" then it goes through these steps 
-
-I have a suspicion that we're grossly over-engineered. For syncing the catalog it should look for sync = true and NOTHING ELSE. 
-
-      1. `sync` = true, then search for matching stripe_product_id 
-      2. No matches? CREATE NEW PRODUCT 
-      3. Find match? OVERWRITE ALL PRODUCT FIELDS PROVIDED 
-      4. New product, place stripe_product_id on JSON 
-      5. New or updated product, change `sync` to FALSE 
 
 
-The same for prices with sync = true (true, it does need to be synced). We shouldn't use any other values or methods to complicate this. 
-
-      1. `sync` = true, then search for matching stripe_price_id 
-      2. No matches? CREATE NEW PRICE OBJECT  
-      3. Find match? CHANGE IT TO ACTIVE:FALSE AND CREATE NEW PRICE OBJECT 
-      4. New price, place stripe_price_id on JSON 
-      5. New or updated product, change `sync` to FALSE 
-
-
-Equally for the calls and methods for updating things, we should be as simple and true as possible to those steps above. 
-
-Next I think we should address the excess of api call script types. For example 
-
-import stripe
-stripe.api_key = "sk_test_..."
-
-price = stripe.Price.modify(
-  "price_1MoBy5LkdIwHu7ixZhnattbh",
-  metadata={"order_id": "6735"},
-)
-
-"Updates the specified price by setting the values of the parameters passed. Any parameters not provided are left unchanged" 
-
-So all we to be able to archive or update *any* field except the amount. 
 When the price with a matching stripe_price_id is found, the script could then see if the amount on the JSON is the same or different than the 
