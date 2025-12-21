@@ -59,6 +59,13 @@ def call_script(script_path: str, **kwargs) -> dict:
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode != 0:
+        # Include both stdout and stderr in error message for debugging
+        error_msg = f"Command failed with exit code {result.returncode}\n"
+        if result.stdout:
+            error_msg += f"STDOUT: {result.stdout}\n"
+        if result.stderr:
+            error_msg += f"STDERR: {result.stderr}\n"
+        print(f"DEBUG: call_script error: {error_msg}", file=sys.stderr)
         raise subprocess.CalledProcessError(
             result.returncode, cmd, result.stdout, result.stderr
         )
