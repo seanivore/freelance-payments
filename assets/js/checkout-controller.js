@@ -1,6 +1,8 @@
 /**
  * CHECKOUT CONTROLLER
  * Handles Stripe Payment Element integration and payment processing
+ * 
+ * Updated for new schema: Uses price[] array, price.unit_amount (cents), price.paid boolean, _metadata.job_id
  */
 
 (function () {
@@ -53,13 +55,13 @@
    * 
    * Flow: Frontend → Serverless Function → Stripe API → Returns client_secret
    */
-  async function createPaymentIntent(jobData, payment) {
+  async function createPaymentIntent(jobData, price) {
     // Vercel API endpoint (backend serverless functions)
     // Frontend is on GitHub Pages, API is on Vercel
     const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-payment-intent';
 
     // Validate Stripe Price ID exists
-    if (!payment.stripe_price_id) {
+    if (!price.stripe_price_id) {
       throw new Error('Stripe Price ID not found. Payment may not be set up in Stripe catalog yet.');
     }
 
@@ -71,14 +73,13 @@
         },
         body: JSON.stringify({
           // Use stripe_price_id to ensure exact payment amount
-          price_id: payment.stripe_price_id,
-          // Additional metadata for webhook handling
+          price_id: price.stripe_price_id,
+          // Additional metadata for webhook handling (new schema)
           metadata: {
-            job_id: jobData.job_id,
-            invoice_number: jobData.invoice_number || jobData.job_id,
-            payment_number: payment.payment_number,
-            client_last_name: jobData.client?.last_name,
-            project_keyword: jobData.client?.project_keyword
+            job_id: jobData._metadata.job_id,
+            payment_number: price.payment_number,
+            client_last_name: jobData._metadata.client_last_name,
+            project_keyword: jobData._metadata.project_keyword
           }
         })
       });
@@ -183,24 +184,26 @@
    * Handle successful payment
    */
   async function handlePaymentSuccess(paymentIntent) {
-    // Update job data
-    const paymentIndex = currentJobData.payments.findIndex(
+    // Update job data (new schema: price[] array, price.paid boolean)
+    const priceIndex = currentJobData.price.findIndex(
       p => p.payment_number === currentPayment.payment_number
     );
 
-    if (paymentIndex !== -1) {
-      currentJobData.payments[paymentIndex].status = 'paid';
-      currentJobData.payments[paymentIndex].paid_date = new Date().toISOString().split('T')[0];
-      currentJobData.payments[paymentIndex].paid_date_unix = Math.floor(Date.now() / 1000);
+    if (priceIndex !== -1) {
+      currentJobData.price[priceIndex].paid = true;
+      currentJobData.price[priceIndex].paid_date = new Date().toISOString().split('T')[0];
+      currentJobData.price[priceIndex].paid_date_unix = Math.floor(Date.now() / 1000);
+      currentJobData.price[priceIndex].active = false; // Archive paid price
     }
 
     // Update sessionStorage
     sessionStorage.setItem('jobData', JSON.stringify(currentJobData));
 
-    // TODO: Update JSON file via GitHub Actions API
+    // Webhook will update JSON file via GitHub Actions
     // For now, show success and route to next step
 
     // Show success message
+    const amount = currentPayment.unit_amount / 100; // Convert cents to dollars
     contentDiv.innerHTML = `
       <div class="card p-8 text-center">
         <div class="mb-4">
@@ -210,7 +213,7 @@
         </div>
         <h2 class="card-title mb-4">Payment Successful!</h2>
         <p class="text-muted-foreground mb-6">
-          Your payment of ${formatCurrency(currentPayment.amount)} has been processed successfully.
+          Your payment of ${formatCurrency(amount)} has been processed successfully.
         </p>
         <div class="flex gap-4 justify-center">
           <a href="/payment-router.html" class="btn btn-primary">Continue</a>
@@ -232,14 +235,15 @@
   /**
    * Build checkout form HTML
    */
-  function buildCheckoutForm(jobData, payment) {
+  function buildCheckoutForm(jobData, price) {
+    const amount = price.unit_amount / 100; // Convert cents to dollars
     return `
       <div class="card p-6 space-y-6">
         <!-- Header -->
         <div class="card-header pb-4">
           <h1 class="card-title">Complete Payment</h1>
           <p class="text-sm text-muted-foreground mt-2">
-            Payment ${payment.payment_number} of ${jobData.payments.length}
+            Payment ${price.payment_number} of ${jobData.price.length}
           </p>
         </div>
 
@@ -247,11 +251,11 @@
         <div class="bg-muted/50 rounded-lg p-4 space-y-2">
           <div class="flex justify-between">
             <span class="text-muted-foreground">Amount:</span>
-            <span class="font-semibold text-lg">${formatCurrency(payment.amount)}</span>
+            <span class="font-semibold text-lg">${formatCurrency(amount)}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-muted-foreground">Description:</span>
-            <span>${payment.description}</span>
+            <span>${price.nickname || 'Payment'}</span>
           </div>
         </div>
 
@@ -264,13 +268,13 @@
           <div id="payment-error" class="text-sm text-destructive"></div>
           
           <button type="submit" id="submit-payment" class="btn btn-primary w-full">
-            Pay ${formatCurrency(payment.amount)}
+            Pay ${formatCurrency(amount)}
           </button>
         </form>
 
         <!-- Navigation -->
         <div class="flex gap-4 justify-center pt-4 border-t">
-          <a href="/invoice.html?payment=${payment.payment_number}" class="btn btn-outline">
+          <a href="/invoice.html?payment=${price.payment_number}" class="btn btn-outline">
             Back to Invoice
           </a>
           <a href="/contract.html" class="btn btn-outline">
@@ -297,15 +301,15 @@
 
     // Get payment number
     const paymentNumber = getPaymentNumber();
-    const payments = jobData.payments || [];
+    const prices = jobData.price || []; // New schema: price[] not payments[]
 
     // Find the payment
     let payment = null;
     if (paymentNumber) {
-      payment = payments.find(p => p.payment_number === paymentNumber);
+      payment = prices.find(p => p.payment_number === paymentNumber);
     } else {
-      // Default to first pending payment
-      payment = payments.find(p => p.status === 'pending');
+      // Default to first pending, active payment
+      payment = prices.find(p => p.paid === false && p.active === true);
     }
 
     if (!payment) {
@@ -314,8 +318,8 @@
       return;
     }
 
-    // Check if already paid
-    if (payment.status === 'paid') {
+    // Check if already paid (new schema: price.paid boolean)
+    if (payment.paid === true) {
       alert('This payment has already been completed.');
       window.location.href = '/payment-router.html';
       return;

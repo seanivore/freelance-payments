@@ -4,16 +4,22 @@ Main coordinator for syncing JSON files to Stripe catalog.
 
 CRITICAL: Creates Product FIRST, then Prices!
 
-Process:
-1. Scan all job files
-2. For each product with section_updated=true:
-   - Create or modify product
-   - Store stripe_product_id
-3. For each price with section_updated=true:
-   - Archive old price (if exists)
-   - Create new price (using product_id from above!)
-   - Store stripe_price_id
-4. Set all section_updated flags to false
+Process (simplified 5-step logic):
+For product.sync = true:
+  1. Check if stripe_product_id exists
+  2. No match? → CREATE NEW PRODUCT
+  3. Match found? → MODIFY PRODUCT (overwrite all fields)
+  4. Store stripe_product_id in JSON
+  5. Set product.sync = false
+
+For price[].sync = true:
+  1. Check if stripe_price_id exists
+  2. No match? → CREATE NEW PRICE
+  3. Match found? → ARCHIVE OLD PRICE, CREATE NEW PRICE
+  4. Store stripe_price_id in JSON
+  5. Set price[].sync = false
+
+Updated for new schema: Uses sync flags, price[] array, _metadata.job_id
 
 Usage:
     python3 sync_catalog.py --jobs-dir "assets/jobs"
@@ -65,7 +71,7 @@ def sync_job(job_data: dict) -> dict:
     Sync a single job to Stripe catalog.
 
     Args:
-        job_data: Job JSON dictionary
+        job_data: Job JSON dictionary (new schema)
 
     Returns:
         Dictionary with sync stats
@@ -73,7 +79,11 @@ def sync_job(job_data: dict) -> dict:
     Raises:
         subprocess.CalledProcessError: If Stripe API calls fail
     """
-    job_id = job_data.get('job_id')
+    # Get job_id from _metadata (new schema)
+    job_id = job_data.get('_metadata', {}).get('job_id')
+    if not job_id:
+        raise ValueError("Job missing _metadata.job_id")
+
     stats = {
         'products_created': 0,
         'products_modified': 0,
@@ -81,24 +91,34 @@ def sync_job(job_data: dict) -> dict:
         'prices_archived': 0
     }
 
-    # === STEP 1: PRODUCT (if section_updated=true) ===
+    # === STEP 1: PRODUCT (if sync=true) ===
     product = job_data.get('product', {})
-    product_id = product.get('metadata', {}).get('stripe_product_id')
+    product_id = product.get('stripe_product_id')  # New schema: direct field, not nested
 
-    if product.get('section_updated'):
+    if product.get('sync'):  # New schema: sync not section_updated
         if product_id:
-            # Product exists → Modify it
+            # Product exists → Modify it (overwrite all fields)
+            metadata = {
+                'job_id': job_id,
+                'client_last_name': job_data.get('_metadata', {}).get('client_last_name', ''),
+                'project_keyword': job_data.get('_metadata', {}).get('project_keyword', '')
+            }
+
             result = call_script(
                 'stripe/product/modify_product.py',
                 product_id=product_id,
+                name=product.get('name'),
                 description=product.get('description'),
-                metadata=json.dumps(product.get('metadata', {}))
+                metadata=json.dumps(metadata)
             )
             stats['products_modified'] += 1
         else:
             # Product doesn't exist → Create it
-            metadata = product.get('metadata', {})
-            metadata['job_id'] = job_id  # Ensure job_id is in metadata
+            metadata = {
+                'job_id': job_id,
+                'client_last_name': job_data.get('_metadata', {}).get('client_last_name', ''),
+                'project_keyword': job_data.get('_metadata', {}).get('project_keyword', '')
+            }
 
             result = call_script(
                 'stripe/product/create_product.py',
@@ -107,24 +127,22 @@ def sync_job(job_data: dict) -> dict:
                 metadata=json.dumps(metadata)
             )
 
-            # CRITICAL: Store the returned stripe_product_id
+            # CRITICAL: Store the returned stripe_product_id (new schema: direct field)
             product_id = result.get('product_id')
-            if 'metadata' not in product:
-                product['metadata'] = {}
-            product['metadata']['stripe_product_id'] = product_id
+            product['stripe_product_id'] = product_id
 
             stats['products_created'] += 1
 
-        # Reset flag
-        product['section_updated'] = False
+        # Reset flag (new schema: sync not section_updated)
+        product['sync'] = False
         job_data['product'] = product
 
     # === STEP 2: PRICES (after product has ID!) ===
-    prices = job_data.get('prices', [])
+    prices = job_data.get('price', [])  # New schema: price[] not prices[]
 
     for i, price in enumerate(prices):
-        if price.get('section_updated'):
-            price_id = price.get('metadata', {}).get('stripe_price_id')
+        if price.get('sync'):  # New schema: sync not section_updated
+            price_id = price.get('stripe_price_id')  # New schema: direct field, not nested
 
             if price_id:
                 # Price exists → Archive old, create new
@@ -136,9 +154,10 @@ def sync_job(job_data: dict) -> dict:
                     print(f"Warning: Failed to archive price {price_id}: {e.stderr}", file=sys.stderr)
 
             # Create new price (whether or not old one existed)
-            metadata = price.get('metadata', {})
-            metadata['job_id'] = job_id
-            metadata['payment_number'] = str(price.get('payment_number'))
+            metadata = {
+                'job_id': job_id,
+                'payment_number': str(price.get('payment_number'))
+            }
 
             result = call_script(
                 'stripe/price/create_price.py',
@@ -149,20 +168,18 @@ def sync_job(job_data: dict) -> dict:
                 metadata=json.dumps(metadata)
             )
 
-            # Store the returned stripe_price_id
+            # Store the returned stripe_price_id (new schema: direct field)
             new_price_id = result.get('price_id')
-            if 'metadata' not in price:
-                price['metadata'] = {}
-            price['metadata']['stripe_price_id'] = new_price_id
+            price['stripe_price_id'] = new_price_id
             price['active'] = True  # New price is active
 
             stats['prices_created'] += 1
 
-            # Reset flag
-            price['section_updated'] = False
+            # Reset flag (new schema: sync not section_updated)
+            price['sync'] = False
             prices[i] = price
 
-    job_data['prices'] = prices
+    job_data['price'] = prices  # New schema: price[] not prices[]
 
     return stats
 
@@ -191,13 +208,15 @@ def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
     }
 
     for job_data in all_jobs:
-        job_id = job_data.get('job_id')
+        # Get job_id from _metadata (new schema)
+        job_id = job_data.get('_metadata', {}).get('job_id')
         if not job_id:
+            print(f"Warning: Skipping job missing _metadata.job_id", file=sys.stderr)
             continue
 
-        # Check if this job needs sync
-        product_needs_sync = job_data.get('product', {}).get('section_updated', False)
-        prices_need_sync = any(p.get('section_updated', False) for p in job_data.get('prices', []))
+        # Check if this job needs sync (new schema: sync not section_updated)
+        product_needs_sync = job_data.get('product', {}).get('sync', False)
+        prices_need_sync = any(p.get('sync', False) for p in job_data.get('price', []))  # New schema: price[] not prices[]
 
         if not product_needs_sync and not prices_need_sync:
             continue  # Skip this job, nothing to sync
@@ -212,12 +231,12 @@ def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
 
             overall_stats['jobs_processed'] += 1
 
-            # Save updated job
+            # Save updated job (uses _metadata.job_id)
             if not save_job(job_id, job_data):
                 print(f"Warning: Failed to save job {job_id}", file=sys.stderr)
 
-        except subprocess.CalledProcessError as e:
-            print(f"Error syncing job {job_id}: {e.stderr}", file=sys.stderr)
+        except (subprocess.CalledProcessError, ValueError) as e:
+            print(f"Error syncing job {job_id}: {e}", file=sys.stderr)
             continue
 
     return overall_stats

@@ -1,6 +1,8 @@
 /**
  * CONTRACT CONTROLLER
  * Loads job data and populates contract template dynamically
+ * 
+ * Updated for new schema: Uses price[] array, contract.signatures structure, _metadata.job_id
  */
 
 (function () {
@@ -60,15 +62,17 @@
   /**
    * Generate payment schedule HTML
    */
-  function generatePaymentSchedule(payments) {
-    if (!payments || payments.length === 0) return '<li>No payments defined</li>';
+  function generatePaymentSchedule(prices) {
+    if (!prices || prices.length === 0) return '<li>No payments defined</li>';
 
-    return payments.map((payment, index) => {
-      const dueText = payment.due_type === 'date'
-        ? `Due: ${formatDate(payment.due_date)}`
-        : `Due: ${payment.due_term}`;
+    return prices.map((price, index) => {
+      // Convert cents to dollars
+      const amount = price.unit_amount / 100;
+      const dueText = price.due_type === 'date'
+        ? `Due: ${formatDate(price.due_date)}`
+        : `Due: ${price.due_term}`;
 
-      return `<li>Payment ${payment.payment_number}: ${formatCurrency(payment.amount)} - ${payment.description} (${dueText})</li>`;
+      return `<li>Payment ${price.payment_number}: ${formatCurrency(amount)} - ${price.nickname || 'Payment'} (${dueText})</li>`;
     }).join('');
   }
 
@@ -78,26 +82,26 @@
   function replacePlaceholders(template, data) {
     let html = template;
 
-    // Client info
-    html = html.replace(/\{\{CLIENT_NAME\}\}/g, data.client?.name || '');
-    html = html.replace(/\{\{CLIENT_CONTACT_NAME\}\}/g, data.client?.contact?.name || '');
+    // Client info (new schema: client.business not client.name)
+    html = html.replace(/\{\{CLIENT_NAME\}\}/g, data.client?.business || '');
+    html = html.replace(/\{\{CLIENT_CONTACT_NAME\}\}/g, data.client?.contact?.full_name || '');
     html = html.replace(/\{\{CLIENT_TITLE\}\}/g, data.client?.contact?.title || '');
     html = html.replace(/\{\{CLIENT_ADDRESS\}\}/g,
       `${data.client?.address?.street || ''}, ${data.client?.address?.city || ''}, ${data.client?.address?.state || ''} ${data.client?.address?.zip || ''}`.trim());
 
-    // Contract dates
-    html = html.replace(/\{\{CONTRACT_DATE\}\}/g, formatDate(data.contract?.date));
-    html = html.replace(/\{\{START_DATE\}\}/g, formatDate(data.contract?.start_date));
-    html = html.replace(/\{\{END_DATE\}\}/g, formatDate(data.contract?.end_date));
+    // Contract dates (new schema field names)
+    html = html.replace(/\{\{CONTRACT_DATE\}\}/g, formatDate(data.contract?.draft_date));
+    html = html.replace(/\{\{START_DATE\}\}/g, formatDate(data.contract?.work_start));
+    html = html.replace(/\{\{END_DATE\}\}/g, formatDate(data.contract?.work_end));
 
-    // Payment info
+    // Payment info (new schema field names)
     html = html.replace(/\{\{RATE_TYPE\}\}/g, data.contract?.rate_type || '');
-    html = html.replace(/\{\{TOTAL_FEE\}\}/g, formatCurrency(data.contract?.total_fee || 0));
+    html = html.replace(/\{\{TOTAL_FEE\}\}/g, formatCurrency(data.contract?.work_cost || 0));
     html = html.replace(/\{\{DEPOSIT_PERCENT\}\}/g, data.contract?.deposit_percent ? `${data.contract.deposit_percent}%` : '');
-    html = html.replace(/\{\{INVOICE_DAYS\}\}/g, data.contract?.invoice_days || '');
+    html = html.replace(/\{\{INVOICE_DAYS\}\}/g, data.contract?.balance_pay_days || '');
     html = html.replace(/\{\{LATE_FEE\}\}/g, formatCurrency(data.contract?.late_fee || 0));
-    html = html.replace(/\{\{HOURLY_FEE\}\}/g, formatCurrency(data.contract?.hourly_fee || 0));
-    html = html.replace(/\{\{PAYMENT_SCHEDULE\}\}/g, generatePaymentSchedule(data.payments));
+    html = html.replace(/\{\{HOURLY_FEE\}\}/g, formatCurrency(data.contract?.maintenance_monthly_fee || 0));
+    html = html.replace(/\{\{PAYMENT_SCHEDULE\}\}/g, generatePaymentSchedule(data.price)); // New schema: price[] not payments[]
 
     // Project scope
     html = html.replace(/\{\{PROJECT_SCOPE_SUMMARY\}\}/g, data.project_scope_summary || '');
@@ -199,13 +203,12 @@
       return;
     }
 
-    // Update job data
+    // Update job data (new schema: contract.signatures structure)
     jobData.contract.signed = true;
-    jobData.contract.signed_date = new Date().toISOString().split('T')[0];
-    jobData.contract.signed_by = clientSignature;
-    jobData.contract.contractor_signature = contractorSignature;
-    jobData.contract.contractor_date = contractorDate;
-    jobData.contract.client_date = clientDate;
+    jobData.contract.signatures.contractor.legal_name = contractorSignature;
+    jobData.contract.signatures.contractor.signed_date = contractorDate;
+    jobData.contract.signatures.client.legal_name = clientSignature;
+    jobData.contract.signatures.client.signed_date = clientDate;
 
     // Update sessionStorage
     sessionStorage.setItem('jobData', JSON.stringify(jobData));
@@ -218,14 +221,19 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          job_id: jobData.job_id,
+          job_id: jobData._metadata.job_id, // New schema: _metadata.job_id
           signature_data: {
             signed: true,
-            signed_date: jobData.contract.signed_date,
-            signed_by: jobData.contract.signed_by,
-            contractor_signature: jobData.contract.contractor_signature,
-            contractor_date: jobData.contract.contractor_date,
-            client_date: jobData.contract.client_date,
+            signatures: {
+              contractor: {
+                legal_name: contractorSignature,
+                signed_date: contractorDate
+              },
+              client: {
+                legal_name: clientSignature,
+                signed_date: clientDate
+              }
+            }
           }
         })
       });

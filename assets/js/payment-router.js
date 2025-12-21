@@ -2,6 +2,8 @@
  * PAYMENT ROUTER - State Machine
  * Determines user routing based on contract signing status and payment completion
  * Routes: contract → invoice → checkout → completion
+ * 
+ * Updated for new schema: Uses price[] array, price.paid boolean, _metadata.job_id
  */
 
 (function () {
@@ -36,14 +38,14 @@
     }
 
     const contract = jobData.contract || {};
-    const payments = jobData.payments || [];
+    const prices = jobData.price || []; // New schema: price[] not payments[]
 
     // Check if contract is signed
     const isContractSigned = contract.signed === true;
 
-    // Find pending payments
-    const pendingPayments = payments.filter(p => p.status === 'pending');
-    const paidPayments = payments.filter(p => p.status === 'paid');
+    // Find pending payments (not paid AND active)
+    const pendingPayments = prices.filter(p => p.paid === false && p.active === true);
+    const paidPayments = prices.filter(p => p.paid === true);
     const allPaymentsPaid = pendingPayments.length === 0 && paidPayments.length > 0;
 
     // State machine logic
@@ -55,8 +57,8 @@
       };
     }
 
-    if (pendingPayments.length === 0 && paidPayments.length === 0) {
-      // No payments defined (edge case)
+    if (prices.length === 0) {
+      // No prices defined (edge case)
       return {
         route: 'error',
         reason: 'No payments defined for this job'
@@ -73,10 +75,14 @@
 
     // Contract signed, payments pending → find first pending payment
     const firstPendingPayment = pendingPayments[0];
-    const paymentNumber = firstPendingPayment.payment_number;
+    if (!firstPendingPayment) {
+      return {
+        route: 'error',
+        reason: 'No active pending payments found'
+      };
+    }
 
-    // Check if this is the first payment
-    const isFirstPayment = paymentNumber === 1;
+    const paymentNumber = firstPendingPayment.payment_number;
 
     // Route to invoice for the pending payment
     return {

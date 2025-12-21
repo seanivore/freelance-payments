@@ -26,7 +26,7 @@ def load_job(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Dict]:
     Example:
         job_data = load_job("uid-test-001")
         if job_data:
-            print(job_data['client']['name'])
+            print(job_data['client']['business'])
     """
     job_path = find_job_file(job_id, jobs_dir)
 
@@ -83,7 +83,7 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
     Find the file path for a given job_id.
 
     Args:
-        job_id: The job identifier
+        job_id: The job identifier (from _metadata.job_id)
         jobs_dir: Directory containing job JSON files
 
     Returns:
@@ -99,12 +99,12 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
     if not jobs_path.exists():
         return None
 
-    # Try direct filename match first
+    # Try direct filename match first (files are named by job_id)
     direct_path = jobs_path / f"{job_id}.json"
     if direct_path.exists():
         return direct_path
 
-    # Search all JSON files in directory
+    # Search all JSON files in directory (fallback for non-standard naming)
     for json_file in jobs_path.glob("*.json"):
         # Skip template and edit files
         if json_file.stem.startswith('_'):
@@ -113,7 +113,10 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                if data.get('job_id') == job_id:
+                # Check _metadata.job_id (new schema) or fallback to old schema
+                metadata_job_id = data.get('_metadata', {}).get('job_id')
+                old_job_id = data.get('job_id')  # Fallback for migration
+                if metadata_job_id == job_id or old_job_id == job_id:
                     return json_file
         except (json.JSONDecodeError, IOError):
             continue
@@ -134,7 +137,7 @@ def list_all_jobs(jobs_dir: str = "assets/jobs") -> List[Dict]:
     Example:
         all_jobs = list_all_jobs()
         for job in all_jobs:
-            print(job['job_id'])
+            print(job['_metadata']['job_id'])
     """
     jobs_path = Path(jobs_dir)
 
@@ -176,29 +179,39 @@ def validate_job_schema(job_data: Dict) -> tuple[bool, List[str]]:
     """
     errors = []
 
-    # Check required top-level fields
-    required_fields = ['job_id', 'client', 'contract', 'product', 'prices']
+    # Check required top-level fields (new schema)
+    required_fields = ['_metadata', 'client', 'contract', 'product', 'price']
     for field in required_fields:
         if field not in job_data:
             errors.append(f"Missing required field: {field}")
 
+    # Check _metadata structure
+    if '_metadata' in job_data:
+        if 'job_id' not in job_data['_metadata']:
+            errors.append("_metadata missing job_id")
+        if 'client_last_name' not in job_data['_metadata']:
+            errors.append("_metadata missing client_last_name")
+        if 'project_keyword' not in job_data['_metadata']:
+            errors.append("_metadata missing project_keyword")
+
     # Check product structure
     if 'product' in job_data:
-        if 'metadata' not in job_data['product']:
-            errors.append("Product missing metadata field")
-        elif 'job_id' not in job_data['product']['metadata']:
-            errors.append("Product metadata missing job_id")
+        if 'stripe_product_id' not in job_data['product']:
+            # This is OK for new products, but should have sync flag
+            pass
+        if 'sync' not in job_data['product']:
+            errors.append("Product missing sync field")
 
-    # Check prices structure
-    if 'prices' in job_data:
-        if not isinstance(job_data['prices'], list):
-            errors.append("Prices must be a list")
+    # Check price structure (not prices - new schema)
+    if 'price' in job_data:
+        if not isinstance(job_data['price'], list):
+            errors.append("Price must be a list")
         else:
-            for i, price in enumerate(job_data['prices']):
+            for i, price in enumerate(job_data['price']):
                 if 'payment_number' not in price:
                     errors.append(f"Price {i} missing payment_number")
-                if 'metadata' not in price:
-                    errors.append(f"Price {i} missing metadata")
+                if 'sync' not in price:
+                    errors.append(f"Price {i} missing sync field")
 
     return (len(errors) == 0, errors)
 
@@ -230,7 +243,7 @@ if __name__ == "__main__":
         jobs = list_all_jobs(args.jobs_dir)
         print(json.dumps({
             "count": len(jobs),
-            "jobs": [{"job_id": j.get('job_id'), "client": j.get('client', {}).get('name')} for j in jobs]
+            "jobs": [{"job_id": j.get('_metadata', {}).get('job_id'), "client": j.get('client', {}).get('business')} for j in jobs]
         }, indent=2))
         sys.exit(0)
 

@@ -37,14 +37,14 @@ def read_job_json(file_path: Path) -> Optional[Dict]:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        # Validate required fields
-        if 'client' not in data:
-            print(f"⚠️  Missing 'client' field in {file_path.name}", file=sys.stderr)
+        # Validate required fields - new schema uses _metadata
+        if '_metadata' not in data:
+            print(f"⚠️  Missing '_metadata' field in {file_path.name}", file=sys.stderr)
             return None
         
-        client = data['client']
-        if 'last_name' not in client or 'project_keyword' not in client:
-            print(f"⚠️  Missing 'last_name' or 'project_keyword' in {file_path.name}", file=sys.stderr)
+        metadata = data['_metadata']
+        if 'client_last_name' not in metadata or 'project_keyword' not in metadata:
+            print(f"⚠️  Missing 'client_last_name' or 'project_keyword' in _metadata for {file_path.name}", file=sys.stderr)
             return None
         
         return data
@@ -69,8 +69,8 @@ def generate_manifest() -> Dict[str, str]:
         print(f"⚠️  Jobs directory not found: {jobs_dir}", file=sys.stderr)
         return manifest
     
-    # Scan for JSON files (excluding template)
-    json_files = [f for f in jobs_dir.glob('*.json') if f.name != '_job_template.json']
+    # Scan for JSON files (excluding templates)
+    json_files = [f for f in jobs_dir.glob('*.json') if not f.name.startswith('_job_template')]
     
     if not json_files:
         print("ℹ️  No job JSON files found (excluding template)", file=sys.stderr)
@@ -82,9 +82,10 @@ def generate_manifest() -> Dict[str, str]:
         if not job_data:
             continue
         
-        client = job_data['client']
-        last_name = normalize_lookup_key(client['last_name'])
-        project_keyword = normalize_lookup_key(client['project_keyword'])
+        # Extract from _metadata (new schema)
+        metadata = job_data['_metadata']
+        last_name = normalize_lookup_key(metadata['client_last_name'])
+        project_keyword = normalize_lookup_key(metadata['project_keyword'])
         
         # Create lookup key: "{last_name}-{project_keyword}"
         lookup_key = f"{last_name}-{project_keyword}"
