@@ -129,7 +129,7 @@ def list_all_jobs(jobs_dir: str = "assets/jobs") -> List[Dict]:
     Load all job files from the jobs directory.
 
     Args:
-        jobs_dir: Directory containing job JSON files
+        jobs_dir: Directory containing job JSON files (relative to project root)
 
     Returns:
         List of dictionaries, each containing job data
@@ -139,25 +139,39 @@ def list_all_jobs(jobs_dir: str = "assets/jobs") -> List[Dict]:
         for job in all_jobs:
             print(job['_metadata']['job_id'])
     """
-    jobs_path = Path(jobs_dir)
+    # Resolve path relative to project root (3 levels up from utils/json_io.py)
+    # This ensures it works regardless of where the script is called from
+    utils_dir = Path(__file__).parent
+    scripts_dir = utils_dir.parent
+    project_root = scripts_dir.parent
+    jobs_path = project_root / jobs_dir
 
     if not jobs_path.exists():
+        print(f"DEBUG: Jobs directory does not exist: {jobs_path} (resolved from {jobs_dir})", file=sys.stderr)
         return []
+    
+    print(f"DEBUG: Looking for jobs in: {jobs_path}", file=sys.stderr)
 
     jobs = []
-    for json_file in jobs_path.glob("*.json"):
+    json_files = list(jobs_path.glob("*.json"))
+    print(f"DEBUG: Found {len(json_files)} JSON file(s) in {jobs_path}", file=sys.stderr)
+    
+    for json_file in json_files:
         # Skip template and edit files
         if json_file.stem.startswith('_'):
+            print(f"DEBUG: Skipping template file: {json_file.name}", file=sys.stderr)
             continue
 
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 job_data = json.load(f)
                 jobs.append(job_data)
+                print(f"DEBUG: Loaded job from {json_file.name}", file=sys.stderr)
         except (json.JSONDecodeError, IOError) as e:
             print(f"Warning: Skipping {json_file}: {e}", file=sys.stderr)
             continue
 
+    print(f"DEBUG: Returning {len(jobs)} job(s)", file=sys.stderr)
     return jobs
 
 
