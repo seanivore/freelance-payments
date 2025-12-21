@@ -62,7 +62,10 @@ def generate_manifest() -> Dict[str, str]:
     Generate manifest mapping lookup keys to JSON file paths
     Returns: dict mapping "{last_name}-{project_keyword}" to relative file path
     """
-    jobs_dir = Path('assets/jobs')
+    # Get project root (3 levels up from .github/scripts/generate_manifest.py)
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent.parent
+    jobs_dir = project_root / 'assets' / 'jobs'
     manifest = {}
     
     if not jobs_dir.exists():
@@ -113,8 +116,8 @@ def main():
         "generated_at": None  # Will be set by GitHub Actions or manually
     }
     
-    # Output directory
-    output_dir = Path('assets/js')
+    # Output directory (relative to project root)
+    output_dir = project_root / 'assets' / 'js'
     output_dir.mkdir(parents=True, exist_ok=True)
     output_file = output_dir / 'manifest.json'
     

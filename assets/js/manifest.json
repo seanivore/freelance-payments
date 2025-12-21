@@ -1,4 +1,6 @@
 {
-  "jobs": {},
+  "jobs": {
+    "testclient-test-single": "assets/jobs/test-single-payment-v2.json"
+  },
   "generated_at": null
 }
