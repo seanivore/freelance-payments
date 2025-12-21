@@ -97,7 +97,7 @@ Next visit: Routes to next payment or completion
 
 ## Section 2: Things That Don't Need Fixing
 
-### ✅ Working Correctly - DO NOT CHANGE
+### ✅ Working Correctly - DO NOT CHANGE **BUT NOT TESTED SO...**
 
 **1. Vercel Integration**
 - `/api/create-payment-intent.js` - Creates Stripe Payment Intent
@@ -137,133 +137,9 @@ Next visit: Routes to next payment or completion
 
 ### Complete Schema Structure
 
-```json
-{
-  // === TOP-LEVEL FIELDS (written ONCE) ===
-  "job_id": "uid-test-001",
-  "project_keyword": "website-redesign",
-
-  "client": {
-    "name": "Test Client Co",
-    "last_name": "Client",
-    "contact": {
-      "name": "Jane Doe",
-      "title": "CEO",
-      "email": "jane@example.com",
-      "phone": "+1-555-0001"
-    },
-    "address": {
-      "street": "123 Main St",
-      "city": "Boston",
-      "state": "MA",
-      "zip": "02101"
-    }
-  },
-
-  // === CONTRACT & INVOICE INFO (no sync flags needed) ===
-  "contract": {
-    "date": "2025-01-15",
-    "start_date": "2025-01-20",
-    "end_date": "2025-04-20",
-    "rate_type": "Flat Rate",
-    "total_fee": 5000.0,
-    "deposit_percent": 25,
-    "invoice_days": 30,
-    "late_fee": 100.0,
-    "hourly_fee": null,
-    "location": "Massachusetts",
-    "maintenance_period_months": 3,
-    "signed": false,
-    "signed_date": null,
-    "signed_by": null,
-    "signatures": {
-      "contractor": {
-        "name": null,
-        "date": null
-      },
-      "client": {
-        "name": null,
-        "date": null
-      }
-    },
-    "contractor_signature": null,
-    "contractor_date": null,
-    "client_date": null
-  },
-
-  // === PRODUCT (Stripe Product Object) ===
-  "product": {
-    "section_updated": false,     // Set to TRUE when product needs sync
-
-    // Stripe Product fields
-    "active": true,               // Set to FALSE to archive
-    "name": "Website for Everlastings by Emy",
-    "description": "Website redesign project with new branding",
-    "metadata": {
-      "stripe_product_id": "prod_xxx",   // Stored IN metadata
-      "job_id": "uid-test-001"
-    },
-    "created": 1737417600,
-    "updated": 1737417600
-  },
-
-  // === PRICES (Stripe Price Objects - array) ===
-  "prices": [
-    {
-      // Payment-specific fields (not in Stripe Price object)
-      "payment_number": 1,
-      "due_date": "2025-01-20",
-      "due_type": "date",           // "date" or "term"
-      "due_term": null,
-      "payment_status": "pending",  // "pending" or "paid"
-      "paid_date": null,
-      "paid_date_unix": null,
-
-      "section_updated": false,     // Set to TRUE when price needs sync
-
-      // Stripe Price fields
-      "active": true,               // Set to FALSE when paid or archived
-      "product": "prod_xxx",        // MUST match product.metadata.stripe_product_id
-      "unit_amount": 125000,        // Amount in cents (1250.00)
-      "currency": "usd",
-      "nickname": "Deposit (25%)",
-      "metadata": {
-        "stripe_price_id": "price_xxx",  // Stored IN metadata
-        "payment_number": "1",
-        "job_id": "uid-test-001"
-      },
-      "created": 1737417600
-    },
-    {
-      "payment_number": 2,
-      "due_date": null,
-      "due_type": "term",
-      "due_term": "Before launch",
-      "payment_status": "pending",
-      "paid_date": null,
-      "paid_date_unix": null,
-
-      "section_updated": false,
-
-      "active": true,
-      "product": "prod_xxx",        // Same product as price 1!
-      "unit_amount": 375000,
-      "currency": "usd",
-      "nickname": "Final payment (75%)",
-      "metadata": {
-        "stripe_price_id": "price_yyy",
-        "payment_number": "2",
-        "job_id": "uid-test-001"
-      },
-      "created": 1737417600
-    }
-  ],
-
-  // === PROJECT SCOPE ===
-  "project_scope_summary": "Website redesign with new branding",
-  "project_scope_full": "Complete redesign of client website including new color scheme, updated logo, mobile-responsive layout, and improved user experience."
-}
-```
+  + See new template and change-log for attention areas that might require adjusting templates for contract or invoice 
+  `/Users/seanivore/Development/freelance-payments/assets/jobs/_job_template_v2.json` 
+  `/Users/seanivore/Development/freelance-payments/assets/jobs/CHANGE_LOG.md` 
 
 ### Key Schema Concepts
 

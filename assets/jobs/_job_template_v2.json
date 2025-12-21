@@ -48,23 +48,23 @@
         }
     },
     "metadata": {
-        "contract_viewed": false,
-        "contract_downloads": 0,
-        "contract_signed": false
+        "viewed": false,
+        "downloaded": 0,
+        "signed": false
     }
 },
 
-"product_object": {
+"product": {
     "job": "Website Development",
     "description": "Professional custom-built e-commerce website",
+    "active": true,
     "metadata": {
-        "active": true,
         "stripe_product_id": null,
         "section_updated": false
     }
 },
 
-"price_objects": [ 
+"price": [ 
     {
     "nickname": "Deposit (25%)",
     "unit_amount": 125000,
@@ -75,12 +75,12 @@
     "due_term": "work start",
     "paid_date": null,
     "paid_date_unix": null,
+    "paid": true,
+    "active": true,
     "metadata": {
-        "stripe_price_id": null,
         "payment_number": 1,
-        "active": true,
-        "section_updated": false,
-        "payment_status": "pending"
+        "stripe_price_id": null,
+        "section_updated": false
         }
     },
 
@@ -94,12 +94,12 @@
     "due_term": "before launch",
     "paid_date": null,
     "paid_date_unix": null,
+    "paid": false,
+    "active": true,
     "metadata": {
-        "stripe_price_id": null,
         "payment_number": 2,
-        "active": true,
-        "section_updated": false,
-        "payment_status": "pending"
+        "stripe_price_id": null,
+        "section_updated": false
         }
     }
 ],
