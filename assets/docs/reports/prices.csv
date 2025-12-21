@@ -1,0 +1,14 @@
+Price ID,Product ID,Product Name,Product Statement Descriptor,Product Tax Code,Description,Created (UTC),Amount,Currency,Interval,Interval Count,Usage Type,Aggregate Usage,Billing Scheme,Trial Period Days,Tax Behavior,project_keyword (metadata),payment_number (metadata),invoice_number (metadata),client_last_name (metadata),job_id (metadata)
+price_1SgrHS9fljwH26CPVueDW4i5,prod_Te9aDB3BgNCOPu,Test Website Development,,,Full Payment,2025-12-21 18:22,1000.00,usd,,,,,per_unit,,unspecified,,1,,,uid-test-001
+price_1SgrGx9fljwH26CPoT6RVDHD,prod_Te9aYNoxpQrpKQ,Test Website Development,,,Full Payment,2025-12-21 18:22,1000.00,usd,,,,,per_unit,,unspecified,,1,,,uid-test-001
+price_1SgrET9fljwH26CP534s1hua,prod_Te9XcuXwtncRqo,Test Website Development,,,Full Payment,2025-12-21 18:19,1000.00,usd,,,,,per_unit,,unspecified,,1,,,uid-test-001
+price_1SgrDP9fljwH26CPhazzd9PA,prod_Te9WzmatF7MaGw,Test Website Development,,,Full Payment,2025-12-21 18:18,1000.00,usd,,,,,per_unit,,unspecified,,1,,,uid-test-001
+price_1SgRId9fljwH26CPWMxBCr32,prod_TdikCjTfMclZWR,uid-test-007-3,,,,2025-12-20 14:38,4500.00,usd,,,,,per_unit,,unspecified,long-description,3,uid-test-007,Longdesc,uid-test-007
+price_1SgRId9fljwH26CPjWGxRmkn,prod_TdikW8uAFIRFPe,uid-test-007-2,,,,2025-12-20 14:38,4500.00,usd,,,,,per_unit,,unspecified,long-description,2,uid-test-007,Longdesc,uid-test-007
+price_1SgRId9fljwH26CPU85j1REA,prod_Tdik1ufhfnEBzA,uid-test-007-1,,,,2025-12-20 14:38,3000.00,usd,,,,,per_unit,,unspecified,long-description,1,uid-test-007,Longdesc,uid-test-007
+price_1SgRIc9fljwH26CPVcjV3o43,prod_TdikB93lB8Zqxn,uid-test-002-3,,,,2025-12-20 14:38,5000.00,usd,,,,,per_unit,,unspecified,multi-payment-test,3,uid-test-002,Multi,uid-test-002
+price_1SgRIc9fljwH26CPQxsGB3Pw,prod_TdikCyytK3rG09,uid-test-002-2,,,,2025-12-20 14:38,5000.00,usd,,,,,per_unit,,unspecified,multi-payment-test,2,uid-test-002,Multi,uid-test-002
+price_1SgRIb9fljwH26CPI5ObDxia,prod_TdikMezcNm2KL6,uid-test-002-1,,,,2025-12-20 14:38,5000.00,usd,,,,,per_unit,,unspecified,multi-payment-test,1,uid-test-002,Multi,uid-test-002
+price_1SgRIb9fljwH26CPOoNk7CNR,prod_Tdik8kfNaXwJIT,uid-test-006-2,,,,2025-12-20 14:38,4500.00,usd,,,,,per_unit,,unspecified,special-chars-test,2,uid-test-006,O'Brien,uid-test-006
+price_1SgRIa9fljwH26CPRRmYv0W0,prod_TdikFXZV5zka51,uid-test-006-1,,,,2025-12-20 14:38,3000.00,usd,,,,,per_unit,,unspecified,special-chars-test,1,uid-test-006,O'Brien,uid-test-006
+price_1SgQwd9fljwH26CPntnk5fQ5,prod_TdiNYn8YV4SQsC,uid-test-001-1,,,,2025-12-20 14:15,1000.00,usd,,,,,per_unit,,unspecified,single-payment-test,1,uid-test-001,Single,uid-test-001
