@@ -208,8 +208,12 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                     results['steps_run'].append('sync_catalog')
                     # Log sync stats and stderr for debugging
                     if sync_result.get('_stderr'):
-                        results['errors'].append(f"sync_catalog stderr: {sync_result.get('_stderr')}")
-                    if sync_result.get('products_created', 0) == 0 and sync_result.get('prices_created', 0) == 0:
+                        # Include stderr in errors (truncate if too long)
+                        stderr_msg = sync_result.get('_stderr', '')[:500]
+                        results['errors'].append(f"sync_catalog stderr: {stderr_msg}")
+                    if sync_result.get('jobs_processed', 0) == 0:
+                        results['errors'].append(f"sync_catalog processed 0 jobs. This suggests jobs were skipped or failed. Stats: {sync_result}")
+                    elif sync_result.get('products_created', 0) == 0 and sync_result.get('prices_created', 0) == 0:
                         results['errors'].append(f"sync_catalog completed but created no products/prices. Stats: {sync_result}")
             except subprocess.CalledProcessError as e:
                 results['errors'].append(f"sync_catalog failed: {e.stderr}")
