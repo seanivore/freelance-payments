@@ -11,7 +11,7 @@
   * **Transform the monolithic automation system into a highly modular, self-documenting architecture where** 
 
     - Each Stripe API call = one Python script
-    - Git-based conditionals → Explicit `section_updated` flags
+    - Git-based conditionals → Explicit `updated` flags
     - Redundant data eliminated
     - Mirrors Stripe's object model (use their vocabulary)
     - File structure reveals the logic
@@ -419,32 +419,29 @@ Vercel function updates JSON via GitHub Actions
     "signatures": {      // signature fields simplified and made clearer 
         "contractor": { "legal_name" /* ... */ "signed_date" },
         "client": { "legal_name" /* ... */ "signed_date" }, },
-    "metadata": {
-        "viewed": false,    // True | False; after first login and scroll 
-        "downloaded": 0,   // integer; Simple download counter 
-        "signed": false  // True | False; tells what loads first next login  
-    }
+    "viewed": false,    // True | False; after first login and scroll 
+    "downloaded": 0,   // integer; Simple download counter 
+    "signed": false  // True | False; tells what loads first next login  
 },
   /* all of the above fills in page templates dynamically and require nothing other than manifest build to display — NOTE if needed, dynamic pages can pull from ANYWHERE on the entire JSON */ 
     
-  /* all of the below fill in Stripe Catalog entries and require a section_updated flag to direct automations or active:true/false fields, to archive when paid — NOTE if needed, any other fields can fill in a Stripe API call value IF they WILL NOT need later updates */
+  /* all of the below fill in Stripe Catalog entries and require a updated flag to direct automations or active:true/false fields, to archive when paid — NOTE if needed, any other fields can fill in a Stripe API call value IF they WILL NOT need later updates */
 
   // === STRIPE PRODUCT OBJECT ===
 "product": {
-    "job": "Website Development",   // "Name" of the object 
+    "name": "Website Development",   // "Name" of the object (job)
     "description": "Professional custom-built e-commerce website",
     "active": true,     // FALSE = archive = paid = PRICE OBJECTS archived first 
-    "metadata": {
-        "stripe_product_id": null, // Added by Stripe entry bounce back 
-        "section_updated": false   // TRUE = needs sync to Stripe
-    }
+    "created": 1766327709,  // seconds since the unix epoch
+    "stripe_product_id": null, // Added by Stripe entry bounce back 
+    "sync": false   // TRUE = needs sync to Stripe
 },
   /* Organized this way because if anything in this section is updated it can be fixed using very simple logic to keep Stripe Catalog and Jobs Directory in sync. 
-      1. `section_updated` = true, then search for matching stripe_product_id 
+      1. `updated` = true, then search for matching stripe_product_id 
       2. No matches? CREATE NEW PRODUCT 
       3. Find match? OVERWRITE ALL PRODUCT FIELDS PROVIDED 
       4. New product, place stripe_product_id on JSON 
-      5. New or updated product, change `section_updated` to FALSE 
+      5. New or updated product, change `updated` to FALSE 
   Always add or update product entry and get the "stripe_product_id" before creating any PRICE OBJECTS for that product */ 
 
   // === STRIPE PRICE OBJECT ===
@@ -461,11 +458,10 @@ Vercel function updates JSON via GitHub Actions
     "paid_date_unix": null,    // Stripe flow updates to Unix Timestamp Epoch in Seconds 
     "paid": false,        // True | False 
     "active": true,       // When paid, workflow changes to false = archive 
-    "metadata": {
-        "payment_number": 1,  // Site backend uses to know which price object to show
-        "stripe_price_id": null, // Added by Stripe (will ask for product too)
-        "section_updated": false // flag if new info. or anything is updated 
-        } },
+    "payment_number": 1,  // Site backend uses to know which price object to show
+    "stripe_price_id": null, // Added by Stripe (will ask for product too)
+    "sync": false // flag if new info. or anything is updated 
+       },
       // Payment 2 example, same stripe_product_id and receive custom stripe_price_id
     {
     "nickname": "Balance payment",
@@ -479,24 +475,24 @@ Vercel function updates JSON via GitHub Actions
     "paid_date_unix": null,
     "paid": false,
     "active": true,
-    "metadata": {
-        "payment_number": 2,
-        "stripe_price_id": null,
-        "section_updated": false } } ],
+    "payment_number": 2,
+    "stripe_price_id": null,
+    "sync": false } ],
   /* Grouped this way because if anything in one PRICE OBJECT section is updated it can be fixed using very simple logic to keep Stripe Catalog and Jobs Directory in sync. 
-      1. `section_updated` = true, then search for matching stripe_price_id 
+      1. `updated` = true, then search for matching stripe_price_id 
       2. No matches? CREATE NEW PRICE OBJECT  
       3. Find match? CHANGE IT TO ACTIVE:FALSE AND CREATE NEW PRICE OBJECT 
       4. New price, place stripe_price_id on JSON 
-      5. New or updated product, change `section_updated` to FALSE 
+      5. New or updated product, change `updated` to FALSE 
   Always add or update PRODUCT ENTRY including getting the "stripe_product_id" before creating ANY PRICE OBJECTS for this same product */ 
+}
 ``` 
 
 ### Key Simplifications
 
   1. Use Stripe's Vocabulary
     - `active: true/false` (not custom "archived" state)
-    - `section_updated: true/false` (not "needs_sync")
+    - `updated: true/false` (not "needs_sync")
     - Product and Price objects mirror Stripe's structure
 
   2. Fix the Product → Prices Issue
@@ -511,61 +507,61 @@ Vercel function updates JSON via GitHub Actions
 
   4. Simple Sync Logic
 
-  * **PRODUCT OBJECT SECTION `section_updated: TRUE` PROCEDURE** 
+  * **PRODUCT OBJECT SECTION `updated: TRUE` PROCEDURE** 
 
-    1. `section_updated` = true, then search for matching stripe_product_id 
+    1. `updated` = true, then search for matching stripe_product_id 
     2. No matches? CREATE NEW PRODUCT 
     3. Find match? OVERWRITE ALL PRODUCT FIELDS PROVIDED 
     4. New product, place stripe_product_id on JSON 
-    5. New or updated product, change `section_updated` to FALSE 
+    5. New or updated product, change `updated` to FALSE 
 
-  * **PRICE OBJECT SECTION `section_updated: TRUE` PROCEDURE** 
+  * **PRICE OBJECT SECTION `updated: TRUE` PROCEDURE** 
 
-    1. `section_updated` = true, then search for matching stripe_price_id 
+    1. `updated` = true, then search for matching stripe_price_id 
     2. No matches? CREATE NEW PRICE OBJECT  
     3. Find match? CHANGE IT TO ACTIVE:FALSE AND CREATE NEW PRICE OBJECT 
     4. New price, place stripe_price_id on JSON 
-    5. New or updated product, change `section_updated` to FALSE 
+    5. New or updated product, change `updated` to FALSE 
 
   * **CRITICAL: Product FIRST, then Prices!**
 
-  **Product Sync (if `product.section_updated = true`):**
+  **Product Sync (if `product.sync = true`):**
   ```python
   # Step 1: Check if product exists in Stripe
-  if product.metadata.stripe_product_id:
+  if product.stripe_product_id:
       # Step 2: Product exists → Modify it
       call modify_product.py
   else:
       # Step 3: Product doesn't exist → Create it
       result = call create_product.py
       # Store the returned stripe_product_id in JSON
-      product.metadata.stripe_product_id = result.id
+      product.stripe_product_id = result.id
 
-  # Set section_updated = false (sync complete)
-  product.section_updated = false
+  # Set updated = false (sync complete)
+  product.sync = false
   ```
 
-  **Price Sync (if `price.section_updated = true`):**
+  **Price Sync (if `price.sync = true`):**
   ```python
   # Step 1: Check if price exists in Stripe
-  if price.metadata.stripe_price_id:
+  if price.stripe_price_id:
       # Step 2: Price exists → Archive old, create new
       call archive_price.py(old_price_id)
       result = call create_price.py(
-          product=product.metadata.stripe_product_id,  # CRITICAL!
+          product=product.stripe_product_id,  # CRITICAL!
           unit_amount=price.unit_amount
       )
-      price.metadata.stripe_price_id = result.id
+      price.stripe_price_id = result.id
   else:
       # Step 3: Price doesn't exist → Create it
       result = call create_price.py(
-          product=product.metadata.stripe_product_id,  # CRITICAL!
+          product=product.stripe_product_id,  # CRITICAL!
           unit_amount=price.unit_amount
       )
-      price.metadata.stripe_price_id = result.id
+      price.stripe_price_id = result.id
 
-  # Set section_updated = false (sync complete)
-  price.section_updated = false
+  # Set updated = false (sync complete)
+  price.sync = false
   ```
 
 **Why this order matters:**
@@ -595,7 +591,7 @@ Vercel function updates JSON via GitHub Actions
 │   │   ├── modify_product.py      # Product.modify()
 │   │   ├── archive_product.py     # Product.modify(active=False)
 │   │   ├── delete_product.py      # Product.delete()
-│   │   └── list_products.py       # Product.list() with metadata filter
+│   │   └── list_products.py       # Product.list() with filter
 │   └── price/
 │       ├── create_price.py        # Price.create()
 │       ├── archive_price.py       # Price.modify(active=False)
@@ -604,7 +600,7 @@ Vercel function updates JSON via GitHub Actions
 ├── state/
 │   ├── update_contract.py         # Contract signing
 │   ├── update_payment.py          # Payment status
-│   └── detect_sync_needs.py       # Set section_updated flags
+│   └── detect_sync_needs.py       # Set updated flags
 ├── utils/
 │   └── json_io.py                 # Shared JSON read/write (DRY) Prevents duplicate read/write code across all scripts
 └── orchestration/
@@ -643,15 +639,15 @@ Vercel function updates JSON via GitHub Actions
 
   * **`state/detect_sync_needs.py`** - Replaces git diff logic
     - Compares current JSON to git HEAD
-    - If product fields changed → Set `product.section_updated = true`
-    - If price fields changed → Set `prices[n].section_updated = true`
+    - If product fields changed → Set `product.sync = true`
+    - If price fields changed → Set `prices[n].updated = true`
     - Commits updated JSON with flags
 
   * **`orchestration/sync_catalog.py`** - Main coordinator (simple 3-step logic)
 
   * **`orchestration/cleanup_orphans.py`** - Edge case cleanup
     - Lists all products from Stripe
-    - Compares to current JSON files (by job_id in metadata)
+    - Compares to current JSON files (by job_id)
     - Deletes orphaned products (and their prices first!)
 
 ### Replace Git-Based Conditionals with Section Flags
@@ -670,11 +666,11 @@ Vercel function updates JSON via GitHub Actions
   * **NEW (simple):**
 
   ```python
-  # Just check the section_updated flags
+  # Just check the updated flags
   def needs_sync(job_data):
-      if job_data['product']['section_updated']:
+      if job_data['product']['updated']:
           return True
-      if any(price['section_updated'] for price in job_data['prices']):
+      if any(price['updated'] for price in job_data['prices']):
           return True
       return False
   ```
@@ -841,17 +837,17 @@ Replace monolithic workflow with modular workflows:
 
 | Trigger            | Action(s)                                                             | Implementation                        |
 | ------------------ | --------------------------------------------------------------------- | ------------------------------------- |
-| Contract opened    | `contract.metadata.viewed = true`                                     |                                       |
-| Doc downloaded     | `contract.metadata.downloaded = +1`                                   |                                       |
-| Contract signed    | `contract.metadata.signed = true`                                     | Vercel → `update_contract.py`         |
-| Product added      | `stripe_product_id` add; `section_updated = false`                    |                                       |
-| Product updated    | `section_updated = false`                                             | `detect_sync_needs` → `sync_catalog`  |
+| Contract opened    | `contract.viewed = true`                                     |                                       |
+| Doc downloaded     | `contract.downloaded = +1`                                   |                                       |
+| Contract signed    | `contract.signed = true`                                     | Vercel → `update_contract.py`         |
+| Product added      | `stripe_product_id` add; `updated = false`                    |                                       |
+| Product updated    | `updated = false`                                             | `detect_sync_needs` → `sync_catalog`  |
 | First payment made | `price.paid = true`; `price.active = false`                           |                                       |
 | Only payment made  | `price.paid = true`; `price.active = false`; `product.active = false` | `update_payment.py` checks all prices |
 | Second payment made| `price.paid = true`; `price.active = false`                           |                                       |
 | Final payment made | `price.paid = true`; `price.active = false`; `product.active = false` | Webhook → `update_payment.py`         |
-| Price added        | `stripe_price_id` add; `section_updated = false`                      | `sync_catalog.py`                     |
-| Price updated      | `section_updated = false`                                             | `detect_sync_needs` → `sync_catalog`  |
+| Price added        | `stripe_price_id` add; `updated = false`                      | `sync_catalog.py`                     |
+| Price updated      | `updated = false`                                             | `detect_sync_needs` → `sync_catalog`  |
 | Job JSON Deleted   | First delete product's Price Objects, then delete Product Object      | `cleanup_orphans.py`                  |
 
 ### Archive & Delete Stripe Rules 

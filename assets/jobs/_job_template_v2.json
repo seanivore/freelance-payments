@@ -8,9 +8,9 @@
 "client": {
     "business": "Bob's Roofing LLC",
     "contact": {
-        "name": "Bob Smith",
+        "full_name": "Bob Smith",
         "title": "Owner / Manager",
-        "email": "bob@roof-me-up.com",
+        "email": "bob@example.com",
         "phone": "312-555-0123"
     },
     "address": {
@@ -47,21 +47,18 @@
             "signed_date": null
         }
     },
-    "metadata": {
-        "viewed": false,
-        "downloaded": 0,
-        "signed": false
-    }
+    "viewed": false,
+    "downloaded": 0,
+    "signed": false
 },
 
 "product": {
-    "job": "Website Development",
+    "name": "Website Development",
     "description": "Professional custom-built e-commerce website",
     "active": true,
-    "metadata": {
-        "stripe_product_id": null,
-        "section_updated": false
-    }
+    "created": 1766327709,
+    "stripe_product_id": null,
+    "sync": false
 },
 
 "price": [ 
@@ -77,11 +74,9 @@
     "paid_date_unix": null,
     "paid": true,
     "active": true,
-    "metadata": {
-        "payment_number": 1,
-        "stripe_price_id": null,
-        "section_updated": false
-        }
+    "payment_number": 1,
+    "stripe_price_id": null,
+    "sync": false
     },
 
     {
@@ -96,11 +91,9 @@
     "paid_date_unix": null,
     "paid": false,
     "active": true,
-    "metadata": {
-        "payment_number": 2,
-        "stripe_price_id": null,
-        "section_updated": false
-        }
+    "payment_number": 2,
+    "stripe_price_id": null,
+    "sync": false
     }
 ],
 
