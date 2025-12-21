@@ -76,6 +76,6 @@
       "sync": true
     }
   ],
-  "project_scope_summary": "This is a test project to verify the payment system works correctly with the new schema. Testing stderr capture for debugging.",
+  "project_scope_summary": "This is a test project to verify the payment system works correctly with the new schema. Testing debug logging to find why jobs aren't processed.",
   "project_scope_full": "Full test project scope for validation."
 }
