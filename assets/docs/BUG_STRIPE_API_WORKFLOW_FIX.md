@@ -166,7 +166,7 @@ GET
 /v1/products
 
 import stripe
-stripe.api_key = "sk_test_51Sbjhg9fljwH26CP5dqLjALcPFtHBhftOCYTqkIGvmZwDN33dismfwKzDQLyKb4QXynGFdrblhEpi89fiK3bQ0TM00mxCMX98p"
+stripe.api_key = "sk_test_...g"
 
 products = stripe.Product.list(limit=3)
 
