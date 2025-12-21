@@ -198,6 +198,9 @@ def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
         IOError: If file operations fail
     """
     all_jobs = list_all_jobs(jobs_dir)
+    
+    # Debug: Log how many jobs were found
+    print(f"DEBUG: Found {len(all_jobs)} job(s) in {jobs_dir}", file=sys.stderr)
 
     overall_stats = {
         'jobs_processed': 0,
@@ -217,13 +220,19 @@ def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
         # Check if this job needs sync (new schema: sync not section_updated)
         product_needs_sync = job_data.get('product', {}).get('sync', False)
         prices_need_sync = any(p.get('sync', False) for p in job_data.get('price', []))  # New schema: price[] not prices[]
+        
+        # Debug: Log sync status for each job
+        print(f"DEBUG: Job {job_id} - product.sync={product_needs_sync}, prices_need_sync={prices_need_sync}", file=sys.stderr)
 
         if not product_needs_sync and not prices_need_sync:
+            print(f"DEBUG: Skipping job {job_id} - no sync flags set", file=sys.stderr)
             continue  # Skip this job, nothing to sync
 
         # Sync this job
         try:
+            print(f"DEBUG: Starting sync for job {job_id}", file=sys.stderr)
             stats = sync_job(job_data)
+            print(f"DEBUG: Sync completed for job {job_id}: {stats}", file=sys.stderr)
 
             # Accumulate stats
             for key in stats:
@@ -235,9 +244,13 @@ def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
             # CRITICAL: Pass jobs_dir to save_job so it saves to the correct location
             if not save_job(job_id, job_data, jobs_dir=jobs_dir):
                 print(f"Warning: Failed to save job {job_id}", file=sys.stderr)
+            else:
+                print(f"DEBUG: Successfully saved job {job_id}", file=sys.stderr)
 
         except (subprocess.CalledProcessError, ValueError) as e:
             print(f"Error syncing job {job_id}: {e}", file=sys.stderr)
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
             continue
 
     return overall_stats
