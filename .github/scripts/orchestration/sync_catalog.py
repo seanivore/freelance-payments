@@ -232,7 +232,8 @@ def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
             overall_stats['jobs_processed'] += 1
 
             # Save updated job (uses _metadata.job_id)
-            if not save_job(job_id, job_data):
+            # CRITICAL: Pass jobs_dir to save_job so it saves to the correct location
+            if not save_job(job_id, job_data, jobs_dir=jobs_dir):
                 print(f"Warning: Failed to save job {job_id}", file=sys.stderr)
 
         except (subprocess.CalledProcessError, ValueError) as e:
