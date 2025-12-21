@@ -264,8 +264,19 @@ def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
             else:
                 print(f"DEBUG: Successfully saved job {job_id}", file=sys.stderr)
 
-        except (subprocess.CalledProcessError, ValueError) as e:
-            print(f"Error syncing job {job_id}: {e}", file=sys.stderr)
+        except subprocess.CalledProcessError as e:
+            # Extract error details from CalledProcessError
+            error_details = f"Command: {e.cmd}\nReturn code: {e.returncode}\n"
+            if e.stdout:
+                error_details += f"STDOUT: {e.stdout}\n"
+            if e.stderr:
+                error_details += f"STDERR: {e.stderr}\n"
+            print(f"Error syncing job {job_id}:\n{error_details}", file=sys.stderr)
+            import traceback
+            print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
+            continue
+        except ValueError as e:
+            print(f"ValueError syncing job {job_id}: {e}", file=sys.stderr)
             import traceback
             print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
             continue
