@@ -48,7 +48,8 @@ def run_script(script_path: str, **kwargs) -> dict:
     Run a Python script and return its JSON output.
 
     Args:
-        script_path: Relative path to script (from project root or .github/scripts/)
+        script_path: Relative path to script from .github/scripts/ directory
+                     Examples: 'state/detect_sync_needs.py', 'generate_manifest.py'
         **kwargs: Arguments to pass to script
 
     Returns:
@@ -57,16 +58,13 @@ def run_script(script_path: str, **kwargs) -> dict:
     Raises:
         subprocess.CalledProcessError: If script fails
     """
-    # Get project root (3 levels up from .github/scripts/orchestration/)
-    project_root = Path(__file__).parent.parent.parent
+    # Get scripts directory (.github/scripts/)
+    scripts_dir = Path(__file__).parent.parent
+    # Get project root (for cwd)
+    project_root = scripts_dir.parent
     
-    # If script_path starts with .github/, use scripts dir; otherwise use project root
-    if script_path.startswith('.github/') or script_path.startswith('github/'):
-        script_dir = Path(__file__).parent.parent
-        full_path = script_dir / script_path.replace('.github/scripts/', '').replace('github/scripts/', '')
-    else:
-        # Script is at project root (like generate_manifest.py)
-        full_path = project_root / script_path
+    # Build full path: scripts_dir + script_path
+    full_path = scripts_dir / script_path
 
     cmd = ['python3', str(full_path)]
 
