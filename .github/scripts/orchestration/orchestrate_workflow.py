@@ -80,7 +80,16 @@ def run_script(script_path: str, **kwargs) -> dict:
             result.returncode, cmd, result.stdout, result.stderr
         )
 
-    return json.loads(result.stdout) if result.stdout else {}
+    # Try to parse as JSON, but some scripts (like generate_manifest.py) don't output JSON
+    if result.stdout:
+        try:
+            return json.loads(result.stdout)
+        except json.JSONDecodeError:
+            # Script doesn't output JSON (e.g., generate_manifest.py just prints messages)
+            # Return success indicator
+            return {"success": True, "output": result.stdout}
+    
+    return {}
 
 
 def git_commit_and_push(message: str, files: list = None) -> bool:
