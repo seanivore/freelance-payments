@@ -9,7 +9,7 @@ on:
       - freelance-payments
     paths:
       - "assets/jobs/*.json"
-      - "generate_manifest.py"
+      - ".github/scripts/generate_manifest.py"
   workflow_dispatch:
     inputs:
       action:

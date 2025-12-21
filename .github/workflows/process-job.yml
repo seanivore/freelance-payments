@@ -9,7 +9,7 @@ on:
       - freelance-payments # Update to your branch name
     paths:
       - "assets/jobs/*.json"
-      - "generate_manifest.py"
+      - ".github/scripts/generate_manifest.py"
   workflow_dispatch:
     inputs:
       job_id:
@@ -61,7 +61,7 @@ jobs:
       # === MANIFEST GENERATION (only on push) ===
       - name: Generate manifest
         if: github.event_name == 'push'
-        run: python3 generate_manifest.py
+        run: python3 .github/scripts/generate_manifest.py
 
       - name: Check for manifest changes
         if: github.event_name == 'push'

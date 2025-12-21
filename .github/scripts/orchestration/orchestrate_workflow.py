@@ -48,7 +48,7 @@ def run_script(script_path: str, **kwargs) -> dict:
     Run a Python script and return its JSON output.
 
     Args:
-        script_path: Relative path to script
+        script_path: Relative path to script (from project root or .github/scripts/)
         **kwargs: Arguments to pass to script
 
     Returns:
@@ -57,8 +57,16 @@ def run_script(script_path: str, **kwargs) -> dict:
     Raises:
         subprocess.CalledProcessError: If script fails
     """
-    script_dir = Path(__file__).parent.parent
-    full_path = script_dir / script_path
+    # Get project root (3 levels up from .github/scripts/orchestration/)
+    project_root = Path(__file__).parent.parent.parent
+    
+    # If script_path starts with .github/, use scripts dir; otherwise use project root
+    if script_path.startswith('.github/') or script_path.startswith('github/'):
+        script_dir = Path(__file__).parent.parent
+        full_path = script_dir / script_path.replace('.github/scripts/', '').replace('github/scripts/', '')
+    else:
+        # Script is at project root (like generate_manifest.py)
+        full_path = project_root / script_path
 
     cmd = ['python3', str(full_path)]
 
@@ -67,7 +75,7 @@ def run_script(script_path: str, **kwargs) -> dict:
         if value is not None:
             cmd.append(str(value))
 
-    result = subprocess.run(cmd, capture_output=True, text=True, cwd=Path(__file__).parent.parent.parent)
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=project_root)
 
     if result.returncode != 0:
         raise subprocess.CalledProcessError(
@@ -213,7 +221,7 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
 
         # Step 5: Generate manifest (always at end)
         try:
-            run_script('generate_manifest.py')  # Script is in project root
+            run_script('generate_manifest.py')
             results['steps_run'].append('generate_manifest')
         except subprocess.CalledProcessError as e:
             results['errors'].append(f"generate_manifest failed: {e.stderr}")
