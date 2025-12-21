@@ -36,16 +36,16 @@ module.exports = async (req, res) => {
     const repoOwner = process.env.GITHUB_REPO_OWNER || 'seanivore';
     const repoName = process.env.GITHUB_REPO_NAME || 'freelance-payments';
 
-    // Trigger GitHub Actions workflow_dispatch
-    const workflowId = 'process-job.yml';
+    // Trigger GitHub Actions workflow_dispatch (new orchestrator workflow)
+    const workflowId = 'orchestrate.yml';
     const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`;
 
     const payload = JSON.stringify({
-      ref: 'freelance-payments', // Update to your branch name
+      ref: 'freelance-payments',
       inputs: {
         action: 'sign-contract',
         job_id: job_id,
-        signature_data: JSON.stringify(signature_data),
+        payload: JSON.stringify({ signature_data }), // Wrap in payload for orchestrator
       },
     });
 

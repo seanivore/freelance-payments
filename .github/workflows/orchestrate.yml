@@ -1,0 +1,67 @@
+name: Orchestrate Workflow
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - freelance-payments
+    paths:
+      - "assets/jobs/*.json"
+      - "generate_manifest.py"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action type (sign-contract, update-payment)"
+        required: true
+        type: choice
+        options:
+          - sign-contract
+          - update-payment
+      job_id:
+        description: "Job ID"
+        required: true
+      payload:
+        description: "JSON payload"
+        required: true
+
+jobs:
+  orchestrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # Full history for git diff
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install stripe
+
+      - name: Configure git auto-pull
+        run: |
+          git config pull.rebase true
+          git config push.autoSetupRemote true
+
+      - name: Run orchestrator
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            python3 .github/scripts/orchestration/orchestrate_workflow.py \
+              --trigger push
+          else
+            python3 .github/scripts/orchestration/orchestrate_workflow.py \
+              --trigger workflow_dispatch \
+              --action "${{ github.event.inputs.action }}" \
+              --job-id "${{ github.event.inputs.job_id }}" \
+              --payload '${{ github.event.inputs.payload }}'
+          fi
