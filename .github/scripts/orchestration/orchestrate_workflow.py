@@ -195,6 +195,9 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 if needs_sync:
                     sync_result = run_script('orchestration/sync_catalog.py', jobs_dir='assets/jobs')
                     results['steps_run'].append('sync_catalog')
+                    # Log sync stats for debugging
+                    if sync_result.get('products_created', 0) == 0 and sync_result.get('prices_created', 0) == 0:
+                        results['errors'].append(f"sync_catalog completed but created no products/prices. Stats: {sync_result}")
             except subprocess.CalledProcessError as e:
                 results['errors'].append(f"sync_catalog failed: {e.stderr}")
 
