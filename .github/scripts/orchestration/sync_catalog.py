@@ -120,16 +120,21 @@ def sync_job(job_data: dict) -> dict:
                 'project_keyword': job_data.get('_metadata', {}).get('project_keyword', '')
             }
 
+            print(f"DEBUG: Calling create_product.py for job {job_id}", file=sys.stderr)
             result = call_script(
                 'stripe/product/create_product.py',
                 name=product.get('name', f"Job {job_id}"),
                 description=product.get('description'),
                 metadata=json.dumps(metadata)
             )
+            print(f"DEBUG: create_product.py returned: {result}", file=sys.stderr)
 
             # CRITICAL: Store the returned stripe_product_id (new schema: direct field)
             product_id = result.get('product_id')
+            if not product_id:
+                raise ValueError(f"create_product.py did not return product_id. Result: {result}")
             product['stripe_product_id'] = product_id
+            print(f"DEBUG: Stored product_id: {product_id}", file=sys.stderr)
 
             stats['products_created'] += 1
 
@@ -159,6 +164,7 @@ def sync_job(job_data: dict) -> dict:
                 'payment_number': str(price.get('payment_number'))
             }
 
+            print(f"DEBUG: Calling create_price.py for payment {price.get('payment_number')}", file=sys.stderr)
             result = call_script(
                 'stripe/price/create_price.py',
                 product=product_id,  # Use product_id from above!
@@ -167,10 +173,14 @@ def sync_job(job_data: dict) -> dict:
                 nickname=price.get('nickname'),
                 metadata=json.dumps(metadata)
             )
+            print(f"DEBUG: create_price.py returned: {result}", file=sys.stderr)
 
             # Store the returned stripe_price_id (new schema: direct field)
             new_price_id = result.get('price_id')
+            if not new_price_id:
+                raise ValueError(f"create_price.py did not return price_id. Result: {result}")
             price['stripe_price_id'] = new_price_id
+            print(f"DEBUG: Stored price_id: {new_price_id}", file=sys.stderr)
             price['active'] = True  # New price is active
 
             stats['prices_created'] += 1
@@ -232,7 +242,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
         try:
             print(f"DEBUG: Starting sync for job {job_id}", file=sys.stderr)
             stats = sync_job(job_data)
-            print(f"DEBUG: Sync completed for job {job_id}: {stats}", file=sys.stderr)
+            print(f"DEBUG: Sync completed for job {job_id}. Stats: products_created={stats.get('products_created')}, prices_created={stats.get('prices_created')}, products_modified={stats.get('products_modified')}, prices_archived={stats.get('prices_archived')}", file=sys.stderr)
 
             # Accumulate stats
             for key in stats:
