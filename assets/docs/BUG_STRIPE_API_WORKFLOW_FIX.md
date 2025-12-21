@@ -7,15 +7,17 @@
   3. All issues can be overcome by implementing a grossly simplified workflow logic that handles any Catalog issues 
   4. Simply, we over extremely over engineer right now compared to how the Stripe API and our flag system works 
 
+---
+
 ## Current Workflow Discoveries 
 
 ### Stripe API Dashboard 
 
   * **I suspect that the responses we expected to get from Stripe were buried in chaos**
 
-  - Our Post products, prices, and even Get requests were all successful 
-  - All of the successful calls did receive response 
-  - Simultaneously we had *~20 invalid delete calls every minute* we made a call 
+  + Our Post products, prices, and even Get requests were all successful 
+    - All of the successful calls did receive response 
+    - Simultaneously we had *~20 invalid delete calls every minute* we made a call 
 
   * **Product are in the catalog currently** 
 
@@ -32,48 +34,59 @@
     - According to our python scripts we have responses of 0, 1, and 2 
     - We got 1 which makes sense because deleting products before prices is a validation error 
 
+  * **Mystery becomes, what in the flow is calling delete_product repeatedly?!**
+
+    - The solution provides a more effective complete workaround from whatever was doing it 
+    - And can remove other scripts in question, i.e. the successful catalog objects came from somewhere 
+    - We will even eliminate the need for a 'cleanup_orphans.py' script for now 
+
 ### GitHub Action Summary 
 
   * **The "Process Job & Update Stripe Catalog" workflow from `process-job.yml`**
 
   + There is only one job in the workflow called "process-job" 
-    - First half is smooth 
+  + Commit: 79829df "Test: Trigger workflow to see full Stripe API error details #31" 
+    - First half of the job steps run smoothly 
     - Handle 'Contract Signing' and 'Payment Update' are skipped, as they should be 
+    - Generate manifest `python3 .github/scripts/generate_manifest.py` runs effectively 
+
+  * **First general problem is "Check for manifest changes" using GIT**
+
+  + We don't want to rely on a product like GIT and planned accordingly 
+    - Reason we implemented the sync flag system 
+    - Worked in my little portfolio project, but not for this project 
+  + How to stop this step and method completely are part of the comprehensive, simple solution 
+
+### Next Step "Process Stripe Products" Massive Errors 
+
+  * **The "Run `python3 .github/scripts/process_stripe_products.py`" command**
+
+  + First clue: "📁 Found 0 active job(s) in folder" 
+  + It then makes *~40 Delete calls* to remove Price Objects 
+    - This is again because of buggy GIT usage in the script 
+    - Somehow it was accruing products and they were stacking up from GIT 
+    - Every call fails because "type object 'Price' has no attribute 'delete'"
+  + After every failed DELETE call, it tried to delete the associated Product Object 
+    - Thankfully we'll be able to eliminate this from the flow logic 
+    - It isn't clear how multiple Price Objects for a Product Object could be deleted without an error 
+  + These DELETE Product Object calls did go through to Stripe API 
+    - There are the HUNDREDS of these failed calls 
+    - They must be what bogged down things from communicating the object created details we wanted 
+    - They all fails because they had active Price Objects 
+
+  * **No payments found in assets/jobs/test-single-payment-v2.json** 
+  
+  + Another odd clue it then says: 
+    - 📁 Found 1 job file(s)
+    - ✅ Processed 0 file(s) with Stripe updates
+
+  * **Again, no clue what in the scripts, other than GIT could be the issue, but it doesn't matter** 
+
+---
+
+## Over Engineering Identified As Primary Culprit 
 
 
-
-
-So the first question I have is what in the flow is calling delete_product repeatedly. We should also make sure the "cleanup orphans" makes sense. It says it does prices first -- if it really does then we know it wasn't caused by that. 
-
-Now, in GitHub looking at the "process job" from "Process Job & Update Stripe Catalog - Test: Trigger workflow to see full Stripe API error details #31"
-
-I see that, at least one of the scripts has a place where it uses a git command to look for changes -- in this case check for manifest changes. This is problematic and we implimented the sync flags to create a method that completely avoided using something like GIT at all. It worked in my little portfolio project, but we don't want to rely on a product like that for this wtuff. 
-
-OH HERE WE GO ---  then in that flow it goes to "Process Stripe Products" 
-
-Run python3 .github/scripts/process_stripe_products.py
-  python3 .github/scripts/process_stripe_products.py
-  shell: /usr/bin/bash -e {0}
-  env:
-    pythonLocation: /opt/hostedtoolcache/Python/3.14.2/x64
-    PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.2/x64/lib/pkgconfig
-    Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.2/x64
-    Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.2/x64
-    Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.2/x64
-    LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.2/x64/lib
-    STRIPE_SECRET_KEY: ***
-📁 Found 0 active job(s) in folder
-
-it found zero active jobs in the folder !! 
-
-THEN it tries to use a delete call for the objects -- SO MANY in the list -- and it fails for all of them because "type object 'Price' has no attribute 'delete'" and after every one of those fails, it tries to make a call to delete the product which does go through but obviously fails. 
-
-After all of those, of which there are many, it says: 
-
-📁 Found 1 job file(s)
-No payments found in assets/jobs/test-single-payment-v2.json
-
-✅ Processed 0 file(s) with Stripe updates
 
 -----
 
