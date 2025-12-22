@@ -204,3 +204,27 @@ price = stripe.Price.modify(
 
 
 When the price with a matching stripe_price_id is found, the script could then see if the amount on the JSON is the same or different than the 
+
+
+---
+
+## HTML Essentials 
+
+### Favicon Full Collection HTML 
+
+```html 
+<link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
+<link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="Payments" />
+<link rel="manifest" href="/assets/favicon/site.webmanifest" />
+```
+
+### Meta Data & Thumbnail 
+
+```html 
+<title>Payments to Sean August Horvath</title>
+<meta name="description" content="Architect of your digital business needs. Consulting and freelance custom web development, AI and end-to-end automation solutions, social production, viral strategy, user design, digital marketing optimization">
+<meta property="og:image" content="https://raw.githubusercontent.com/seanivore/portfolio/refs/heads/portfolio-seanivore/assets/entries/ai-ux-tool-consulting/img-thumbnail-ai-ux-tool-consulting.webp">
+``` 
