@@ -196,14 +196,490 @@ price = stripe.Price.modify(
 )
 ```
 
+---
+
+## New Job JSON Stripe Setup  
+
+### 1. Create Product 
+
+  + Simple name of service 
+    - Will be active by default 
+    - Description is like "SEO Description" style about the service 
+  + Use the bash `uid` command to provide an ID 
+    - This same ID will be provided for the other elements 
+    - Payment 1 = `uid`-1 
+    - Payment 2 = `uid`-2 
+    - Coupon discount = `uid`-coupon 
+    - Client reference ID (when setting up checkout session) = `uid`-client 
+  + Add the metadata 
+    - For easy reference during rest of setup 
+    - For future understandability 
+  + Metadata keys and values 
+    - login_keyword 
+    - login_name 
+    - service_usd = full cost of service before discount 
+    - total_payments = planned number of payments in contract 
+    - discount_usd = planned discount in contract, if applicable 
+  + "unit_label" = each time they pay, the "get" ... well for a service they're just making a payment 
+
+    ```python
+    import stripe
+    stripe.api_key = "{{TEST_SECRET_KEY}}"
+
+    product = stripe.Product.create(
+      name="Online Shop",
+      active=True,
+      description="Development and launch of website for client company artwork sales and brand story.",
+      id="uid-amx-856",
+      metadata={
+        "login_keyword": "art-store",
+        "login_name": "smith",
+        "service_usd": "$2,000",
+        "total_payments": "2",
+        "discount_usd": "$1,000",
+      },
+      type="service",
+      unit_label="Payment",
+    )
+    ```
+
+  * **API response to successful product creation** 
+
+    + Success response = full product object 
+      - "livemode" should say "true" 
+      - Otherwise everything else should look the same but with created/updated times 
+    + Safely ignored unless it is an error  
+
+```json
+{
+  "id": "uid-amx-856",
+  "object": "product",
+  "active": true,
+  "attributes": [],
+  "created": 1766585456,
+  "default_price": null,
+  "description": "Development and launch of website for client company artwork sales and brand story.",
+  "images": [],
+  "livemode": false,
+  "marketing_features": [],
+  "metadata": {
+    "discount_usd": "$1,000",
+    "login_keyword": "art-store",
+    "login_name": "smith",
+    "service_usd": "$2,000",
+    "total_payments": "2"
+  },
+  "name": "Online Shop",
+  "package_dimensions": null,
+  "shippable": null,
+  "tax_code": null,
+  "type": "service",
+  "unit_label": "Payment",
+  "updated": 1766585456,
+  "url": null
+}
+```
+
+### 2. Create Payments 
+
+  + Currency USD and active = true should be default, add per_unit type 
+  + Add metadata continuing the details in the product object 
+    - payment_number = # of total given in product object 
+    - payment_usd = amount of this payment should include discount 
+    - balance_usd = what is left after payment (included discount below but either way)
+  + "Nickname" = what the client will see when they pay, so something like initial or final payment 
+  + Provide the ID used in product object for "product" 
+  + "unit_amount" is payment amount in pennies 
+  + Include `id="uid-xxx-xxx-1` or `-2` to represent payment number associated with the same product UID ID 
+
+```python 
+import stripe
+stripe.api_key = "{{TEST_SECRET_KEY}}"
+
+price = stripe.Price.create(
+  currency="usd",
+  active=True,
+  billing_scheme="per_unit",
+  metadata={"payment_number": "1", "payment_usd": "$1,500", "balance_usd": "$500"},
+  nickname="Initial Payment",
+  product="uid-amx-856",
+  id="uid-amx-856-1",
+  unit_amount=150000,
+)
+```
+  * **API response to successful price object creation** 
+
+    + Again successful response is the object sent back 
+    + Ignore unless it is an error 
+
+```json 
+{
+  "id": "uid-amx-856-1",
+  "object": "price",
+  "active": true,
+  "billing_scheme": "per_unit",
+  "created": 1766585859,
+  "currency": "usd",
+  "custom_unit_amount": null,
+  "livemode": false,
+  "lookup_key": null,
+  "metadata": {
+    "balance_usd": "$500",
+    "payment_number": "1",
+    "payment_usd": "$1,500"
+  },
+  "nickname": "Initial Payment",
+  "product": "uid-amx-856",
+  "recurring": null,
+  "tax_behavior": "unspecified",
+  "tiers_mode": null,
+  "transform_quantity": null,
+  "type": "one_time",
+  "unit_amount": 150000,
+  "unit_amount_decimal": "150000"
+}
+``` 
+
+  * **Create second, final, payment object in same with adjustments**
+
+```python
+import stripe
+stripe.api_key = "{{TEST_SECRET_KEY}}"
+
+price = stripe.Price.create(
+  currency="usd",
+  active=True,
+  billing_scheme="per_unit",
+  metadata={
+    "payment_number": "2",
+    "payment_usd": "$500",
+    "balance_usd": "$0 after discount",
+  },
+  nickname="Final Payment",
+  product="uid-amx-856",
+  id="uid-amx-856-2",
+  unit_amount=50000,
+)
+```
+
+  * **Response is object, and id was labeled correctly = all good** 
+
+```json
+{
+  "id": "uid-amx-856-2",
+  "object": "price",
+  "active": true,
+  "billing_scheme": "per_unit",
+  "created": 1766586240,
+  "currency": "usd",
+  "custom_unit_amount": null,
+  "livemode": false,
+  "lookup_key": null,
+  "metadata": {
+    "balance_usd": "$0 after discount",
+    "payment_number": "2",
+    "payment_usd": "$500"
+  },
+  "nickname": "Final Payment",
+  "product": "uid-amx-856",
+  "recurring": null,
+  "tax_behavior": "unspecified",
+  "tiers_mode": null,
+  "transform_quantity": null,
+  "type": "one_time",
+  "unit_amount": 50000,
+  "unit_amount_decimal": "50000"
+}
+```
+
+### 3. Create Coupon Discount 
+
+  + One time usage that applies to the specific product created 
+    - Create random "name" that client will see 
+    - Again, the amount is in pennies so 100000 = $1,000 
+  + Make sure to use the SAME `uid` as the Product Object with `-coupon` for the ID 
+
+```python 
+import stripe
+stripe.api_key = "{{TEST_SECRET_KEY}}"
+
+coupon = stripe.Coupon.create(
+  amount_off=100000,
+  applies_to={"products": ["uid-amx-856"]},
+  currency="usd",
+  duration="once",
+  id="uid-amx-856-coupon",
+  max_redemptions=1,
+  name="HAPPY-NEW-YEAR",
+)
+```
+  * **API response to coupon discount object creation** 
+
+  + As always with stripe, if you get the actual object back, it worked 
+  + Ignore unless it returns an error 
+
+```json
+{
+  "id": "uid-amx-856-coupon",
+  "object": "coupon",
+  "amount_off": 100000,
+  "created": 1766586458,
+  "currency": "usd",
+  "duration": "once",
+  "duration_in_months": null,
+  "livemode": false,
+  "max_redemptions": 1,
+  "metadata": {},
+  "name": "HAPPY-NEW-YEAR",
+  "percent_off": null,
+  "redeem_by": null,
+  "script": null,
+  "times_redeemed": 0,
+  "type": "amount_off",
+  "valid": true
+}
+```
+
+### 4. Prepare Payment Checkout Ahead Of Time 
+
+  + Setting up the checkout session ahead of time 
+    - The checkout.session id would need to be saved in JSON 
+    - Then when user logs-in, use `stripe checkout sessions retrieve --id="cs_..."  
+  + Adding discounts 
+    - Note that this is created ahead of time to add the coupon to the line items 
+    - Allow_promotion_codes is left off because the client doesn't put it in 
+  + Many other fields, shown in response object, could and should be filled out 
+    - Let's review and see which we should be using 
+    - And assess creating ahead of time versus giving client the discount code to use 
+    - Branding settings — see if defaults can be set up
+  + Not sure what the **client secret** is all about but seems important 
+  + We should also look at setting up taxes to be included 
+  + It doesn't appear overwhelmingly complicated to create the session on the fly 
+    - No sure if it means the checkout page with line items would lag or not 
+    - If we pull them up on the fly then we have to remember coupon or give to them 
+
+```python
+import stripe
+stripe.api_key = "{{TEST_SECRET_KEY}}"
+
+session = stripe.checkout.Session.create(
+  client_reference_id="uid-amx-856-client",
+  currency="usd",
+  customer_creation="always",
+  discounts=[{"coupon": "uid-amx-856-coupon"}],
+  line_items=[{"price": "uid-amx-856-1", "quantity": 1}],
+  mode="payment",
+  return_url="https://payments.august.style/payment-success.html",
+  submit_type="pay",
+  ui_mode="embedded",
+)
+```
+  * **API response confirming session created** 
+
+```json 
+{
+  "id": "cs_test_a1Ha56WztK7GrOLUJFRAx89BbKMvyv8BYMASk68qfrWxu1AKIiSJlgTJGG",
+  "object": "checkout.session",
+  "adaptive_pricing": {
+    "enabled": true
+  },
+  "after_expiration": null,
+  "allow_promotion_codes": null,
+  "amount_subtotal": 150000,
+  "amount_total": 50000,
+  "automatic_tax": {
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "billing_address_collection": null,
+  "branding_settings": {
+    "background_color": "#ffffff",
+    "border_style": "rounded",
+    "button_color": "#0074d4",
+    "display_name": "Sean August Horvath sandbox",
+    "font_family": "default",
+    "icon": null,
+    "logo": null
+  },
+  "cancel_url": null,
+  "client_reference_id": "uid-amx-856-client",
+  "client_secret": "cs_test_a1Ha56WztK7GrOLUJFRAx89BbKMvyv8BYMASk68qfrWxu1AKIiSJlgTJGG_secret_fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdkdWxOYHwnPyd1blpxYHZxWjA0VmdvbWI8Y2lvck03M0ZVbjBVVE5jcXVIZFNUMkEybkxNNko2cVxTQENWbkp%2FU2F0TDBBUnFRMkBIZk9BUHRUSU5AYkxqdn0ydDFrY2Jvd0c0TkhjPTA0NTVSdnBSQ05LdycpJ3BsSGphYCc%2FJ2BoZ2BhYWBhJyknaWR8anBxUXx1YCc%2FJ3Zsa2JpYFpscWBoJyknd2BhbHdgZnFKa0ZqaHVpYHFsamsnPydkaXJkfHYnKSdnZGZuYndqcGthRmppancnPycmY2NjY2NjJ3gl",
+  "collected_information": null,
+  "consent": null,
+  "consent_collection": null,
+  "created": 1766586691,
+  "currency": "usd",
+  "currency_conversion": null,
+  "custom_fields": [],
+  "custom_text": {
+    "after_submit": null,
+    "shipping_address": null,
+    "submit": null,
+    "terms_of_service_acceptance": null
+  },
+  "customer": null,
+  "customer_account": null,
+  "customer_creation": "always",
+  "customer_details": null,
+  "customer_email": null,
+  "discounts": [
+    {
+      "coupon": "uid-amx-856-coupon",
+      "promotion_code": null
+    }
+  ],
+  "expires_at": 1766673091,
+  "invoice": null,
+  "invoice_creation": {
+    "enabled": false,
+    "invoice_data": {
+      "account_tax_ids": null,
+      "custom_fields": null,
+      "description": null,
+      "footer": null,
+      "issuer": null,
+      "metadata": {},
+      "rendering_options": null
+    }
+  },
+  "livemode": false,
+  "locale": null,
+  "metadata": {},
+  "mode": "payment",
+  "origin_context": null,
+  "payment_intent": null,
+  "payment_link": null,
+  "payment_method_collection": "if_required",
+  "payment_method_configuration_details": {
+    "id": "pmc_1SbjiE9fljwH26CPmMKxs5qZ",
+    "parent": null
+  },
+  "payment_method_options": {
+    "affirm": {},
+    "card": {
+      "request_three_d_secure": "automatic"
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "klarna",
+    "link",
+    "affirm",
+    "cashapp",
+    "amazon_pay"
+  ],
+  "payment_status": "unpaid",
+  "permissions": null,
+  "phone_number_collection": {
+    "enabled": false
+  },
+  "recovered_from": null,
+  "redirect_on_completion": "always",
+  "return_url": "https://payments.august.style/payment-success.html",
+  "saved_payment_method_options": {
+    "allow_redisplay_filters": [
+      "always"
+    ],
+    "payment_method_remove": "disabled",
+    "payment_method_save": null
+  },
+  "setup_intent": null,
+  "shipping_address_collection": null,
+  "shipping_cost": null,
+  "shipping_options": [],
+  "status": "open",
+  "submit_type": "pay",
+  "subscription": null,
+  "success_url": null,
+  "total_details": {
+    "amount_discount": 100000,
+    "amount_shipping": 0,
+    "amount_tax": 0
+  },
+  "ui_mode": "embedded",
+  "url": null,
+  "wallet_options": null
+}
+```
 
 
 
------
+---
+
+### Payment Intent Event 
+
+I see the following on `assets/js/checkout-controller.js` 
+
+```js
+  /**
+   * Create PaymentIntent via serverless function
+   * Uses stripe_price_id from JSON to ensure correct payment amount
+   * 
+   * Flow: Frontend → Serverless Function → Stripe API → Returns client_secret
+   */
+  async function createPaymentIntent(jobData, price) {
+    // Vercel API endpoint (backend serverless functions)
+    // Frontend is on GitHub Pages, API is on Vercel
+    const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-payment-intent';
+``` 
+
+And I do remember originally saying we'd need the serverless function for frontend triggered "signed contract" or just "viewed but didn't sign contract" — since both of those would be needed for state management if they left and came back after either of those it would know to route them to payment-1 or to the contract to sign it. 
+
+But I noticed information about payment intent messages and webhooks when running a test payment. We have two webhook events set up but maybe we want to look at these others we could add. 
+
+We currently have these two 
+
+  - `payment_intent.payment_failed`
+  - `payment_intent.succeeded`
+
+I searched just "payment_intent" and there are all these other options
+
+  - `payment_intent.amount_capturable_updated` 
+  Occurs when a *Paymentintent* has funds to be captured. Check the *amount_capturable* property on the *PaymentIntent* to determine the amount that can be captured. You may capture the *PaymentIntent* with an *amount_to_capture* value up to the specified amount. Learn more about capturing *Paymentintents*.
+  - `payment_intent.canceled`
+  Occurs when a *PaymentIntent* is canceled.
+  - `payment_intent.created`
+  Occurs when a new *Paymentintent* is created.
+  - `payment_intent.partially_funded`
+  Occurs when funds are applied to a *customer_balance* *Paymentintent* and the *amount_remaining* changes. 
+  - `payment_intent.payment_failed`
+  Occurs when a *PaymentIntent* has failed the attempt to create a payment method or a payment.
+  - `payment_intent.processing`
+  Occurs when a *PaymentIntent* has started processing.
+  - `payment_intent.requires_action`
+  Occurs when a *Paymentintent* transitions to *requires_action* state
+  - `payment_intent.succeeded`
+  Occurs when a *PaymentIntent* has successfully completed payment.
+
+Seems like we should probably use as many events straight from/in Stripe as possible, right? Wdyt? 
+
+---
+
+# Set your secret key. Remember to switch to your live secret key in production.
+# See your keys here: https://dashboard.stripe.com/apikeys
+import stripe
+stripe.api_key = "{{TEST_SECRET_KEY}}"
+
+session = stripe.checkout.Session.create(
+  allow_promotion_codes=True,
+  automatic_tax={"enabled": True},
+  billing_address_collection="auto",
+  currency="usd",
+  customer_creation="always",
+  discounts=[{"coupon": "uid-hpb-145-d"}],
+  line_items=[{"price": "uid-hpb-145-2", "quantity": 1}],
+  mode="payment",
+  name_collection={
+    "business": {"enabled": True, "optional": True},
+    "individual": {"enabled": True, "optional": True},
+  },
+  ui_mode="embedded",
+  submit_type="pay",
+)
 
 
-
-When the price with a matching stripe_price_id is found, the script could then see if the amount on the JSON is the same or different than the 
 
 
 ---
@@ -226,5 +702,5 @@ When the price with a matching stripe_price_id is found, the script could then s
 ```html 
 <title>Payments to Sean August Horvath</title>
 <meta name="description" content="Architect of your digital business needs. Consulting and freelance custom web development, AI and end-to-end automation solutions, social production, viral strategy, user design, digital marketing optimization">
-<meta property="og:image" content="https://raw.githubusercontent.com/seanivore/portfolio/refs/heads/portfolio-seanivore/assets/entries/ai-ux-tool-consulting/img-thumbnail-ai-ux-tool-consulting.webp">
+<meta property="og:image" content="https://raw.githubusercontent.com/seanivore/freelance-payments/refs/heads/freelance-payments/assets/media/thumbnail-image-bauhaus-banking.webp">
 ``` 
