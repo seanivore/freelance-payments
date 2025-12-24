@@ -7,6 +7,13 @@
   3. All issues can be overcome by implementing a grossly simplified workflow logic that handles any Catalog issues 
   4. Simply, we over extremely over engineer right now compared to how the Stripe API and our flag system works 
 
+### Jump Through (1) Discovery, (2) Solution, (3) Implementation Specifics, (4) Simplest Automation Cycle Map Ever 
+
+  - What was [going wrong](#current-workflow-discoveries)
+  - A much easier way [to fix everything](#new-script--workflows)
+  - Step-by-step API Stripe Object [creation guide](#job-json-stripe-setup)
+  - 9-step flow breakdown showing 2-distinct [automation cycle start-to-end](#comprehensive-flow-breakdown) 
+
 ---
 
 ## Current Workflow Discoveries 
@@ -88,9 +95,7 @@
     - However it is unclear how that script would have handled different files with different number of changes 
   + In the end though, no changes meant no new page build, no push deployed 
 
----
-
-## Over Engineering Identified As Primary Culprit 
+### Over Engineering Identified As Primary Culprit 
 
   * **Our solution was actually already planned** 
    
@@ -123,84 +128,215 @@
     - No new price allowed but all other field updates permitted? OH WELL, just always make a new one 
     - Use the action response as opportunity to reset our wildly simple solution 
 
-### Making Super Simple More Robust 
+---
 
-  * **We've come full circle from creating the method to rehashing it for a reason**
+*Sneak this in here* 
 
-  + Now we're going to make it even more all encompassing 
-    - No need for a handful of types of Stripe API call scripts 
-    - One-size, or solution, fits all is the way to go 
-  
-  * **Two options, both simple** 
+## Forgotten HTML Essentials 
 
-  + Price Object updates can edit any field except the amount 
-  1. We could accommodate their versatility, if it benefits us 
-    - `"sync": "price change"`
-    - `"sync": "new"` 
-    - `"sync": "update"` or delete or archive, etc. 
-  2. Or we could not care and just over write everything no matter what 
+### Favicon Full Collection HTML 
 
-  * **Product update**
-
-    - Include all fields and change only any needed 
-    - Or don't and the field doesn't change 
-
-  * **Price update**
-
-    + Include all fields with any changes 
-    + Ignore the price stipulations 
-      - ALWAYS ARCHIVE 
-      - NEVER UPDATE 
-    + Then ALWAYS CREATE 
-      - Make a new Price Object 
-      - Never worry about scripts to check price difference 
-
-### Broadening The Simplicity By Eliminating Unnecessary 
-
-  * **Deleting is overly complicated; let's just always archive**
-
-    - Archive is simple field change to `"active": false` for any Stripe catalog object 
-    - Delete `cleanup_orphans.py` 
-
-GET 
-/v1/products
-
-import stripe
-stripe.api_key = "sk_test_...g"
-
-products = stripe.Product.list(limit=3)
-
-
-  + DELETE THESE SCRIPTS 
-    - archive_price.py
-    - delete_price.py
-    - list_prices.py 
-    - archive_product.py 
-    - delete_product.py 
-    - list_product.py 
-
-  + KEEP OR CREATE THESE SCRIPTS 
-    - create_price.py 
-    - modify_price.py 
-    - create_product.py 
-    - modify_product.py 
-
-```python 
-POST /v1/prices/:id
-
-import stripe
-stripe.api_key = "sk_test_..."
-price = stripe.Price.modify(
-  "price_1MoBy5LkdIwHu7ixZhnattbh",
-  metadata={"order_id": "6735"},
-)
+```html 
+<link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
+<link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="Payments" />
+<link rel="manifest" href="/assets/favicon/site.webmanifest" />
 ```
+
+### Meta Data & Thumbnail 
+
+```html 
+<title>Payments to Sean August Horvath</title>
+<meta name="description" content="Architect of your digital business needs. Consulting and freelance custom web development, AI and end-to-end automation solutions, social production, viral strategy, user design, digital marketing optimization">
+<meta property="og:image" content="https://raw.githubusercontent.com/seanivore/freelance-payments/refs/heads/freelance-payments/assets/media/thumbnail-image-bauhaus-banking.webp">
+``` 
+
+*Now, back to business* 
 
 ---
 
-## New Job JSON Stripe Setup  
+## New Script & Workflows 
 
-### 1. Create Product 
+  --> [STATE MANAGEMENT FOR USER FLOW & TRIGGER IDS](#create-state-management-section-on-json)
+  --> [JOB JSON STRIPE SETUP STEPS](#job-json-stripe-setup)
+  --> [COMPREHENSIVE FLOW BREAKDOWN](#comprehensive-flow-breakdown)
+
+### We Don't Even Need "SYNC'ed" Value 
+
+  * **After preparing the JOB JSON STRIPE SETUP STEPS (API walkthrough) below, I'm not sure we need "synced", it just seems complicated** 
+
+  + Unnecessary scripts 
+    - Create and Update might be the only scripts absolutely needed 
+    - Eliminate "delete" logic in every case; always opt to archive, which is "modify" anyway 
+    - e.g. breakdown of `archive_price.py`, `modify_product.py`, `create...`, `delete...` is excessive 
+  + Remove any stress over keeping a perfect Stripe Catalog 
+    - All that matters is that when it goes to pull up the client's payments it is accurate 
+    - No need for excessive `cleanup_orphans.py` or `orchestrate_workflow.py` or `sync_payment.py` 
+  + Keep old manifest, compare to directory, make all updates, end with manifest new copy creation 
+    - Gather the filenames from JSON directory (which are the same as the product ID)  
+    - Manifest should be each job's product ID, then login-keyword and login-name 
+    - Matching ID (`uid-xxx-xxx`) in directory and JSON? If active=false, archive. If active=true, ignore. 
+    - Archiving? Run the simple bash `stripe products update uid-xxx-xxx --active=false` 
+  + Creating Job Stripe OBJECTS and CHECKOUT SESSION 
+    - Add the product, all prices, coupon, and can even create checkout session IMMEDIATELY 
+    - Only after creating in Stripe is successful, then batched JSON updates with ID numbers, etc., THEN create new manifest 
+
+### Create "State Management" Section On JSON 
+
+  * **To tell payments website what page or payment to load for the client**
+
+    - "initial_payment_intent" is "succeeded" --> User visiting `payments.august.style` --> checkout_session for "uid-xxx-xxx-2" 
+    - "client_status" is "logged_in" --> next login to `payments.august.style` --> shows welcome back instead of onboarding 
+    - "client_status" viewed both docs and downloaded --> next `payments.august.style` login --> straight to page anchor for signing 
+
+  * **Each sub-section represents an event's trigger that starts an automation's action** 
+
+    - state_management.object's all come from API completion confirmation response 
+    - user behavior on the frontend of the website notifies Vercel endpoints that activate GitHub Actions for JSON updates 
+    - all payment_intent represent Stripe webhooks caught by Vercel that activate JSON updating GitHub Actions 
+
+```json
+{
+"state_management": {
+  "object": {                 // API response details collected, queued in time-delayed GitHub Action; manifest updated only after JSON updates 
+    "created": 2026-01-02,    // null | DATE ... all objects created together on
+    "product": "uid-xxx-xxx", // We provide ID in job's single product object create API call 
+    "price": [                // array to add object ID for each ... informs payment count logic
+      "uid-xxx-xxx-1", 
+      "uid-xxx-xxx-2"
+    ],
+    "coupon": "uid-xxx-xxx-coupon", // null or include ID we provide when creating job's single coupon object 
+    "checkout_session": [           // one for each product price representing payment count 
+      "cs_test_a1Ha56WztK7GrOLUJFRAx89BbKMvyv8BYMASk68qfrWxu1AKIiSJlgTJGG",
+      "cs_test_a1n62RmIax5Djhyz0PmAo4RfNMHYK5xFJlgS9MZtdPYbdF3Uf7mBYhgJes"
+    ],
+  },
+  "client_status": {              // Frontend event notifies serverless Vercel endpoint, activating GitHub Action to update status 
+    "logged_in": 2026-01-03,      // null | DATE ... show "welcome back" versus onboarding next login 
+    "viewed_contract": true,      // false | true ... if contract scrolled to end, next login direct to invoice 
+    "viewed_invoice": true,       // false | true ... if invoice loaded, next login can jump to page anchor for signing and PDF download 
+    "downloaded_docs": 0,         // count clicks on contract and invoice PDF download button 
+    "signed_contract": 2026-01-05 // null | DATE ... navigate user to next payment using `stripe checkout sessions retrieve cs_...`
+  },
+  "initial_payment_intent": {   // Stripe webhook event caught by Vercel, activates GitHub Action to update these dates
+    "created": 2026-01-04,      // null | DATE 
+    "processing": 2026-01-05,   // null | DATE 
+    "succeeded": 2026-01-06     // null | DATE ... set `initial_payment.active=false`and use second `stripe checkout sessions retrieve cs_...`
+  },
+  "balance_payment_intent": {
+    "created": null,      // null | DATE 
+    "processing": null,   // null | DATE 
+    "succeeded": null     // null | DATE ... then update payment 2 `balance_payment.active=false` and `product_object.active=false` 
+  }
+}
+}
+```
+
+### Update Payment Intent Events 
+
+I see the following on `assets/js/checkout-controller.js` 
+
+```js
+  /**
+   * Create PaymentIntent via serverless function
+   * Uses stripe_price_id from JSON to ensure correct payment amount
+   * 
+   * Flow: Frontend → Serverless Function → Stripe API → Returns client_secret
+   */
+  async function createPaymentIntent(jobData, price) {
+    // Vercel API endpoint (backend serverless functions)
+    // Frontend is on GitHub Pages, API is on Vercel
+    const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-payment-intent';
+``` 
+
+And I do remember originally saying we'd need the serverless function for frontend triggered "signed contract" or just "viewed but didn't sign contract" — since both of those would be needed for state management if they left and came back after either of those it would know to route them to payment-1 or to the contract to sign it. 
+
+But I noticed information about payment intent messages and webhooks when running a test payment. We have two webhook events set up but maybe we want to look at these others we could add. 
+
+We currently have two, but these are the other options. Seems like we should probably use as many events straight from/in Stripe as possible, right? Wdyt? 
+
+  - `payment_intent.canceled`
+  Occurs when a *PaymentIntent* is canceled.
+  - `payment_intent.created` --> **ALREADY ON**
+  Occurs when a new *Paymentintent* is created.
+  - `payment_intent.processing`
+  Occurs when a *PaymentIntent* has started processing.
+  - `payment_intent.requires_action`
+  Occurs when a *Paymentintent* transitions to *requires_action* state
+  - `payment_intent.succeeded` --> **ALREADY ON**
+  Occurs when a *PaymentIntent* has successfully completed payment.
+
+---
+
+## Job JSON Stripe Setup 
+
+  * **Step 1:** [Review all the job JSON filenames](#1-collect-job-json-directory-ids)
+  * **Step 2:** [Archive the inactive JSON files you found](#2-run-simple-archive-command)
+  * **Step 3:** [Jobs get a series of Stripe "objects"](#3-create-jobs-stripe-object-series)
+  * **Step 4:** [Every job gets one Product Object](#4-create-product)
+  * **Step 5:** [Create a Price Object for Product's first job payment](#5-create-prices-initial-payment-first)
+  * **Step 6:** [Final balance payment for the Product gets a second Price Object](#6-create-final-balance-payment-price-object)
+  * **Step 7:** [If there is a discount, create a Coupon Object for the Product](#7-create-coupon-discount)
+  * **Step 8:** [Create a Checkout Object for the first Payment Object and Coupon Object](#8-prepare-initial-checkout-ahead-of-time)
+  * **Step 9:** [Create second Checkout Object for balance payment Price Object](#9-prepare-final-balance-checkout-ahead-of-time)
+  * **[COMPREHENSIVE FLOW BREAKDOWN](#comprehensive-flow-breakdown)**
+
+### 1. Collect Job JSON Directory IDs 
+[top](#job-json-stripe-setup)
+
+  + Commit is PUSHED to Git with **ANY** change to `assets/jobs/...` directory
+    - Big or small change, it doesn't matter what was changed or where, only that something was; keep it simple 
+    - Gather JSON file names which are their Stripe `product_object.id`, the `uid-xxx-xxx` number 
+    - Identify ID numbers that are on the `assets/js/manifest.json` list and those that are not 
+
+    * **Keep a list of filenames not on the list for OBJECT CREATION** 
+
+  + There will be two types of JSON files identified as already being on `assets/js/manifest.json`
+    1. Ignore the filenames already on the list with `product_object.active=true` 
+    2. Identify filenames already on the list that have the `product_object.active=false` value 
+
+    * **Keep the files with `false` to run through a quick PRODUCT OBJECT ARCHIVE**
+  
+### 2. Run Simple Archive Command 
+[top](#job-json-stripe-setup)
+
+  + Use quick BASH command or python stripe.Product.modify() API call 
+    - Add the filename, which is the same as the `product_object.id` directly after `stripe` `api resource` `operation` 
+    - Add the argument/flag `--active="false"` 
+  + Ignore Price Objects and Coupons associated with the Product Object 
+    - You just made their product inactive 
+    - The products associated resources automatically become inactive, too
+  + Stripe keeps all inactive objects, of any kind, **INDEFINITELY** because they're amazing at record-keeping; no deleting ever 
+
+```bash
+stripe products update uid-xxx-xxx --active="false"
+```
+
+```python
+product = stripe.Product.modify(
+  "uid-xxx-xxx",
+  active=False,
+)
+```
+
+### 3. Create Job's Stripe Object Series 
+[top](#job-json-stripe-setup)
+
+  * **All the filenames that weren't already on `assets/js/manifest.json` now go through these steps** 
+
+  + New job JSON files are only added to the manifest **AFTER** creating their objects 
+    - This prevents errors 
+    - Ensures only fully ready to go jobs are accessible from the front end 
+  + Every JOB gets a single JSON file, which in Stripe get a few "OBJECTS" 
+    1. PRODUCT OBJECT: the main information about the client's job 
+    2. INITIAL & BALANCE PRICE OBJECT: to sell a product, it gets a "price object"; most jobs have two but only one is needed 
+    4. COUPON OBJECT: if the client is getting a discount, make sure it is on the books; include the amount in the first price object 
+    5. CHECKOUT SESSION OBJECT: create one of these for each price object 
+
+### 4. Create Product 
+[top](#job-json-stripe-setup)
 
   + Simple name of service 
     - Will be active by default 
@@ -280,7 +416,8 @@ price = stripe.Price.modify(
 }
 ```
 
-### 2. Create Payments 
+### 5. Create Prices: Initial Payment First 
+[top](#job-json-stripe-setup)
 
   + Currency USD and active = true should be default, add per_unit type 
   + Add metadata continuing the details in the product object 
@@ -340,7 +477,10 @@ price = stripe.Price.create(
 }
 ``` 
 
-  * **Create second, final, payment object in same with adjustments**
+### 6. Create Final, Balance Payment Price Object 
+[top](#job-json-stripe-setup)
+
+  * **Created the same way, with the remaining balance, and no discount, using `uid-xxx-xxx-2`**
 
 ```python
 import stripe
@@ -392,7 +532,8 @@ price = stripe.Price.create(
 }
 ```
 
-### 3. Create Coupon Discount 
+### 7. Create Coupon Discount 
+[top](#job-json-stripe-setup)
 
   + One time usage that applies to the specific product created 
     - Create random "name" that client will see 
@@ -440,23 +581,19 @@ coupon = stripe.Coupon.create(
 }
 ```
 
-### 4. Prepare Payment Checkout Ahead Of Time 
+### 8. Prepare Initial Checkout Ahead Of Time 
+[top](#job-json-stripe-setup)
 
-  + Setting up the checkout session ahead of time 
-    - The checkout.session id would need to be saved in JSON 
-    - Then when user logs-in, use `stripe checkout sessions retrieve --id="cs_..."  
-  + Adding discounts 
-    - Note that this is created ahead of time to add the coupon to the line items 
-    - Allow_promotion_codes is left off because the client doesn't put it in 
-  + Many other fields, shown in response object, could and should be filled out 
-    - Let's review and see which we should be using 
-    - And assess creating ahead of time versus giving client the discount code to use 
-    - Branding settings — see if defaults can be set up
-  + Not sure what the **client secret** is all about but seems important 
-  + We should also look at setting up taxes to be included 
-  + It doesn't appear overwhelmingly complicated to create the session on the fly 
-    - No sure if it means the checkout page with line items would lag or not 
-    - If we pull them up on the fly then we have to remember coupon or give to them 
+  + Successful response will be checkout.session object 
+    - Must save checkout.session's `id` to JSON 
+    - User login finds JSON and loads proper line-item checkout based on state_management 
+  + Make sure the FIRST checkout uses the FULL service cost and discount 
+  + Client Secret if needed is provided in response confirmation 
+  + Branding 
+    - Cant use a logo or icon for embedded check out type 
+    - I didn't add other details in example below 
+    - I did add details in balance payment example down further 
+    - This should be carefully filled in IRL to match site 
 
 ```python
 import stripe
@@ -603,104 +740,214 @@ session = stripe.checkout.Session.create(
   "wallet_options": null
 }
 ```
+### 9. Prepare Final Balance Checkout Ahead Of Time 
+[top](#job-json-stripe-setup)
 
+  + Create using second Price Objects with different ID
 
-
----
-
-### Payment Intent Event 
-
-I see the following on `assets/js/checkout-controller.js` 
-
-```js
-  /**
-   * Create PaymentIntent via serverless function
-   * Uses stripe_price_id from JSON to ensure correct payment amount
-   * 
-   * Flow: Frontend → Serverless Function → Stripe API → Returns client_secret
-   */
-  async function createPaymentIntent(jobData, price) {
-    // Vercel API endpoint (backend serverless functions)
-    // Frontend is on GitHub Pages, API is on Vercel
-    const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-payment-intent';
-``` 
-
-And I do remember originally saying we'd need the serverless function for frontend triggered "signed contract" or just "viewed but didn't sign contract" — since both of those would be needed for state management if they left and came back after either of those it would know to route them to payment-1 or to the contract to sign it. 
-
-But I noticed information about payment intent messages and webhooks when running a test payment. We have two webhook events set up but maybe we want to look at these others we could add. 
-
-We currently have these two 
-
-  - `payment_intent.payment_failed`
-  - `payment_intent.succeeded`
-
-I searched just "payment_intent" and there are all these other options
-
-  - `payment_intent.amount_capturable_updated` 
-  Occurs when a *Paymentintent* has funds to be captured. Check the *amount_capturable* property on the *PaymentIntent* to determine the amount that can be captured. You may capture the *PaymentIntent* with an *amount_to_capture* value up to the specified amount. Learn more about capturing *Paymentintents*.
-  - `payment_intent.canceled`
-  Occurs when a *PaymentIntent* is canceled.
-  - `payment_intent.created`
-  Occurs when a new *Paymentintent* is created.
-  - `payment_intent.partially_funded`
-  Occurs when funds are applied to a *customer_balance* *Paymentintent* and the *amount_remaining* changes. 
-  - `payment_intent.payment_failed`
-  Occurs when a *PaymentIntent* has failed the attempt to create a payment method or a payment.
-  - `payment_intent.processing`
-  Occurs when a *PaymentIntent* has started processing.
-  - `payment_intent.requires_action`
-  Occurs when a *Paymentintent* transitions to *requires_action* state
-  - `payment_intent.succeeded`
-  Occurs when a *PaymentIntent* has successfully completed payment.
-
-Seems like we should probably use as many events straight from/in Stripe as possible, right? Wdyt? 
-
----
-
-# Set your secret key. Remember to switch to your live secret key in production.
-# See your keys here: https://dashboard.stripe.com/apikeys
+```python 
 import stripe
 stripe.api_key = "{{TEST_SECRET_KEY}}"
 
 session = stripe.checkout.Session.create(
-  allow_promotion_codes=True,
-  automatic_tax={"enabled": True},
-  billing_address_collection="auto",
+  automatic_tax={"enabled": True, "liability": {"type": "self"}},
+  billing_address_collection="required",
+  branding_settings={
+    "font_family": "noto_sans",
+    "background_color": "#1f1f1f",
+    "border_style": "pill",
+    "button_color": "#9C528B",
+    "display_name": "august.style designs",
+  },
+  client_reference_id="uid-amx-856-client",
   currency="usd",
   customer_creation="always",
-  discounts=[{"coupon": "uid-hpb-145-d"}],
-  line_items=[{"price": "uid-hpb-145-2", "quantity": 1}],
   mode="payment",
-  name_collection={
-    "business": {"enabled": True, "optional": True},
-    "individual": {"enabled": True, "optional": True},
-  },
-  ui_mode="embedded",
+  redirect_on_completion="always",
+  return_url="https://payments.august.style/payment-success.html",
   submit_type="pay",
+  ui_mode="embedded",
+  custom_text={"after_submit": {"message": "Time to create magic 💎"}},
+  line_items=[{"price": "uid-amx-856-2", "quantity": 1}],
+  name_collection={
+    "individual": {"enabled": True},
+    "business": {"enabled": True, "optional": True},
+  },
 )
+```
+```bash
+stripe checkout sessions create --automatic-tax.enabled=true --billing-address-collection="required" --branding-settings.font-family="noto_sans" --branding-settings.background-color="#1f1f1f" --branding-settings.border-style="pill" --branding-settings.button-color="#9C528B" --branding-settings.display-name="august.style designs" --client-reference-id="uid-amx-856-client" --currency="usd" --customer-creation="always" --mode="payment" --redirect-on-completion="always" --return-url="https://payments.august.style/payment-success.html" --submit-type="pay" --ui-mode="embedded" -d "automatic_tax[liability][type]=self" -d "custom_text[after_submit][message]=Time to create magic 💎" -d "line_items[0][price]=uid-amx-856-2" -d "line_items[0][quantity]=1" -d "name_collection[individual][enabled]=true" -d "name_collection[business][enabled]=true" -d "name_collection[business][optional]=true"
+```
 
-
-
+```json
+{
+  "id": "cs_test_a1n62RmIax5Djhyz0PmAo4RfNMHYK5xFJlgS9MZtdPYbdF3Uf7mBYhgJes",
+  "object": "checkout.session",
+  "adaptive_pricing": {
+    "enabled": true
+  },
+  "after_expiration": null,
+  "allow_promotion_codes": null,
+  "amount_subtotal": 50000,
+  "amount_total": 50000,
+  "automatic_tax": {
+    "enabled": true,
+    "liability": {
+      "type": "self"
+    },
+    "provider": "stripe",
+    "status": "requires_location_inputs"
+  },
+  "billing_address_collection": "required",
+  "branding_settings": {
+    "background_color": "#1f1f1f",
+    "border_style": "pill",
+    "button_color": "#9c528b",
+    "display_name": "august.style designs",
+    "font_family": "noto_sans",
+    "icon": null,
+    "logo": null
+  },
+  "cancel_url": null,
+  "client_reference_id": "uid-amx-856-client",
+  "client_secret": "cs_test_a1n62RmIax5Djhyz0PmAo4RfNMHYK5xFJlgS9MZtdPYbdF3Uf7mBYhgJes_secret_fid1d2BpamRhQ2prcSc%2FJ0tqcWolVmRrdicpJ2dqd2Fgd1ZxfGlgJz8nd2pwa2EnKSdkdWxOYHwnPyd1blpxYHZxWjA0VmdvbWI8Y2lvck03M0ZVbjBVVE5jcXVIZFNUMkEybkxNNko2cVxTQENWbkp%2FU2F0TDBBUnFRMkBIZk9BUHRUSU5AYkxqdn0ydDFrY2Jvd0c0TkhjPTA0NTVSdnBSQ05LdycpJ3BsSGphYCc%2FJ2BoZ2BhYWBhJyknaWR8anBxUXx1YCc%2FJ3Zsa2JpYFpscWBoJyknd2BhbHdgZnFKa0ZqaHVpYHFsamsnPydkaXJkfHYnKSdnZGZuYndqcGthRmppancnPycmNGM0YzRjJ3gl",
+  "collected_information": null,
+  "consent": null,
+  "consent_collection": null,
+  "created": 1766596347,
+  "currency": "usd",
+  "currency_conversion": null,
+  "custom_fields": [],
+  "custom_text": {
+    "after_submit": {
+      "message": "Time to create magic 💎"
+    },
+    "shipping_address": null,
+    "submit": null,
+    "terms_of_service_acceptance": null
+  },
+  "customer": null,
+  "customer_account": null,
+  "customer_creation": "always",
+  "customer_details": null,
+  "customer_email": null,
+  "discounts": [],
+  "expires_at": 1766682747,
+  "invoice": null,
+  "invoice_creation": {
+    "enabled": false,
+    "invoice_data": {
+      "account_tax_ids": null,
+      "custom_fields": null,
+      "description": null,
+      "footer": null,
+      "issuer": null,
+      "metadata": {},
+      "rendering_options": null
+    }
+  },
+  "livemode": false,
+  "locale": null,
+  "metadata": {},
+  "mode": "payment",
+  "name_collection": {
+    "business": {
+      "enabled": true,
+      "optional": true
+    },
+    "individual": {
+      "enabled": true,
+      "optional": false
+    }
+  },
+  "origin_context": null,
+  "payment_intent": null,
+  "payment_link": null,
+  "payment_method_collection": "if_required",
+  "payment_method_configuration_details": {
+    "id": "pmc_1SbjiE9fljwH26CPmMKxs5qZ",
+    "parent": null
+  },
+  "payment_method_options": {
+    "affirm": {},
+    "card": {
+      "request_three_d_secure": "automatic"
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "klarna",
+    "link",
+    "affirm",
+    "cashapp",
+    "amazon_pay"
+  ],
+  "payment_status": "unpaid",
+  "permissions": null,
+  "phone_number_collection": {
+    "enabled": false
+  },
+  "recovered_from": null,
+  "redirect_on_completion": "always",
+  "return_url": "https://payments.august.style/payment-success.html",
+  "saved_payment_method_options": {
+    "allow_redisplay_filters": [
+      "always"
+    ],
+    "payment_method_remove": "disabled",
+    "payment_method_save": null
+  },
+  "setup_intent": null,
+  "shipping_address_collection": null,
+  "shipping_cost": null,
+  "shipping_options": [],
+  "status": "open",
+  "submit_type": "pay",
+  "subscription": null,
+  "success_url": null,
+  "total_details": {
+    "amount_discount": 0,
+    "amount_shipping": 0,
+    "amount_tax": 0
+  },
+  "ui_mode": "embedded",
+  "url": null,
+  "wallet_options": null
+}
+```
 
 ---
 
-## HTML Essentials 
+## Comprehensive Flow Breakdown 
+[BACK TO TOP](#we-dont-even-need-synced-value)
 
-### Favicon Full Collection HTML 
+### Two Main Paths With Tiny Overlap 
 
-```html 
-<link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
-<link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="Payments" />
-<link rel="manifest" href="/assets/favicon/site.webmanifest" />
-```
+  * **Starting because of organic, admin/internal changes to JSON directory**
 
-### Meta Data & Thumbnail 
+  1. Scan JSON directory for changes 
 
-```html 
-<title>Payments to Sean August Horvath</title>
-<meta name="description" content="Architect of your digital business needs. Consulting and freelance custom web development, AI and end-to-end automation solutions, social production, viral strategy, user design, digital marketing optimization">
-<meta property="og:image" content="https://raw.githubusercontent.com/seanivore/freelance-payments/refs/heads/freelance-payments/assets/media/thumbnail-image-bauhaus-banking.webp">
-``` 
+  2. Archive the old and create all new Stripe objects with API --> *potential end point if there are only JSONs to archive* 
+
+  3. API response details collected, queued for GitHub Action updating all JSON file state management and object ID additions together 
+
+  4. After all JSON files updated back to back, NOW and only now add new JSON IDs (e.g. UID = filename) and login-keyword, login-name to the MANIFEST 
+
+  5. Automated push of JSON changes, new manifest, auto pull for local; RECOGNIZED AS AUTOMATED AND DOESN'T TRIGGER #1 AGAIN --> *natural end point*
+
+  * **Starting because frontend user behavior across contract, invoice, and payments** 
+  
+  6. User interactions tracked by serverless Vercel events queue triggered GitHub Action automated JSON file updates, held for 1 hour inactivity 
+
+  7. Payment behavior events from Stripe Webhooks caught by Vercel also queue JSON file updates, queued and held 
+
+  8. Collected JSON updates to `state_management.client_status` or `state_management.initial/balance_payment_intent` being held are released 
+
+  9. After all JSON files updated back to back, including any JSON files now `"active"=false`, *NOW start at #1*, probably just archiving 
+
+### Automation Cycles Defined 
+
+  - A. Runs from #1 through #5 
+  - B. Runs from #6 through #2 
+
+---
