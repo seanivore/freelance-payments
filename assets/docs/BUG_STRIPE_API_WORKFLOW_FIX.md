@@ -276,11 +276,12 @@ We currently have two, but these are the other options. Seems like we should pro
   * **Step 2:** [Archive the inactive JSON files you found](#2-run-simple-archive-command)
   * **Step 3:** [Jobs get a series of Stripe "objects"](#3-create-jobs-stripe-object-series)
   * **Step 4:** [Every job gets one Product Object](#4-create-product)
-  * **Step 5:** [Create a Price Object for Product's first job payment](#5-create-prices-initial-payment-first)
-  * **Step 6:** [Final balance payment for the Product gets a second Price Object](#6-create-final-balance-payment-price-object)
-  * **Step 7:** [If there is a discount, create a Coupon Object for the Product](#7-create-coupon-discount)
-  * **Step 8:** [Create a Checkout Object for the first Payment Object and Coupon Object](#8-prepare-initial-checkout-ahead-of-time)
-  * **Step 9:** [Create second Checkout Object for balance payment Price Object](#9-prepare-final-balance-checkout-ahead-of-time)
+  * **Step 5:** [Customer Object client contract details](#5-create-client)
+  * **Step 6:** [Create a Price Object for Product's first job payment](#6-create-prices-initial-payment-first)
+  * **Step 7:** [Final balance payment for the Product gets a second Price Object](#7-create-final-balance-payment-price-object)
+  * **Step 8:** [If there is a discount, create a Coupon Object for the Product](#8-create-coupon-discount)
+  * **Step 9:** [Create a Checkout Object for the first Payment Object and Coupon Object](#9-prepare-initial-checkout-ahead-of-time)
+  * **Step 10:** [Create second Checkout Object for balance payment Price Object](#10-prepare-final-balance-checkout-ahead-of-time)
   * **[COMPREHENSIVE FLOW BREAKDOWN](#comprehensive-flow-breakdown)**
 
 ### 1. Collect Job JSON Directory IDs 
@@ -416,7 +417,77 @@ product = stripe.Product.modify(
 }
 ```
 
-### 5. Create Prices: Initial Payment First 
+### 5. Create Client 
+
+  + Information needed across documents so might as well add it here 
+
+```python
+import stripe
+stripe.api_key = "{{TEST_SECRET_KEY}}"
+
+customer = stripe.Customer.create(
+  address={
+    "city": "Boston", 
+    "line1": "123 Main St", 
+    "state": "MA", 
+    "postal_code"= "02101", 
+    "country": "US"
+  },
+  business_name="Bob's Roofing LLC",
+  description="Met in Philadelphia",
+  email="bob@bobdoesroofing.com",
+  individual_name="Bob Smith",
+  name="Managing Owner",
+  phone="323-442-9485",
+  id="uid-amx-856-client",
+)
+```
+
+  * **RESPONSE CONFIRMING CLIENT/CUSTOMER CREATION**
+
+```json
+{
+  "id": "uid-amx-856-client",
+  "object": "customer",
+  "address": {
+    "city": "Boston",
+    "country": null,
+    "line1": null,
+    "line2": null,
+    "postal_code": null,
+    "state": null
+  },
+  "balance": 0,
+  "business_name": "Bob's Roofing LLC",
+  "created": 1766611965,
+  "currency": null,
+  "customer_account": null,
+  "default_source": null,
+  "delinquent": false,
+  "description": "Met in Philadelphia",
+  "discount": null,
+  "email": "bob@bobdoesroofing.com",
+  "individual_name": "Bob Smith",
+  "invoice_prefix": "JKFWFHOL",
+  "invoice_settings": {
+    "custom_fields": null,
+    "default_payment_method": null,
+    "footer": null,
+    "rendering_options": null
+  },
+  "livemode": false,
+  "metadata": {},
+  "name": "Bob's Roofing LLC",
+  "next_invoice_sequence": 1,
+  "phone": "323-442-9485",
+  "preferred_locales": [],
+  "shipping": null,
+  "tax_exempt": "none",
+  "test_clock": null
+}
+```
+
+### 6. Create Prices: Initial Payment First 
 [top](#job-json-stripe-setup)
 
   + Currency USD and active = true should be default, add per_unit type 
@@ -477,7 +548,7 @@ price = stripe.Price.create(
 }
 ``` 
 
-### 6. Create Final, Balance Payment Price Object 
+### 7. Create Final, Balance Payment Price Object 
 [top](#job-json-stripe-setup)
 
   * **Created the same way, with the remaining balance, and no discount, using `uid-xxx-xxx-2`**
@@ -532,7 +603,7 @@ price = stripe.Price.create(
 }
 ```
 
-### 7. Create Coupon Discount 
+### 8. Create Coupon Discount 
 [top](#job-json-stripe-setup)
 
   + One time usage that applies to the specific product created 
@@ -581,7 +652,7 @@ coupon = stripe.Coupon.create(
 }
 ```
 
-### 8. Prepare Initial Checkout Ahead Of Time 
+### 9. Prepare Initial Checkout Ahead Of Time 
 [top](#job-json-stripe-setup)
 
   + Successful response will be checkout.session object 
@@ -740,7 +811,7 @@ session = stripe.checkout.Session.create(
   "wallet_options": null
 }
 ```
-### 9. Prepare Final Balance Checkout Ahead Of Time 
+### 10. Prepare Final Balance Checkout Ahead Of Time 
 [top](#job-json-stripe-setup)
 
   + Create using second Price Objects with different ID
