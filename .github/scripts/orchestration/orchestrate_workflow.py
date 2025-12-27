@@ -50,7 +50,7 @@ def run_script(script_path: str, **kwargs) -> dict:
 
     Args:
         script_path: Relative path to script from .github/scripts/ directory
-                     Examples: 'state/detect_sync_needs.py', 'generate_manifest.py'
+                     Examples: 'state/update_state.py', 'generate_manifest.py'
         **kwargs: Arguments to pass to script
 
     Returns:
