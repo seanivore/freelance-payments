@@ -1,6 +1,6 @@
 # Stripe Catalog-Sync Bug Issue Review & Solution 
 
-## Overview  
+## Overview 
 
   **TESTING ISSUES ENCOUNTERED**
   1. JSON files were not updated with details confirming Stripe catalog Product Object creation 
@@ -482,10 +482,15 @@ We currently have two, but these are the other options. Seems like we should pro
 
   * **Simple UPDATE logic for catalog syncing** 
 
-    1. Gather JSON directory file names 
-    2. Ignore JSON directory file names that the `assets/js/manifest.json` has a matching entry for 
-    3. Hold any `manifest.json` entires that do not have a JSON directory file match TO BE ARCHIVED 
-    4. Hold any new JSON directory filenames that do not have a `manifest.json` match TO HAVE STRIPE OBJECTS CREATED 
+    1. Gather JSON directory filenames 
+    2. Of JSON directory filenames with matching entry in `assets/js/manifest.json` 
+       - HOLD TO ARCHIVE any that have payment 2 set to `balance_price_object.active=false` 
+       - HOLD TO ARCHIVE any that have `product_object.active=false` 
+       - IGNORE any that have only `product_object.active=true` and `balance_price_object.active=true`
+    3. Of JSON directory filenames that DO NOT have a matching entry in `manifest.json` 
+       - HOLD TO ARCHIVE  
+    4. Of JSON directory filenames that do not have a `manifest.json` match 
+       - HOLD TO HAVE STRIPE OBJECTS CREATED 
 
   * **Do not update the manifest.json yet, that will be done LAST** 
 
@@ -498,14 +503,14 @@ We currently have two, but these are the other options. Seems like we should pro
   + `stripe products update uid-xxx-xxx --active="false"`
 
   + Locate object ID from the file name 
-    - The `stripe.product_object.id` is the same as the JSON filename 
+    - The Stripe `product_object.id` is the same as the JSON filename 
     - Just remove `.json` from `uid-xxx-xxx.json` 
     - The `uid-xxx-xxx` is how Stripe identifies the product 
     
   + Change "active" value to "false" 
-    - If it isn't active, it is archived 
-    - This only needs to be done to the PROJECT OBJECT 
-    - All associated price objects, coupon objects, or checkout session objects are archived by implication 
+    - If it isn't active, it is "archived" 
+    - This only needs to be done to the Stripe Catalog's PROJECT OBJECT 
+    - All associated price objects, coupon objects, or checkout session objects in Stripe are archived by implication 
     - Stripe keeps all archived (inactive) objects INDEFINITELY for amazing record-keeping 
 
   * **Simply do this for all the entries on the manifest.json that did not have a matching JSON filename in the directory** 
@@ -530,11 +535,22 @@ product = stripe.Product.modify(
   + New job JSON files are only added to the manifest **AFTER** creating their objects 
     - This prevents errors 
     - Ensures only fully ready to go jobs are accessible from the front end 
-  + Every JOB gets a single JSON file, which in Stripe get a few "OBJECTS" 
+  + Every JOB gets a single JSON file, which in Stripe gets a few "OBJECTS" 
     1. PRODUCT OBJECT: the main information about the client's job 
+    2. CUSTOMER OBJECT: adding the client info to Stripe to make taxes easier down the line since we have the details handy 
     2. INITIAL & BALANCE PRICE OBJECT: to sell a product, it gets a "price object"; most jobs have two but only one is needed 
     4. COUPON OBJECT: if the client is getting a discount, make sure it is on the books; include the amount in the first price object 
     5. CHECKOUT SESSION OBJECT: create one of these for each price object 
+  + Use the bash custom command we have `uid` to come up with always unique identifier 
+    - In many cases where Stripe offers an ID for the object, you can preemptively provide what you want it to be 
+    - In a few other cases, though not listed in the docs, you can provide --id="uid..." and it will do the same 
+    - Only in very few cases would it not let me propose my own ID; this happened for the checkout_sessions 
+
+```bash
+> ~/Development/freelance-payments > uid 
+Generated UID: uid-rju-024
+Mathematical operations: r(56079)=153144 → j(153144)=21 → u(21)=24
+```
 
 ### 4. Create Product 
 [top](#job-json-stripe-setup)
@@ -544,20 +560,21 @@ product = stripe.Product.modify(
     - Description is like "SEO Description" style about the service 
   + Use the bash `uid` command to provide an ID 
     - This same ID will be provided for the other elements 
-    - Payment 1 = `uid`-1 
-    - Payment 2 = `uid`-2 
-    - Coupon discount = `uid`-coupon 
-    - Client reference ID (when setting up checkout session) = `uid`-client 
+    - Payment 1 = `uid-1`
+    - Payment 2 = `uid-2`
+    - Coupon discount = `uid-coupon`
+    - Client reference ID (also used when setting up checkout session) = `uid-client`
   + Add the metadata 
     - For easy reference during rest of setup 
     - For future understandability 
   + Metadata keys and values 
-    - login_keyword 
-    - login_name 
-    - service_usd = full cost of service before discount 
-    - total_payments = planned number of payments in contract 
-    - discount_usd = planned discount in contract, if applicable 
-  + "unit_label" = each time they pay, the "get" ... well for a service they're just making a payment 
+    - `login_keyword` 
+    - `login_name` 
+    - `service_usd` = full cost of service before discount 
+    - `total_payments` = planned number of payments in contract 
+    - `discount_usd` = planned discount in contract, if applicable 
+    - For metadata, keep everything human-readable, e.g. "$2,000" instead of "200000" 
+  + `unit_label` = each time they pay, they "get" ... well for a service they're just making a payment 
 
     ```python
     import stripe
@@ -585,7 +602,7 @@ product = stripe.Product.modify(
     + Success response = full product object 
       - "livemode" should say "true" 
       - Otherwise everything else should look the same but with created/updated times 
-    + Safely ignored unless it is an error  
+    + Safely ignored unless it is an error 
 
 ```json
 {
@@ -619,7 +636,7 @@ product = stripe.Product.modify(
 
 ### 5. Create Client 
 
-  + Information needed across documents so might as well add it here 
+  + Information needed across documents so might as well add it here for record-keeping and tax purposes 
 
 ```python
 import stripe
@@ -807,7 +824,7 @@ price = stripe.Price.create(
 [top](#job-json-stripe-setup)
 
   + One time usage that applies to the specific product created 
-    - Create random "name" that client will see 
+    - Create random "name" though the client will see this listed on the itemization 
     - Again, the amount is in pennies so 100000 = $1,000 
   + Make sure to use the SAME `uid` as the Product Object with `-coupon` for the ID 
 
@@ -883,6 +900,10 @@ session = stripe.checkout.Session.create(
 )
 ```
   * **API response confirming session created** 
+
+  + The long CHECKOUT.SESSION ID string is the most important keeper thing here 
+  + And possibly the client secret 
+  + Need to confirm the "Return URL" -- I guessed 
 
 ```json 
 {
@@ -1046,6 +1067,9 @@ session = stripe.checkout.Session.create(
   },
 )
 ```
+
+  + Bash with Stripe CLI can do the same. I ran this in the Sandbox Workspace 
+
 ```bash
 stripe checkout sessions create --automatic-tax.enabled=true --billing-address-collection="required" --branding-settings.font-family="noto_sans" --branding-settings.background-color="#1f1f1f" --branding-settings.border-style="pill" --branding-settings.button-color="#9C528B" --branding-settings.display-name="august.style designs" --client-reference-id="uid-amx-856-client" --currency="usd" --customer-creation="always" --mode="payment" --redirect-on-completion="always" --return-url="https://payments.august.style/payment-success.html" --submit-type="pay" --ui-mode="embedded" -d "automatic_tax[liability][type]=self" -d "custom_text[after_submit][message]=Time to create magic 💎" -d "line_items[0][price]=uid-amx-856-2" -d "line_items[0][quantity]=1" -d "name_collection[individual][enabled]=true" -d "name_collection[business][enabled]=true" -d "name_collection[business][optional]=true"
 ```
@@ -1194,31 +1218,39 @@ stripe checkout sessions create --automatic-tax.enabled=true --billing-address-c
 
 ### Two Main Paths With Tiny Overlap 
 
-  * **Starting because of organic, admin/internal changes to JSON directory**
+  * **CYCLE A: Starting because of organic, admin/internal PUSH with changes to JSON directory**
 
-  1. Scan JSON directory for changes 
+  1. Collect JSON directory filenames to compare to old/current manifest.json **cont. cycle B for potential archives**
 
-  2. Archive the old and create all new Stripe objects with API --> *potential end point if there are only JSONs to archive* 
+  2. Archive the old or any `product_object.active=false`, and create all new Stripe objects 
 
-  3. API response details collected, queued for GitHub Action updating all JSON file state management and object ID additions together 
+  3. API response details collected for state management, queued for GitHub Action updating all JSON file and object ID additions together
 
-  4. After all JSON files updated back to back, NOW and only now add new JSON IDs (e.g. UID = filename) and login-keyword, login-name to the MANIFEST 
-
-  5. Automated push of JSON changes, new manifest, auto pull for local; RECOGNIZED AS AUTOMATED AND DOESN'T TRIGGER #1 AGAIN --> *natural end point*
-
-  * **Starting because frontend user behavior across contract, invoice, and payments** 
+  4. After all new JSON files have their appropriate Stripe Objects created, then update all JSON files back-to-back 
   
-  6. User interactions tracked by serverless Vercel events queue triggered GitHub Action automated JSON file updates, held for 1 hour inactivity 
+  5. After JSON files updated back-to-back, now add new JSON IDs by filename to the MANIFEST each with their login-keyword and login-name
 
-  7. Payment behavior events from Stripe Webhooks caught by Vercel also queue JSON file updates, queued and held 
+  6. Automated push: JSON, manifest updates, rebase setup for later push --> **RECOGNIZED AS AUTOMATED, DOESN'T TRIGGER #1 AGAIN; natural end point**
 
-  8. Collected JSON updates to `state_management.client_status` or `state_management.initial/balance_payment_intent` being held are released 
+  * **CYCLE B: Starting because frontend user behavior across contract, invoice, and payments triggered required JSON updates** 
+  
+  7. User interactions tracked by serverless Vercel events trigger a queued GitHub Action to update JSON file; hold until ~15min inactivity passes 
 
-  9. After all JSON files updated back to back, including any JSON files now `"active"=false`, *NOW start at #1*, probably just archiving 
+  8. Payment behavior events from Stripe Webhooks caught by Vercel also queue JSON file updates, queued and held, too; activity restarts counter  
+
+  9. Collected JSON updates to `state_management.client_status` or `state_management.[initial/balance]_payment_intent` being held are released 
+
+  10. All JSON files updated back-to-back, including any JSON files now `"active"=false`, **NOW continue at #1, probably just for archiving if needed**
 
 ### Automation Cycles Defined 
 
-  - A. Runs from #1 through #5 
-  - B. Runs from #6 through #2 
+  * **CYCLE A** 
+    - Runs from #1 through #6 
+    - Simple 
+  * **CYCLE B** 
+    - Runs from #7 through #6 
+    - In every case (I can think of) it is just for #1/#2 and then jumps to #6 for the push update 
+    - But there should be no harm in it going through #3, #4, #5 if they are all working correctly they should just pass 
 
 ---
+*Detailed outline of Stripe API/SDK calls and responses, along with new cycle flow logic, completed by Sean August Horvath on 2025-12-27*
