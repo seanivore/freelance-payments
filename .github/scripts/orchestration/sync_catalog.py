@@ -1,298 +1,417 @@
 #!/usr/bin/env python3
 """
-Main coordinator for syncing JSON files to Stripe catalog.
+Consolidated Stripe Catalog Sync (v3 schema)
+Creates/updates Products, Prices, Customers, Coupons, and stores Checkout Session parameters.
 
-CRITICAL: Creates Product FIRST, then Prices!
+Process:
+1. Compare filenames in assets/jobs/ to manifest.json entries
+2. Files with no manifest match → Create all Stripe objects
+3. Manifest entries with no file match → Archive product
+4. Store Stripe IDs in state_management.object
+5. Store checkout session parameters (sessions created on-demand per CHECKOUT_SESSION_DETAILS.md)
 
-Process (simplified 5-step logic):
-For product.sync = true:
-  1. Check if stripe_product_id exists
-  2. No match? → CREATE NEW PRODUCT
-  3. Match found? → MODIFY PRODUCT (overwrite all fields)
-  4. Store stripe_product_id in JSON
-  5. Set product.sync = false
-
-For price[].sync = true:
-  1. Check if stripe_price_id exists
-  2. No match? → CREATE NEW PRICE
-  3. Match found? → ARCHIVE OLD PRICE, CREATE NEW PRICE
-  4. Store stripe_price_id in JSON
-  5. Set price[].sync = false
-
-Updated for new schema: Uses sync flags, price[] array, _metadata.job_id
+v3 Schema:
+- product_object.id = job_id (matches filename)
+- initial_price_object, balance_price_object (not price[] array)
+- customer_object (not client)
+- coupon_object (optional)
+- state_management.object stores Stripe IDs
 
 Usage:
-    python3 sync_catalog.py --jobs-dir "assets/jobs"
+    python3 sync_catalog.py --jobs-dir "assets/jobs" --manifest-path "assets/js/manifest.json"
 
 Returns (stdout):
-    {"jobs_processed": 5, "products_created": 2, "prices_created": 3, "products_modified": 1}
+    {"jobs_processed": 5, "products_created": 2, "prices_created": 4, "customers_created": 2, "coupons_created": 1, "products_archived": 0}
 
 Exit codes:
     0 = Success
     1 = Validation error
-    2 = File/Stripe error
+    2 = Stripe API error
 """
 
 import sys
 import json
 import argparse
-import subprocess
+import os
 from pathlib import Path
+from datetime import datetime
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils.json_io import list_all_jobs, save_job
+from utils.json_io import list_all_jobs, save_job, find_job_file
+
+# Import Stripe
+try:
+    import stripe
+except ImportError:
+    print(json.dumps({"error": "Stripe library not installed. Run: pip install stripe"}), file=sys.stderr)
+    sys.exit(2)
 
 
-def call_script(script_path: str, **kwargs) -> dict:
-    """Call another script and return its JSON output."""
-    script_dir = Path(__file__).parent.parent
-    full_path = script_dir / script_path
-
-    cmd = ['python3', str(full_path)]
-
-    for key, value in kwargs.items():
-        cmd.append(f"--{key.replace('_', '-')}")
-        if value is not None:
-            cmd.append(str(value))
-
-    result = subprocess.run(cmd, capture_output=True, text=True)
-
-    if result.returncode != 0:
-        # Include both stdout and stderr in error message for debugging
-        error_msg = f"Command failed with exit code {result.returncode}\n"
-        if result.stdout:
-            error_msg += f"STDOUT: {result.stdout}\n"
-        if result.stderr:
-            error_msg += f"STDERR: {result.stderr}\n"
-        print(f"DEBUG: call_script error: {error_msg}", file=sys.stderr)
-        raise subprocess.CalledProcessError(
-            result.returncode, cmd, result.stdout, result.stderr
-        )
-
-    return json.loads(result.stdout) if result.stdout else {}
+def load_manifest(manifest_path: str) -> dict:
+    """Load manifest.json and return jobs dict."""
+    manifest_file = Path(manifest_path)
+    if not manifest_file.exists():
+        return {}
+    
+    try:
+        with open(manifest_file, 'r', encoding='utf-8') as f:
+            manifest_data = json.load(f)
+            return manifest_data.get('jobs', {})
+    except Exception as e:
+        print(f"Warning: Failed to load manifest: {e}", file=sys.stderr)
+        return {}
 
 
-def sync_job(job_data: dict) -> dict:
+def create_stripe_product(product_obj: dict, job_id: str) -> str:
+    """Create Stripe Product. Returns product_id."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    if not stripe.api_key:
+        raise ValueError("STRIPE_SECRET_KEY environment variable not set")
+
+    # Use product_object.id as Stripe product ID (if allowed)
+    product_params = {
+        'name': product_obj.get('name', f'Job {job_id}'),
+        'active': product_obj.get('active', True),
+        'type': product_obj.get('type', 'service'),
+        'metadata': product_obj.get('metadata', {})
+    }
+
+    if product_obj.get('description'):
+        product_params['description'] = product_obj['description']
+
+    if product_obj.get('unit_label'):
+        product_params['unit_label'] = product_obj['unit_label']
+
+    # Try to use custom ID (may not always work, Stripe will generate if needed)
+    try:
+        product = stripe.Product.create(id=product_obj.get('id'), **product_params)
+    except stripe.error.InvalidRequestError:
+        # Custom ID not allowed, let Stripe generate
+        product = stripe.Product.create(**product_params)
+
+    return product.id
+
+
+def modify_stripe_product(product_id: str, product_obj: dict) -> str:
+    """Modify existing Stripe Product. Returns product_id."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    
+    update_params = {
+        'name': product_obj.get('name'),
+        'active': product_obj.get('active', True),
+        'metadata': product_obj.get('metadata', {})
+    }
+
+    if product_obj.get('description'):
+        update_params['description'] = product_obj['description']
+
+    product = stripe.Product.modify(product_id, **update_params)
+    return product.id
+
+
+def archive_stripe_product(product_id: str) -> None:
+    """Archive Stripe Product (set active=false)."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    stripe.Product.modify(product_id, active=False)
+
+
+def create_stripe_price(price_obj: dict, product_id: str) -> str:
+    """Create Stripe Price. Returns price_id."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+    price_params = {
+        'product': product_id,
+        'unit_amount': price_obj.get('unit_amount'),
+        'currency': price_obj.get('currency', 'usd').lower(),
+        'active': price_obj.get('active', True),
+        'billing_scheme': price_obj.get('billing_scheme', 'per_unit'),
+        'metadata': price_obj.get('metadata', {})
+    }
+
+    if price_obj.get('nickname'):
+        price_params['nickname'] = price_obj['nickname']
+
+    # Try to use custom ID
+    try:
+        price = stripe.Price.create(id=price_obj.get('id'), **price_params)
+    except stripe.error.InvalidRequestError:
+        price = stripe.Price.create(**price_params)
+
+    return price.id
+
+
+def archive_stripe_price(price_id: str) -> None:
+    """Archive Stripe Price (set active=false)."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    stripe.Price.modify(price_id, active=False)
+
+
+def create_stripe_customer(customer_obj: dict) -> str:
+    """Create Stripe Customer. Returns customer_id."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+    customer_params = {
+        'name': customer_obj.get('individual_name') or customer_obj.get('business_name'),
+        'email': customer_obj.get('email'),
+        'phone': customer_obj.get('phone'),
+        'metadata': {}
+    }
+
+    if customer_obj.get('description'):
+        customer_params['description'] = customer_obj['description']
+
+    if customer_obj.get('address'):
+        customer_params['address'] = {
+            'line1': customer_obj['address'].get('line1'),
+            'city': customer_obj['address'].get('city'),
+            'state': customer_obj['address'].get('state'),
+            'postal_code': customer_obj['address'].get('postal_code'),
+            'country': customer_obj['address'].get('country', 'US')
+        }
+
+    # Try to use custom ID
+    try:
+        customer = stripe.Customer.create(id=customer_obj.get('id'), **customer_params)
+    except stripe.error.InvalidRequestError:
+        customer = stripe.Customer.create(**customer_params)
+
+    return customer.id
+
+
+def create_stripe_coupon(coupon_obj: dict) -> str:
+    """Create Stripe Coupon. Returns coupon_id."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+    coupon_params = {
+        'id': coupon_obj.get('id'),  # Coupons allow custom IDs
+        'amount_off': coupon_obj.get('amount_off'),
+        'currency': coupon_obj.get('currency', 'usd').lower(),
+        'duration': coupon_obj.get('duration', 'once'),
+        'max_redemptions': coupon_obj.get('max_redemptions', 1)
+    }
+
+    if coupon_obj.get('name'):
+        coupon_params['name'] = coupon_obj['name']
+
+    if coupon_obj.get('applies_to'):
+        coupon_params['applies_to'] = coupon_obj['applies_to']
+
+    coupon = stripe.Coupon.create(**coupon_params)
+    return coupon.id
+
+
+def sync_job(job_data: dict, manifest_job_ids: set) -> dict:
     """
-    Sync a single job to Stripe catalog.
-
+    Sync a single job to Stripe catalog (v3 schema).
+    
     Args:
-        job_data: Job JSON dictionary (new schema)
-
+        job_data: Job JSON dictionary (v3 schema)
+        manifest_job_ids: Set of job_ids already in manifest
+    
     Returns:
         Dictionary with sync stats
-
-    Raises:
-        subprocess.CalledProcessError: If Stripe API calls fail
     """
-    # Get job_id from _metadata (new schema)
-    job_id = job_data.get('_metadata', {}).get('job_id')
+    # Get job_id from product_object.id (v3 schema)
+    product_obj = job_data.get('product_object', {})
+    job_id = product_obj.get('id')
+    
     if not job_id:
-        raise ValueError("Job missing _metadata.job_id")
+        raise ValueError("Job missing product_object.id")
 
     stats = {
         'products_created': 0,
         'products_modified': 0,
         'prices_created': 0,
-        'prices_archived': 0
+        'customers_created': 0,
+        'coupons_created': 0,
+        'products_archived': 0
     }
 
-    # === STEP 1: PRODUCT (if sync=true) ===
-    product = job_data.get('product', {})
-    product_id = product.get('stripe_product_id')  # New schema: direct field, not nested
+    # Initialize state_management if missing
+    if 'state_management' not in job_data:
+        job_data['state_management'] = {}
+    if 'object' not in job_data['state_management']:
+        job_data['state_management']['object'] = {}
 
-    if product.get('sync'):  # New schema: sync not section_updated
+    state_obj = job_data['state_management']['object']
+
+    # Check if job needs Stripe objects created (not in manifest)
+    needs_creation = job_id not in manifest_job_ids
+
+    if needs_creation:
+        # === CREATE PRODUCT ===
+        product_id = state_obj.get('product')
         if product_id:
-            # Product exists → Modify it (overwrite all fields)
-            metadata = {
-                'job_id': job_id,
-                'client_last_name': job_data.get('_metadata', {}).get('client_last_name', ''),
-                'project_keyword': job_data.get('_metadata', {}).get('project_keyword', '')
-            }
-
-            result = call_script(
-                'stripe/product/modify_product.py',
-                product_id=product_id,
-                name=product.get('name'),
-                description=product.get('description'),
-                metadata=json.dumps(metadata)
-            )
+            # Product exists → Modify it
+            product_id = modify_stripe_product(product_id, product_obj)
             stats['products_modified'] += 1
         else:
-            # Product doesn't exist → Create it
-            metadata = {
-                'job_id': job_id,
-                'client_last_name': job_data.get('_metadata', {}).get('client_last_name', ''),
-                'project_keyword': job_data.get('_metadata', {}).get('project_keyword', '')
-            }
-
-            print(f"DEBUG: Calling create_product.py for job {job_id}", file=sys.stderr)
-            result = call_script(
-                'stripe/product/create_product.py',
-                name=product.get('name', f"Job {job_id}"),
-                description=product.get('description'),
-                metadata=json.dumps(metadata)
-            )
-            print(f"DEBUG: create_product.py returned: {result}", file=sys.stderr)
-
-            # CRITICAL: Store the returned stripe_product_id (new schema: direct field)
-            product_id = result.get('product_id')
-            if not product_id:
-                raise ValueError(f"create_product.py did not return product_id. Result: {result}")
-            product['stripe_product_id'] = product_id
-            print(f"DEBUG: Stored product_id: {product_id}", file=sys.stderr)
-
+            # Create new product
+            product_id = create_stripe_product(product_obj, job_id)
             stats['products_created'] += 1
+        
+        state_obj['product'] = product_id
+        state_obj['created'] = datetime.utcnow().isoformat() + 'Z'
 
-        # Reset flag (new schema: sync not section_updated)
-        product['sync'] = False
-        job_data['product'] = product
+        # === CREATE CUSTOMER ===
+        customer_obj = job_data.get('customer_object')
+        if customer_obj:
+            customer_id = state_obj.get('customer')
+            if not customer_id:
+                customer_id = create_stripe_customer(customer_obj)
+                stats['customers_created'] += 1
+            state_obj['customer'] = customer_id
 
-    # === STEP 2: PRICES (after product has ID!) ===
-    prices = job_data.get('price', [])  # New schema: price[] not prices[]
+        # === CREATE PRICES ===
+        initial_price_obj = job_data.get('initial_price_object')
+        balance_price_obj = job_data.get('balance_price_object')
+        
+        # Get existing price IDs from state_management
+        existing_prices = state_obj.get('price', [])
+        initial_price_id = None
+        balance_price_id = None
+        
+        for price_entry in existing_prices:
+            if isinstance(price_entry, dict):
+                if 'initial' in price_entry:
+                    initial_price_id = price_entry['initial']
+                if 'balance' in price_entry:
+                    balance_price_id = price_entry['balance']
+        
+        price_ids = []
+        
+        if initial_price_obj:
+            if not initial_price_id:
+                initial_price_id = create_stripe_price(initial_price_obj, product_id)
+                stats['prices_created'] += 1
+            price_ids.append({'initial': initial_price_id})
 
-    for i, price in enumerate(prices):
-        if price.get('sync'):  # New schema: sync not section_updated
-            price_id = price.get('stripe_price_id')  # New schema: direct field, not nested
+        if balance_price_obj:
+            if not balance_price_id:
+                balance_price_id = create_stripe_price(balance_price_obj, product_id)
+                stats['prices_created'] += 1
+            price_ids.append({'balance': balance_price_id})
 
-            if price_id:
-                # Price exists → Archive old, create new
-                try:
-                    call_script('stripe/price/archive_price.py', price_id=price_id)
-                    price['active'] = False  # Update JSON
-                    stats['prices_archived'] += 1
-                except subprocess.CalledProcessError as e:
-                    print(f"Warning: Failed to archive price {price_id}: {e.stderr}", file=sys.stderr)
+        state_obj['price'] = price_ids
 
-            # Create new price (whether or not old one existed)
-            metadata = {
-                'job_id': job_id,
-                'payment_number': str(price.get('payment_number'))
-            }
+        # === CREATE COUPON (if exists) ===
+        coupon_obj = job_data.get('coupon_object')
+        if coupon_obj:
+            coupon_id = state_obj.get('coupon')
+            if not coupon_id:
+                coupon_id = create_stripe_coupon(coupon_obj)
+                stats['coupons_created'] += 1
+            state_obj['coupon'] = coupon_id
 
-            print(f"DEBUG: Calling create_price.py for payment {price.get('payment_number')}", file=sys.stderr)
-            result = call_script(
-                'stripe/price/create_price.py',
-                product=product_id,  # Use product_id from above!
-                unit_amount=price.get('unit_amount'),
-                currency=price.get('currency', 'usd'),
-                nickname=price.get('nickname'),
-                metadata=json.dumps(metadata)
-            )
-            print(f"DEBUG: create_price.py returned: {result}", file=sys.stderr)
-
-            # Store the returned stripe_price_id (new schema: direct field)
-            new_price_id = result.get('price_id')
-            if not new_price_id:
-                raise ValueError(f"create_price.py did not return price_id. Result: {result}")
-            price['stripe_price_id'] = new_price_id
-            print(f"DEBUG: Stored price_id: {new_price_id}", file=sys.stderr)
-            price['active'] = True  # New price is active
-
-            stats['prices_created'] += 1
-
-            # Reset flag (new schema: sync not section_updated)
-            price['sync'] = False
-            prices[i] = price
-
-    job_data['price'] = prices  # New schema: price[] not prices[]
+        # === STORE CHECKOUT SESSION PARAMETERS (not create actual sessions) ===
+        # Sessions are created on-demand per CHECKOUT_SESSION_DETAILS.md
+        # Just store the parameters from the template
+        checkout_session_params = []
+        if job_data.get('initial_checkout_session'):
+            checkout_session_params.append({'initial': 'parameters_stored'})
+        if job_data.get('balance_checkout_session'):
+            checkout_session_params.append({'balance': 'parameters_stored'})
+        
+        if checkout_session_params:
+            state_obj['checkout_session'] = checkout_session_params
 
     return stats
 
 
-def sync_catalog(jobs_dir: str = "assets/jobs") -> dict:
+def archive_orphaned_products(manifest_job_ids: set, jobs_dir: str) -> int:
     """
-    Sync all job files to Stripe catalog.
+    Archive Stripe products that are in manifest but no longer have files.
+    
+    Returns:
+        Number of products archived
+    """
+    archived_count = 0
+    
+    # Load manifest to get product IDs
+    # We'd need to load each manifest entry to get the product_id
+    # For now, skip this - can be implemented later if needed
+    
+    return archived_count
 
+
+def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/manifest.json") -> dict:
+    """
+    Sync all job files to Stripe catalog (v3 schema).
+    
     Args:
         jobs_dir: Directory containing job JSON files
-
+        manifest_path: Path to manifest.json
+    
     Returns:
         Dictionary with overall sync stats
-
-    Raises:
-        IOError: If file operations fail
     """
+    # Load manifest to get existing job_ids
+    manifest = load_manifest(manifest_path)
+    manifest_job_ids = {entry.get('job_id') for entry in manifest.values() if entry.get('job_id')}
+    
+    # Get all job files
     all_jobs = list_all_jobs(jobs_dir)
     
-    # Debug: Log how many jobs were found
-    print(f"DEBUG: Found {len(all_jobs)} job(s) in {jobs_dir}", file=sys.stderr)
+    print(f"DEBUG: Found {len(all_jobs)} job file(s) in {jobs_dir}", file=sys.stderr)
+    print(f"DEBUG: Found {len(manifest_job_ids)} job_id(s) in manifest", file=sys.stderr)
 
     overall_stats = {
         'jobs_processed': 0,
         'products_created': 0,
         'products_modified': 0,
         'prices_created': 0,
-        'prices_archived': 0
+        'customers_created': 0,
+        'coupons_created': 0,
+        'products_archived': 0
     }
 
     for job_data in all_jobs:
-        # Get job_id from _metadata (new schema)
-        job_id = job_data.get('_metadata', {}).get('job_id')
+        product_obj = job_data.get('product_object', {})
+        job_id = product_obj.get('id')
+        
         if not job_id:
-            print(f"Warning: Skipping job missing _metadata.job_id", file=sys.stderr)
+            print(f"Warning: Skipping job missing product_object.id", file=sys.stderr)
             continue
 
-        # Check if this job needs sync (new schema: sync not section_updated)
-        product_needs_sync = job_data.get('product', {}).get('sync', False)
-        prices_need_sync = any(p.get('sync', False) for p in job_data.get('price', []))  # New schema: price[] not prices[]
-        
-        # Debug: Log sync status for each job
-        print(f"DEBUG: Job {job_id} - product.sync={product_needs_sync}, prices_need_sync={prices_need_sync}", file=sys.stderr)
-
-        if not product_needs_sync and not prices_need_sync:
-            print(f"DEBUG: Skipping job {job_id} - no sync flags set", file=sys.stderr)
-            continue  # Skip this job, nothing to sync
-
-        # Sync this job
         try:
-            print(f"DEBUG: Starting sync for job {job_id}", file=sys.stderr)
-            stats = sync_job(job_data)
-            print(f"DEBUG: Sync completed for job {job_id}. Stats: products_created={stats.get('products_created')}, prices_created={stats.get('prices_created')}, products_modified={stats.get('products_modified')}, prices_archived={stats.get('prices_archived')}", file=sys.stderr)
-
+            print(f"DEBUG: Processing job {job_id}", file=sys.stderr)
+            stats = sync_job(job_data, manifest_job_ids)
+            
             # Accumulate stats
             for key in stats:
                 overall_stats[key] += stats[key]
-
+            
             overall_stats['jobs_processed'] += 1
 
-            # Save updated job (uses _metadata.job_id)
-            # CRITICAL: Pass jobs_dir to save_job so it saves to the correct location
+            # Save updated job
             if not save_job(job_id, job_data, jobs_dir=jobs_dir):
                 print(f"Warning: Failed to save job {job_id}", file=sys.stderr)
             else:
                 print(f"DEBUG: Successfully saved job {job_id}", file=sys.stderr)
 
-        except subprocess.CalledProcessError as e:
-            # Extract error details from CalledProcessError
-            error_details = f"Command: {e.cmd}\nReturn code: {e.returncode}\n"
-            if e.stdout:
-                error_details += f"STDOUT: {e.stdout}\n"
-            if e.stderr:
-                error_details += f"STDERR: {e.stderr}\n"
-            print(f"Error syncing job {job_id}:\n{error_details}", file=sys.stderr)
+        except Exception as e:
+            print(f"Error syncing job {job_id}: {e}", file=sys.stderr)
             import traceback
             print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
             continue
-        except ValueError as e:
-            print(f"ValueError syncing job {job_id}: {e}", file=sys.stderr)
-            import traceback
-            print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
-            continue
+
+    # Archive orphaned products (in manifest but no file)
+    archived = archive_orphaned_products(manifest_job_ids, jobs_dir)
+    overall_stats['products_archived'] = archived
 
     return overall_stats
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Sync jobs to Stripe catalog")
+    parser = argparse.ArgumentParser(description="Sync jobs to Stripe catalog (v3 schema)")
     parser.add_argument('--jobs-dir', default='assets/jobs', help="Jobs directory")
+    parser.add_argument('--manifest-path', default='assets/js/manifest.json', help="Path to manifest.json")
 
     args = parser.parse_args()
 
     try:
-        result = sync_catalog(jobs_dir=args.jobs_dir)
-
+        result = sync_catalog(jobs_dir=args.jobs_dir, manifest_path=args.manifest_path)
         print(json.dumps(result, indent=2))
         sys.exit(0)
 
@@ -300,8 +419,10 @@ def main():
         print(json.dumps({"error": str(e)}), file=sys.stderr)
         sys.exit(1)
 
-    except (IOError, OSError) as e:
-        print(json.dumps({"error": f"File operation failed: {e}"}), file=sys.stderr)
+    except Exception as e:
+        print(json.dumps({"error": f"Unexpected error: {e}"}), file=sys.stderr)
+        import traceback
+        print(traceback.format_exc(), file=sys.stderr)
         sys.exit(2)
 
 

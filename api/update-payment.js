@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
         job_id: job_id,
         payload: JSON.stringify({
           payment_number: payment_number,
-          paid_date: payment_data.paid_date || new Date().toISOString().split('T')[0]
+          succeeded: payment_data.succeeded || new Date().toISOString() + 'Z' // v3 schema: ISO timestamp
         }),
       },
     });

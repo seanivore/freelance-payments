@@ -13,12 +13,13 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "Action type (sign-contract, update-payment)"
+        description: "Action type (sign-contract, update-payment, track-event)"
         required: true
         type: choice
         options:
           - sign-contract
           - update-payment
+          - track-event
       job_id:
         description: "Job ID"
         required: true

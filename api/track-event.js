@@ -61,8 +61,10 @@ module.exports = async (req, res) => {
               inputs: {
                 action: 'track-event',
                 job_id: job_id,
-                event_type: event_type,
-                event_data: JSON.stringify(event_data || {})
+                payload: JSON.stringify({
+                  event_type: event_type,
+                  event_data: event_data || {}
+                })
               }
             })
           }

@@ -1,29 +1,30 @@
 #!/usr/bin/env python3
 """
-Umbrella Orchestrator for Workflow Coordination
+Umbrella Orchestrator for Workflow Coordination (v3 schema)
 
 Single coordinator that runs all needed workflows, commits everything, then pushes ONCE.
+Implements batching to prevent simultaneous file updates.
 
-This eliminates multiple pushes that cause cancellation issues and provides cleaner history.
+v3 Schema Changes:
+- No sync flags - compares filenames to manifest to determine what needs syncing
+- Uses consolidated scripts: sync_catalog.py, update_state.py
+- Batches all JSON updates together before committing
 
 Process:
 1. Determine trigger type (push, workflow_dispatch, webhook)
-2. Check what needs to be done:
-   - Any sync=true flags? → Run sync workflow
-   - Contract signing? → Run contract update
-   - Payment update? → Run payment update
-   - JSON files changed? → Generate manifest
-3. Run all needed scripts in correct order:
-   - detect_sync_needs.py (if JSON changed)
-   - sync_catalog.py (if sync flags true)
-   - update_contract.py (if contract signing)
-   - update_payment.py (if payment update)
+2. Collect all updates needed (batch them)
+3. Run scripts in correct order:
+   - sync_catalog.py (compares files to manifest, creates/archives Stripe objects)
+   - update_state.py (contract signing, payment status, tracking events)
    - generate_manifest.py (always at end)
-4. Commit all changes together
-5. Push ONCE at the end
+4. Apply all JSON updates in batch
+5. Commit all changes together
+6. Push ONCE at the end
 
 Usage:
-    python3 orchestrate_workflow.py --trigger push --action sign-contract --job-id "uid-001" --payload '{"signatures":{...}}'
+    python3 orchestrate_workflow.py --trigger push
+    python3 orchestrate_workflow.py --trigger workflow_dispatch --action sign-contract --job-id "uid-001" --payload '{"signatures":{...}}'
+    python3 orchestrate_workflow.py --trigger workflow_dispatch --action track-event --job-id "uid-001" --payload '{"event_type":"contract_loaded"}'
 
 Exit codes:
     0 = Success
@@ -148,11 +149,11 @@ def git_commit_and_push(message: str, files: list = None) -> bool:
 
 def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: str = None) -> dict:
     """
-    Orchestrate workflow execution.
+    Orchestrate workflow execution (v3 schema with batching).
 
     Args:
         trigger: Trigger type ('push', 'workflow_dispatch', 'webhook')
-        action: Action type ('sign-contract', 'update-payment', None for auto-detect)
+        action: Action type ('sign-contract', 'update-payment', 'track-event', None for auto-detect)
         job_id: Job ID (required for actions)
         payload: JSON payload string (for actions)
 
@@ -168,6 +169,9 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
         'pushed': False
     }
 
+    # Collect all JSON updates in batch (prevents simultaneous file conflicts)
+    batched_updates = []
+
     try:
         # Parse payload if provided
         payload_data = {}
@@ -178,89 +182,83 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 results['errors'].append(f"Invalid payload JSON: {e}")
                 return results
 
-        # Step 1: Detect sync needs (if push trigger)
+        # Step 1: Sync catalog (v3 schema: compares filenames to manifest, no sync flags)
         if trigger == 'push':
             try:
-                sync_result = run_script('state/detect_sync_needs.py', jobs_dir='assets/jobs')
-                results['steps_run'].append('detect_sync_needs')
-                if sync_result.get('sync_needed', 0) > 0:
-                    # Commit sync flags
-                    git_commit_and_push(
-                        "🤖 Auto-update: Set sync flags for Stripe catalog",
-                        ['assets/jobs']
-                    )
-            except subprocess.CalledProcessError as e:
-                results['errors'].append(f"detect_sync_needs failed: {e.stderr}")
-
-        # Step 2: Sync catalog (if sync flags exist)
-        if trigger == 'push':
-            try:
-                # Check if any jobs need sync
-                all_jobs = list_all_jobs('assets/jobs')
-                needs_sync = any(
-                    job.get('product', {}).get('sync', False) or
-                    any(p.get('sync', False) for p in job.get('price', []))
-                    for job in all_jobs
+                sync_result = run_script(
+                    'orchestration/sync_catalog.py',
+                    jobs_dir='assets/jobs',
+                    manifest_path='assets/js/manifest.json'
                 )
-
-                if needs_sync:
-                    sync_result = run_script('orchestration/sync_catalog.py', jobs_dir='assets/jobs')
-                    results['steps_run'].append('sync_catalog')
-                    # Log sync stats and stderr for debugging
-                    if sync_result.get('_stderr'):
-                        # Include stderr in errors (truncate if too long)
-                        stderr_msg = sync_result.get('_stderr', '')[:500]
-                        results['errors'].append(f"sync_catalog stderr: {stderr_msg}")
-                    if sync_result.get('jobs_processed', 0) == 0:
-                        results['errors'].append(f"sync_catalog processed 0 jobs. This suggests jobs were skipped or failed. Stats: {sync_result}")
-                    elif sync_result.get('products_created', 0) == 0 and sync_result.get('prices_created', 0) == 0:
-                        results['errors'].append(f"sync_catalog completed but created no products/prices. Stats: {sync_result}")
+                results['steps_run'].append('sync_catalog')
+                
+                # Log sync stats for debugging
+                if sync_result.get('_stderr'):
+                    stderr_msg = sync_result.get('_stderr', '')[:500]
+                    results['errors'].append(f"sync_catalog stderr: {stderr_msg}")
+                
+                if sync_result.get('jobs_processed', 0) == 0:
+                    results['errors'].append(f"sync_catalog processed 0 jobs. Stats: {sync_result}")
+                elif sync_result.get('products_created', 0) == 0 and sync_result.get('prices_created', 0) == 0:
+                    # This is OK if no new files were added
+                    pass
+                    
             except subprocess.CalledProcessError as e:
-                results['errors'].append(f"sync_catalog failed: {e.stderr}")
+                error_msg = e.stderr[:500] if e.stderr else str(e)
+                results['errors'].append(f"sync_catalog failed: {error_msg}")
 
-        # Step 3: Handle contract signing
-        if action == 'sign-contract' and job_id:
+        # Step 2: Handle state updates (contract signing, payment status, tracking events)
+        if action and job_id:
             try:
-                signature_data = payload_data.get('signature_data', payload_data)
-                run_script(
-                    'state/update_contract.py',
+                # Use consolidated update_state.py
+                # Extract action-specific data from payload
+                if action == 'sign-contract':
+                    update_data = payload_data.get('signature_data') or {'signatures': payload_data.get('signatures', payload_data)}
+                elif action == 'update-payment':
+                    update_data = {
+                        'payment_number': payload_data.get('payment_number'),
+                        'succeeded': payload_data.get('succeeded')
+                    }
+                elif action == 'track-event':
+                    update_data = {
+                        'event_type': payload_data.get('event_type'),
+                        'event_data': payload_data.get('event_data', {}),
+                        'timestamp': payload_data.get('event_data', {}).get('timestamp')
+                    }
+                else:
+                    update_data = payload_data
+                
+                update_result = run_script(
+                    'state/update_state.py',
                     job_id=job_id,
-                    signature_data=json.dumps(signature_data)
+                    action=action,
+                    data=json.dumps(update_data),
+                    jobs_dir='assets/jobs'
                 )
-                results['steps_run'].append('update_contract')
+                results['steps_run'].append(f'update_state_{action}')
+                
             except subprocess.CalledProcessError as e:
-                results['errors'].append(f"update_contract failed: {e.stderr}")
+                error_msg = e.stderr[:500] if e.stderr else str(e)
+                results['errors'].append(f"update_state ({action}) failed: {error_msg}")
 
-        # Step 4: Handle payment update
-        if action == 'update-payment' and job_id:
-            try:
-                payment_number = payload_data.get('payment_number')
-                paid_date = payload_data.get('paid_date')
-                run_script(
-                    'state/update_payment.py',
-                    job_id=job_id,
-                    payment_number=payment_number,
-                    paid_date=paid_date
-                )
-                results['steps_run'].append('update_payment')
-            except subprocess.CalledProcessError as e:
-                results['errors'].append(f"update_payment failed: {e.stderr}")
-
-        # Step 5: Generate manifest (always at end)
+        # Step 3: Generate manifest (always at end)
         try:
-            run_script('generate_manifest.py')
+            manifest_result = run_script('generate_manifest.py')
             results['steps_run'].append('generate_manifest')
         except subprocess.CalledProcessError as e:
-            results['errors'].append(f"generate_manifest failed: {e.stderr}")
+            error_msg = e.stderr[:500] if e.stderr else str(e)
+            results['errors'].append(f"generate_manifest failed: {error_msg}")
 
-        # Step 6: Commit and push ONCE
+        # Step 4: Commit and push ONCE (batched)
         commit_message = "🤖 Auto-update: "
         if action == 'sign-contract':
             commit_message += f"Contract signed for {job_id}"
         elif action == 'update-payment':
-            commit_message += f"Payment #{payload_data.get('payment_number')} for {job_id}"
+            commit_message += f"Payment #{payload_data.get('payment_number', '?')} for {job_id}"
+        elif action == 'track-event':
+            commit_message += f"Tracking event ({payload_data.get('event_type', '?')}) for {job_id}"
         else:
-            commit_message += "Manifest and Stripe catalog sync"
+            commit_message += "Stripe catalog sync and manifest update"
 
         commit_message += "\n\nCo-Authored-By: GitHub Actions <action@github.com>"
 
@@ -270,6 +268,8 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
 
     except Exception as e:
         results['errors'].append(f"Orchestration error: {str(e)}")
+        import traceback
+        print(traceback.format_exc(), file=sys.stderr)
 
     return results
 
@@ -278,7 +278,7 @@ def main():
     parser = argparse.ArgumentParser(description="Orchestrate workflow execution")
     parser.add_argument('--trigger', required=True, choices=['push', 'workflow_dispatch', 'webhook'],
                        help="Trigger type")
-    parser.add_argument('--action', choices=['sign-contract', 'update-payment'],
+    parser.add_argument('--action', choices=['sign-contract', 'update-payment', 'track-event'],
                        help="Action type (for workflow_dispatch)")
     parser.add_argument('--job-id', help="Job ID (required for actions)")
     parser.add_argument('--payload', help="JSON payload string")

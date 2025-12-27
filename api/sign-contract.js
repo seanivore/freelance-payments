@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
       inputs: {
         action: 'sign-contract',
         job_id: job_id,
-        payload: JSON.stringify({ signature_data }), // Wrap in payload for orchestrator
+        payload: JSON.stringify({ signatures: signature_data.signatures || signature_data }), // v3 schema: signatures object
       },
     });
 

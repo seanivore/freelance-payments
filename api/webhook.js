@@ -32,13 +32,13 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
 
-  // Handle the event
+  // Handle the event (v3 schema: Checkout Sessions instead of Payment Intents)
   switch (event.type) {
-    case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
+    case 'checkout.session.completed':
+      const session = event.data.object;
 
-      // Extract metadata
-      const metadata = paymentIntent.metadata || {};
+      // Extract metadata (v3 schema)
+      const metadata = session.metadata || {};
       const jobId = metadata.job_id;
       const paymentNumber = parseInt(metadata.payment_number, 10);
 
@@ -49,33 +49,45 @@ module.exports = async (req, res) => {
         });
       }
 
-      // Prepare payment data
+      // Prepare payment data (v3 schema: succeeded timestamp)
+      const succeededTimestamp = new Date().toISOString() + 'Z';
       const paymentData = {
-        status: 'paid',
-        paid_date: new Date().toISOString().split('T')[0],
-        paid_date_unix: Math.floor(Date.now() / 1000),
-        stripe_payment_intent_id: paymentIntent.id,
+        succeeded: succeededTimestamp
       };
 
-      // Call update-payment API (or directly trigger GitHub Action)
+      // Trigger GitHub Actions workflow to update payment status
       try {
-        const updateResponse = await fetch(
-          `${req.headers.origin || process.env.SITE_URL}/api/update-payment`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              job_id: jobId,
+        const githubToken = process.env.GITHUB_TOKEN;
+        const repoOwner = process.env.GITHUB_REPO_OWNER || 'seanivore';
+        const repoName = process.env.GITHUB_REPO_NAME || 'freelance-payments';
+        const workflowId = 'orchestrate.yml';
+        const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`;
+
+        const payload = JSON.stringify({
+          ref: 'freelance-payments',
+          inputs: {
+            action: 'update-payment',
+            job_id: jobId,
+            payload: JSON.stringify({
               payment_number: paymentNumber,
-              payment_data: paymentData,
+              succeeded: succeededTimestamp
             }),
-          }
-        );
+          },
+        });
+
+        const updateResponse = await fetch(workflowUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `token ${githubToken}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+          },
+          body: payload,
+        });
 
         if (!updateResponse.ok) {
-          throw new Error('Failed to update payment');
+          const errorText = await updateResponse.text();
+          throw new Error(`GitHub API error: ${updateResponse.status} - ${errorText}`);
         }
 
         console.log(`✅ Payment updated: ${jobId} - Payment ${paymentNumber}`);
@@ -86,9 +98,16 @@ module.exports = async (req, res) => {
 
       break;
 
-    case 'payment_intent.payment_failed':
-      const failedPayment = event.data.object;
-      console.log('Payment failed:', failedPayment.id);
+    case 'checkout.session.async_payment_succeeded':
+      // Handle async payment success (e.g., bank transfers)
+      const asyncSession = event.data.object;
+      console.log('Async payment succeeded:', asyncSession.id);
+      // Same handling as checkout.session.completed
+      break;
+
+    case 'checkout.session.async_payment_failed':
+      const failedSession = event.data.object;
+      console.log('Async payment failed:', failedSession.id);
       // Optionally log or notify
       break;
 

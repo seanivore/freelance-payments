@@ -113,10 +113,13 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # Check _metadata.job_id (new schema) or fallback to old schema
+                # Check v3 schema: product_object.id (matches filename)
+                product_job_id = data.get('product_object', {}).get('id')
+                # Check v2 schema: _metadata.job_id
                 metadata_job_id = data.get('_metadata', {}).get('job_id')
-                old_job_id = data.get('job_id')  # Fallback for migration
-                if metadata_job_id == job_id or old_job_id == job_id:
+                # Check old schema: top-level job_id
+                old_job_id = data.get('job_id')
+                if product_job_id == job_id or metadata_job_id == job_id or old_job_id == job_id:
                     return json_file
         except (json.JSONDecodeError, IOError):
             continue
