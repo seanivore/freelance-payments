@@ -1,47 +1,4 @@
 {
-  "jobs": {
-    "smith-two-payment": {
-      "file_path": "assets/jobs/uid-test-002.json",
-      "job_id": "uid-test-002",
-      "login_keyword": "two-payment",
-      "login_name": "smith"
-    },
-    "johnson-partial-payment": {
-      "file_path": "assets/jobs/uid-test-003.json",
-      "job_id": "uid-test-003",
-      "login_keyword": "partial-payment",
-      "login_name": "johnson"
-    },
-    "williams-all-paid": {
-      "file_path": "assets/jobs/uid-test-004.json",
-      "job_id": "uid-test-004",
-      "login_keyword": "all-paid",
-      "login_name": "williams"
-    },
-    "brown-single-signed": {
-      "file_path": "assets/jobs/uid-test-005.json",
-      "job_id": "uid-test-005",
-      "login_keyword": "single-signed",
-      "login_name": "brown"
-    },
-    "davis-discount-test": {
-      "file_path": "assets/jobs/uid-test-006.json",
-      "job_id": "uid-test-006",
-      "login_keyword": "discount-test",
-      "login_name": "davis"
-    },
-    "taylor-long-desc": {
-      "file_path": "assets/jobs/uid-test-007.json",
-      "job_id": "uid-test-007",
-      "login_keyword": "long-desc",
-      "login_name": "taylor"
-    },
-    "o'reilly-special-chars": {
-      "file_path": "assets/jobs/uid-test-008.json",
-      "job_id": "uid-test-008",
-      "login_keyword": "special-chars",
-      "login_name": "o'reilly"
-    }
-  },
-  "generated_at": "2025-12-27T23:00:43.824492Z"
+  "jobs": {},
+  "generated_at": "2025-12-27T23:39:22.388317Z"
 }
