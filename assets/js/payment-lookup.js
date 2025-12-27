@@ -54,15 +54,20 @@
       const normalizedKeyword = normalizeLookupKey(projectKeyword);
       const lookupKey = `${normalizedLastName}-${normalizedKeyword}`;
 
-      // Find job in manifest
-      const jobPath = manifest.jobs[lookupKey];
+      // Find job entry in manifest (now an object with file_path, job_id, etc.)
+      const jobEntry = manifest.jobs[lookupKey];
 
-      if (!jobPath) {
+      if (!jobEntry) {
         throw new Error('Job not found. Please check your last name and project keyword.');
       }
 
-      // Store job path in sessionStorage for routing
+      // Extract job_id and file_path from entry
+      const jobId = jobEntry.job_id;
+      const jobPath = jobEntry.file_path;
+
+      // Store job data in sessionStorage for routing
       sessionStorage.setItem('jobPath', jobPath);
+      sessionStorage.setItem('jobId', jobId);
       sessionStorage.setItem('lookupKey', lookupKey);
 
       // Load job data to verify it exists
@@ -74,8 +79,8 @@
       const jobData = await jobResponse.json();
       sessionStorage.setItem('jobData', JSON.stringify(jobData));
 
-      // Redirect to payment router to determine next step
-      window.location.href = '/payment-router.html';
+      // Redirect to job_id-based URL (404.html will route to appropriate section)
+      window.location.href = `/${jobId}`;
 
     } catch (error) {
       console.error('Lookup error:', error);
@@ -115,6 +120,7 @@
 
   // Clear sessionStorage on page load (fresh lookup)
   sessionStorage.removeItem('jobPath');
+  sessionStorage.removeItem('jobId');
   sessionStorage.removeItem('lookupKey');
   sessionStorage.removeItem('jobData');
 

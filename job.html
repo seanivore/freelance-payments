@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment - Freelance Payments</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
+
+  <!-- Tailwind CSS -->
+  <link rel="stylesheet" href="/assets/css/styles.css">
+
+  <!-- Stripe.js (needed for checkout sections) -->
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <!-- Print styles -->
+  <style>
+    @media print {
+      .no-print {
+        display: none;
+      }
+
+      @page {
+        margin: 1in;
+      }
+
+      body {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+
+      /* Hide all sections except the one being printed */
+      .job-section:not(.print-active) {
+        display: none;
+      }
+    }
+
+    /* Smooth scrolling for hash anchors */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Section spacing */
+    .job-section {
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+
+    /* Navigation bar */
+    .job-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-background text-foreground">
+  <!-- Loading state -->
+  <div id="loading" class="min-h-screen flex items-center justify-center">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p class="text-muted-foreground">Loading...</p>
+    </div>
+  </div>
+
+  <!-- Navigation bar (shown after content loads) -->
+  <nav id="job-nav" class="job-nav hidden no-print">
+    <div class="max-w-4xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <a href="/" class="text-sm text-muted-foreground hover:text-foreground">← Back to Home</a>
+        <div class="flex gap-4">
+          <a href="#contract" class="text-sm hover:text-primary">Contract</a>
+          <a href="#invoice" class="text-sm hover:text-primary">Invoice</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content container -->
+  <main id="job-content" class="hidden">
+
+    <!-- Contract Section -->
+    <section id="contract" class="job-section">
+      <div class="max-w-4xl mx-auto px-6 print:p-0">
+        <div id="contract-content">
+          <!-- Contract will be populated here by contract-controller.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Invoice Section -->
+    <section id="invoice" class="job-section">
+      <div class="max-w-4xl mx-auto px-6 print:p-0">
+        <div id="invoice-content">
+          <!-- Invoice will be populated here by invoice-controller.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Checkout Section - Payment 1 -->
+    <section id="payment-1" class="job-section">
+      <div class="max-w-2xl mx-auto px-6">
+        <div id="checkout-content-1">
+          <!-- Checkout for payment 1 will be populated here by checkout-controller.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Checkout Section - Payment 2 -->
+    <section id="payment-2" class="job-section">
+      <div class="max-w-2xl mx-auto px-6">
+        <div id="checkout-content-2">
+          <!-- Checkout for payment 2 will be populated here by checkout-controller.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Completion Section -->
+    <section id="completion" class="job-section">
+      <div class="max-w-2xl mx-auto px-6 text-center">
+        <div id="completion-content">
+          <!-- Completion message will be populated here -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Load controllers -->
+  <script src="/assets/js/payment-router.js"></script>
+  <script src="/assets/js/contract-controller.js"></script>
+  <script src="/assets/js/invoice-controller.js"></script>
+  <script src="/assets/js/checkout-controller.js"></script>
+
+  <script>
+    /**
+     * Initialize job page
+     * Determines which section to show based on state and hash anchor
+     */
+    (function () {
+      'use strict';
+
+      // Wait for DOM and controllers to be ready
+      function init() {
+        const jobDataStr = sessionStorage.getItem('jobData');
+        if (!jobDataStr) {
+          console.error('No job data found');
+          document.getElementById('loading').innerHTML = `
+            <div class="text-center">
+              <h1>Error</h1>
+              <p>Job data not found. Please start from the <a href="/">homepage</a>.</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Hide loading, show content
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('job-content').classList.remove('hidden');
+        document.getElementById('job-nav').classList.remove('hidden');
+
+        // Get current hash or determine from state
+        const hash = window.location.hash;
+        let targetSection = hash ? hash.substring(1) : null;
+
+        // If no hash, use payment router to determine section
+        if (!targetSection && typeof PaymentRouter !== 'undefined') {
+          try {
+            const jobData = JSON.parse(jobDataStr);
+            const routeInfo = PaymentRouter.determineRoute(jobData);
+
+            // Map route to section ID
+            const routeToSection = {
+              'contract': 'contract',
+              'invoice': 'invoice',
+              'checkout': routeInfo.paymentNumber === 1 ? 'payment-1' :
+                routeInfo.paymentNumber === 2 ? 'payment-2' : 'payment-1',
+              'completion': 'completion'
+            };
+
+            targetSection = routeToSection[routeInfo.route] || 'contract';
+
+            // Update URL hash without scrolling
+            history.replaceState(null, null, `#${targetSection}`);
+          } catch (e) {
+            console.error('Error determining route:', e);
+            targetSection = 'contract';
+          }
+        }
+
+        // Show target section, hide others
+        if (targetSection) {
+          const sections = document.querySelectorAll('.job-section');
+          sections.forEach(section => {
+            section.classList.add('hidden');
+          });
+
+          const targetElement = document.getElementById(targetSection);
+          if (targetElement) {
+            targetElement.classList.remove('hidden');
+            // Scroll to section smoothly
+            setTimeout(() => {
+              targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+          }
+        }
+
+        // Handle hash changes (user clicks nav links)
+        window.addEventListener('hashchange', function () {
+          const newHash = window.location.hash.substring(1);
+          const sections = document.querySelectorAll('.job-section');
+          sections.forEach(section => {
+            section.classList.add('hidden');
+          });
+
+          const targetElement = document.getElementById(newHash);
+          if (targetElement) {
+            targetElement.classList.remove('hidden');
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+
+</html>

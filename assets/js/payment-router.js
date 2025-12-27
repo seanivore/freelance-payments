@@ -26,8 +26,11 @@
   }
 
   /**
-   * Determine route based on job state
+   * Determine route based on job state (v3 schema)
    * Returns: { route: string, paymentNumber?: number, reason: string }
+   * 
+   * Routes: contract → invoice → checkout → completion
+   * Uses v3 schema: contract.signatures, state_management.client_status, price[] array
    */
   function determineRoute(jobData) {
     if (!jobData) {
@@ -38,89 +41,97 @@
     }
 
     const contract = jobData.contract || {};
-    const prices = jobData.price || []; // New schema: price[] not payments[]
+    const stateManagement = jobData.state_management || {};
+    const clientStatus = stateManagement.client_status || {};
 
-    // Check if contract is signed
-    const isContractSigned = contract.signed === true;
+    // v3 schema: prices are in separate objects (initial_price_object, balance_price_object)
+    // But we need to check payment status from state_management
+    const initialPayment = stateManagement.initial_payment_intent || {};
+    const balancePayment = stateManagement.balance_payment_intent || {};
 
-    // Find pending payments (not paid AND active)
-    const pendingPayments = prices.filter(p => p.paid === false && p.active === true);
-    const paidPayments = prices.filter(p => p.paid === true);
-    const allPaymentsPaid = pendingPayments.length === 0 && paidPayments.length > 0;
+    // Check if contract is signed (v3 schema: contract.signatures.client.signed_date)
+    const isContractSigned = !!(contract.signatures &&
+      contract.signatures.client &&
+      contract.signatures.client.signed_date);
+
+    // Check payment status
+    const initialPaid = initialPayment.succeeded !== null;
+    const balancePaid = balancePayment.succeeded !== null;
+    const allPaymentsPaid = initialPaid && balancePaid;
 
     // State machine logic
     if (!isContractSigned) {
-      // Contract not signed → go to contract page
+      // Contract not signed → go to contract section
       return {
         route: 'contract',
         reason: 'Contract not yet signed'
       };
     }
 
-    if (prices.length === 0) {
-      // No prices defined (edge case)
-      return {
-        route: 'error',
-        reason: 'No payments defined for this job'
-      };
-    }
-
     if (allPaymentsPaid) {
-      // All payments complete → completion page
+      // All payments complete → completion section
       return {
         route: 'completion',
         reason: 'All payments completed'
       };
     }
 
-    // Contract signed, payments pending → find first pending payment
-    const firstPendingPayment = pendingPayments[0];
-    if (!firstPendingPayment) {
+    // Contract signed, determine which payment is pending
+    if (!initialPaid) {
+      // First payment pending → invoice then checkout for payment 1
       return {
-        route: 'error',
-        reason: 'No active pending payments found'
+        route: 'invoice',
+        paymentNumber: 1,
+        reason: 'Initial payment is pending'
+      };
+    } else if (!balancePaid) {
+      // Second payment pending → invoice then checkout for payment 2
+      return {
+        route: 'invoice',
+        paymentNumber: 2,
+        reason: 'Balance payment is pending'
       };
     }
 
-    const paymentNumber = firstPendingPayment.payment_number;
-
-    // Route to invoice for the pending payment
+    // Fallback (shouldn't reach here)
     return {
-      route: 'invoice',
-      paymentNumber: paymentNumber,
-      reason: `Payment ${paymentNumber} is pending`
+      route: 'error',
+      reason: 'Unable to determine route'
     };
   }
 
   /**
-   * Route user to appropriate page
+   * Route user to appropriate section (hash-based routing for single-page app)
+   * Maps routes to section IDs: contract, invoice, payment-1, payment-2, completion
    */
   function routeUser(routeInfo) {
     const { route, paymentNumber } = routeInfo;
+    const jobId = sessionStorage.getItem('jobId');
 
+    // Map route to section ID
+    let sectionId;
     switch (route) {
       case 'contract':
-        window.location.href = '/contract.html';
+        sectionId = 'contract';
         break;
 
       case 'invoice':
-        if (paymentNumber) {
-          window.location.href = `/invoice.html?payment=${paymentNumber}`;
-        } else {
-          window.location.href = '/invoice.html';
-        }
+        sectionId = 'invoice';
         break;
 
       case 'checkout':
-        if (paymentNumber) {
-          window.location.href = `/checkout.html?payment=${paymentNumber}`;
+        // Map payment number to section ID
+        if (paymentNumber === 1) {
+          sectionId = 'payment-1';
+        } else if (paymentNumber === 2) {
+          sectionId = 'payment-2';
         } else {
-          window.location.href = '/checkout.html';
+          sectionId = 'payment-1'; // Default to first payment
         }
         break;
 
       case 'completion':
-        window.location.href = '/completion.html';
+        sectionId = 'completion';
         break;
 
       case 'error':
@@ -128,12 +139,34 @@
         // Show error or redirect to lookup
         alert(`Error: ${routeInfo.reason}. Redirecting to lookup.`);
         window.location.href = '/';
-        break;
+        return;
+    }
+
+    // Update URL hash to navigate to section
+    if (jobId) {
+      // We're on the job page, just update hash
+      window.location.hash = sectionId;
+
+      // Scroll to section (handled by job.html's hashchange listener)
+      const targetElement = document.getElementById(sectionId);
+      if (targetElement) {
+        // Show section, hide others
+        document.querySelectorAll('.job-section').forEach(section => {
+          section.classList.add('hidden');
+        });
+        targetElement.classList.remove('hidden');
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      // Not on job page yet, redirect to job page with hash
+      // This shouldn't happen if called from job.html, but handle it anyway
+      console.warn('No jobId found, cannot route to section');
+      window.location.href = '/';
     }
   }
 
   /**
-   * Main execution
+   * Main execution (only runs if explicitly called, not auto-executed)
    */
   function init() {
     const jobData = getJobData();
@@ -149,7 +182,7 @@
     const routeInfo = determineRoute(jobData);
     console.log('Routing decision:', routeInfo);
 
-    // Route user
+    // Route user (will update hash, not redirect)
     routeUser(routeInfo);
   }
 
@@ -157,12 +190,8 @@
   window.PaymentRouter = {
     determineRoute,
     routeUser,
-    getJobData
+    getJobData,
+    init
   };
-
-  // Auto-execute if this is the router page
-  if (window.location.pathname.includes('payment-router')) {
-    init();
-  }
 
 })();

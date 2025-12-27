@@ -16,7 +16,7 @@ Output:
 import json
 import os
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 import sys
 
 
@@ -37,14 +37,23 @@ def read_job_json(file_path: Path) -> Optional[Dict]:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        # Validate required fields - new schema uses _metadata
-        if '_metadata' not in data:
-            print(f"⚠️  Missing '_metadata' field in {file_path.name}", file=sys.stderr)
+        # Validate required fields - v3 schema uses product_object.metadata
+        if 'product_object' not in data:
+            print(f"⚠️  Missing 'product_object' field in {file_path.name}", file=sys.stderr)
             return None
         
-        metadata = data['_metadata']
-        if 'client_last_name' not in metadata or 'project_keyword' not in metadata:
-            print(f"⚠️  Missing 'client_last_name' or 'project_keyword' in _metadata for {file_path.name}", file=sys.stderr)
+        product_obj = data['product_object']
+        if 'metadata' not in product_obj:
+            print(f"⚠️  Missing 'metadata' in product_object for {file_path.name}", file=sys.stderr)
+            return None
+        
+        metadata = product_obj['metadata']
+        if 'login_name' not in metadata or 'login_keyword' not in metadata:
+            print(f"⚠️  Missing 'login_name' or 'login_keyword' in product_object.metadata for {file_path.name}", file=sys.stderr)
+            return None
+        
+        if 'id' not in product_obj:
+            print(f"⚠️  Missing 'id' in product_object for {file_path.name}", file=sys.stderr)
             return None
         
         return data
@@ -57,10 +66,14 @@ def read_job_json(file_path: Path) -> Optional[Dict]:
         return None
 
 
-def generate_manifest() -> Dict[str, str]:
+def generate_manifest() -> Dict[str, Dict]:
     """
-    Generate manifest mapping lookup keys to JSON file paths
-    Returns: dict mapping "{last_name}-{project_keyword}" to relative file path
+    Generate manifest mapping lookup keys to job entries
+    Returns: dict mapping "{login_name}-{login_keyword}" to entry dict with:
+        - file_path: relative path to JSON file
+        - job_id: product_object.id (matches filename)
+        - login_keyword: from product_object.metadata
+        - login_name: from product_object.metadata
     """
     # Get project root (3 levels up from .github/scripts/generate_manifest.py)
     script_dir = Path(__file__).parent
@@ -85,24 +98,37 @@ def generate_manifest() -> Dict[str, str]:
         if not job_data:
             continue
         
-        # Extract from _metadata (new schema)
-        metadata = job_data['_metadata']
-        last_name = normalize_lookup_key(metadata['client_last_name'])
-        project_keyword = normalize_lookup_key(metadata['project_keyword'])
+        # Extract from product_object (v3 schema)
+        product_obj = job_data['product_object']
+        metadata = product_obj['metadata']
+        login_name = normalize_lookup_key(metadata['login_name'])
+        login_keyword = normalize_lookup_key(metadata['login_keyword'])
+        job_id = product_obj['id']
         
-        # Create lookup key: "{last_name}-{project_keyword}"
-        lookup_key = f"{last_name}-{project_keyword}"
+        # Create lookup key: "{login_name}-{login_keyword}"
+        lookup_key = f"{login_name}-{login_keyword}"
         
         # Relative path from site root
         relative_path = f"assets/jobs/{json_file.name}"
         
+        # Verify job_id matches filename (without .json)
+        expected_job_id = json_file.stem
+        if job_id != expected_job_id:
+            print(f"⚠️  Warning: job_id '{job_id}' doesn't match filename '{expected_job_id}' in {json_file.name}", file=sys.stderr)
+        
         # Check for duplicates
         if lookup_key in manifest:
-            print(f"⚠️  Duplicate lookup key '{lookup_key}': {json_file.name} conflicts with {manifest[lookup_key]}", file=sys.stderr)
+            print(f"⚠️  Duplicate lookup key '{lookup_key}': {json_file.name} conflicts with {manifest[lookup_key]['file_path']}", file=sys.stderr)
             continue
         
-        manifest[lookup_key] = relative_path
-        print(f"✅ Added: {lookup_key} → {json_file.name}")
+        # Create entry with all required fields
+        manifest[lookup_key] = {
+            "file_path": relative_path,
+            "job_id": job_id,
+            "login_keyword": metadata['login_keyword'],
+            "login_name": metadata['login_name']
+        }
+        print(f"✅ Added: {lookup_key} → {job_id} ({json_file.name})")
     
     return manifest
 
@@ -115,9 +141,11 @@ def main():
     script_dir = Path(__file__).parent
     project_root = script_dir.parent.parent
     
+    from datetime import datetime
+    
     manifest_data = {
         "jobs": generate_manifest(),
-        "generated_at": None  # Will be set by GitHub Actions or manually
+        "generated_at": datetime.utcnow().isoformat() + "Z"
     }
     
     # Output directory (relative to project root)
