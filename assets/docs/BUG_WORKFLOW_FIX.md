@@ -1,18 +1,224 @@
-# Stripe Catalog Sync Bug Issues 
+# Stripe Catalog-Sync Bug Issue Review & Solution 
 
-## Overview 
+## Phase Overviews 
 
-  1. The cause of Stripe API related workflow failures has almost certainly been identified in one script error 
-  2. Based on the behavior we're seeing, there are more than just this script managing Stripe Catalog products 
-  3. All issues can be overcome by implementing a grossly simplified workflow logic that handles any Catalog issues 
-  4. Simply, we over extremely over engineer right now compared to how the Stripe API and our flag system works 
+  **TESTING ISSUES ENCOUNTERED**
+  1. JSON files were not updated with details confirming Stripe catalog Product Object creation 
+  2. In subsequent testing it appeared Stripe API calls were not followed by response or were followed by error response 
+
+  **POST-TESTING REVIEW DISCOVERIES**
+  3. Stripe API functioning properly, calls and responses present and accurate, Stripe catalog created Product Objects as intended 
+  4. Our workflow scripts sent hundreds of API calls per minute; response quantity likely blocked our automation's progress 
+  5. API error responses caused by COUNTLESS Product Object delete calls preempted by an unsuccessful Price Deletion call 
+  6. While one script was identified as being problematic, it is clear there is at least one other script with bugs 
+
+  **PLANNED COMPREHENSIVE SOLUTION** 
+  7. Simply, we over-engineered the necessary flow of triggers and action-created JSON file updates 
+  8. Design of heavily-simplified workflow with fully defined automation map eliminates need of other buggy scripts 
+
+### Summary 
+
+Previously planned automation "simplification" resulted in convoluted workflow resulting in bugs during testing. Post-testing review illuminated the issues while confirming all singular tools, like Stripe API, are functional. The system has been replanned and our new logic is carefully defined. 
 
 ### Jump Through (1) Discovery, (2) Solution, (3) Implementation Specifics, (4) Simplest Automation Cycle Map Ever 
 
-  - What was [going wrong](#current-workflow-discoveries)
-  - A much easier way [to fix everything](#new-script--workflows)
-  - Step-by-step API Stripe Object [creation guide](#job-json-stripe-setup)
-  - 9-step flow breakdown showing 2-distinct [automation cycle start-to-end](#comprehensive-flow-breakdown) 
+  - (1) What was [going wrong](#current-workflow-discoveries)
+  - (2) A much easier way [to fix everything](#new-script--workflows)
+  - (3) Step-by-step API Stripe Object [creation guide](#job-json-stripe-setup)
+  - (4) Overall flow breakdown showing 2-distinct [automation cycle start-to-end](#comprehensive-flow-breakdown) 
+
+### Old System Versus New System 
+
+  * **These are the big picture changes from current system to the new system** 
+
+  1. No use of 'DELETE' Stripe catalog objects at all
+    - We will only ARCHIVE Stripe Product Object, done via `active: false | true` 
+    - No need to update Price Objects, Coupon Objects, etc. 
+  2. All Freelance Payments will have TWO 'initial' and 'balance' 
+    - Initial payment will always start work; we should only loosely allude to this as a deposit in contract 
+    - Balance payment will always be due to complete work, we can hardcode that this has a 14-day due date range upon receipt, and $150/late fee 
+    - In all logic for UX state management directing user to certain page or payment, use Payment 1 and Payment 2 
+    - Product meta data still says total number of payments as well, but other than this, no additional future prep need be designed into the system 
+  3. The job JSON file Schema is remade to focus on STATE MANAGEMENT and STRIPE OBJECT CREATION 
+    - All vocabulary should reflect Stripe; all values that can be in a Stripe Object, are now planned to be in a Stripe Object 
+    - Top of schema 'identifying information' for contract and invoice, and scope options at bottom are the only values not in a Stripe Object 
+  4. All Stripe Objects created IMMEDIATELY before adding to manifest; this includes Checkout Sessions 
+    - (1) project object, (2) customer object, (3-4) initial and balance payment, (5) coupon object 
+    - (6-7) checkout session object 
+    - The first payment must always include any discount, with project cost totals reflecting pre-discount, too keep taxes accurate 
+  5. The Contract and Invoice templates should be updated accordingly 
+    - We need to check we are writing them out according to the information we are already collecting 
+    - Instead of collecting a bunch of unnecessary extra, or even duplicate, information 
+    - Flag if there are any essentials missing that are needed for these two documents, that weren't just simplified 
+  6. JSON files and Stripe Objects are ARCHIVED and REPLACED with a new uid-xxx-xxx only 
+    - No more looking for small changes on JSON files at all 
+    - User needs to fix a JSON object? The old one is archived and completely replaced by new entry 
+      (1) They can copy the file, make all the changes they could possibly need 
+      (2) Give it a new Job ID uid-xxx-xxx; then DELETE the old Job JSON file
+      (3) Update all applicable Stripe Objects in JSON that fit the uid-xxx-xxx structure 
+          - Price Object for payment 1 uid-xxx-xxx-1 and payment 2 uid-xxx-xxx-2 
+          - Customer Object uid-xxx-xxx-client 
+          - Discount Coupon Object uid-xxx-xxx-coupon 
+    - The `uid-xxx-xxx` is what the job/JSON is saved as, i.e. `assets/jobs/uid-xxx-xxx.json` 
+    - The manifest lists JSON by `uid-xxx-xxx` which is used as part of the payment page's URL  
+    - With each manifest entry is the `product_object.metadata.login-keyword` and `product_object.metadata.login-name`
+    - Simple workflow and triggers defined in detail below but basically 
+      (1) Gather filenames in `assets/jobs/...` directory 
+      (2) Compare to current, not-yet-updated, manifest and ignore all entries with a matching file name 
+      (3) If an entry has no filename match, use simple archive command for the Product Object only 
+      (4) If a filename has no manifest match, create all required Stripe objects needed 
+      (5) After all objects created, there are JSON updates to be made in state management; queue these 
+      (6) After all new JSON have all required Stripe Objects created, then all JSON files state management should be updated in batch 
+      (6) Only then, upon completion, is the NEW manifest created 
+
+### Planning Next Steps For New System  
+
+  * **What do we prepare and update to integrate the new schema, update trigger logic, actions, and workflows?**
+
+  1. Examine in detail the newly planned flow in this document 
+  2. Compare old `assets/jobs/_job_template_v2.json` with new `assets/jobs/_job_template_v3.json` to identify specific changes 
+  3. As mentioned, schema `v3` is built to first to MANAGE STATE and second to GROUP STRIPE OBJECTS 
+    - Triggered actions in the workflow add details to the state management section 
+    - This way, state management section can inform logic needed to know exactly what page/payment a User logging in should be sent to 
+  4. Make sure new mapped workflow cycle's `trigger, flow, action, cont.` needs are provided for; reviewing all old files for accuracy 
+    - `api/create-payment-intent.js`, `api/webhook.js`, `api/update-payment.js`, and `api/sign-contract.js` 
+    - `.github/workflows/orchestrate.yml` and `.github/workflows/process-job.yml` 
+  4. Eliminate all current automation scripts and workflows, noting what needs to be rewritten and what novel files are needed 
+     - `./.github/scripts/...` and `.github/workflows/...` 
+  5. Find the JS files that need to be updated, as well as the template files, and any HTML files 
+     - `assets/js/...` and `assets/js/components` 
+     - The `assets/js/manifest.json` wil have a new structure 
+     - `assets/templates/contract-template.html` and `assets/templates/invoice-template.html` 
+     - `checkout.html`, `completion.html`, `contract.html`, `index.html`, `invoice.html`, and `payment-router.html` 
+  6. What other elements are missing from this update? Old documents from previous refactor and bug fixes to check for any missing concepts. 
+    - `assets/docs/planning-resources/PREVIOUS_REFACTORING/AI_CONTEXT_PRIMER.md`
+    - `assets/docs/planning-resources/PREVIOUS_REFACTORING/MODULAR_REFACTOR_PLANNING.md`
+    - `assets/docs/planning-resources/PREVIOUS_REFACTORING/SCHEMA_MIGRATION_RECOVERY.md`
+    - `assets/docs/planning-resources/PREVIOUS_REFACTORING/TESTING_DEBUGGING_STATUS.md` 
+  7. Create new triggers, actions, and workflows 
+    + Check the map defined at bottom of page 
+    + If possible, name each step as accurately as possible, for ease of communicating between AI and my Web Browser 
+      - So that when we see things running and fail in GitHub actions 
+      - So that it is obvious what exactly is which trigger 
+      - Able to identify which files exactly are each action step 
+    + Before building the workflows, evaluate if they are simple as possible 
+      - Do we need an overarching orchestrator again or not 
+      - There are two distinctly different flows, only one is admin triggered by push 
+      - Discuss and strategize best way to queue actions that need to run, to efficiently run them together, appropriate amount of time, etc. 
+  8. Create new tests using the new v3 schema. These are the old tests for reference. 
+    - `assets/docs/planning-resources/W_I_P/test-all-paid.json`
+    - `assets/docs/planning-resources/W_I_P/test-already-signed.json`
+    - `assets/docs/planning-resources/W_I_P/test-four-payments.json`
+    - `assets/docs/planning-resources/W_I_P/test-long-description.json`
+    - `assets/docs/planning-resources/W_I_P/test-multi-payment.json`
+    - `assets/docs/planning-resources/W_I_P/test-partially-paid.json`
+    - `assets/docs/planning-resources/W_I_P/test-single-payment-v2.json`
+    - `assets/docs/planning-resources/W_I_P/test-single-payment.json`
+    - `assets/docs/planning-resources/W_I_P/test-special-chars.json` 
+  9. Test each step in the workflow separately; we didn't do that last time and ended up wishing we did 
+    - Note that we test on the live site 
+    - We've not yet gotten past testing the addition/removal of JSON files and syncing of Stripe Catalog 
+
+### Current Project Directory 
+
+```plaintext 
+.
+├── _config.yml                   <-- GitHub Pages build guide 
+├── CNAME                         <-- GitHub Pages custom domain 
+├── .cursor/plans/
+│   └── freelance_payments_micro-site_afd10b54.plan.md   <-- Exists, but is dated; use for outline only, only if needed
+├── .env
+├── .env.local
+├── .example.env
+├── .github
+│   ├── scripts
+│   │   ├── generate_manifest.py
+│   │   ├── orchestration
+│   │   │   ├── cleanup_orphans.py
+│   │   │   ├── orchestrate_workflow.py
+│   │   │   └── sync_catalog.py
+│   │   ├── process_stripe_products.py
+│   │   ├── state
+│   │   │   ├── detect_sync_needs.py
+│   │   │   ├── update_contract.py
+│   │   │   └── update_payment.py
+│   │   ├── stripe
+│   │   │   ├── price
+│   │   │   │   ├── archive_price.py
+│   │   │   │   ├── create_price.py
+│   │   │   │   ├── delete_price.py
+│   │   │   │   └── list_prices.py
+│   │   │   └── product
+│   │   │       ├── archive_product.py
+│   │   │       ├── create_product.py
+│   │   │       ├── delete_product.py
+│   │   │       ├── list_products.py
+│   │   │       └── modify_product.py
+│   │   ├── update_job_json.py
+│   │   └── utils
+│   │       └── json_io.py
+│   └── workflows
+│       ├── orchestrate.yml
+│       └── process-job.yml
+├── .gitignore
+├── .vercel
+│   ├── project.json
+│   └── README.txt
+├── api
+│   ├── create-payment-intent.js
+│   ├── sign-contract.js
+│   ├── update-payment.js
+│   └── webhook.js
+├── assets
+│   ├── css
+│   │   ├── input.css
+│   │   └── styles.css
+│   ├── docs
+│   │   ├── BUG_WORKFLOW_FIX.md                   <-- THIS DOCUMENT 
+│   │   ├── planning-resources
+│   │   │   ├── EXAMPLE_FILES                     <-- `404_example.html`, `data-loader_example.js`, etc. five others 
+│   │   │   ├── IMAGE_VISUAL_DESIGN_GUIDE 
+│   │   │   ├── ORIGINAL_PLANNING_DOCS
+│   │   │   ├── PREVIOUS_REFACTORING
+│   │   │   │   ├── AI_CONTEXT_PRIMER.md          <-- Dated from previous rebuild, need updated version 
+│   │   │   │   ├── MODULAR_REFACTOR_PLANNING.md  <-- Reason for previous refactor before bug 
+│   │   │   │   ├── SCHEMA_MIGRATION_RECOVERY.md  <-- Worked through before testing that led to bugs 
+│   │   │   │   └── TESTING_DEBUGGING_STATUS.md   <-- Where we were before this document 
+│   │   │   ├── reports
+│   │   │   └── W_I_P                             <-- Old test JSON files 
+│   │   └── stripe_docs_llm.txt                   <-- Written for LLMs using Stripe Dev Docs  
+│   ├── favicon
+│   ├── fonts 
+│   ├── jobs
+│   │   ├── _job_template_v2.json
+│   │   └── _job_template_v3.json
+│   ├── js
+│   │   ├── checkout-controller.js
+│   │   ├── components
+│   │   │   ├── button.js
+│   │   │   ├── card.js
+│   │   │   └── input.js
+│   │   ├── contract-controller.js
+│   │   ├── invoice-controller.js
+│   │   ├── manifest.json
+│   │   ├── payment-lookup.js
+│   │   └── payment-router.js
+│   ├── media
+│   └── templates
+│       ├── contract-template.html
+│       └── invoice-template.html
+├── checkout.html
+├── completion.html
+├── contract.html
+├── index.html
+├── invoice.html
+├── package-lock.json
+├── package.json
+├── payment-router.html
+├── postcss.config.js
+├── tailwind.config.js
+└── vercel.json
+```
 
 ---
 
@@ -287,29 +493,54 @@ We currently have two, but these are the other options. Seems like we should pro
 ### 1. Collect Job JSON Directory IDs 
 [top](#job-json-stripe-setup)
 
-  + Commit is PUSHED to Git with **ANY** change to `assets/jobs/...` directory
-    - Big or small change, it doesn't matter what was changed or where, only that something was; keep it simple 
-    - Gather JSON file names which are their Stripe `product_object.id`, the `uid-xxx-xxx` number 
-    - Identify ID numbers that are on the `assets/js/manifest.json` list and those that are not 
-
-    * **Keep a list of filenames not on the list for OBJECT CREATION** 
-
-  + There will be two types of JSON files identified as already being on `assets/js/manifest.json`
-    1. Ignore the filenames already on the list with `product_object.active=true` 
-    2. Identify filenames already on the list that have the `product_object.active=false` value 
-
-    * **Keep the files with `false` to run through a quick PRODUCT OBJECT ARCHIVE**
+  * **New job JSON creation and updating job JSON files; WHOLE UPDATES only** 
   
+  1. All "updates" needed to be made to jobs by creating a NEW JOB JSON COMPLETELY 
+    - The JSON can be copied, and all changes made 
+    - Then a new job number ID and all object ID that fit the pattern must be replaced 
+    - This means creating new `uid-xxx-xxx` for the Product Object 
+    - Replace Payment 1's `uid-xxx-xxx-1` Price Object ID
+    - Replace Payment 2's `uid-xxx-xxx-2` Price Object ID 
+    - Replace Client's `uid-xxx-xxx-client` Customer Object ID 
+    - Replace Discount's `uid-xxx-xxx-coupon` Coupon Object ID 
+  2. All job JSON are saved with the filename reflecting the UID `assets/jobs/uid-xxx-xxx.json` 
+  2. Then DELETE the old JSON file completely out of the `assets/jobs/...` directory 
+
+  * **Trigger looks simply for commit pushing ANY changes to the `assets/jobs/...` directory**
+
+    - Ignore tracking anything about the specifics of the change 
+    - We don't need those details and keeping more details than needed is not worth the complication risks 
+
+  * **Simple UPDATE logic for catalog syncing** 
+
+    1. Gather JSON directory file names 
+    2. Ignore JSON directory file names that the `assets/js/manifest.json` has a matching entry for 
+    3. Hold any `manifest.json` entires that do not have a JSON directory file match TO BE ARCHIVED 
+    4. Hold any new JSON directory filenames that do not have a `manifest.json` match TO HAVE STRIPE OBJECTS CREATED 
+
+  * **Do not update the manifest.json yet, that will be done LAST** 
+
 ### 2. Run Simple Archive Command 
 [top](#job-json-stripe-setup)
 
-  + Use quick BASH command or python stripe.Product.modify() API call 
-    - Add the filename, which is the same as the `product_object.id` directly after `stripe` `api resource` `operation` 
-    - Add the argument/flag `--active="false"` 
-  + Ignore Price Objects and Coupons associated with the Product Object 
-    - You just made their product inactive 
-    - The products associated resources automatically become inactive, too
-  + Stripe keeps all inactive objects, of any kind, **INDEFINITELY** because they're amazing at record-keeping; no deleting ever 
+  * **Use quick BASH command or python stripe.Product.modify() API/SDK call to archive PRODUCT OBJECT** 
+
+  + Command pattern is `stripe` `api resource` `operation` `object id` `argument/flag parameters` 
+  + `stripe products update uid-xxx-xxx --active="false"`
+
+  + Locate object ID from the file name 
+    - The `stripe.product_object.id` is the same as the JSON filename 
+    - Just remove `.json` from `uid-xxx-xxx.json` 
+    - The `uid-xxx-xxx` is how Stripe identifies the product 
+    
+  + Change "active" value to "false" 
+    - If it isn't active, it is archived 
+    - This only needs to be done to the PROJECT OBJECT 
+    - All associated price objects, coupon objects, or checkout session objects are archived by implication 
+    - Stripe keeps all archived (inactive) objects INDEFINITELY for amazing record-keeping 
+
+  * **Simply do this for all the entries on the manifest.json that did not have a matching JSON filename in the directory** 
+    
 
 ```bash
 stripe products update uid-xxx-xxx --active="false"
