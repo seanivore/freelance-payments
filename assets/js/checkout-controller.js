@@ -1,29 +1,40 @@
 /**
  * CHECKOUT CONTROLLER
- * Handles Stripe Payment Element integration and payment processing
+ * Handles Stripe Checkout Session creation and redirect
  * 
- * Updated for new schema: Uses price[] array, price.unit_amount (cents), price.paid boolean, _metadata.job_id
+ * Updated for v3 schema: Uses initial_price_object, balance_price_object, product_object.id
+ * Creates Checkout Sessions on-demand (per CHECKOUT_SESSION_DETAILS.md)
+ * Works within single-page template (job.html) with #payment-1 and #payment-2 sections
  */
 
 (function () {
   'use strict';
 
-  const loadingDiv = document.getElementById('loading');
-  const contentDiv = document.getElementById('checkout-content');
-
-  let stripe = null;
-  let elements = null;
-  let paymentElement = null;
-  let currentJobData = null;
-  let currentPayment = null;
+  const checkoutContent1 = document.getElementById('checkout-content-1');
+  const checkoutContent2 = document.getElementById('checkout-content-2');
+  const paymentSection1 = document.getElementById('payment-1');
+  const paymentSection2 = document.getElementById('payment-2');
 
   /**
-   * Get payment number from URL
+   * Get payment number from hash or determine from state (v3 schema)
    */
-  function getPaymentNumber() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentParam = urlParams.get('payment');
-    return paymentParam ? parseInt(paymentParam, 10) : null;
+  function getPaymentNumber(jobData) {
+    // Try hash first (e.g., #payment-1)
+    const hash = window.location.hash;
+    const hashMatch = hash.match(/payment-(\d+)/);
+    if (hashMatch) {
+      return parseInt(hashMatch[1], 10);
+    }
+
+    // Check state_management to determine which payment is pending
+    const stateManagement = jobData.state_management || {};
+    const initialPaid = stateManagement.initial_payment_intent?.succeeded !== null;
+    const balancePaid = stateManagement.balance_payment_intent?.succeeded !== null;
+
+    if (!initialPaid) return 1;
+    if (!balancePaid) return 2;
+
+    return null; // All paid
   }
 
   /**
@@ -50,20 +61,33 @@
   }
 
   /**
-   * Create PaymentIntent via serverless function
-   * Uses stripe_price_id from JSON to ensure correct payment amount
-   * 
-   * Flow: Frontend → Serverless Function → Stripe API → Returns client_secret
+   * Create Checkout Session on-demand (per CHECKOUT_SESSION_DETAILS.md)
    */
-  async function createPaymentIntent(jobData, price) {
-    // Vercel API endpoint (backend serverless functions)
-    // Frontend is on GitHub Pages, API is on Vercel
-    const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-payment-intent';
+  async function createCheckoutSession(jobData, paymentNumber) {
+    const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-checkout-session';
 
-    // Validate Stripe Price ID exists
-    if (!price.stripe_price_id) {
-      throw new Error('Stripe Price ID not found. Payment may not be set up in Stripe catalog yet.');
+    // Get price object (v3 schema)
+    let priceObject = null;
+    let priceId = null;
+    let couponId = null;
+
+    if (paymentNumber === 1) {
+      priceObject = jobData.initial_price_object;
+      priceId = priceObject?.id;
+      // Discounts only apply to first payment (v3 schema)
+      couponId = jobData.coupon_object?.id || null;
+    } else if (paymentNumber === 2) {
+      priceObject = jobData.balance_price_object;
+      priceId = priceObject?.id;
+      couponId = null; // No discount on balance payment
     }
+
+    if (!priceId) {
+      throw new Error('Price ID not found. Payment may not be set up in Stripe catalog yet.');
+    }
+
+    const jobId = jobData.product_object?.id || sessionStorage.getItem('jobId');
+    const customerId = jobData.customer_object?.id || null;
 
     try {
       const response = await fetch(serverlessEndpoint, {
@@ -72,178 +96,42 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // Use stripe_price_id to ensure exact payment amount
-          price_id: price.stripe_price_id,
-          // Additional metadata for webhook handling (new schema)
-          metadata: {
-            job_id: jobData._metadata.job_id,
-            payment_number: price.payment_number,
-            client_last_name: jobData._metadata.client_last_name,
-            project_keyword: jobData._metadata.project_keyword
-          }
+          price_id: priceId,
+          coupon_id: couponId,
+          customer_id: customerId,
+          job_id: jobId,
+          payment_number: paymentNumber,
+          return_url: `${window.location.origin}/${jobId}#completion`
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Failed to create payment intent: ${response.status}`);
+        throw new Error(errorData.message || `Failed to create checkout session: ${response.status}`);
       }
 
       const data = await response.json();
-      return data.clientSecret;
+      return data.session_url; // Stripe Checkout Session URL
     } catch (error) {
-      console.error('Error creating payment intent:', error);
+      console.error('Error creating checkout session:', error);
       throw error;
     }
   }
 
   /**
-   * Initialize Stripe Payment Element
+   * Build checkout form HTML (v3 schema)
    */
-  async function initializePaymentElement(clientSecret) {
-    // Initialize Stripe with publishable key
-    // TODO: Replace with your Stripe publishable key (from Stripe Dashboard)
-    // Option 1: Set directly here (for testing)
-    // Option 2: Load from config.js file (see PHASE2_SETUP.md)
-    const publishableKey = 'pk_test_51Sbjhg9fljwH26CPk5PQKftpMaVQ7D7kIH3O3tYVEFSkOzVdqI5DWtT7EMcJDUqQLKEgIosx7q4nfgjrB1KMf85100WsuWFKNr';
+  function buildCheckoutForm(jobData, priceObject, paymentNumber) {
+    const amount = (priceObject.unit_amount || 0) / 100; // Convert cents to dollars
+    const jobId = jobData.product_object?.id || '';
 
-    if (!publishableKey || publishableKey === 'pk_test_YOUR_KEY_HERE') {
-      throw new Error('Stripe publishable key not configured. Please set window.STRIPE_PUBLISHABLE_KEY or update checkout-controller.js');
-    }
-
-    stripe = Stripe(publishableKey); // Stripe (capital S) is the constructor function
-
-    // Create Elements instance
-    elements = stripe.elements({
-      clientSecret: clientSecret,
-      appearance: {
-        theme: 'stripe',
-        variables: {
-          colorPrimary: 'hsl(var(--primary))',
-          colorBackground: 'hsl(var(--background))',
-          colorText: 'hsl(var(--foreground))',
-          colorDanger: 'hsl(var(--destructive))',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          spacingUnit: '4px',
-          borderRadius: '8px',
-        }
-      }
-    });
-
-    // Create and mount Payment Element
-    paymentElement = elements.create('payment');
-    await paymentElement.mount('#payment-element');
-  }
-
-  /**
-   * Handle payment form submission
-   */
-  async function handlePaymentSubmit(event) {
-    event.preventDefault();
-
-    const submitButton = document.getElementById('submit-payment');
-    const errorDiv = document.getElementById('payment-error');
-
-    // Disable submit button
-    submitButton.disabled = true;
-    submitButton.textContent = 'Processing...';
-    errorDiv.textContent = '';
-
-    try {
-      // Confirm payment
-      const { error, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/payment-success.html`,
-        },
-        redirect: 'if_required' // Don't redirect automatically, handle in JS
-      });
-
-      if (error) {
-        // Show error to user
-        errorDiv.textContent = error.message;
-        submitButton.disabled = false;
-        submitButton.textContent = 'Pay Now';
-        return;
-      }
-
-      // Payment succeeded
-      if (paymentIntent && paymentIntent.status === 'succeeded') {
-        await handlePaymentSuccess(paymentIntent);
-      }
-
-    } catch (error) {
-      console.error('Payment error:', error);
-      errorDiv.textContent = 'An error occurred. Please try again.';
-      submitButton.disabled = false;
-      submitButton.textContent = 'Pay Now';
-    }
-  }
-
-  /**
-   * Handle successful payment
-   */
-  async function handlePaymentSuccess(paymentIntent) {
-    // Update job data (new schema: price[] array, price.paid boolean)
-    const priceIndex = currentJobData.price.findIndex(
-      p => p.payment_number === currentPayment.payment_number
-    );
-
-    if (priceIndex !== -1) {
-      currentJobData.price[priceIndex].paid = true;
-      currentJobData.price[priceIndex].paid_date = new Date().toISOString().split('T')[0];
-      currentJobData.price[priceIndex].paid_date_unix = Math.floor(Date.now() / 1000);
-      currentJobData.price[priceIndex].active = false; // Archive paid price
-    }
-
-    // Update sessionStorage
-    sessionStorage.setItem('jobData', JSON.stringify(currentJobData));
-
-    // Webhook will update JSON file via GitHub Actions
-    // For now, show success and route to next step
-
-    // Show success message
-    const amount = currentPayment.unit_amount / 100; // Convert cents to dollars
-    contentDiv.innerHTML = `
-      <div class="card p-8 text-center">
-        <div class="mb-4">
-          <svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-        </div>
-        <h2 class="card-title mb-4">Payment Successful!</h2>
-        <p class="text-muted-foreground mb-6">
-          Your payment of ${formatCurrency(amount)} has been processed successfully.
-        </p>
-        <div class="flex gap-4 justify-center">
-          <a href="/payment-router.html" class="btn btn-primary">Continue</a>
-        </div>
-      </div>
-    `;
-
-    // Route to next step after a moment
-    setTimeout(() => {
-      if (typeof PaymentRouter !== 'undefined') {
-        const routeInfo = PaymentRouter.determineRoute(currentJobData);
-        PaymentRouter.routeUser(routeInfo);
-      } else {
-        window.location.href = '/payment-router.html';
-      }
-    }, 2000);
-  }
-
-  /**
-   * Build checkout form HTML
-   */
-  function buildCheckoutForm(jobData, price) {
-    const amount = price.unit_amount / 100; // Convert cents to dollars
     return `
       <div class="card p-6 space-y-6">
         <!-- Header -->
         <div class="card-header pb-4">
           <h1 class="card-title">Complete Payment</h1>
           <p class="text-sm text-muted-foreground mt-2">
-            Payment ${price.payment_number} of ${jobData.price.length}
+            Payment ${paymentNumber} of 2
           </p>
         </div>
 
@@ -255,29 +143,36 @@
           </div>
           <div class="flex justify-between">
             <span class="text-muted-foreground">Description:</span>
-            <span>${price.nickname || 'Payment'}</span>
+            <span>${priceObject.nickname || 'Payment'}</span>
           </div>
+          ${paymentNumber === 1 && jobData.coupon_object ? `
+          <div class="flex justify-between text-sm">
+            <span class="text-muted-foreground">Discount:</span>
+            <span class="text-green-600">${jobData.coupon_object.name || 'Applied'}</span>
+          </div>
+          ` : ''}
         </div>
 
-        <!-- Payment Form -->
-        <form id="payment-form" class="space-y-4">
-          <div id="payment-element">
-            <!-- Stripe Payment Element will be mounted here -->
-          </div>
-          
-          <div id="payment-error" class="text-sm text-destructive"></div>
-          
-          <button type="submit" id="submit-payment" class="btn btn-primary w-full">
-            Pay ${formatCurrency(amount)}
-          </button>
-        </form>
+        <!-- Pay Button -->
+        <button id="pay-button" class="btn btn-primary w-full">
+          Pay ${formatCurrency(amount)}
+        </button>
+
+        <!-- Loading state (hidden initially) -->
+        <div id="checkout-loading" class="hidden text-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p class="text-sm text-muted-foreground">Redirecting to secure payment...</p>
+        </div>
+
+        <!-- Error message (hidden initially) -->
+        <div id="checkout-error" class="hidden text-sm text-destructive bg-destructive/10 p-3 rounded"></div>
 
         <!-- Navigation -->
         <div class="flex gap-4 justify-center pt-4 border-t">
-          <a href="/invoice.html?payment=${price.payment_number}" class="btn btn-outline">
+          <a href="#invoice" class="btn btn-outline">
             Back to Invoice
           </a>
-          <a href="/contract.html" class="btn btn-outline">
+          <a href="#contract" class="btn btn-outline">
             View Contract
           </a>
         </div>
@@ -286,91 +181,155 @@
   }
 
   /**
-   * Initialize checkout page
+   * Initialize checkout section (works within single-page template)
    */
-  async function init() {
+  async function init(paymentNumber) {
     const jobData = getJobData();
 
     if (!jobData) {
-      alert('Job data not found. Redirecting to lookup.');
-      window.location.href = '/';
+      const errorMsg = '<p>Job data not found. Please start from the <a href="/">homepage</a>.</p>';
+      if (paymentNumber === 1 && checkoutContent1) {
+        checkoutContent1.innerHTML = errorMsg;
+      } else if (paymentNumber === 2 && checkoutContent2) {
+        checkoutContent2.innerHTML = errorMsg;
+      }
       return;
     }
 
-    currentJobData = jobData;
-
-    // Get payment number
-    const paymentNumber = getPaymentNumber();
-    const prices = jobData.price || []; // New schema: price[] not payments[]
-
-    // Find the payment
-    let payment = null;
-    if (paymentNumber) {
-      payment = prices.find(p => p.payment_number === paymentNumber);
-    } else {
-      // Default to first pending, active payment
-      payment = prices.find(p => p.paid === false && p.active === true);
+    // Get price object (v3 schema)
+    let priceObject = null;
+    if (paymentNumber === 1) {
+      priceObject = jobData.initial_price_object;
+    } else if (paymentNumber === 2) {
+      priceObject = jobData.balance_price_object;
     }
 
-    if (!payment) {
-      alert('Payment not found. Redirecting to lookup.');
-      window.location.href = '/';
+    if (!priceObject) {
+      const errorMsg = '<p>Payment not found. Please contact support.</p>';
+      if (paymentNumber === 1 && checkoutContent1) {
+        checkoutContent1.innerHTML = errorMsg;
+      } else if (paymentNumber === 2 && checkoutContent2) {
+        checkoutContent2.innerHTML = errorMsg;
+      }
       return;
     }
 
-    // Check if already paid (new schema: price.paid boolean)
-    if (payment.paid === true) {
-      alert('This payment has already been completed.');
-      window.location.href = '/payment-router.html';
-      return;
+    // Check if already paid (v3 schema: check state_management)
+    const stateManagement = jobData.state_management || {};
+    let isPaid = false;
+    if (paymentNumber === 1) {
+      isPaid = stateManagement.initial_payment_intent?.succeeded !== null;
+    } else if (paymentNumber === 2) {
+      isPaid = stateManagement.balance_payment_intent?.succeeded !== null;
     }
 
-    currentPayment = payment;
-
-    // Build checkout form
-    const checkoutHTML = buildCheckoutForm(jobData, payment);
-    contentDiv.innerHTML = checkoutHTML;
-
-    // Hide loading, show content
-    loadingDiv.classList.add('hidden');
-    contentDiv.classList.remove('hidden');
-
-    try {
-      // Create PaymentIntent and get client secret
-      const clientSecret = await createPaymentIntent(jobData, payment);
-
-      // Initialize Stripe Payment Element
-      await initializePaymentElement(clientSecret);
-
-      // Attach form submit handler
-      const form = document.getElementById('payment-form');
-      form.addEventListener('submit', handlePaymentSubmit);
-
-    } catch (error) {
-      console.error('Checkout initialization error:', error);
-      contentDiv.innerHTML = `
-        <div class="card p-6">
-          <h2 class="card-title mb-4">Error</h2>
-          <p class="text-destructive mb-4">${error.message || 'Failed to initialize checkout. Please try again.'}</p>
-          <a href="/invoice.html?payment=${payment.payment_number}" class="btn btn-primary">Back to Invoice</a>
+    if (isPaid) {
+      const paidMsg = `
+        <div class="card p-6 text-center">
+          <div class="mb-4">
+            <svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h2 class="card-title mb-4">Payment Already Completed</h2>
+          <p class="text-muted-foreground mb-6">
+            This payment has already been processed successfully.
+          </p>
+          <a href="#invoice" class="btn btn-primary">View Invoice</a>
         </div>
       `;
-      loadingDiv.classList.add('hidden');
-      contentDiv.classList.remove('hidden');
+      if (paymentNumber === 1 && checkoutContent1) {
+        checkoutContent1.innerHTML = paidMsg;
+      } else if (paymentNumber === 2 && checkoutContent2) {
+        checkoutContent2.innerHTML = paidMsg;
+      }
+      return;
     }
+
+    // Build checkout form
+    const checkoutHTML = buildCheckoutForm(jobData, priceObject, paymentNumber);
+    const contentDiv = paymentNumber === 1 ? checkoutContent1 : checkoutContent2;
+    if (contentDiv) {
+      contentDiv.innerHTML = checkoutHTML;
+
+      // Attach pay button handler
+      const payButton = document.getElementById('pay-button');
+      const loadingDiv = document.getElementById('checkout-loading');
+      const errorDiv = document.getElementById('checkout-error');
+
+      if (payButton) {
+        payButton.addEventListener('click', async () => {
+          payButton.disabled = true;
+          payButton.classList.add('hidden');
+          if (loadingDiv) loadingDiv.classList.remove('hidden');
+          if (errorDiv) {
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+          }
+
+          try {
+            // Create checkout session on-demand
+            const sessionUrl = await createCheckoutSession(jobData, paymentNumber);
+
+            // Redirect to Stripe Checkout Session
+            window.location.href = sessionUrl;
+          } catch (error) {
+            console.error('Checkout error:', error);
+            if (errorDiv) {
+              errorDiv.textContent = error.message || 'Failed to create checkout session. Please try again.';
+              errorDiv.classList.remove('hidden');
+            }
+            payButton.disabled = false;
+            payButton.classList.remove('hidden');
+            if (loadingDiv) loadingDiv.classList.add('hidden');
+          }
+        });
+      }
+    }
+  }
+
+  /**
+   * Initialize checkout sections when they become visible
+   */
+  function checkAndInit() {
+    const jobData = getJobData();
+    if (!jobData) return;
+
+    // Determine which payment is pending
+    const paymentNumber = getPaymentNumber(jobData);
+    if (!paymentNumber) return;
+
+    // Initialize the appropriate section
+    if (paymentNumber === 1 && paymentSection1 && !paymentSection1.classList.contains('hidden')) {
+      init(1);
+    } else if (paymentNumber === 2 && paymentSection2 && !paymentSection2.classList.contains('hidden')) {
+      init(2);
+    }
+  }
+
+  // Watch for section visibility changes
+  const observer1 = paymentSection1 ? new MutationObserver(checkAndInit) : null;
+  const observer2 = paymentSection2 ? new MutationObserver(checkAndInit) : null;
+
+  if (paymentSection1 && observer1) {
+    observer1.observe(paymentSection1, { attributes: true, attributeFilter: ['class'] });
+  }
+  if (paymentSection2 && observer2) {
+    observer2.observe(paymentSection2, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // Also initialize on page load if section is already visible
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkAndInit);
+  } else {
+    checkAndInit();
   }
 
   // Export for use in other scripts
   window.CheckoutController = {
     getJobData,
-    getPaymentNumber
+    getPaymentNumber,
+    init
   };
-
-  // Initialize on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
 
 })();

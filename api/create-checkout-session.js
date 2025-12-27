@@ -1,0 +1,98 @@
+/**
+ * Vercel Serverless Function
+ * Creates Stripe Checkout Session on-demand (per CHECKOUT_SESSION_DETAILS.md)
+ * 
+ * POST /api/create-checkout-session
+ * Body: { price_id: string, coupon_id?: string, customer_id?: string, job_id: string, payment_number: number, return_url: string }
+ * 
+ * Creates a new Checkout Session each time user clicks Pay (sessions expire after 24 hours)
+ */
+
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+module.exports = async (req, res) => {
+  // Only allow POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const { price_id, coupon_id, customer_id, job_id, payment_number, return_url } = req.body;
+
+    // Validate required fields
+    if (!price_id) {
+      return res.status(400).json({ error: 'price_id is required' });
+    }
+
+    if (!job_id) {
+      return res.status(400).json({ error: 'job_id is required' });
+    }
+
+    if (!payment_number) {
+      return res.status(400).json({ error: 'payment_number is required' });
+    }
+
+    // Build line items
+    const lineItems = [{
+      price: price_id,
+      quantity: 1
+    }];
+
+    // Build discounts array (only for first payment)
+    const discounts = [];
+    if (coupon_id && payment_number === 1) {
+      discounts.push({ coupon: coupon_id });
+    }
+
+    // Create Checkout Session
+    const sessionParams = {
+      mode: 'payment',
+      line_items: lineItems,
+      success_url: return_url || `${req.headers.origin}/${job_id}#completion`,
+      cancel_url: return_url || `${req.headers.origin}/${job_id}#invoice`,
+      expires_at: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours from now
+      metadata: {
+        job_id: job_id,
+        payment_number: payment_number.toString(),
+        created_via: 'freelance-payments-api'
+      },
+      // Enable after-expiration recovery (per CHECKOUT_SESSION_DETAILS.md)
+      after_expiration: {
+        recovery: {
+          enabled: true
+        }
+      }
+    };
+
+    // Add customer if provided
+    if (customer_id) {
+      sessionParams.customer = customer_id;
+      sessionParams.customer_creation = 'always';
+    } else {
+      sessionParams.customer_creation = 'always';
+    }
+
+    // Add discounts if any
+    if (discounts.length > 0) {
+      sessionParams.discounts = discounts;
+    }
+
+    // Add billing address collection
+    sessionParams.billing_address_collection = 'required';
+
+    // Create session
+    const session = await stripe.checkout.sessions.create(sessionParams);
+
+    res.status(200).json({
+      session_id: session.id,
+      session_url: session.url
+    });
+
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({
+      error: 'Failed to create checkout session',
+      message: error.message,
+    });
+  }
+};
