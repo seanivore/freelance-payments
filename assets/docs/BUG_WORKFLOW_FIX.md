@@ -1,6 +1,6 @@
 # Stripe Catalog-Sync Bug Issue Review & Solution 
 
-## Phase Overviews 
+## Overview  
 
   **TESTING ISSUES ENCOUNTERED**
   1. JSON files were not updated with details confirming Stripe catalog Product Object creation 
@@ -18,11 +18,11 @@
 
 ### Summary 
 
-Previously planned automation "simplification" resulted in convoluted workflow resulting in bugs during testing. Post-testing review illuminated the issues while confirming all singular tools, like Stripe API, are functional. The system has been replanned and our new logic is carefully defined. 
+Previously planned automation "simplification" and modular rebuild led to convoluted workflow resulting in bugs during testing. Post-testing review illuminated the issue and confirmed accurate tool functioning, i.e. Stripe API/SDK connection is working properly. The system has been replanned and our new logic is carefully defined below; it comes with a collection of overall simplifications that should, hopefully, allow us to build a more robust automated backend set of workflows. 
 
 ### Jump Through (1) Discovery, (2) Solution, (3) Implementation Specifics, (4) Simplest Automation Cycle Map Ever 
 
-  - (1) What was [going wrong](#current-workflow-discoveries)
+  - (1) What was [going wrong](#buggy-workflow-discoveries)
   - (2) A much easier way [to fix everything](#new-script--workflows)
   - (3) Step-by-step API Stripe Object [creation guide](#job-json-stripe-setup)
   - (4) Overall flow breakdown showing 2-distinct [automation cycle start-to-end](#comprehensive-flow-breakdown) 
@@ -32,7 +32,7 @@ Previously planned automation "simplification" resulted in convoluted workflow r
   * **These are the big picture changes from current system to the new system** 
 
   1. No use of 'DELETE' Stripe catalog objects at all
-    - We will only ARCHIVE Stripe Product Object, done via `active: false | true` 
+    - We will only ARCHIVE Stripe Product Object via 'Modify' `active: false | true` 
     - No need to update Price Objects, Coupon Objects, etc. 
   2. All Freelance Payments will have TWO 'initial' and 'balance' 
     - Initial payment will always start work; we should only loosely allude to this as a deposit in contract 
@@ -222,96 +222,62 @@ Previously planned automation "simplification" resulted in convoluted workflow r
 
 ---
 
-## Current Workflow Discoveries 
+## Buggy Workflow Discoveries 
 
 ### Stripe API Dashboard 
 
-  * **I suspect that the responses we expected to get from Stripe were buried in chaos**
+  * **Overwhelmed system that appears to have been working properly regardless** 
 
-  + Our Post products, prices, and even Get requests were all successful 
-    - All of the successful calls did receive response 
-    - Simultaneously we had *~20 invalid delete calls every minute* we made a call 
+  + Our successful calls and call responses went through both ways 
+    - Our POST product and price object creation, and even GET product object list requests were all successful and received response 
+    - Simultaneously we had more than 20 invalid DELETE calls every minute that we made other calls; probably from another script 
+  + The only call responses we got were regarding the DELETE product object calls 
+    - These were accurate and expected based on the error 
+    - The script causing them tried to delete prices before the product but it rejected the price calls outright 
+    - Re: "Error 1" -- according to our python scripts we have responses of 0, 1, and 2 and we got 1 which is accurate 
+  + We created 19 products that were visible in the Stripe Catalog 
+    - Exported cvs reports confirm this: `assets/docs/reports/products.csv`, `assets/docs/reports/prices.csv` 
+    - Actual API call logs can't be exported and not all call responses are saved 
 
-  * **Product are in the catalog currently** 
+  * **The real mystery becomes, what in the flow was calling delete_product repeatedly** 
 
-  + There are 19 product objects and all have associated price objects 
-    - Products: `assets/docs/reports/products.csv` 
-    - Prices: `assets/docs/reports/prices.csv` 
-  + API call logs and responses can't be exported 
-    - But we can rest assured that we never hit rate limits even with over 600 calls 
-    - Everything appears to have functioned as it should on Stripe 
-  + Every DELETE request was for a product 
-    - The products had prices and couldn't be deleted 
-    - The products *were* objects we added today 
-  + "Error 1" 
-    - According to our python scripts we have responses of 0, 1, and 2 
-    - We got 1 which makes sense because deleting products before prices is a validation error 
-
-  * **Mystery becomes, what in the flow is calling delete_product repeatedly?!**
-
-    - The solution provides a more effective complete workaround from whatever was doing it 
-    - And can remove other scripts in question, i.e. the successful catalog objects came from somewhere 
-    - We will even eliminate the need for a 'cleanup_orphans.py' script for now 
+  + We can eliminate the `cleanup_orphans.py` script from use with the new system; and it was something in `process-job.yml` workflow 
 
 ### GitHub Action Summary 
 
   * **The "Process Job & Update Stripe Catalog" workflow from `process-job.yml`**
 
-  + There is only one job in the workflow called "process-job" 
-  + Commit: 79829df "Test: Trigger workflow to see full Stripe API error details #31" 
-    - First half of the job steps run smoothly 
-    - Handle 'Contract Signing' and 'Payment Update' are skipped, as they should be 
+  + Contains one workflow job called "process-job"; commit: 79829df "Test: Trigger workflow to see full Stripe API error details #31" 
+    - First half of the job steps run smoothly, 'Contract Signing' and 'Payment Update' are skipped, as they should be
     - Generate manifest `python3 .github/scripts/generate_manifest.py` runs effectively 
-
-  * **First general problem is "Check for manifest changes" using GIT**
-
-  + We don't want to rely on a product like GIT and planned accordingly 
-    - Reason we implemented the sync flag system 
-    - Worked in my little portfolio project, but not for this project 
-  + How to stop this step and method completely are part of the comprehensive, simple solution 
-
-### Next Step "Process Stripe Products" Massive Errors 
-
-  * **The "Run `python3 .github/scripts/process_stripe_products.py`" command**
-
-  + First clue: "📁 Found 0 active job(s) in folder" 
-  + It then makes *~40 Delete calls* to remove Price Objects 
-    - This is again because of buggy GIT usage in the script 
-    - Somehow it was accruing products and they were stacking up from GIT 
-    - Every call fails because "type object 'Price' has no attribute 'delete'"
-  + After every failed DELETE call, it tried to delete the associated Product Object 
-    - Thankfully we'll be able to eliminate this from the flow logic 
-    - It isn't clear how multiple Price Objects for a Product Object could be deleted without an error 
-  + These DELETE Product Object calls did go through to Stripe API 
-    - There are the HUNDREDS of these failed calls 
-    - They must be what bogged down things from communicating the object created details we wanted 
-    - They all fails because they had active Price Objects 
-
-  * **No payments found in assets/jobs/test-single-payment-v2.json** 
   
-  + Another odd clue it then says: 
-    - 📁 Found 1 job file(s)
-    - ✅ Processed 0 file(s) with Stripe updates
+  * **"Check for manifest changes" job the follows uses GIT** 
 
-  * **Again, no clue what in the scripts, other than GIT could be the issue, but it doesn't matter** 
+  + We created the "sync" flagging system specifically to find a way to completely remove relying on GIT in our scripts 
+  + This "sync" flag system was still overly complex and the new system avoids this; we should still try to avoid using GIT in scripts 
 
-  + Ironically after this is does another GIT script call to find changes and discovers "No changes detected" 
-    - Though this is partially because it seems to be looking for `"changes:true"` in the JSON files 
-    - Changes are currently identified by `"sync":true` 
-    - However it is unclear how that script would have handled different files with different number of changes 
-  + In the end though, no changes meant no new page build, no push deployed 
+  * **Next job in flow "Process Stripe Products" has massive amount of errors**
 
-### Over Engineering Identified As Primary Culprit 
+  + Started mid-flow with `run python3 .github/scripts/process_stripe_products.py` command 
+    - First clue was it says: 📁 Found 0 active job(s) in folder" 
+    - Then makes over 40 delete calls to remove price objects which is because of the buggy GIT method in the script 
+    - Every call fails because "type object 'Price' has no attribute 'delete'"
+    - After every failed DELETE call, it tried to delete the associated Product Object, which was a validation error 
+  + These DELETE Product Object calls did go through to Stripe API
+    - There are the HUNDREDS of these failed calls, which must have bogged down the back-and-forth communication we were looking for 
+    - Thankfully we'll be able to eliminate this completely from our new logic flow 
+  + Then another odd issue said: No payments found in assets/jobs/test-single-payment-v2.json
+    - Followed by: 📁 Found 1 job file(s), ✅ Processed 0 file(s) with Stripe updates -- none of which reflects what happened 
 
-  * **Our solution was actually already planned** 
-   
-  + It all comes back to creating those `"sync":true` flags 
-    - It was intended to be the sole method used to identify changes 
-    - JSON schema overhaul's grouping plus flags meant to be sole method to create conditional workflows 
-  + For recall, it is `"sync":true` as in, true this needs to be synced 
+  * **Our new flow makes finding the specific issue in this workflow and script irrelevant** 
 
-  * **Poorly communicated solution that could be even bigger but same simplicity** 
+  + We should straight up delete all of the scripts and workflows from this error ridden build 
+  + Then we should build the new based on the updated logic you'll find detailed below 
 
+### Primary Culprit Seems To Have Been Over Engineering 
+
+  * **The logic we meant to implement in the simplest form possible ** 
+  
   + If `"product.sync": true` follow just five steps 
 
     1. `sync` = true, then search for matching `stripe_product_id` 
@@ -327,18 +293,21 @@ Previously planned automation "simplification" resulted in convoluted workflow r
     3. Find match? CHANGE IT TO ACTIVE:FALSE AND CREATE NEW PRICE OBJECT 
     4. New price, place stripe_price_id on JSON 
     5. New or updated product, change `sync` to FALSE  
-  
-  * **Not dynamic and clean, but doesn't cause any issues** 
+   
+  + It all comes back to creating those `"sync":true` flags 
+    - It was intended to be the sole method used to identify changes 
+    - JSON schema overhaul's grouping plus flags meant to be sole method to create conditional workflows 
+  + For recall, it is `"sync":true` as in, true this needs to be synced 
 
-  + What we wanted is *ONE TRIGGER* and then *ONE ACTION* that solves many possible adjustments 
-    - No new price allowed but all other field updates permitted? OH WELL, just always make a new one 
-    - Use the action response as opportunity to reset our wildly simple solution 
+  * **Poorly communicated solution, not dynamic and clean, shouldn't have caused issues, but we can do better anyway** 
+
+  + We wanted one trigger, one action that solves any possible adjustments to Stripe catalog 
+  + Our new plan is going to completely eliminate making updates at all 
 
 ---
 
-*Sneak this in here* 
-
 ## Forgotten HTML Essentials 
+*Sneaking this in here; please add these in when reviewing and updating the HTML files to update for the new logic*
 
 ### Favicon Full Collection HTML 
 
