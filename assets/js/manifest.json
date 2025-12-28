@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "doe-single-test": {
-      "file_path": "assets/jobs/uid-test-001.json",
-      "job_id": "uid-test-001",
-      "login_keyword": "single-test",
-      "login_name": "doe"
-    }
-  },
-  "generated_at": "2025-12-28T13:53:37.956095Z"
+  "jobs": {},
+  "generated_at": "2025-12-28T13:54:13.502385Z"
 }
