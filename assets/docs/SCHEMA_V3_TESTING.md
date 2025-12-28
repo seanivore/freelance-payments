@@ -12,6 +12,14 @@ Feedback from testing after we made the most recent updates to accommodate the v
 
   + Please see the logs for all three workflows that activate every push here: `assets/docs/CANCELED_FIRST_FLOW.md`
 
+  - NOTE: The first one ONLY works successfully when it is running because of a push to build the website that DID NOT INVOLVE ANY UPDATES TO THE JSON DIRECTORY. Is it possible to add logic to this first basic website build flow so that, if there are changes coming because of the push having changes to the JSON directory, then completely skip the initial pointless build. Where is this action even coming from? Is it just built into any github pages site? 
+
+  - AH HA! So this first build, meant for normal website building but not necessary when an actual automation is running because of updates to the JSON directory or because of frontend behavior triggering update (we haven't even tested the second option yet) — then it says **Triggered via dynamic** 
+  - The build we intended to run because of push or from front end behavior -- that says **Triggered via Push** 
+  - The final automated one that rebuilds the site says **Triggered via GitHub Pages** and is the bot workflow 
+
+  - What is the solution? 
+
 ### Price Object ID
 
   * **Providing Stripe a predetermined Price Object ID is seen as an 'unknown parameter'** 
