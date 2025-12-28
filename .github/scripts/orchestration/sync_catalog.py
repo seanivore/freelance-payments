@@ -50,16 +50,28 @@ except ImportError:
 
 def load_manifest(manifest_path: str) -> dict:
     """Load manifest.json and return jobs dict."""
-    manifest_file = Path(manifest_path)
+    # Resolve path relative to project root (consistent with other functions)
+    utils_dir = Path(__file__).parent.parent  # .github/scripts
+    github_dir = utils_dir.parent  # .github
+    project_root = github_dir.parent  # project root
+    manifest_file = project_root / manifest_path
+    
+    print(f"DEBUG: Loading manifest from: {manifest_file} (resolved from {manifest_path})", file=sys.stderr)
+    
     if not manifest_file.exists():
+        print(f"DEBUG: Manifest file does not exist at {manifest_file}", file=sys.stderr)
         return {}
     
     try:
         with open(manifest_file, 'r', encoding='utf-8') as f:
             manifest_data = json.load(f)
-            return manifest_data.get('jobs', {})
+            jobs = manifest_data.get('jobs', {})
+            print(f"DEBUG: Loaded manifest with {len(jobs)} entries", file=sys.stderr)
+            return jobs
     except Exception as e:
         print(f"Warning: Failed to load manifest: {e}", file=sys.stderr)
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
         return {}
 
 
@@ -399,12 +411,15 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     # - Old format: {"url": {"job_id": "...", "file_path": "..."}}
     # - New format: {"url": "file_path"} (extract job_id from filename)
     manifest_job_ids = set()
-    for entry in manifest.values():
+    print(f"DEBUG: Processing {len(manifest)} manifest entries", file=sys.stderr)
+    for lookup_key, entry in manifest.items():
+        print(f"DEBUG: Processing manifest entry: {lookup_key} -> {type(entry).__name__}", file=sys.stderr)
         if isinstance(entry, dict):
             # Old format with job_id field
             job_id = entry.get('job_id')
             if job_id:
                 manifest_job_ids.add(job_id)
+                print(f"DEBUG: Extracted job_id '{job_id}' from dict entry", file=sys.stderr)
         elif isinstance(entry, str):
             # New format: entry is just the file path string
             # Extract job_id from filename (e.g., "assets/jobs/uid-abc-123.json" -> "uid-abc-123")
@@ -412,6 +427,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
             if file_path.suffix == '.json':
                 job_id = file_path.stem  # Removes .json extension
                 manifest_job_ids.add(job_id)
+                print(f"DEBUG: Extracted job_id '{job_id}' from file path '{entry}'", file=sys.stderr)
     
     # Get all job files
     all_jobs = list_all_jobs(jobs_dir)
