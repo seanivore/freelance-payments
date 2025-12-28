@@ -19,14 +19,14 @@
   },
   "state_management": {
     "object_id": {
-      "created": "2026-01-15T10:00:00Z",
-      "product": null,
-      "initial_price": null,
+      "created": "2025-12-28T13:53:37.221750Z",
+      "product": "prod_TghphzLYy61cto",
+      "initial_price": "price_1SjKPd9fljwH26CPTsDLvsMl",
       "balance_price": null,
-      "customer": null,
+      "customer": "cus_Tghpo3zasaUKod",
       "coupon": null,
       "checkout_session": {
-        "initial": null,
+        "initial": "parameters_stored",
         "balance": null
       }
     },
@@ -91,14 +91,23 @@
       "pay_by": "start of work"
     },
     "nickname": "Full Payment",
-    "product": {"products": ["uid-test-001"]},
-    "id": null,
+    "product": {
+      "products": [
+        "uid-test-001"
+      ]
+    },
+    "id": "price_1SjKPd9fljwH26CPTsDLvsMl",
     "unit_amount": 100000
   },
   "balance_price_object": null,
   "coupon_object": null,
   "initial_checkout_session": {
-    "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
+    "automatic_tax": {
+      "enabled": true,
+      "liability": {
+        "type": "self"
+      }
+    },
     "billing_address_collection": "required",
     "branding_settings": {
       "font_family": "noto_sans",
@@ -110,17 +119,31 @@
     "client_reference_id": "uid-test-001-client",
     "currency": "usd",
     "customer_creation": "always",
-    "custom_text": {"after_submit": {"message": "Thank you!"}},
+    "custom_text": {
+      "after_submit": {
+        "message": "Thank you!"
+      }
+    },
     "discounts": null,
-    "line_items": [{"price": null, "quantity": 1}],
+    "line_items": [
+      {
+        "price": "price_1SjKPd9fljwH26CPTsDLvsMl",
+        "quantity": 1
+      }
+    ],
     "mode": "payment",
     "redirect_on_completion": "always",
     "return_url": "https://payments.august.style/uid-test-001#completion",
     "submit_type": "pay",
     "ui_mode": "embedded",
     "name_collection": {
-      "individual": {"enabled": true},
-      "business": {"enabled": true, "optional": true}
+      "individual": {
+        "enabled": true
+      },
+      "business": {
+        "enabled": true,
+        "optional": true
+      }
     }
   },
   "balance_checkout_session": null,
