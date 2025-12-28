@@ -19,7 +19,7 @@
 },
 
 "state_management": {
-  "object_ID": {
+  "object_id": {
     "created": "2026-01-02",
     "product": "uid-amx-856",
     "initial_price": "price_zyx...",
@@ -56,8 +56,8 @@
   "description": "Development and launch of website for client company artwork sales and brand story",
   "id": "uid-amx-856",
   "metadata": {
-    "login_keyword": "art-store",
     "login_name": "smith",
+    "login_keyword": "art-store",
     "service_usd": "$2,000",
     "total_payments": 2,
     "discount_usd": "$1,000"
