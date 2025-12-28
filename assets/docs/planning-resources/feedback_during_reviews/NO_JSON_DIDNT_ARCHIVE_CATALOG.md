@@ -42,7 +42,9 @@
   4. No JSON but existing catalog object requires that catalog product object be archived via `active: false` 
   5. No API calls to Stripe were made at all 
 
-  + What went wrong and where?   
+  + What went wrong and where? 
+
+  * **HOWEVER** I just went to push and save this bug report and pulled first to get the manifest and it WAS updated so it now says on the manifest that there are no products in the catalog which is in accurate because there was, it just didn't archive. Note that the manifest DID say there was one product in the catalog when it should have been checking to see if the "no json files in directory" matched an empty manifest and it didn't 
 
 ## Orchestrate Workflow 
 

@@ -220,10 +220,15 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                     stats.get('products_archived', 0) > 0
                 )
                 
-                # Log sync stats for debugging
-                # Only treat actual errors as errors (not DEBUG/Warning messages)
+                # Print stats and stderr output so we can see what sync_catalog found
+                print(f"DEBUG: sync_catalog stats: {json.dumps(stats, indent=2)}", file=sys.stderr)
+                
                 if sync_result.get('_stderr'):
                     stderr_msg = sync_result.get('_stderr', '')
+                    # Print stderr output so we can see file counts, comparison results, etc.
+                    print(f"DEBUG: sync_catalog stderr output:", file=sys.stderr)
+                    print(stderr_msg, file=sys.stderr)
+                    
                     # Filter out DEBUG and Warning messages - they're informational, not errors
                     # Split stderr into lines and check each line for actual errors
                     stderr_lines = stderr_msg.split('\n')
