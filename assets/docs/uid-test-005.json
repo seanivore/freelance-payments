@@ -18,12 +18,16 @@
     }
   },
   "state_management": {
-    "object": {
+    "object_ID": {
       "created": "2026-01-20T10:00:00Z",
       "product": null,
-      "price": [],
+      "initial_price": null,
+      "balance_price": null,
+      "customer": null,
       "coupon": null,
-      "checkout_session": []
+      "checkout_session": {
+        "initial": null,
+        "balance": null
     },
     "client_status": {
       "logged_in": "2026-01-25T08:00:00Z",

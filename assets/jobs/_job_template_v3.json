@@ -19,18 +19,16 @@
 },
 
 "state_management": {
-  "object": {
+  "object_ID": {
     "created": "2026-01-02",
     "product": "uid-amx-856",
-    "price": [
-      {"initial": "price_..."},
-      {"balance": "price_..."}
-    ],
+    "initial_price": "price_zyx...",
+    "balance_price": "price_zyx...",
+    "customer": "uid-amx-856-client",
     "coupon": "uid-amx-856-coupon",
-    "checkout_session": [
-      {"initial": "cs_test_a1Ha56WztK7GrOLUJFRAx89BbKMvyv8BYMASk68qfrWxu1AKIiSJlgTJGG"}, 
-      {"balance": "cs_test_a1n62RmIax5Djhyz0PmAo4RfNMHYK5xFJlgS9MZtdPYbdF3Uf7mBYhgJes"}
-    ]
+    "checkout_session": {
+      "initial": null,
+      "balance": null
   },
   "client_status": {
     "logged_in": "2026-01-03",
@@ -49,6 +47,7 @@
     "processing": null,
     "succeeded": null
   }
+}
 },
 
 "product_object": {
