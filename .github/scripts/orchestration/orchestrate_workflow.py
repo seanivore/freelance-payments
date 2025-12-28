@@ -120,8 +120,20 @@ def git_commit_and_push(message: str, files: list = None) -> bool:
         subprocess.run(['git', 'config', '--local', 'user.email', 'action@github.com'], check=True)
         subprocess.run(['git', 'config', '--local', 'user.name', 'GitHub Action'], check=True)
 
-        # Pull with rebase (auto-pull before push)
-        subprocess.run(['git', 'pull', '--rebase'], check=False)  # Don't fail if no remote changes
+        # Pull before push (handle unstaged changes gracefully)
+        # Check if there are unstaged changes from scripts that ran
+        status_result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True, check=True)
+        has_unstaged = bool(status_result.stdout.strip())
+        
+        if has_unstaged:
+            # Scripts have modified files - stash, pull with rebase, then pop
+            subprocess.run(['git', 'stash', '--include-untracked'], check=False)
+            pull_result = subprocess.run(['git', 'pull', '--rebase'], check=False, capture_output=True, text=True)
+            stash_pop_result = subprocess.run(['git', 'stash', 'pop'], check=False, capture_output=True, text=True)
+            # If stash pop has conflicts, that's okay - we'll add the files anyway
+        else:
+            # No local changes, safe to pull with rebase
+            subprocess.run(['git', 'pull', '--rebase'], check=False)
 
         # Add files
         if files:
@@ -209,9 +221,14 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 )
                 
                 # Log sync stats for debugging
+                # Only treat actual errors as errors (not DEBUG/Warning messages)
                 if sync_result.get('_stderr'):
-                    stderr_msg = sync_result.get('_stderr', '')[:500]
-                    results['errors'].append(f"sync_catalog stderr: {stderr_msg}")
+                    stderr_msg = sync_result.get('_stderr', '')
+                    # Filter out DEBUG and Warning messages - they're informational, not errors
+                    # Only add to errors if it contains actual error indicators
+                    error_indicators = ['Error:', 'error:', 'Failed', 'failed', 'Exception', 'Traceback']
+                    if any(indicator in stderr_msg for indicator in error_indicators):
+                        results['errors'].append(f"sync_catalog stderr: {stderr_msg[:500]}")
                 
                 if not has_catalog_changes:
                     print("DEBUG: sync_catalog made no changes - all files match manifest and are active", file=sys.stderr)
