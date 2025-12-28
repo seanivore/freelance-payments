@@ -11,12 +11,12 @@
     3. Matching JSON and manifest entry with the JSON's `product_object.active= false` means that the payment process is complete so archive the Stripe catalog Product Object
     4. Product listed on the manifest that has no matching JSON object means it was removed and the associated Project Object should be modified in the catalog archive the object by changing active= true to false. 
 
+### Issue Log Adding JSON  
+
   + For adding a new JSON needing creation of product in the Stripe Catalog 
     - When product is created, it has all necessary associated objects 
     - The created product's Price Object API response confirming creation has a Price Object ID to be copied over to the JSON file 
     - Then the manifest is updated to reflect the addition 
-
-### Issue Logs 
 
   1. Product created accurately in the Stripe catalog with all associated objects  
   2. **ERROR** the JSON object was not updated with the Stripe Price Object ID after creation 
@@ -36,9 +36,7 @@
 
   After any object is created, the automation needs to directly update that JSON's state_management section with the object ID's directly from the API call's confirmation response. While setting up / confirming / debugging this, please also make sure that we have `update_state.py` set up the same way. Those events just come from a different place rather than Stripe API responses. 
 
-  After this is sorted I'm going to simply remove the JSON file from the directory and ensure that our fix, made directly before this test, is effective and the Stripe catalog object is archived. 
-
-
+  Since these items need to be fixed, I went ahead and removed the JSON from the directory to test the most recent bug fix for removing orphaned catalog entries by archiving them. Issue log is below. 
 
 ```plaintext 
   3s
@@ -114,4 +112,98 @@ To https://github.com/seanivore/freelance-payments
   "pushed": true
 }
 Error: Process completed with exit code 1.
+```
+
+### Issue Log Removing JSON 
+
+  + For removing a JSON from directory, leaving the manifest's entry of a Product that was created in the Stripe Catalog 
+    - When running same flow for every push, logic identifies an orphaned product in the catalog  
+    - This means there is no JSON object to go along with the entry on the Manifest 
+    - Take the Product Object ID and use a Stripe Modify API call to change the Product Object to "active=false" 
+    - Then after the new manifest will be updated to reflect the already empty JSON directory  
+
+  1. No error registered on orchestrate workflow or website build workflow   
+  2. **ERROR** the Stripe Project was not archived from the catalog 
+  3. It specifically says in the log below "DEBUG: Found 0 job_id(s) in manifest" which means it didn't actually check the manifest 
+  4. Note that under "sync_catalog stats" it says Product archived and Product modified which are the same thing 
+
+  + Details from the recent "fix" of this bug 
+
+    Most recently: "The plan is correct: print the captured stderr so we can see what sync_catalog found. Then we can verify:
+    Did it find 0 JSON files?
+    Did it find 1 job_id in manifest?
+    Did it detect the orphaned job?
+    Did it attempt to archive?
+    Implementing the fix to print the stderr output so we can see what's happening." 
+
+    And then "The archiving logic looks correct:
+    Uses stripe.Product.modify(product_id, active=False) ✓
+    For orphaned products, uses product_id = job_id ✓
+    Increments products_archived counter ✓
+    The change is complete. Now when you run the workflow, you'll see:
+    The stats JSON showing products_archived count
+    The stderr output showing:
+    "Found X job file(s)"
+    "Found X job_id(s) in manifest"
+    "Job X is orphaned - will archive"
+    "Archived product X" (if successful)
+    Any errors if archiving fails
+    This will show what sync_catalog found and why archiving didn't happen. Ready to test." 
+
+```plaintext 
+Run if [ "push" == "push" ]; then
+  if [ "push" == "push" ]; then
+    python3 .github/scripts/orchestration/orchestrate_workflow.py \
+      --trigger push
+  else
+    python3 .github/scripts/orchestration/orchestrate_workflow.py \
+      --trigger workflow_dispatch \
+      --action "" \
+      --job-id "" \
+      --payload ''
+  fi
+  shell: /usr/bin/bash -e {0}
+  env:
+    pythonLocation: /opt/hostedtoolcache/Python/3.14.2/x64
+    PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.2/x64/lib/pkgconfig
+    Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.2/x64
+    Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.2/x64
+    Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.2/x64
+    LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.2/x64/lib
+    STRIPE_SECRET_KEY: ***
+DEBUG: sync_catalog stats: {
+  "jobs_processed": 0,
+  "products_created": 0,
+  "products_modified": 0,
+  "prices_created": 0,
+  "customers_created": 0,
+  "coupons_created": 0,
+  "products_archived": 0,
+  "_stderr": "DEBUG: Looking for jobs in: /home/runner/work/freelance-payments/freelance-payments/assets/jobs\nDEBUG: Found 1 JSON file(s) in /home/runner/work/freelance-payments/freelance-payments/assets/jobs\nDEBUG: Skipping template file: _job_template_v3.json\nDEBUG: Returning 0 job(s)\nDEBUG: Found 0 job file(s) in assets/jobs\nDEBUG: Found 0 job_id(s) in manifest\n"
+}
+DEBUG: sync_catalog stderr output:
+DEBUG: Looking for jobs in: /home/runner/work/freelance-payments/freelance-payments/assets/jobs
+DEBUG: Found 1 JSON file(s) in /home/runner/work/freelance-payments/freelance-payments/assets/jobs
+DEBUG: Skipping template file: _job_template_v3.json
+DEBUG: Returning 0 job(s)
+DEBUG: Found 0 job file(s) in assets/jobs
+DEBUG: Found 0 job_id(s) in manifest
+
+DEBUG: sync_catalog made no changes - all files match manifest and are active
+Saved working directory and index state WIP on freelance-payments: 3aa8f25 detailed bug again, now removing JSON to see if the bug prior to this bug was actually fixed
+[freelance-payments e608ece] 🤖 Auto-update: Manifest update
+ 1 file changed, 2 insertions(+), 9 deletions(-)
+To https://github.com/seanivore/freelance-payments
+   3aa8f25..e608ece  freelance-payments -> freelance-payments
+{
+  "trigger": "push",
+  "action": null,
+  "steps_run": [
+    "sync_catalog",
+    "generate_manifest"
+  ],
+  "errors": [],
+  "committed": true,
+  "pushed": true
+}
 ```
