@@ -62,16 +62,25 @@ def save_job(job_id: str, job_data: Dict, jobs_dir: str = "assets/jobs") -> bool
         if save_job("uid-test-001", job_data):
             print("Saved successfully")
     """
+    # Resolve path relative to project root (consistent with list_all_jobs)
+    utils_dir = Path(__file__).parent  # .github/scripts/utils
+    scripts_dir = utils_dir.parent     # .github/scripts
+    github_dir = scripts_dir.parent    # .github
+    project_root = github_dir.parent   # project root
+    
     job_path = find_job_file(job_id, jobs_dir)
 
     if not job_path:
-        # File doesn't exist, create it
-        job_path = Path(jobs_dir) / f"{job_id}.json"
+        # File doesn't exist, create it (resolve relative to project root)
+        jobs_path = project_root / jobs_dir
+        jobs_path.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+        job_path = jobs_path / f"{job_id}.json"
 
     try:
         with open(job_path, 'w', encoding='utf-8') as f:
             json.dump(job_data, f, indent=2, ensure_ascii=False)
             f.write('\n')  # Add trailing newline
+        print(f"DEBUG: Saved job {job_id} to {job_path}", file=sys.stderr)
         return True
     except IOError as e:
         print(f"Error: Cannot write to {job_path}: {e}", file=sys.stderr)
@@ -83,8 +92,8 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
     Find the file path for a given job_id.
 
     Args:
-        job_id: The job identifier (from _metadata.job_id)
-        jobs_dir: Directory containing job JSON files
+        job_id: The job identifier (from product_object.id in v3 schema)
+        jobs_dir: Directory containing job JSON files (relative to project root)
 
     Returns:
         Path to the job file, or None if not found
@@ -94,7 +103,12 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
         if path:
             print(f"Found at: {path}")
     """
-    jobs_path = Path(jobs_dir)
+    # Resolve path relative to project root (consistent with list_all_jobs)
+    utils_dir = Path(__file__).parent  # .github/scripts/utils
+    scripts_dir = utils_dir.parent     # .github/scripts
+    github_dir = scripts_dir.parent    # .github
+    project_root = github_dir.parent   # project root
+    jobs_path = project_root / jobs_dir
 
     if not jobs_path.exists():
         return None

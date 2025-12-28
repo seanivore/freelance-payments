@@ -225,10 +225,16 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 if sync_result.get('_stderr'):
                     stderr_msg = sync_result.get('_stderr', '')
                     # Filter out DEBUG and Warning messages - they're informational, not errors
-                    # Only add to errors if it contains actual error indicators
-                    error_indicators = ['Error:', 'error:', 'Failed', 'failed', 'Exception', 'Traceback']
-                    if any(indicator in stderr_msg for indicator in error_indicators):
-                        results['errors'].append(f"sync_catalog stderr: {stderr_msg[:500]}")
+                    # Split stderr into lines and check each line for actual errors
+                    stderr_lines = stderr_msg.split('\n')
+                    error_lines = [
+                        line for line in stderr_lines
+                        if not line.strip().startswith('DEBUG:') 
+                        and not line.strip().startswith('Warning:')
+                        and any(indicator in line for indicator in ['Error:', 'error:', 'Failed', 'failed', 'Exception', 'Traceback'])
+                    ]
+                    if error_lines:
+                        results['errors'].append(f"sync_catalog errors: {' '.join(error_lines[:3])}")  # First 3 error lines
                 
                 if not has_catalog_changes:
                     print("DEBUG: sync_catalog made no changes - all files match manifest and are active", file=sys.stderr)
