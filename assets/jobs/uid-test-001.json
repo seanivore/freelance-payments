@@ -1,0 +1,129 @@
+{
+  "project": "Test Project - Single Payment",
+  "contract": {
+    "work_start": "2026-02-01",
+    "work_end": "2026-03-01",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": "$150",
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": null
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "state_management": {
+    "object_id": {
+      "created": "2026-01-15T10:00:00Z",
+      "product": null,
+      "initial_price": null,
+      "balance_price": null,
+      "customer": null,
+      "coupon": null,
+      "checkout_session": {
+        "initial": null,
+        "balance": null
+      }
+    },
+    "client_status": {
+      "logged_in": null,
+      "contract_loaded": null,
+      "contract_scrolled_complete": false,
+      "viewed_contract": false,
+      "viewed_invoice": false,
+      "downloaded_docs": 0,
+      "signed_contract": null
+    },
+    "initial_payment_intent": {
+      "created": null,
+      "processing": null,
+      "succeeded": null
+    },
+    "balance_payment_intent": {
+      "created": null,
+      "processing": null,
+      "succeeded": null
+    }
+  },
+  "product_object": {
+    "name": "Single Payment Test Project",
+    "active": true,
+    "description": "Test project with single payment - contract not signed",
+    "id": "uid-test-001",
+    "metadata": {
+      "login_keyword": "single-test",
+      "login_name": "doe",
+      "service_usd": "$1,000",
+      "total_payments": 1,
+      "discount_usd": "$0"
+    },
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer_object": {
+    "individual_name": "Jane Doe",
+    "business_name": null,
+    "description": "Client",
+    "email": "jane@example.com",
+    "phone": "555-0100",
+    "id": "uid-test-001-client",
+    "address": {
+      "city": "Boston",
+      "line1": "456 Test St",
+      "state": "MA",
+      "postal_code": "02101",
+      "country": "US"
+    }
+  },
+  "initial_price_object": {
+    "currency": "usd",
+    "active": true,
+    "billing_scheme": "per_unit",
+    "metadata": {
+      "payment_number": 1,
+      "payment_usd": "$1,000",
+      "balance_usd": "$0",
+      "pay_by": "start of work"
+    },
+    "nickname": "Full Payment",
+    "product": {"products": ["uid-test-001"]},
+    "id": null,
+    "unit_amount": 100000
+  },
+  "balance_price_object": null,
+  "coupon_object": null,
+  "initial_checkout_session": {
+    "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
+    "billing_address_collection": "required",
+    "branding_settings": {
+      "font_family": "noto_sans",
+      "background_color": "#1f1f1f",
+      "border_style": "pill",
+      "button_color": "#9C528B",
+      "display_name": "august.style designer"
+    },
+    "client_reference_id": "uid-test-001-client",
+    "currency": "usd",
+    "customer_creation": "always",
+    "custom_text": {"after_submit": {"message": "Thank you!"}},
+    "discounts": null,
+    "line_items": [{"price": null, "quantity": 1}],
+    "mode": "payment",
+    "redirect_on_completion": "always",
+    "return_url": "https://payments.august.style/uid-test-001#completion",
+    "submit_type": "pay",
+    "ui_mode": "embedded",
+    "name_collection": {
+      "individual": {"enabled": true},
+      "business": {"enabled": true, "optional": true}
+    }
+  },
+  "balance_checkout_session": null,
+  "project_scope_summary": "Single payment test project for testing contract signing and payment flow.",
+  "project_scope_full": "Full detailed project scope document stored separately."
+}
