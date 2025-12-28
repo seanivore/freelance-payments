@@ -1,5 +1,13 @@
 # Testing Continued
 
+## Documentation 
+
+  - These bugs have been virtually unmoved with zero progress for more than one 8+ hour day 
+  - We need to start creating an organized documentation collection of each issue, the "fix", etc. so that it is easier to look back 
+  - We should label the files by date and then count: `assets/docs/bugs/2025_12_28_01_BUG_ISSUE.md` etc. 
+
+  + My only other idea is that we need fresh eyes to come into the codebase, understand how things are supposed to work, and then review everything looking for issues. Because we also tried to do this, between bug fighting sessions, to no avail. I'm extremely discouraged at this point. Each 'fix' seems to push us further away. I no longer am able to recognize progress and that makes me feel like I have no idea what the best way forward is. This project, as a whole, is not complex, but we keep confirming things are in place only to find out later that things were not actually in place. How do we pragmatically circumvent that. 
+
 ## Objective 
 
   * **Adding and removing a single JSON file in the directory to test all workflows** 
