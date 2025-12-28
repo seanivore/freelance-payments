@@ -3,23 +3,23 @@
 Umbrella Orchestrator for Workflow Coordination (v3 schema)
 
 Single coordinator that runs all needed workflows, commits everything, then pushes ONCE.
-Implements batching to prevent simultaneous file updates.
+Uses immediate updates (each JSON file saved after Stripe objects created) with batched git commit.
 
 v3 Schema Changes:
 - No sync flags - compares filenames to manifest to determine what needs syncing
 - Uses consolidated scripts: sync_catalog.py, update_state.py
-- Batches all JSON updates together before committing
+- Immediate updates: sync_catalog.py saves each JSON file immediately after creating Stripe objects
+- Batched git commit: All changes committed together at the end (prevents multiple pushes)
 
 Process:
 1. Determine trigger type (push, workflow_dispatch, webhook)
-2. Collect all updates needed (batch them)
-3. Run scripts in correct order:
-   - sync_catalog.py (compares files to manifest, creates/archives Stripe objects)
-   - update_state.py (contract signing, payment status, tracking events)
-   - generate_manifest.py (always at end)
-4. Apply all JSON updates in batch
-5. Commit all changes together
-6. Push ONCE at the end
+2. Run scripts in correct order:
+   - sync_catalog.py (compares files to manifest, creates/archives Stripe objects, saves JSON immediately)
+   - update_state.py (contract signing, payment status, tracking events, saves JSON immediately)
+   - generate_manifest.py (always at end, saves manifest.json)
+3. Check if any changes were made (sync_catalog stats or action triggered)
+4. Commit all changes together (if any)
+5. Push ONCE at the end (if committed)
 
 Usage:
     python3 orchestrate_workflow.py --trigger push
@@ -182,7 +182,12 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 results['errors'].append(f"Invalid payload JSON: {e}")
                 return results
 
-        # Step 1: Sync catalog (v3 schema: compares filenames to manifest, no sync flags)
+        # Step 1: Always sync catalog (simplified flow - script checks if changes needed)
+        # sync_catalog.py compares files to manifest and only makes changes when needed
+        # Returns stats - if all zeros, no changes were made
+        sync_result = None
+        has_catalog_changes = False
+        
         if trigger == 'push':
             try:
                 sync_result = run_script(
@@ -192,16 +197,24 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 )
                 results['steps_run'].append('sync_catalog')
                 
+                # Check if any changes were made
+                stats = sync_result
+                has_catalog_changes = (
+                    stats.get('products_created', 0) > 0 or
+                    stats.get('products_modified', 0) > 0 or
+                    stats.get('prices_created', 0) > 0 or
+                    stats.get('customers_created', 0) > 0 or
+                    stats.get('coupons_created', 0) > 0 or
+                    stats.get('products_archived', 0) > 0
+                )
+                
                 # Log sync stats for debugging
                 if sync_result.get('_stderr'):
                     stderr_msg = sync_result.get('_stderr', '')[:500]
                     results['errors'].append(f"sync_catalog stderr: {stderr_msg}")
                 
-                if sync_result.get('jobs_processed', 0) == 0:
-                    results['errors'].append(f"sync_catalog processed 0 jobs. Stats: {sync_result}")
-                elif sync_result.get('products_created', 0) == 0 and sync_result.get('prices_created', 0) == 0:
-                    # This is OK if no new files were added
-                    pass
+                if not has_catalog_changes:
+                    print("DEBUG: sync_catalog made no changes - all files match manifest and are active", file=sys.stderr)
                     
             except subprocess.CalledProcessError as e:
                 error_msg = e.stderr[:500] if e.stderr else str(e)
@@ -249,7 +262,9 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
             error_msg = e.stderr[:500] if e.stderr else str(e)
             results['errors'].append(f"generate_manifest failed: {error_msg}")
 
-        # Step 4: Commit and push ONCE (batched)
+        # Step 4: Always attempt commit (git_commit_and_push checks for actual changes)
+        # This handles cases where manifest might have changed even if sync_catalog stats were zero
+        # git_commit_and_push will return False if there are no changes, which is fine
         commit_message = "🤖 Auto-update: "
         if action == 'sign-contract':
             commit_message += f"Contract signed for {job_id}"
@@ -257,14 +272,22 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
             commit_message += f"Payment #{payload_data.get('payment_number', '?')} for {job_id}"
         elif action == 'track-event':
             commit_message += f"Tracking event ({payload_data.get('event_type', '?')}) for {job_id}"
-        else:
+        elif has_catalog_changes:
             commit_message += "Stripe catalog sync and manifest update"
+        else:
+            # sync_catalog ran but made no changes - manifest might still need update
+            commit_message += "Manifest update"
 
         commit_message += "\n\nCo-Authored-By: GitHub Actions <action@github.com>"
 
         if git_commit_and_push(commit_message):
             results['committed'] = True
             results['pushed'] = True
+        else:
+            # No actual changes detected by git - this is fine!
+            print("DEBUG: git_commit_and_push found no changes - skipping commit", file=sys.stderr)
+            results['committed'] = False
+            results['pushed'] = False
 
     except Exception as e:
         results['errors'].append(f"Orchestration error: {str(e)}")

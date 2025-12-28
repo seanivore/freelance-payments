@@ -38,7 +38,7 @@ from datetime import datetime
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils.json_io import list_all_jobs, save_job, find_job_file
+from utils.json_io import list_all_jobs, save_job, find_job_file, load_job
 
 # Import Stripe
 try:
@@ -117,7 +117,12 @@ def archive_stripe_product(product_id: str) -> None:
 
 
 def create_stripe_price(price_obj: dict, product_id: str) -> str:
-    """Create Stripe Price. Returns price_id."""
+    """
+    Create Stripe Price. Returns price_id.
+    
+    Note: Stripe doesn't allow custom IDs for Price objects via Python SDK.
+    We use lookup_key instead (e.g., 'uid-xxx-xxx-1') and store the Stripe-generated ID.
+    """
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
     price_params = {
@@ -132,13 +137,15 @@ def create_stripe_price(price_obj: dict, product_id: str) -> str:
     if price_obj.get('nickname'):
         price_params['nickname'] = price_obj['nickname']
 
-    # Try to use custom ID
-    try:
-        price = stripe.Price.create(id=price_obj.get('id'), **price_params)
-    except stripe.error.InvalidRequestError:
-        price = stripe.Price.create(**price_params)
+    # Use lookup_key instead of id (Stripe doesn't allow custom Price IDs via SDK)
+    # The lookup_key can be used to retrieve the price later: stripe.Price.list(lookup_keys=['uid-xxx-xxx-1'])
+    if price_obj.get('id'):
+        price_params['lookup_key'] = price_obj['id']
 
-    return price.id
+    # Stripe will generate the actual price_id (e.g., 'price_xyz...')
+    price = stripe.Price.create(**price_params)
+
+    return price.id  # Returns Stripe-generated ID (e.g., 'price_xyz...')
 
 
 def archive_stripe_price(price_id: str) -> None:
@@ -201,13 +208,14 @@ def create_stripe_coupon(coupon_obj: dict) -> str:
     return coupon.id
 
 
-def sync_job(job_data: dict, manifest_job_ids: set) -> dict:
+def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict:
     """
     Sync a single job to Stripe catalog (v3 schema).
     
     Args:
         job_data: Job JSON dictionary (v3 schema)
         manifest_job_ids: Set of job_ids already in manifest
+        should_create: True if this job needs Stripe objects created (new job)
     
     Returns:
         Dictionary with sync stats
@@ -236,10 +244,8 @@ def sync_job(job_data: dict, manifest_job_ids: set) -> dict:
 
     state_obj = job_data['state_management']['object']
 
-    # Check if job needs Stripe objects created (not in manifest)
-    needs_creation = job_id not in manifest_job_ids
-
-    if needs_creation:
+    # Only create Stripe objects if this is a new job (not in manifest)
+    if should_create:
         # === CREATE PRODUCT ===
         product_id = state_obj.get('product')
         if product_id:
@@ -286,12 +292,18 @@ def sync_job(job_data: dict, manifest_job_ids: set) -> dict:
                 initial_price_id = create_stripe_price(initial_price_obj, product_id)
                 stats['prices_created'] += 1
             price_ids.append({'initial': initial_price_id})
+            # Store Stripe-generated price_id in initial_price_object.id
+            # Note: initial_price_object.id originally had lookup_key format (uid-xxx-xxx-1)
+            # but Stripe generates the actual ID (price_xyz...)
+            initial_price_obj['id'] = initial_price_id
 
         if balance_price_obj:
             if not balance_price_id:
                 balance_price_id = create_stripe_price(balance_price_obj, product_id)
                 stats['prices_created'] += 1
             price_ids.append({'balance': balance_price_id})
+            # Store Stripe-generated price_id in balance_price_object.id
+            balance_price_obj['id'] = balance_price_id
 
         state_obj['price'] = price_ids
 
@@ -319,25 +331,47 @@ def sync_job(job_data: dict, manifest_job_ids: set) -> dict:
     return stats
 
 
-def archive_orphaned_products(manifest_job_ids: set, jobs_dir: str) -> int:
+def archive_stripe_product_by_job_id(job_id: str, manifest: dict) -> bool:
     """
-    Archive Stripe products that are in manifest but no longer have files.
+    Archive a Stripe product by job_id.
+    
+    Args:
+        job_id: Job ID (product_object.id)
+        manifest: Manifest dictionary
     
     Returns:
-        Number of products archived
+        True if archived, False if not found
     """
-    archived_count = 0
+    # Find job entry in manifest
+    job_entry = None
+    for entry in manifest.values():
+        if entry.get('job_id') == job_id:
+            job_entry = entry
+            break
     
-    # Load manifest to get product IDs
-    # We'd need to load each manifest entry to get the product_id
-    # For now, skip this - can be implemented later if needed
+    if not job_entry:
+        return False
     
-    return archived_count
+    # Get product_id from state_management (we'd need to load the JSON file)
+    # For now, use job_id as product_id (they match in v3 schema)
+    try:
+        archive_stripe_product(job_id)
+        return True
+    except Exception as e:
+        print(f"Warning: Failed to archive product {job_id}: {e}", file=sys.stderr)
+        return False
 
 
 def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/manifest.json") -> dict:
     """
     Sync all job files to Stripe catalog (v3 schema).
+    
+    Logic (per BUG_WORKFLOW_FIX.md):
+    1. Compare JSON filenames to manifest entries
+    2. If match AND product_object.active=false → archive
+    3. If match AND product_object.active=true → skip (already synced)
+    4. If manifest entry but no JSON file → archive (orphaned)
+    5. If JSON file but no manifest entry → create all objects (new)
     
     Args:
         jobs_dir: Directory containing job JSON files
@@ -346,12 +380,22 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     Returns:
         Dictionary with overall sync stats
     """
-    # Load manifest to get existing job_ids
+    # Load manifest
     manifest = load_manifest(manifest_path)
     manifest_job_ids = {entry.get('job_id') for entry in manifest.values() if entry.get('job_id')}
     
     # Get all job files
     all_jobs = list_all_jobs(jobs_dir)
+    json_job_ids = set()
+    
+    # Build map of job_id -> job_data for quick lookup
+    jobs_by_id = {}
+    for job_data in all_jobs:
+        product_obj = job_data.get('product_object', {})
+        job_id = product_obj.get('id')
+        if job_id:
+            json_job_ids.add(job_id)
+            jobs_by_id[job_id] = job_data
     
     print(f"DEBUG: Found {len(all_jobs)} job file(s) in {jobs_dir}", file=sys.stderr)
     print(f"DEBUG: Found {len(manifest_job_ids)} job_id(s) in manifest", file=sys.stderr)
@@ -366,17 +410,75 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
         'products_archived': 0
     }
 
-    for job_data in all_jobs:
-        product_obj = job_data.get('product_object', {})
-        job_id = product_obj.get('id')
-        
-        if not job_id:
-            print(f"Warning: Skipping job missing product_object.id", file=sys.stderr)
-            continue
-
+    # Step 1: Process JSON files that have matching manifest entries
+    # Check product_object.active to decide: archive or skip
+    jobs_to_archive = []
+    jobs_to_skip = []
+    jobs_to_create = []
+    
+    for job_id in json_job_ids:
+        if job_id in manifest_job_ids:
+            # Has manifest entry - check if needs archiving
+            job_data = jobs_by_id[job_id]
+            product_obj = job_data.get('product_object', {})
+            balance_price_obj = job_data.get('balance_price_object')
+            
+            # Check if product is marked inactive OR balance payment is inactive
+            product_active = product_obj.get('active', True)
+            balance_active = balance_price_obj.get('active', True) if balance_price_obj else True
+            
+            if not product_active or (balance_price_obj and not balance_active):
+                # Archive this product
+                jobs_to_archive.append(job_id)
+                print(f"DEBUG: Job {job_id} marked for archiving (active=false)", file=sys.stderr)
+            else:
+                # Already synced and active - skip
+                jobs_to_skip.append(job_id)
+                print(f"DEBUG: Job {job_id} already synced and active - skipping", file=sys.stderr)
+        else:
+            # No manifest entry - needs creation
+            jobs_to_create.append(job_id)
+            print(f"DEBUG: Job {job_id} is new - will create Stripe objects", file=sys.stderr)
+    
+    # Step 2: Find orphaned products (in manifest but no JSON file)
+    orphaned_job_ids = manifest_job_ids - json_job_ids
+    for job_id in orphaned_job_ids:
+        jobs_to_archive.append(job_id)
+        print(f"DEBUG: Job {job_id} is orphaned (in manifest but no JSON file) - will archive", file=sys.stderr)
+    
+    # Step 3: Archive products
+    for job_id in jobs_to_archive:
         try:
-            print(f"DEBUG: Processing job {job_id}", file=sys.stderr)
-            stats = sync_job(job_data, manifest_job_ids)
+            # Get product_id from state_management if job file exists
+            # Otherwise use job_id (which should match product_id in v3 schema)
+            product_id = job_id  # Default to job_id
+            
+            if job_id in jobs_by_id:
+                # Job file exists - get product_id from state_management
+                job_data = jobs_by_id[job_id]
+                state_obj = job_data.get('state_management', {}).get('object', {})
+                product_id = state_obj.get('product', job_id)
+            else:
+                # Orphaned - file was deleted but still in manifest
+                # Try to get product_id from manifest entry's stored state (if we had it)
+                # For now, use job_id (which should match product_id in v3 schema when custom IDs work)
+                # If product_id was auto-generated by Stripe, we'd need to load from git history
+                # For simplicity, try job_id first (most common case)
+                product_id = job_id
+            
+            archive_stripe_product(product_id)
+            overall_stats['products_archived'] += 1
+            print(f"DEBUG: Archived product {product_id} (job_id: {job_id})", file=sys.stderr)
+        except Exception as e:
+            print(f"Warning: Failed to archive product for job {job_id}: {e}", file=sys.stderr)
+    
+    # Step 4: Create Stripe objects for new jobs
+    for job_id in jobs_to_create:
+        job_data = jobs_by_id[job_id]
+        
+        try:
+            print(f"DEBUG: Creating Stripe objects for job {job_id}", file=sys.stderr)
+            stats = sync_job(job_data, manifest_job_ids, should_create=True)
             
             # Accumulate stats
             for key in stats:
@@ -384,7 +486,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
             
             overall_stats['jobs_processed'] += 1
 
-            # Save updated job
+            # Save updated job (with Stripe IDs in state_management)
             if not save_job(job_id, job_data, jobs_dir=jobs_dir):
                 print(f"Warning: Failed to save job {job_id}", file=sys.stderr)
             else:
@@ -395,10 +497,6 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
             import traceback
             print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
             continue
-
-    # Archive orphaned products (in manifest but no file)
-    archived = archive_orphaned_products(manifest_job_ids, jobs_dir)
-    overall_stats['products_archived'] = archived
 
     return overall_stats
 
