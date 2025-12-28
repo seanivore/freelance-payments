@@ -34,7 +34,7 @@ import json
 import argparse
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -258,7 +258,7 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
             stats['products_created'] += 1
         
         state_obj['product'] = product_id
-        state_obj['created'] = datetime.utcnow().isoformat() + 'Z'
+        state_obj['created'] = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
 
         # === CREATE CUSTOMER ===
         customer_obj = job_data.get('customer_object')
@@ -308,6 +308,7 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
         state_obj['price'] = price_ids
 
         # === CREATE COUPON (if exists) ===
+        coupon_id = None  # Initialize before use
         coupon_obj = job_data.get('coupon_object')
         if coupon_obj:
             coupon_id = state_obj.get('coupon')
@@ -396,7 +397,24 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     """
     # Load manifest
     manifest = load_manifest(manifest_path)
-    manifest_job_ids = {entry.get('job_id') for entry in manifest.values() if entry.get('job_id')}
+    # Extract job_ids from manifest entries
+    # Handle both formats:
+    # - Old format: {"url": {"job_id": "...", "file_path": "..."}}
+    # - New format: {"url": "file_path"} (extract job_id from filename)
+    manifest_job_ids = set()
+    for entry in manifest.values():
+        if isinstance(entry, dict):
+            # Old format with job_id field
+            job_id = entry.get('job_id')
+            if job_id:
+                manifest_job_ids.add(job_id)
+        elif isinstance(entry, str):
+            # New format: entry is just the file path string
+            # Extract job_id from filename (e.g., "assets/jobs/uid-abc-123.json" -> "uid-abc-123")
+            file_path = Path(entry)
+            if file_path.suffix == '.json':
+                job_id = file_path.stem  # Removes .json extension
+                manifest_job_ids.add(job_id)
     
     # Get all job files
     all_jobs = list_all_jobs(jobs_dir)
