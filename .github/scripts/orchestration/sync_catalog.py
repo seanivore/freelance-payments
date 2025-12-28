@@ -316,13 +316,27 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
                 stats['coupons_created'] += 1
             state_obj['coupon'] = coupon_id
 
-        # === STORE CHECKOUT SESSION PARAMETERS (not create actual sessions) ===
+        # === UPDATE CHECKOUT SESSION PARAMETERS WITH ACTUAL PRICE_IDS ===
         # Sessions are created on-demand per CHECKOUT_SESSION_DETAILS.md
-        # Just store the parameters from the template
+        # But we update the parameters with actual Stripe price_ids for documentation/completeness
         checkout_session_params = []
-        if job_data.get('initial_checkout_session'):
+        
+        if job_data.get('initial_checkout_session') and initial_price_id:
+            # Update initial_checkout_session.line_items[].price with actual Stripe price_id
+            initial_checkout_session = job_data['initial_checkout_session']
+            if 'line_items' in initial_checkout_session and len(initial_checkout_session['line_items']) > 0:
+                initial_checkout_session['line_items'][0]['price'] = initial_price_id
+            # Update discounts[].coupon with actual Stripe coupon_id (if coupon exists)
+            if coupon_id and 'discounts' in initial_checkout_session and initial_checkout_session['discounts']:
+                if len(initial_checkout_session['discounts']) > 0:
+                    initial_checkout_session['discounts'][0]['coupon'] = coupon_id
             checkout_session_params.append({'initial': 'parameters_stored'})
-        if job_data.get('balance_checkout_session'):
+        
+        if job_data.get('balance_checkout_session') and balance_price_id:
+            # Update balance_checkout_session.line_items[].price with actual Stripe price_id
+            balance_checkout_session = job_data['balance_checkout_session']
+            if 'line_items' in balance_checkout_session and len(balance_checkout_session['line_items']) > 0:
+                balance_checkout_session['line_items'][0]['price'] = balance_price_id
             checkout_session_params.append({'balance': 'parameters_stored'})
         
         if checkout_session_params:

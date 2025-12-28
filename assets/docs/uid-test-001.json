@@ -87,7 +87,7 @@
     },
     "nickname": "Full Payment",
     "product": {"products": ["uid-test-001"]},
-    "id": "uid-test-001-1",
+    "id": null,
     "unit_amount": 100000
   },
   "balance_price_object": null,
@@ -107,7 +107,7 @@
     "customer_creation": "always",
     "custom_text": {"after_submit": {"message": "Thank you!"}},
     "discounts": null,
-    "line_items": [{"price": "uid-test-001-1", "quantity": 1}],
+    "line_items": [{"price": null, "quantity": 1}],
     "mode": "payment",
     "redirect_on_completion": "always",
     "return_url": "https://payments.august.style/uid-test-001#completion",

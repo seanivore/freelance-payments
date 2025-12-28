@@ -23,8 +23,8 @@
     "created": "2026-01-02",
     "product": "uid-amx-856",
     "price": [
-      {"initial": "uid-amx-856-1"},
-      {"balance": "uid-amx-856-2"}
+      {"initial": "price_..."},
+      {"balance": "price_..."}
     ],
     "coupon": "uid-amx-856-coupon",
     "checkout_session": [
@@ -95,7 +95,7 @@
   },
   "nickname": "Initial/Deposit Payment",
   "product": {"products": ["uid-amx-856"]},
-  "id": "uid-amx-856-1",
+  "id": "price_...",
   "unit_amount": 150000
 },
 
@@ -113,7 +113,7 @@
   },
   "nickname": "Final Payment",
   "product": {"products": ["uid-amx-856"]},
-  "id": "uid-amx-856-2",
+  "id": "price_...",
   "unit_amount": 50000
 },
 
@@ -141,8 +141,8 @@
   "currency": "usd",
   "customer_creation": "always",
   "custom_text": {"after_submit": {"message": "Time to create magic 💎"}},
-  "discounts": [{"coupon": "uid-amx-856-coupon"}],
-  "line_items": [{"price": "uid-amx-856-1", "quantity": 1}],
+  "discounts": [{"coupon": null}],
+  "line_items": [{"price": null, "quantity": 1}],
   "mode": "payment", 
   "redirect_on_completion": "always",
   "return_url": "https://payments.august.style/payment-success",
