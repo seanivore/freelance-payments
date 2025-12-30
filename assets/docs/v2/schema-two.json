@@ -1,0 +1,102 @@
+{
+"_metadata":{
+    "project_name": "AI Sales Assistants for Bob's Roofing",
+    "project_keyword": "ai-and-roofing",
+    "client_last_name": "Smith",
+    "job_id": "uid-bbr-001"
+},
+"client": {
+    "business": "Bob's Roofing LLC",
+    "contact": {
+        "full_name": "Bob Smith",
+        "title": "Owner / Manager",
+        "email": "bob@example.com",
+        "phone": "312-555-0123"
+    },
+    "address": {
+        "street": "123 Main St",
+        "city": "Boston",
+        "state": "MA",
+        "zip": "02101"
+    }
+},
+
+"contract": {
+    "draft_date": "2025-01-15",
+    "work_start": "2025-01-20",
+    "work_end": "2025-03-15",
+    "rate_type": "Flat Rate",
+    "work_cost": 5000.00,
+    "deposit": true,
+    "deposit_amount": 1250.00,
+    "deposit_percent": 25,
+    "deposit_pay_by": "work_start",
+    "balance_pay_by": "before_launch",
+    "balance_pay_days": 14,
+    "late_fee": 100.00,
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150.00,
+    "signatures": {
+        "contractor": {
+            "legal_name": null,
+            "signed_date": null
+        },
+        "client": {
+            "legal_name": null,
+            "signed_date": null
+        }
+    },
+    "viewed": false,
+    "downloaded": 0,
+    "signed": false
+},
+
+"product": {
+    "name": "Website Development",
+    "description": "Professional custom-built e-commerce website",
+    "active": true,
+    "created": 1766327709,
+    "stripe_product_id": null,
+    "sync": false
+},
+
+"price": [ 
+    {
+    "nickname": "Deposit (25%)",
+    "unit_amount": 125000,
+    "currency": "usd",
+    "due_date": "2025-01-20",
+    "due_date_unix": "1737349200",
+    "due_type": "date",
+    "due_term": "work start",
+    "paid_date": null,
+    "paid_date_unix": null,
+    "paid": true,
+    "active": true,
+    "payment_number": 1,
+    "stripe_price_id": null,
+    "sync": false
+    },
+
+    {
+    "nickname": "Balance payment",
+    "unit_amount": 375000,
+    "currency": "usd",
+    "due_date": null,
+    "due_date_unix": null,
+    "due_type": "term",
+    "due_term": "before launch",
+    "paid_date": null,
+    "paid_date_unix": null,
+    "paid": false,
+    "active": true,
+    "payment_number": 2,
+    "stripe_price_id": null,
+    "sync": false
+    }
+],
+
+"project_scope_summary": "This project delivers a professional, custom-built e-commerce website. The Contractor will build a custom dynamic website using a JSON-based product catalog system, hosted on GitHub Pages with Cloudflare R2 CDN for images. The site will include Stripe Prebuilt Checkout integration for e-commerce functionality. The Contractor will create a brand-aligned visual design with mobile-first responsive design and professional typography. Key features include homepage with dynamic product rotation, collection pages with filterable product grid, product pages with photo galleries and story cards, newsletter collection, contact form, SEO optimization, and Google Analytics. The Contractor will provide 30 days of post-launch support, complete technical documentation, content template guidance, and training on adding new products.",
+"project_scope_full": "Full detailed project scope document stored separately. Includes technical infrastructure details, design specifications, complete feature list, content management system details, support terms, deliverables checklist, timeline breakdown, client responsibilities, and success criteria."
+}

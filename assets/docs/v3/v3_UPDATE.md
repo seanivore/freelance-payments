@@ -1,6 +1,6 @@
 # v3 Update 
 
-*UPDATED 2025-12-29: v3.1.6*
+*UPDATED 2025-12-29: v3.1.7*
 
 ## Note 
 
@@ -55,3 +55,13 @@ This is being written after the fact. I just created the versioning folders. Mov
 
   + No need for any other job sync check 
   + No updates needed, then standard build and push runs 
+
+## Next Steps 
+
+  - In the last bug assessment AI said "The complexity comes from" and listed the following 
+
+    1. Multiple refactorings leaving dead code and confusing logic
+    2. Missing error handling (like the `coupon_id` bug)
+    3. Documentation gaps making it hard to track what should happen where
+  
+  + We should create those based on current state 

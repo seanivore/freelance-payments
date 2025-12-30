@@ -1,9 +1,9 @@
 {
-  "project": "Test Project - Special Characters",
+  "project": null,
   "contract": {
-    "work_start": "2026-03-15",
-    "work_end": "2026-06-15",
-    "legal_jurisdiction": "Massachusetts",
+    "work_start": null,
+    "work_end": null,
+    "legal_jurisdiction": null,
     "maintenance_period_months": 3,
     "maintenance_monthly_fee": "$150",
     "signatures": {
@@ -17,9 +17,10 @@
       }
     }
   },
+
   "state_management": {
     "object_id": {
-      "created": "2026-02-05T10:00:00Z",
+      "created": null,
       "product": null,
       "initial_price": null,
       "balance_price": null,
@@ -28,13 +29,14 @@
       "checkout_session": {
         "initial": null,
         "balance": null
+      }
     },
     "client_status": {
       "logged_in": null,
       "contract_loaded": null,
-      "contract_scrolled_complete": false,
-      "viewed_contract": false,
-      "viewed_invoice": false,
+      "contract_scrolled_complete": null,
+      "viewed_contract": true,
+      "viewed_invoice": true,
       "downloaded_docs": 0,
       "signed_contract": null
     },
@@ -49,69 +51,83 @@
       "succeeded": null
     }
   },
+
   "product_object": {
-    "name": "Special Characters Test: O'Reilly & Associates",
+    "name": null,
     "active": true,
-    "description": "Test project with special characters: quotes \"double\" and 'single', ampersands &, apostrophes O'Reilly, dashes — and –, and symbols ©®™",
-    "id": "uid-test-008",
+    "description": null,
+    "id": null,
     "metadata": {
-      "login_keyword": "special-chars",
-      "login_name": "o'reilly",
-      "service_usd": "$7,000",
-      "total_payments": 2,
-      "discount_usd": "$0"
+      "login_name": null,
+      "login_keyword": null,
+      "service_usd": null,
+      "total_payments": null,
+      "discount_usd": null
     },
-    "type": "service",
+    "type": "service", 
     "unit_label": "Payment"
   },
+
   "customer_object": {
-    "individual_name": "Pat O'Reilly",
-    "business_name": "O'Reilly & Associates, LLC",
-    "description": "Founder & CEO",
-    "email": "pat.o'reilly@example.com",
-    "phone": "555-0800",
-    "id": "uid-test-008-client",
+    "individual_name": null,
+    "business_name": null,
+    "description": null,
+    "email": null,
+    "phone": null,
+    "id": null,
     "address": {
-      "city": "Concord",
-      "line1": "369 Main St, Suite 2A",
-      "state": "MA",
-      "postal_code": "01742",
-      "country": "US"
+      "city": null,
+      "line1": null,
+      "state": null,
+      "postal_code": null,
+      "country": null
     }
   },
+
+    "coupon_object": {
+    "amount_off": null,
+    "applies_to": {"products": [null]},
+    "currency": "usd",
+    "duration": "once",
+    "id": null,
+    "max_redemptions": 1,
+    "name": null
+  },
+
   "initial_price_object": {
     "currency": "usd",
     "active": true,
     "billing_scheme": "per_unit",
     "metadata": {
       "payment_number": 1,
-      "payment_usd": "$4,000",
-      "balance_usd": "$3,000",
+      "payment_usd": null,
+      "balance_usd": null,
       "pay_by": "start of work"
     },
-    "nickname": "Initial Payment (50%)",
-    "product": {"products": ["uid-test-008"]},
-    "id": "uid-test-008-1",
-    "unit_amount": 400000
+    "nickname": "Initial Payment",
+    "product": {"products": [null]},
+    "id": null,
+    "unit_amount": null
   },
+
   "balance_price_object": {
     "currency": "usd",
     "active": true,
     "billing_scheme": "per_unit",
     "metadata": {
       "payment_number": 2,
-      "payment_usd": "$3,000",
-      "balance_usd": "$0",
+      "payment_usd": null,
+      "balance_usd": null,
       "pay_by": "before project launch",
       "pay_days": 14,
       "late_fee": "$100"
     },
-    "nickname": "Final Payment (Balance)",
-    "product": {"products": ["uid-test-008"]},
-    "id": "uid-test-008-2",
-    "unit_amount": 300000
+    "nickname": "Final Payment",
+    "product": {"products": [null]},
+    "id": null,
+    "unit_amount": null
   },
-  "coupon_object": null,
+
   "initial_checkout_session": {
     "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
     "billing_address_collection": "required",
@@ -122,15 +138,15 @@
       "button_color": "#9C528B",
       "display_name": "august.style designer"
     },
-    "client_reference_id": "uid-test-008-client",
+    "client_reference_id": null,
     "currency": "usd",
     "customer_creation": "always",
-    "custom_text": {"after_submit": {"message": "Thank you!"}},
-    "discounts": null,
-    "line_items": [{"price": "uid-test-008-1", "quantity": 1}],
-    "mode": "payment",
+    "custom_text": {"after_submit": {"message": "Time to create magic 💎"}},
+    "discounts": [{"coupon": null}],
+    "line_items": [{"price": null, "quantity": 1}],
+    "mode": "payment", 
     "redirect_on_completion": "always",
-    "return_url": "https://payments.august.style/uid-test-008#completion",
+    "return_url": "https://payments.august.style/payment-success",
     "submit_type": "pay",
     "ui_mode": "embedded",
     "name_collection": {
@@ -138,6 +154,7 @@
       "business": {"enabled": true, "optional": true}
     }
   },
+
   "balance_checkout_session": {
     "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
     "billing_address_collection": "required",
@@ -148,15 +165,15 @@
       "button_color": "#9C528B",
       "display_name": "august.style designer"
     },
-    "client_reference_id": "uid-test-008-client",
+    "client_reference_id": null,
     "currency": "usd",
     "customer_creation": "always",
-    "custom_text": {"after_submit": {"message": "Thank you!"}},
     "discounts": null,
-    "line_items": [{"price": "uid-test-008-2", "quantity": 1}],
-    "mode": "payment",
+    "custom_text": {"after_submit": {"message": "Hope you love it 💃"}},
+    "line_items": [{"price": null, "quantity": 1}],
+    "mode": "payment", 
     "redirect_on_completion": "always",
-    "return_url": "https://payments.august.style/uid-test-008#completion",
+    "return_url": "https://payments.august.style/payment-success",
     "submit_type": "pay",
     "ui_mode": "embedded",
     "name_collection": {
@@ -164,7 +181,7 @@
       "business": {"enabled": true, "optional": true}
     }
   },
-  "project_scope_summary": "Special characters test project: Testing quotes \"double\" and 'single', ampersands &, apostrophes O'Reilly, dashes — and , symbols ©®™, and various punctuation marks.",
-  "project_scope_full": "Full detailed project scope document stored separately. Includes technical infrastructure details, design specifications, complete feature list, content management system details, support terms, deliverables checklist, timeline breakdown, client responsibilities, and success criteria."
-}
+
+"project_scope_summary": null,
+"project_scope_full": null
 }
