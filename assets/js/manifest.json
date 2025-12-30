@@ -1,11 +1,5 @@
 {
   "jobs": {
-    "mandy-multi-mad": {
-      "file_path": "assets/jobs/uid-egf-089.json",
-      "job_id": "uid-egf-089",
-      "login_keyword": "multi-mad",
-      "login_name": "Mandy"
-    },
     "flow-full-flow": {
       "file_path": "assets/jobs/uid-sst-846.json",
       "job_id": "uid-sst-846",
@@ -13,5 +7,5 @@
       "login_name": "Flow"
     }
   },
-  "generated_at": "2025-12-30T18:56:01.016465Z"
+  "generated_at": "2025-12-30T19:26:31.481594Z"
 }
