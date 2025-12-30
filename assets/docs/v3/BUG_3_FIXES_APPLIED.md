@@ -116,8 +116,8 @@ After these fixes, test:
 
 ## Next Steps
 
-1. Test with a single JSON file (add → push → verify)
-2. Test removing a JSON file (remove → push → verify archive)
-3. Test with `product_object.active=false` (set → push → verify archive)
-4. Monitor GitHub Actions for correct workflow behavior
-5. Check Stripe dashboard for correct product/price creation
+1. Test with a single JSON file (add → push → verify) ✅
+2. Test removing a JSON file (remove → push → verify archive) ✅
+3. Test with `product_object.active=false` (set → push → verify archive) ✅
+4. Monitor GitHub Actions for correct workflow behavior ✅
+5. Check Stripe dashboard for correct product/price creation ✅
