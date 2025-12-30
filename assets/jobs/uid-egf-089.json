@@ -52,7 +52,7 @@
   },
   "product_object": {
     "name": "Same But Not",
-    "active": true,
+    "active": false,
     "description": "How well does the system handle multiple actions across jobs?",
     "id": "uid-egf-089",
     "metadata": {
