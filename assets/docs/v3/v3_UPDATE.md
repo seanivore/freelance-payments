@@ -1,6 +1,6 @@
 # v3 Update 
 
-*UPDATED 2025-12-29: v3.1.7*
+*UPDATED 2025-12-29:* v3.1.7 
 
 ## Note 
 

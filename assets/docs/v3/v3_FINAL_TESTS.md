@@ -2,6 +2,67 @@
 
 ## Summary 
 
+## Bugs 
+
+## 1. Using `project_object.active= false` Change To Archive 
+
+  * **Steps required in automation versus what happened** 
+
+  1. Recognizes the JSON filename and manifest entry matches ✅ 
+  2. Discovered one of the matched JSON files has been marked no longer active ✅
+    - This means it needs to be archived 
+    - Happens after a final (1 of 1 payments, or 2 of 2 payments, etc.) payment is made 🧪
+  3. The inactive JSON product is archived from the Stripe catalog ✅ 
+  4. That inactive JSON file must now be deleted 🚫 
+    - This did not happen 
+    - Though Stripe worked
+    - This action is important for avoiding overly complex logic for keeping archived JSON files; we don't want that 
+  5. The manifest then updates and wouldn't show the deleted file ⏰ 
+    - As long as the file deletion happens first 
+    - I think this should end up accurate 
+    - Without deletion last time it did not end up accurate 
+
+  * **Updates required to fix bug** 
+
+  The script that updates a JSON with all the ID numbers after catalog object creation, must also delete JSON job files after catalog object archival. 
+
+    1. Prepare for fix 
+      - I'm going to delete the file that should have been deleted ✅ 
+      - Then when I push it should fix the manifest to be accurate showing just one product instead of two 
+      - Be conscious that there is no error from the system thinking it needs to archive a product that was already archived 
+      - If there is, add that to the steps for the fix in steps below 
+    2. Identify which file should be handling this action 
+      - The same file that updates JSONs after new object creation 
+      - Be aware of avoiding logic conflict where system looks for object to archive that already was 
+      - However, this won't occur once the deletion works, but good to protect for edge cases 
+    2. Confirm there isn't already coded logic for this action elsewhere 
+      - What if it does exist but is just broken and didn't flag an error 
+      - Check file we're using 
+      - Check other files just in case 
+      - Again, confirm no logic conflict will occur when fixing this, without removing the normal orphan archival action 
+    3. Fix file that is needed to delete JSON files after a Stripe Object is archived 
+      - Write new code 
+      - Create an `asset/docs/v3/BUG_8_INACTIVE_DELETION.md` documenting the issue and fix 
+      - Update `asset/docs/v3/v3_UPDATE.md` to include an extra bug +0_0_1 count to v3.1.8 
+    4. Push the fix 
+      - Perhaps create first tag for versioning in GitHub 
+      - Nothing should actually change with push, will need to set up actual test to check for success 
+
+  * **Test creation after bug fix is pushed and documented** 
+
+    1. First create a standard job with two payments and a coupon 
+    2. Push that file as `active: true` first to have objects created 
+    3. Git Pull to get updated JSON and manifest
+    4. Confirm creation of Stripe Catalog object, accurate manifest, and JSON file updates 
+    5. Now, if all is a success, you can change the JSON to `product_object.active= false` 
+    6. Commit and push, wait for deploy and build 
+    7. Confirm Stripe catalog product archival is still functional 
+    8. Git Pull for updated (deleted) JSON file and new manifest with one less entry 
+
+  All current feature flow functionality working, plus file deletion, and accurate manifest will indicate successful bug removal
+
+## Updates 
+
 ### 1. JSON Template Accuracy Issue 
 
 The artifact I was editing was from the last successful tests. I saw that the `state_management.client_status` section was different than the actual `assets/docs/v3/_job_template_v3.json` file. The tested file I'm repurposing for my own test looks more accurate based on the wording so I'm changing the template to match. Noting the details here for record keeping in case one of either or both are inaccurate. 
