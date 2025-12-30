@@ -19,15 +19,15 @@
   },
   "state_management": {
     "object_id": {
-      "created": null,
-      "product": null, 
-      "initial_price": null,
-      "balance_price": null, 
-      "customer": null, 
-      "coupon": null, 
+      "created": "2025-12-30T18:51:41.115491Z",
+      "product": "uid-egf-089",
+      "initial_price": "price_1Sk81B9fljwH26CP25ocNW9U",
+      "balance_price": "price_1Sk81B9fljwH26CPLCepp1w4",
+      "customer": "uid-egf-089-client",
+      "coupon": "uid-egf-089-coupon",
       "checkout_session": {
-        "initial": null,
-        "balance": null
+        "initial": "parameters_stored",
+        "balance": "parameters_stored"
       }
     },
     "client_status": {
@@ -109,7 +109,7 @@
         "uid-egf-089"
       ]
     },
-    "id": null, 
+    "id": "price_1Sk81B9fljwH26CP25ocNW9U",
     "unit_amount": 75000
   },
   "balance_price_object": {
@@ -130,7 +130,7 @@
         "uid-egf-089"
       ]
     },
-    "id": null,
+    "id": "price_1Sk81B9fljwH26CPLCepp1w4",
     "unit_amount": 25000
   },
   "initial_checkout_session": {
@@ -159,7 +159,7 @@
     "discounts": null,
     "line_items": [
       {
-        "price": null, 
+        "price": "price_1Sk81B9fljwH26CP25ocNW9U",
         "quantity": 1
       }
     ],
@@ -204,7 +204,7 @@
     },
     "line_items": [
       {
-        "price": null,
+        "price": "price_1Sk81B9fljwH26CPLCepp1w4",
         "quantity": 1
       }
     ],
