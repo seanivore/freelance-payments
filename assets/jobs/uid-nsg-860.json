@@ -17,18 +17,17 @@
       }
     }
   },
-
   "state_management": {
     "object_id": {
-      "created": null,
-      "product": null,
-      "initial_price": null,
-      "balance_price": null,
-      "customer": null,
-      "coupon": null,
+      "created": "2025-12-30T15:20:31.530025Z",
+      "product": "uid-nsg-860",
+      "initial_price": "price_1Sk4ip9fljwH26CPbshcyRve",
+      "balance_price": "price_1Sk4ip9fljwH26CPIdXwYqgd",
+      "customer": "uid-nsg-860-client",
+      "coupon": "uid-nsg-860-coupon",
       "checkout_session": {
-        "initial": null,
-        "balance": null
+        "initial": "parameters_stored",
+        "balance": "parameters_stored"
       }
     },
     "client_status": {
@@ -83,7 +82,11 @@
   },
   "coupon_object": {
     "amount_off": 25000,
-    "applies_to": {"products": ["uid-nsg-860"]},
+    "applies_to": {
+      "products": [
+        "uid-nsg-860"
+      ]
+    },
     "currency": "usd",
     "duration": "once",
     "id": "uid-nsg-860-coupon",
@@ -101,8 +104,12 @@
       "pay_by": "Today, thanks"
     },
     "nickname": "Payment with discount",
-    "product": {"products": ["uid-nsg-860"]},
-    "id": null,
+    "product": {
+      "products": [
+        "uid-nsg-860"
+      ]
+    },
+    "id": "price_1Sk4ip9fljwH26CPbshcyRve",
     "unit_amount": 75000
   },
   "balance_price_object": {
@@ -118,12 +125,21 @@
       "late_fee": "$100"
     },
     "nickname": "Balance Payment",
-    "product": {"products": ["uid-nsg-860"]},
-    "id": null,
+    "product": {
+      "products": [
+        "uid-nsg-860"
+      ]
+    },
+    "id": "price_1Sk4ip9fljwH26CPIdXwYqgd",
     "unit_amount": 25000
   },
   "initial_checkout_session": {
-    "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
+    "automatic_tax": {
+      "enabled": true,
+      "liability": {
+        "type": "self"
+      }
+    },
     "billing_address_collection": "required",
     "branding_settings": {
       "font_family": "noto_sans",
@@ -135,22 +151,40 @@
     "client_reference_id": "uid-nsg-860-client",
     "currency": "usd",
     "customer_creation": "always",
-    "custom_text": {"after_submit": {"message": "TESTED!"}},
+    "custom_text": {
+      "after_submit": {
+        "message": "TESTED!"
+      }
+    },
     "discounts": null,
-    "line_items": [{"price": null, "quantity": 1}],
+    "line_items": [
+      {
+        "price": "price_1Sk4ip9fljwH26CPbshcyRve",
+        "quantity": 1
+      }
+    ],
     "mode": "payment",
     "redirect_on_completion": "always",
     "return_url": "https://payments.august.style/uid-test-001#completion",
     "submit_type": "pay",
     "ui_mode": "embedded",
     "name_collection": {
-      "individual": {"enabled": true},
-      "business": {"enabled": true, "optional": true}
+      "individual": {
+        "enabled": true
+      },
+      "business": {
+        "enabled": true,
+        "optional": true
+      }
     }
   },
-
   "balance_checkout_session": {
-    "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
+    "automatic_tax": {
+      "enabled": true,
+      "liability": {
+        "type": "self"
+      }
+    },
     "billing_address_collection": "required",
     "branding_settings": {
       "font_family": "noto_sans",
@@ -163,19 +197,32 @@
     "currency": "usd",
     "customer_creation": "always",
     "discounts": null,
-    "custom_text": {"after_submit": {"message": "That's all she wrote!"}},
-    "line_items": [{"price": null, "quantity": 1}],
-    "mode": "payment", 
+    "custom_text": {
+      "after_submit": {
+        "message": "That's all she wrote!"
+      }
+    },
+    "line_items": [
+      {
+        "price": "price_1Sk4ip9fljwH26CPIdXwYqgd",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
     "redirect_on_completion": "always",
     "return_url": "https://payments.august.style/payment-success",
     "submit_type": "pay",
     "ui_mode": "embedded",
     "name_collection": {
-      "individual": {"enabled": true},
-      "business": {"enabled": true, "optional": true}
+      "individual": {
+        "enabled": true
+      },
+      "business": {
+        "enabled": true,
+        "optional": true
+      }
     }
   },
-
   "project_scope_summary": "Single payment test project for testing contract signing and payment flow.",
   "project_scope_full": "Full detailed project scope document stored separately."
 }
