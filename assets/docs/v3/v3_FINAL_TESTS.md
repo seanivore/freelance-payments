@@ -28,9 +28,13 @@
 
     1. Prepare for fix 
       - I'm going to delete the file that should have been deleted ✅ 
-      - Then when I push it should fix the manifest to be accurate showing just one product instead of two 
-      - Be conscious that there is no error from the system thinking it needs to archive a product that was already archived 
-      - If there is, add that to the steps for the fix in steps below 
+      - Then when I push it should fix the manifest to be accurate showing just one product instead of two ✅
+      - Be conscious that there is no error from the system thinking it needs to archive a product that was already archived ✅
+      - If there is, add that to the steps for the fix in steps below ✅ 
+  * **UPDATE** the removal of the edge case inactive JSON from manifest worked even though there was no object to archive ✅
+    + It did do a modify api call to archive the object ✅
+    + The identical api call went through with no error so we're all good to move forward form here ✅
+    + Going to pull in new manifest now ✅
     2. Identify which file should be handling this action 
       - The same file that updates JSONs after new object creation 
       - Be aware of avoiding logic conflict where system looks for object to archive that already was 
