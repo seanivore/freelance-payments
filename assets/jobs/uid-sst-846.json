@@ -1,9 +1,9 @@
 {
-  "project": "Standard Job Flow Testing",
+  "project": "Test Two",
   "contract": {
     "work_start": "2026-12-30",
     "work_end": "2026-12-31",
-    "legal_jurisdiction": "Massachusetts",
+    "legal_jurisdiction": "California",
     "maintenance_period_months": 3,
     "maintenance_monthly_fee": "$150",
     "signatures": {
@@ -19,15 +19,15 @@
   },
   "state_management": {
     "object_id": {
-      "created": "2025-12-30T15:20:31.530025Z",
-      "product": "uid-nsg-860",
-      "initial_price": "price_1Sk4ip9fljwH26CPbshcyRve",
-      "balance_price": "price_1Sk4ip9fljwH26CPIdXwYqgd",
-      "customer": "uid-nsg-860-client",
-      "coupon": "uid-nsg-860-coupon",
+      "created": null,
+      "product": null, 
+      "initial_price": null,
+      "balance_price": null, 
+      "customer": null, 
+      "coupon": null, 
       "checkout_session": {
-        "initial": "parameters_stored",
-        "balance": "parameters_stored"
+        "initial": null,
+        "balance": null
       }
     },
     "client_status": {
@@ -51,13 +51,13 @@
     }
   },
   "product_object": {
-    "name": "Standard Job",
+    "name": "Full Flow Standard Job",
     "active": true,
-    "description": "A new test job JSON file to test the entire flow of the system.",
-    "id": "uid-nsg-860",
+    "description": "This time we'll do the full flow and we'll create more than one new job at a time.",
+    "id": "uid-sst-846",
     "metadata": {
-      "login_keyword": "standard-job",
-      "login_name": "Job",
+      "login_keyword": "full-flow",
+      "login_name": "Flow",
       "service_usd": "$1,250",
       "total_payments": 2,
       "discount_usd": "$250"
@@ -66,17 +66,17 @@
     "unit_label": "Payment"
   },
   "customer_object": {
-    "individual_name": "Standard Job",
-    "business_name": "Standard Jobs LLC",
-    "description": "A pretend client to test the entire UX flow.",
-    "email": "standard@example.com",
+    "individual_name": "Sandra Flow",
+    "business_name": "Flowing With Sandy LLC",
+    "description": "Sandy wants to make sure the UX flow of checking out works well.",
+    "email": "sandy@flow.com",
     "phone": "210-510-0100",
-    "id": "uid-nsg-860-client",
+    "id": "uid-sst-846-client",
     "address": {
-      "city": "Los Angeles",
-      "line1": "1920 Hilhurst Ave",
-      "state": "CA",
-      "postal_code": "90026",
+      "city": "Bangor",
+      "line1": "9301 Gerbil Rd",
+      "state": "ME",
+      "postal_code": "10111",
       "country": "US"
     }
   },
@@ -84,14 +84,14 @@
     "amount_off": 25000,
     "applies_to": {
       "products": [
-        "uid-nsg-860"
+        "uid-sst-846"
       ]
     },
     "currency": "usd",
     "duration": "once",
-    "id": "uid-nsg-860-coupon",
+    "id": "uid-sst-846-coupon",
     "max_redemptions": 1,
-    "name": "STANDARD-JOB"
+    "name": "FOR-SANDY"
   },
   "initial_price_object": {
     "currency": "usd",
@@ -101,15 +101,15 @@
       "payment_number": 1,
       "payment_usd": "$750",
       "balance_usd": "$750",
-      "pay_by": "Today, thanks"
+      "pay_by": "Meow."
     },
     "nickname": "Payment with discount",
     "product": {
       "products": [
-        "uid-nsg-860"
+        "uid-sst-846"
       ]
     },
-    "id": "price_1Sk4ip9fljwH26CPbshcyRve",
+    "id": null, 
     "unit_amount": 75000
   },
   "balance_price_object": {
@@ -120,17 +120,17 @@
       "payment_number": 2,
       "payment_usd": "$250",
       "balance_usd": "$0",
-      "pay_by": "After first payment, thanks",
+      "pay_by": "Meow, but a little later than right meow.",
       "pay_days": 14,
       "late_fee": "$100"
     },
     "nickname": "Balance Payment",
     "product": {
       "products": [
-        "uid-nsg-860"
+        "uid-sst-846"
       ]
     },
-    "id": "price_1Sk4ip9fljwH26CPIdXwYqgd",
+    "id": null,
     "unit_amount": 25000
   },
   "initial_checkout_session": {
@@ -148,18 +148,18 @@
       "button_color": "#9C528B",
       "display_name": "august.style designer"
     },
-    "client_reference_id": "uid-nsg-860-client",
+    "client_reference_id": "uid-sst-846-client",
     "currency": "usd",
     "customer_creation": "always",
     "custom_text": {
       "after_submit": {
-        "message": "TESTED!"
+        "message": "Glorious!"
       }
     },
     "discounts": null,
     "line_items": [
       {
-        "price": "price_1Sk4ip9fljwH26CPbshcyRve",
+        "price": null, 
         "quantity": 1
       }
     ],
@@ -193,18 +193,18 @@
       "button_color": "#9C528B",
       "display_name": "august.style designer"
     },
-    "client_reference_id": "uid-nsg-860-client",
+    "client_reference_id": "uid-sst-846-client",
     "currency": "usd",
     "customer_creation": "always",
     "discounts": null,
     "custom_text": {
       "after_submit": {
-        "message": "That's all she wrote!"
+        "message": "WINNER!"
       }
     },
     "line_items": [
       {
-        "price": "price_1Sk4ip9fljwH26CPIdXwYqgd",
+        "price": null,
         "quantity": 1
       }
     ],
@@ -223,6 +223,6 @@
       }
     }
   },
-  "project_scope_summary": "Single payment test project for testing contract signing and payment flow.",
+  "project_scope_summary": "For you, Sandy Flow.",
   "project_scope_full": "Full detailed project scope document stored separately."
 }

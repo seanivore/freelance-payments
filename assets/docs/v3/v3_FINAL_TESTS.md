@@ -2,7 +2,7 @@
 
 ## Summary 
 
-### JSON Template Accuracy Issue 
+### 1. JSON Template Accuracy Issue 
 
 The artifact I was editing was from the last successful tests. I saw that the `state_management.client_status` section was different than the actual `assets/docs/v3/_job_template_v3.json` file. The tested file I'm repurposing for my own test looks more accurate based on the wording so I'm changing the template to match. Noting the details here for record keeping in case one of either or both are inaccurate. 
 
@@ -34,27 +34,8 @@ The artifact I was editing was from the last successful tests. I saw that the `s
     }, }
 ``` 
 
-### Creating Actual Template 
 
-  * **Truly `_BLANK.json` job JSON file** 
-
-  + Once the schema is confirmed accurate I want to create a truly blank version for the directory 
-    - That way we can keep each version in their versioning directory, like `assets/docs/v3/_job_template_v3.json` 
-    - I found the v2 version for that folder; renamed to avoid grep search confusion `assets/docs/v2/schema-two.json` 
-    - New one will be at `assets/job/_BLANK.json` 
-  + This helps UX because 
-    - No need to hunt down missing sections like coupons 
-    - Nothing in `state_management` will be filled in ahead of time
-    - Whereas the actual v3 template one shoes EXAMPLE values instead of blanks where blanks should be when creating a new one 
-
-  * **Please make sure that the system will ignore it**
-
-  + Let's set it to ignore any files that 
-    - Are in `assets/job/...` directory 
-    - Have an underscore to start the filename `_`
-    - And do not follow the string format `uid-abd-123` 
-
-### Custom Script for New JSON UX 
+### 2. Custom Script for New JSON UX 
 
   * **Let's create a custom script to keep in the directory that produces a new, blank JSON ready for real information**
 
