@@ -19,21 +19,21 @@
   },
 
   "document": {
-    "contract_pdf": {
+    "contract": {
       "id": null,
-      "drive_file_id": null,
-      "web_view_link": null, 
+      "pdf": null, 
+      "drive_id": null,
+      "url": null, 
       "sha256": null,
-      "generated_at": null, 
-      "file_id_path": null
+      "created": null
     },
-    "invoice_pdf": {
+    "invoice": {
       "id": null,
-      "drive_file_id": null,
-      "web_view_link": null, 
+      "pdf": null, 
+      "drive_id": null,
+      "url": null, 
       "sha256": null,
-      "generated_at": null,
-      "file_id_path": null
+      "created": null
     }
   },
 
