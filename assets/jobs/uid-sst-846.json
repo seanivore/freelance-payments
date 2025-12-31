@@ -17,8 +17,8 @@
       }
     }
   },
-  "state_management": {
-    "object_id": {
+  "state": {
+    "object": {
       "created": "2025-12-30T18:51:40.071111Z",
       "product": "uid-sst-846",
       "initial_price": "price_1Sk81A9fljwH26CPWq2sOLqU",
@@ -39,7 +39,7 @@
       "downloaded_docs": 0,
       "signed_contract": null
     },
-    "initial_payment_intent": {
+    "payment_1": {
       "created": null,
       "processing": null,
       "succeeded": null
@@ -50,10 +50,10 @@
       "succeeded": null
     }
   },
-  "product_object": {
+  "product": {
     "name": "Full Flow Standard Job",
     "active": true,
-    "description": "This time we'll do the full flow and we'll create more than one new job at a time.",
+    "title": "This time we'll do the full flow and we'll create more than one new job at a time.",
     "id": "uid-sst-846",
     "metadata": {
       "login_keyword": "full-flow",
@@ -65,10 +65,10 @@
     "type": "service",
     "unit_label": "Payment"
   },
-  "customer_object": {
-    "individual_name": "Sandra Flow",
-    "business_name": "Flowing With Sandy LLC",
-    "description": "Managing Owner",
+  "customer": {
+    "name": "Sandra Flow",
+    "business": "Flowing With Sandy LLC",
+    "title": "Managing Owner",
     "email": "sandy@flow.com",
     "phone": "210-510-0100",
     "id": "uid-sst-846-client",
@@ -80,7 +80,7 @@
       "country": "US"
     }
   },
-  "coupon_object": {
+  "coupon": {
     "amount_off": 25000,
     "applies_to": {
       "products": [
@@ -93,7 +93,7 @@
     "max_redemptions": 1,
     "name": "FOR-SANDY"
   },
-  "initial_price_object": {
+  "price1": {
     "currency": "usd",
     "active": true,
     "billing_scheme": "per_unit",
@@ -112,7 +112,7 @@
     "id": "price_1Sk81A9fljwH26CPWq2sOLqU",
     "unit_amount": 75000
   },
-  "balance_price_object": {
+  "price2": {
     "currency": "usd",
     "active": true,
     "billing_scheme": "per_unit",
@@ -133,7 +133,7 @@
     "id": "price_1Sk81A9fljwH26CPdQFDdLBK",
     "unit_amount": 25000
   },
-  "initial_checkout_session": {
+  "checkout_session_1": {
     "automatic_tax": {
       "enabled": true,
       "liability": {
@@ -178,7 +178,7 @@
       }
     }
   },
-  "balance_checkout_session": {
+  "checkout_session_2": {
     "automatic_tax": {
       "enabled": true,
       "liability": {

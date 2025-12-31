@@ -7,15 +7,15 @@ Process:
 1. Compare filenames in assets/jobs/ to manifest.json entries
 2. Files with no manifest match → Create all Stripe objects
 3. Manifest entries with no file match → Archive product
-4. Store Stripe IDs in state_management.object_id
+4. Store Stripe IDs in state.object
 5. Store checkout session parameters (sessions created on-demand per CHECKOUT_SESSION_DETAILS.md)
 
 v3 Schema:
-- product_object.id = job_id (matches filename)
-- initial_price_object, balance_price_object (not price[] array)
-- customer_object (not client)
-- coupon_object (optional)
-- state_management.object_id stores Stripe IDs
+- product.id = job_id (matches filename)
+- price1, price2 (not price[] array)
+- customer (not client)
+- coupon (optional)
+- state.object stores Stripe IDs
 
 Usage:
     python3 sync_catalog.py --jobs-dir "assets/jobs" --manifest-path "assets/js/manifest.json"
@@ -81,7 +81,7 @@ def create_stripe_product(product_obj: dict, job_id: str) -> str:
     if not stripe.api_key:
         raise ValueError("STRIPE_SECRET_KEY environment variable not set")
 
-    # Use product_object.id as Stripe product ID (if allowed)
+    # Use product.id as Stripe product ID (if allowed)
     product_params = {
         'name': product_obj.get('name', f'Job {job_id}'),
         'active': product_obj.get('active', True),
@@ -89,8 +89,8 @@ def create_stripe_product(product_obj: dict, job_id: str) -> str:
         'metadata': product_obj.get('metadata', {})
     }
 
-    if product_obj.get('description'):
-        product_params['description'] = product_obj['description']
+    if product_obj.get('title'):
+        product_params['title'] = product_obj['title']
 
     if product_obj.get('unit_label'):
         product_params['unit_label'] = product_obj['unit_label']
@@ -115,8 +115,8 @@ def modify_stripe_product(product_id: str, product_obj: dict) -> str:
         'metadata': product_obj.get('metadata', {})
     }
 
-    if product_obj.get('description'):
-        update_params['description'] = product_obj['description']
+    if product_obj.get('title'):
+        update_params['title'] = product_obj['title']
 
     product = stripe.Product.modify(product_id, **update_params)
     return product.id
@@ -166,55 +166,55 @@ def archive_stripe_price(price_id: str) -> None:
     stripe.Price.modify(price_id, active=False)
 
 
-def create_stripe_customer(customer_obj: dict) -> str:
-    """Create Stripe Customer. Returns customer_id."""
+def create_stripe_customer(customer: dict) -> str:
+    """Create Stripe Customer. Returns customer.id."""
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
     customer_params = {
-        'name': customer_obj.get('individual_name') or customer_obj.get('business_name'),
-        'email': customer_obj.get('email'),
-        'phone': customer_obj.get('phone'),
+        'name': customer.get('name') or customer.get('business'),
+        'email': customer.get('email'),
+        'phone': customer.get('phone'),
         'metadata': {}
     }
 
-    if customer_obj.get('description'):
-        customer_params['description'] = customer_obj['description']
+    if customer.get('title'):
+        customer_params['title'] = customer['title']
 
-    if customer_obj.get('address'):
+    if customer.get('address'):
         customer_params['address'] = {
-            'line1': customer_obj['address'].get('line1'),
-            'city': customer_obj['address'].get('city'),
-            'state': customer_obj['address'].get('state'),
-            'postal_code': customer_obj['address'].get('postal_code'),
-            'country': customer_obj['address'].get('country', 'US')
+            'line1': customer['address'].get('line1'),
+            'city': customer['address'].get('city'),
+            'state': customer['address'].get('state'),
+            'postal_code': customer['address'].get('postal_code'),
+            'country': customer['address'].get('country', 'US')
         }
 
     # Try to use custom ID
     try:
-        customer = stripe.Customer.create(id=customer_obj.get('id'), **customer_params)
+        customer = stripe.Customer.create(id=customer.get('id'), **customer_params)
     except stripe.error.InvalidRequestError:
         customer = stripe.Customer.create(**customer_params)
 
     return customer.id
 
 
-def create_stripe_coupon(coupon_obj: dict) -> str:
+def create_stripe_coupon(coupon: dict) -> str:
     """Create Stripe Coupon. Returns coupon_id."""
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
     coupon_params = {
-        'id': coupon_obj.get('id'),  # Coupons allow custom IDs
-        'amount_off': coupon_obj.get('amount_off'),
-        'currency': coupon_obj.get('currency', 'usd').lower(),
-        'duration': coupon_obj.get('duration', 'once'),
-        'max_redemptions': coupon_obj.get('max_redemptions', 1)
+        'id': coupon.get('id'),  # Coupons allow custom IDs
+        'amount_off': coupon.get('amount_off'),
+        'currency': coupon.get('currency', 'usd').lower(),
+        'duration': coupon.get('duration', 'once'),
+        'max_redemptions': coupon.get('max_redemptions', 1)
     }
 
-    if coupon_obj.get('name'):
-        coupon_params['name'] = coupon_obj['name']
+    if coupon.get('name'):
+        coupon_params['name'] = coupon['name']
 
-    if coupon_obj.get('applies_to'):
-        coupon_params['applies_to'] = coupon_obj['applies_to']
+    if coupon.get('applies_to'):
+        coupon_params['applies_to'] = coupon['applies_to']
 
     coupon = stripe.Coupon.create(**coupon_params)
     return coupon.id
@@ -232,12 +232,12 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
     Returns:
         Dictionary with sync stats
     """
-    # Get job_id from product_object.id (v3 schema)
-    product_obj = job_data.get('product_object', {})
+    # Get job_id from product.id (v3 schema)
+    product_obj = job_data.get('product', {})
     job_id = product_obj.get('id')
     
     if not job_id:
-        raise ValueError("Job missing product_object.id")
+        raise ValueError("Job missing product.id")
 
     stats = {
         'products_created': 0,
@@ -248,13 +248,13 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
         'products_archived': 0
     }
 
-    # Initialize state_management if missing
-    if 'state_management' not in job_data:
-        job_data['state_management'] = {}
-    if 'object_id' not in job_data['state_management']:
-        job_data['state_management']['object_id'] = {}
+    # Initialize state if missing
+    if 'state' not in job_data:
+        job_data['state'] = {}
+    if 'object' not in job_data['state']:
+        job_data['state']['object'] = {}
 
-    state_obj = job_data['state_management']['object_id']
+    state_obj = job_data['state']['object']
 
     # Only create Stripe objects if this is a new job (not in manifest)
     if should_create:
@@ -273,47 +273,47 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
         state_obj['created'] = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
 
         # === CREATE CUSTOMER ===
-        customer_obj = job_data.get('customer_object')
-        if customer_obj:
-            customer_id = state_obj.get('customer')
-            if not customer_id:
-                customer_id = create_stripe_customer(customer_obj)
+        customer = job_data.get('customer')
+        if customer:
+            customer.id = state_obj.get('customer')
+            if not customer.id:
+                customer.id = create_stripe_customer(customer)
                 stats['customers_created'] += 1
-            state_obj['customer'] = customer_id
+            state_obj['customer'] = customer.id
 
         # === CREATE PRICES ===
-        initial_price_obj = job_data.get('initial_price_object')
-        balance_price_obj = job_data.get('balance_price_object')
+        price1 = job_data.get('price1')
+        price2 = job_data.get('price2')
         
-        # Get existing price IDs from state_management.object_id
+        # Get existing price IDs from state.object
         initial_price_id = state_obj.get('initial_price')
         balance_price_id = state_obj.get('balance_price')
         
-        if initial_price_obj:
+        if price1:
             if not initial_price_id:
-                initial_price_id = create_stripe_price(initial_price_obj, product_id)
+                initial_price_id = create_stripe_price(price1, product_id)
                 stats['prices_created'] += 1
             # Store Stripe-generated price_id in both places
             state_obj['initial_price'] = initial_price_id
-            # Also update initial_price_object.id for consistency
-            initial_price_obj['id'] = initial_price_id
+            # Also update price1.id for consistency
+            price1['id'] = initial_price_id
 
-        if balance_price_obj:
+        if price2:
             if not balance_price_id:
-                balance_price_id = create_stripe_price(balance_price_obj, product_id)
+                balance_price_id = create_stripe_price(price2, product_id)
                 stats['prices_created'] += 1
             # Store Stripe-generated price_id in both places
             state_obj['balance_price'] = balance_price_id
-            # Also update balance_price_object.id for consistency
-            balance_price_obj['id'] = balance_price_id
+            # Also update price2.id for consistency
+            price2['id'] = balance_price_id
 
         # === CREATE COUPON (if exists) ===
         coupon_id = None  # Initialize before use
-        coupon_obj = job_data.get('coupon_object')
-        if coupon_obj:
+        coupon = job_data.get('coupon')
+        if coupon:
             coupon_id = state_obj.get('coupon')
             if not coupon_id:
-                coupon_id = create_stripe_coupon(coupon_obj)
+                coupon_id = create_stripe_coupon(coupon)
                 stats['coupons_created'] += 1
             state_obj['coupon'] = coupon_id
 
@@ -322,22 +322,22 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
         # But we update the parameters with actual Stripe price_ids for documentation/completeness
         checkout_session_params = []
         
-        if job_data.get('initial_checkout_session') and initial_price_id:
-            # Update initial_checkout_session.line_items[].price with actual Stripe price_id
-            initial_checkout_session = job_data['initial_checkout_session']
-            if 'line_items' in initial_checkout_session and len(initial_checkout_session['line_items']) > 0:
-                initial_checkout_session['line_items'][0]['price'] = initial_price_id
+        if job_data.get('checkout_session_1') and initial_price_id:
+            # Update checkout_session_1.line_items[].price with actual Stripe price_id
+            checkout_session_1 = job_data['checkout_session_1']
+            if 'line_items' in checkout_session_1 and len(checkout_session_1['line_items']) > 0:
+                checkout_session_1['line_items'][0]['price'] = initial_price_id
             # Update discounts[].coupon with actual Stripe coupon_id (if coupon exists)
-            if coupon_id and 'discounts' in initial_checkout_session and initial_checkout_session['discounts']:
-                if len(initial_checkout_session['discounts']) > 0:
-                    initial_checkout_session['discounts'][0]['coupon'] = coupon_id
+            if coupon_id and 'discounts' in checkout_session_1 and checkout_session_1['discounts']:
+                if len(checkout_session_1['discounts']) > 0:
+                    checkout_session_1['discounts'][0]['coupon'] = coupon_id
             checkout_session_params.append({'initial': 'parameters_stored'})
         
-        if job_data.get('balance_checkout_session') and balance_price_id:
-            # Update balance_checkout_session.line_items[].price with actual Stripe price_id
-            balance_checkout_session = job_data['balance_checkout_session']
-            if 'line_items' in balance_checkout_session and len(balance_checkout_session['line_items']) > 0:
-                balance_checkout_session['line_items'][0]['price'] = balance_price_id
+        if job_data.get('checkout_session_2') and balance_price_id:
+            # Update checkout_session_2.line_items[].price with actual Stripe price_id
+            checkout_session_2 = job_data['checkout_session_2']
+            if 'line_items' in checkout_session_2 and len(checkout_session_2['line_items']) > 0:
+                checkout_session_2['line_items'][0]['price'] = balance_price_id
             checkout_session_params.append({'balance': 'parameters_stored'})
         
         if checkout_session_params:
@@ -360,7 +360,7 @@ def archive_stripe_product_by_job_id(job_id: str, manifest: dict) -> bool:
     Archive a Stripe product by job_id.
     
     Args:
-        job_id: Job ID (product_object.id)
+        job_id: Job ID (product.id)
         manifest: Manifest dictionary
     
     Returns:
@@ -376,7 +376,7 @@ def archive_stripe_product_by_job_id(job_id: str, manifest: dict) -> bool:
     if not job_entry:
         return False
     
-    # Get product_id from state_management (we'd need to load the JSON file)
+    # Get product_id from state (we'd need to load the JSON file)
     # For now, use job_id as product_id (they match in v3 schema)
     try:
         archive_stripe_product(job_id)
@@ -392,8 +392,8 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     
     Logic (per BUG_WORKFLOW_FIX.md):
     1. Compare JSON filenames to manifest entries
-    2. If match AND product_object.active=false → archive
-    3. If match AND product_object.active=true → skip (already synced)
+    2. If match AND product.active=false → archive
+    3. If match AND product.active=true → skip (already synced)
     4. If manifest entry but no JSON file → archive (orphaned)
     5. If JSON file but no manifest entry → create all objects (new)
     
@@ -436,7 +436,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     # Build map of job_id -> job_data for quick lookup
     jobs_by_id = {}
     for job_data in all_jobs:
-        product_obj = job_data.get('product_object', {})
+        product_obj = job_data.get('product', {})
         job_id = product_obj.get('id')
         if job_id:
             json_job_ids.add(job_id)
@@ -456,7 +456,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     }
 
     # Step 1: Process JSON files that have matching manifest entries
-    # Check product_object.active to decide: archive or skip
+    # Check product.active to decide: archive or skip
     jobs_to_archive = []
     jobs_to_skip = []
     jobs_to_create = []
@@ -465,14 +465,14 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
         if job_id in manifest_job_ids:
             # Has manifest entry - check if needs archiving
             job_data = jobs_by_id[job_id]
-            product_obj = job_data.get('product_object', {})
-            balance_price_obj = job_data.get('balance_price_object')
+            product_obj = job_data.get('product', {})
+            price2 = job_data.get('price2')
             
             # Check if product is marked inactive OR balance payment is inactive
             product_active = product_obj.get('active', True)
-            balance_active = balance_price_obj.get('active', True) if balance_price_obj else True
+            balance_active = price2.get('active', True) if price2 else True
             
-            if not product_active or (balance_price_obj and not balance_active):
+            if not product_active or (price2 and not balance_active):
                 # Archive this product
                 jobs_to_archive.append(job_id)
                 print(f"DEBUG: Job {job_id} marked for archiving (active=false)", file=sys.stderr)
@@ -494,14 +494,14 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     # Step 3: Archive products
     for job_id in jobs_to_archive:
         try:
-            # Get product_id from state_management if job file exists
+            # Get product_id from state if job file exists
             # Otherwise use job_id (which should match product_id in v3 schema)
             product_id = job_id  # Default to job_id
             
             if job_id in jobs_by_id:
-                # Job file exists - get product_id from state_management
+                # Job file exists - get product_id from state
                 job_data = jobs_by_id[job_id]
-                state_obj = job_data.get('state_management', {}).get('object_id', {})
+                state_obj = job_data.get('state', {}).get('object', {})
                 product_id = state_obj.get('product', job_id)
             else:
                 # Orphaned - file was deleted but still in manifest
@@ -531,7 +531,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
             
             overall_stats['jobs_processed'] += 1
 
-            # Save updated job (with Stripe IDs in state_management.object_id)
+            # Save updated job (with Stripe IDs in state.object)
             if not save_job(job_id, job_data, jobs_dir=jobs_dir):
                 print(f"Warning: Failed to save job {job_id}", file=sys.stderr)
             else:
@@ -547,7 +547,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Sync jobs to Stripe catalog (v3 schema)")
+    parser = argparse.ArgumentParser(title="Sync jobs to Stripe catalog (v3 schema)")
     parser.add_argument('--jobs-dir', default='assets/jobs', help="Jobs directory")
     parser.add_argument('--manifest-path', default='assets/js/manifest.json', help="Path to manifest.json")
 

@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "Action type (sign-contract, update-payment, track-event)"
+        title: "Action type (sign-contract, update-payment, track-event)"
         required: true
         type: choice
         options:
@@ -21,10 +21,10 @@ on:
           - update-payment
           - track-event
       job_id:
-        description: "Job ID"
+        title: "Job ID"
         required: true
       payload:
-        description: "JSON payload"
+        title: "JSON payload"
         required: true
 
 jobs:

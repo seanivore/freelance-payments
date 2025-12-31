@@ -326,7 +326,7 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Orchestrate workflow execution")
+    parser = argparse.ArgumentParser(title="Orchestrate workflow execution")
     parser.add_argument('--trigger', required=True, choices=['push', 'workflow_dispatch', 'webhook'],
                        help="Trigger type")
     parser.add_argument('--action', choices=['sign-contract', 'update-payment', 'track-event'],

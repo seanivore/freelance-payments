@@ -2,7 +2,7 @@
  * CONTRACT CONTROLLER
  * Loads job data and populates contract template dynamically
  * 
- * Updated for v3 schema: Uses product_object.id, customer_object, initial_price_object, balance_price_object
+ * Updated for v3 schema: Uses product.id, customer, price1, price2
  * Works within single-page template (job.html) with #contract section
  */
 
@@ -61,11 +61,11 @@
   }
 
   /**
-   * Generate payment schedule HTML (v3 schema: initial_price_object and balance_price_object)
+   * Generate payment schedule HTML (v3 schema: price1 and price2)
    */
   function generatePaymentSchedule(jobData) {
-    const initialPrice = jobData.initial_price_object;
-    const balancePrice = jobData.balance_price_object;
+    const initialPrice = jobData.price1;
+    const balancePrice = jobData.price2;
     const payments = [];
 
     if (initialPrice) {
@@ -89,23 +89,23 @@
   function replacePlaceholders(template, data) {
     let html = template;
 
-    // Client info (v3 schema: customer_object)
-    const customer = data.customer_object || {};
-    html = html.replace(/\{\{CLIENT_NAME\}\}/g, customer.business_name || customer.individual_name || '');
-    html = html.replace(/\{\{CLIENT_CONTACT_NAME\}\}/g, customer.individual_name || '');
-    html = html.replace(/\{\{CLIENT_TITLE\}\}/g, customer.description || '');
+    // Client info (v3 schema: customer)
+    const customer = data.customer || {};
+    html = html.replace(/\{\{CLIENT_NAME\}\}/g, customer.business || customer.name || '');
+    html = html.replace(/\{\{CLIENT_CONTACT_NAME\}\}/g, customer.name || '');
+    html = html.replace(/\{\{CLIENT_TITLE\}\}/g, customer.title || '');
     const address = customer.address || {};
     html = html.replace(/\{\{CLIENT_ADDRESS\}\}/g,
       `${address.line1 || ''}, ${address.city || ''}, ${address.state || ''} ${address.postal_code || ''}`.trim());
 
     // Contract dates (v3 schema)
-    html = html.replace(/\{\{CONTRACT_DATE\}\}/g, formatDate(data.state_management?.object?.created || new Date().toISOString().split('T')[0]));
+    html = html.replace(/\{\{CONTRACT_DATE\}\}/g, formatDate(data.state?.object?.created || new Date().toISOString().split('T')[0]));
     html = html.replace(/\{\{START_DATE\}\}/g, formatDate(data.contract?.work_start));
     html = html.replace(/\{\{END_DATE\}\}/g, formatDate(data.contract?.work_end));
 
     // Payment info (v3 schema: calculate from price objects)
-    const initialPrice = data.initial_price_object || {};
-    const balancePrice = data.balance_price_object || {};
+    const initialPrice = data.price1 || {};
+    const balancePrice = data.price2 || {};
     const totalAmount = ((initialPrice.unit_amount || 0) + (balancePrice.unit_amount || 0)) / 100;
     html = html.replace(/\{\{RATE_TYPE\}\}/g, 'Flat Rate');
     html = html.replace(/\{\{TOTAL_FEE\}\}/g, formatCurrency(totalAmount));
@@ -214,7 +214,7 @@
       return;
     }
 
-    const jobId = jobData.product_object?.id || sessionStorage.getItem('jobId');
+    const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
 
     // Track contract loaded
     if (jobId) {
@@ -289,7 +289,7 @@
     // Update sessionStorage
     sessionStorage.setItem('jobData', JSON.stringify(jobData));
 
-    const jobId = jobData.product_object?.id || sessionStorage.getItem('jobId');
+    const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
 
     // Call Vercel API to update JSON file via GitHub Actions
     try {

@@ -92,7 +92,7 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
     Find the file path for a given job_id.
 
     Args:
-        job_id: The job identifier (from product_object.id in v3 schema)
+        job_id: The job identifier (from product.id in v3 schema)
         jobs_dir: Directory containing job JSON files (relative to project root)
 
     Returns:
@@ -127,8 +127,8 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # Check v3 schema: product_object.id (matches filename)
-                product_job_id = data.get('product_object', {}).get('id')
+                # Check v3 schema: product.id (matches filename)
+                product_job_id = data.get('product', {}).get('id')
                 # Check v2 schema: _metadata.job_id
                 metadata_job_id = data.get('_metadata', {}).get('job_id')
                 # Check old schema: top-level job_id
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     # Simple CLI for testing
     import argparse
 
-    parser = argparse.ArgumentParser(description="Job JSON I/O utilities")
+    parser = argparse.ArgumentParser(title="Job JSON I/O utilities")
     parser.add_argument('action', choices=['load', 'list', 'validate'])
     parser.add_argument('--job-id', help="Job ID to load")
     parser.add_argument('--jobs-dir', default="assets/jobs", help="Jobs directory")

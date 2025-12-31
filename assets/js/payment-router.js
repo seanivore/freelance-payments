@@ -30,7 +30,7 @@
    * Returns: { route: string, paymentNumber?: number, reason: string }
    * 
    * Routes: contract → invoice → checkout → completion
-   * Uses v3 schema: contract.signatures, state_management.client_status, price[] array
+   * Uses v3 schema: contract.signatures, state.client_status, price[] array
    */
   function determineRoute(jobData) {
     if (!jobData) {
@@ -41,12 +41,12 @@
     }
 
     const contract = jobData.contract || {};
-    const stateManagement = jobData.state_management || {};
+    const stateManagement = jobData.state || {};
     const clientStatus = stateManagement.client_status || {};
 
-    // v3 schema: prices are in separate objects (initial_price_object, balance_price_object)
-    // But we need to check payment status from state_management
-    const initialPayment = stateManagement.initial_payment_intent || {};
+    // v3 schema: prices are in separate objects (price1, price2)
+    // But we need to check payment status from state
+    const initialPayment = stateManagement.payment_1 || {};
     const balancePayment = stateManagement.balance_payment_intent || {};
 
     // Check if contract is signed (v3 schema: contract.signatures.client.signed_date)

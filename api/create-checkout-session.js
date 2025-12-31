@@ -3,7 +3,7 @@
  * Creates Stripe Checkout Session on-demand (per CHECKOUT_SESSION_DETAILS.md)
  * 
  * POST /api/create-checkout-session
- * Body: { price_id: string, coupon_id?: string, customer_id?: string, job_id: string, payment_number: number, return_url: string }
+ * Body: { price_id: string, coupon_id?: string, customer.id?: string, job_id: string, payment_number: number, return_url: string }
  * 
  * Creates a new Checkout Session each time user clicks Pay (sessions expire after 24 hours)
  */
@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { price_id, coupon_id, customer_id, job_id, payment_number, return_url } = req.body;
+    const { price_id, coupon_id, customer.id, job_id, payment_number, return_url } = req.body;
 
     // Validate required fields
     if (!price_id) {
@@ -65,8 +65,8 @@ module.exports = async (req, res) => {
     };
 
     // Add customer if provided
-    if (customer_id) {
-      sessionParams.customer = customer_id;
+    if (customer.id) {
+      sessionParams.customer = customer.id;
       sessionParams.customer_creation = 'always';
     } else {
       sessionParams.customer_creation = 'always';

@@ -2,7 +2,7 @@
  * CHECKOUT CONTROLLER
  * Handles Stripe Checkout Session creation and redirect
  * 
- * Updated for v3 schema: Uses initial_price_object, balance_price_object, product_object.id
+ * Updated for v3 schema: Uses price1, price2, product.id
  * Creates Checkout Sessions on-demand (per CHECKOUT_SESSION_DETAILS.md)
  * Works within single-page template (job.html) with #payment-1 and #payment-2 sections
  */
@@ -26,9 +26,9 @@
       return parseInt(hashMatch[1], 10);
     }
 
-    // Check state_management to determine which payment is pending
-    const stateManagement = jobData.state_management || {};
-    const initialPaid = stateManagement.initial_payment_intent?.succeeded !== null;
+    // Check state to determine which payment is pending
+    const stateManagement = jobData.state || {};
+    const initialPaid = stateManagement.payment_1?.succeeded !== null;
     const balancePaid = stateManagement.balance_payment_intent?.succeeded !== null;
 
     if (!initialPaid) return 1;
@@ -72,12 +72,12 @@
     let couponId = null;
 
     if (paymentNumber === 1) {
-      priceObject = jobData.initial_price_object;
+      priceObject = jobData.price1;
       priceId = priceObject?.id;
       // Discounts only apply to first payment (v3 schema)
-      couponId = jobData.coupon_object?.id || null;
+      couponId = jobData.coupon?.id || null;
     } else if (paymentNumber === 2) {
-      priceObject = jobData.balance_price_object;
+      priceObject = jobData.price2;
       priceId = priceObject?.id;
       couponId = null; // No discount on balance payment
     }
@@ -86,8 +86,8 @@
       throw new Error('Price ID not found. Payment may not be set up in Stripe catalog yet.');
     }
 
-    const jobId = jobData.product_object?.id || sessionStorage.getItem('jobId');
-    const customerId = jobData.customer_object?.id || null;
+    const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
+    const customerId = jobData.customer?.id || null;
 
     try {
       const response = await fetch(serverlessEndpoint, {
@@ -98,7 +98,7 @@
         body: JSON.stringify({
           price_id: priceId,
           coupon_id: couponId,
-          customer_id: customerId,
+          customer.id: customerId,
           job_id: jobId,
           payment_number: paymentNumber,
           return_url: `${window.location.origin}/${jobId}#completion`
@@ -123,7 +123,7 @@
    */
   function buildCheckoutForm(jobData, priceObject, paymentNumber) {
     const amount = (priceObject.unit_amount || 0) / 100; // Convert cents to dollars
-    const jobId = jobData.product_object?.id || '';
+    const jobId = jobData.product?.id || '';
 
     return `
       <div class="card p-6 space-y-6">
@@ -145,10 +145,10 @@
             <span class="text-muted-foreground">Description:</span>
             <span>${priceObject.nickname || 'Payment'}</span>
           </div>
-          ${paymentNumber === 1 && jobData.coupon_object ? `
+          ${paymentNumber === 1 && jobData.coupon ? `
           <div class="flex justify-between text-sm">
             <span class="text-muted-foreground">Discount:</span>
-            <span class="text-green-600">${jobData.coupon_object.name || 'Applied'}</span>
+            <span class="text-green-600">${jobData.coupon.name || 'Applied'}</span>
           </div>
           ` : ''}
         </div>
@@ -199,9 +199,9 @@
     // Get price object (v3 schema)
     let priceObject = null;
     if (paymentNumber === 1) {
-      priceObject = jobData.initial_price_object;
+      priceObject = jobData.price1;
     } else if (paymentNumber === 2) {
-      priceObject = jobData.balance_price_object;
+      priceObject = jobData.price2;
     }
 
     if (!priceObject) {
@@ -214,11 +214,11 @@
       return;
     }
 
-    // Check if already paid (v3 schema: check state_management)
-    const stateManagement = jobData.state_management || {};
+    // Check if already paid (v3 schema: check state)
+    const stateManagement = jobData.state || {};
     let isPaid = false;
     if (paymentNumber === 1) {
-      isPaid = stateManagement.initial_payment_intent?.succeeded !== null;
+      isPaid = stateManagement.payment_1?.succeeded !== null;
     } else if (paymentNumber === 2) {
       isPaid = stateManagement.balance_payment_intent?.succeeded !== null;
     }

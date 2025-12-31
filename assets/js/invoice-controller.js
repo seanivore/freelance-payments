@@ -2,7 +2,7 @@
  * INVOICE CONTROLLER
  * Loads job data and displays specific payment invoice
  * 
- * Updated for v3 schema: Uses initial_price_object, balance_price_object, customer_object, product_object.id
+ * Updated for v3 schema: Uses price1, price2, customer, product.id
  * Works within single-page template (job.html) with #invoice section
  */
 
@@ -23,9 +23,9 @@
       return parseInt(hashMatch[1], 10);
     }
 
-    // Check state_management to determine which payment is pending
-    const stateManagement = jobData.state_management || {};
-    const initialPaid = stateManagement.initial_payment_intent?.succeeded !== null;
+    // Check state to determine which payment is pending
+    const stateManagement = jobData.state || {};
+    const initialPaid = stateManagement.payment_1?.succeeded !== null;
     const balancePaid = stateManagement.balance_payment_intent?.succeeded !== null;
 
     if (!initialPaid) return 1;
@@ -105,26 +105,26 @@
   function replacePlaceholders(template, jobData, priceObject, paymentNumber) {
     let html = template;
 
-    // Invoice number (v3 schema: product_object.id)
-    const invoiceNumber = jobData.product_object?.id || '';
+    // Invoice number (v3 schema: product.id)
+    const invoiceNumber = jobData.product?.id || '';
     html = html.replace(/\{\{INVOICE_NUMBER\}\}/g, invoiceNumber);
-    html = html.replace(/\{\{INVOICE_DATE\}\}/g, formatDate(jobData.state_management?.object?.created || new Date().toISOString().split('T')[0]));
+    html = html.replace(/\{\{INVOICE_DATE\}\}/g, formatDate(jobData.state?.object?.created || new Date().toISOString().split('T')[0]));
 
-    // Payment status (v3 schema: check state_management)
-    const stateManagement = jobData.state_management || {};
+    // Payment status (v3 schema: check state)
+    const stateManagement = jobData.state || {};
     let isPaid = false;
     if (paymentNumber === 1) {
-      isPaid = stateManagement.initial_payment_intent?.succeeded !== null;
+      isPaid = stateManagement.payment_1?.succeeded !== null;
     } else if (paymentNumber === 2) {
       isPaid = stateManagement.balance_payment_intent?.succeeded !== null;
     }
     const status = isPaid ? 'paid' : 'pending';
     html = html.replace(/\{\{PAYMENT_STATUS\}\}/g, status);
 
-    // Client info (v3 schema: customer_object)
-    const customer = jobData.customer_object || {};
-    html = html.replace(/\{\{CLIENT_NAME\}\}/g, customer.business_name || customer.individual_name || '');
-    html = html.replace(/\{\{CLIENT_CONTACT_NAME\}\}/g, customer.individual_name || '');
+    // Client info (v3 schema: customer)
+    const customer = jobData.customer || {};
+    html = html.replace(/\{\{CLIENT_NAME\}\}/g, customer.business || customer.name || '');
+    html = html.replace(/\{\{CLIENT_CONTACT_NAME\}\}/g, customer.name || '');
     const address = customer.address || {};
     html = html.replace(/\{\{CLIENT_ADDRESS\}\}/g,
       `${address.line1 || ''}, ${address.city || ''}, ${address.state || ''} ${address.postal_code || ''}`.trim());
@@ -142,10 +142,10 @@
     html = html.replace(/\{\{DUE_DATE_OR_TERM\}\}/g, payBy);
 
     // Contract date
-    html = html.replace(/\{\{CONTRACT_DATE\}\}/g, formatDate(jobData.state_management?.object?.created || new Date().toISOString().split('T')[0]));
+    html = html.replace(/\{\{CONTRACT_DATE\}\}/g, formatDate(jobData.state?.object?.created || new Date().toISOString().split('T')[0]));
 
-    // Payment terms (v3 schema: balance_price_object.metadata.pay_days)
-    const balancePrice = jobData.balance_price_object || {};
+    // Payment terms (v3 schema: metadata.pay_days)
+    const balancePrice = jobData.price2 || {};
     html = html.replace(/\{\{INVOICE_DAYS\}\}/g, balancePrice.metadata?.pay_days || '14');
     const lateFeeStr = balancePrice.metadata?.late_fee || '';
     if (lateFeeStr) {
@@ -157,7 +157,7 @@
     }
 
     // Project name (v3 schema: project field)
-    const projectName = jobData.project || jobData.customer_object?.business_name || `Project ${invoiceNumber}`;
+    const projectName = jobData.project || jobData.customer?.business || `Project ${invoiceNumber}`;
     html = html.replace(/\{\{PROJECT_NAME\}\}/g, projectName);
 
     // Job ID for navigation
@@ -223,12 +223,12 @@
       return;
     }
 
-    // Get price object (v3 schema: initial_price_object or balance_price_object)
+    // Get price object (v3 schema: price1 or price2)
     let priceObject = null;
     if (paymentNumber === 1) {
-      priceObject = jobData.initial_price_object;
+      priceObject = jobData.price1;
     } else if (paymentNumber === 2) {
-      priceObject = jobData.balance_price_object;
+      priceObject = jobData.price2;
     }
 
     if (!priceObject) {
@@ -236,7 +236,7 @@
       return;
     }
 
-    const jobId = jobData.product_object?.id || sessionStorage.getItem('jobId');
+    const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
 
     // Track invoice viewed
     if (jobId) {

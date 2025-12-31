@@ -1,8 +1,6 @@
 # Google Docs → PDF Implementation Guide for Dia Browser
 
-**Purpose**: Technical implementation details for integrating Google Docs template-based PDF generation into the freelance payments system.
 
-**Context**: The system is already built and functional. We need to add PDF generation that replaces the current markdown-to-HTML rendering with professional Google Docs-generated PDFs.
 
 ---
 

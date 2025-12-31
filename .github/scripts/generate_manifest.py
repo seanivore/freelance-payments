@@ -37,23 +37,23 @@ def read_job_json(file_path: Path) -> Optional[Dict]:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        # Validate required fields - v3 schema uses product_object.metadata
-        if 'product_object' not in data:
-            print(f"⚠️  Missing 'product_object' field in {file_path.name}", file=sys.stderr)
+        # Validate required fields - v3 schema uses product.metadata
+        if 'product' not in data:
+            print(f"⚠️  Missing 'product' field in {file_path.name}", file=sys.stderr)
             return None
         
-        product_obj = data['product_object']
+        product_obj = data['product']
         if 'metadata' not in product_obj:
-            print(f"⚠️  Missing 'metadata' in product_object for {file_path.name}", file=sys.stderr)
+            print(f"⚠️  Missing 'metadata' in product for {file_path.name}", file=sys.stderr)
             return None
         
         metadata = product_obj['metadata']
         if 'login_name' not in metadata or 'login_keyword' not in metadata:
-            print(f"⚠️  Missing 'login_name' or 'login_keyword' in product_object.metadata for {file_path.name}", file=sys.stderr)
+            print(f"⚠️  Missing 'login_name' or 'login_keyword' in product.metadata for {file_path.name}", file=sys.stderr)
             return None
         
         if 'id' not in product_obj:
-            print(f"⚠️  Missing 'id' in product_object for {file_path.name}", file=sys.stderr)
+            print(f"⚠️  Missing 'id' in product for {file_path.name}", file=sys.stderr)
             return None
         
         return data
@@ -71,9 +71,9 @@ def generate_manifest() -> Dict[str, Dict]:
     Generate manifest mapping lookup keys to job entries
     Returns: dict mapping "{login_name}-{login_keyword}" to entry dict with:
         - file_path: relative path to JSON file
-        - job_id: product_object.id (matches filename)
-        - login_keyword: from product_object.metadata
-        - login_name: from product_object.metadata
+        - job_id: product.id (matches filename)
+        - login_keyword: from product.metadata
+        - login_name: from product.metadata
     """
     # Get project root (3 levels up from .github/scripts/generate_manifest.py)
     script_dir = Path(__file__).parent
@@ -98,8 +98,8 @@ def generate_manifest() -> Dict[str, Dict]:
         if not job_data:
             continue
         
-        # Extract from product_object (v3 schema)
-        product_obj = job_data['product_object']
+        # Extract from product (v3 schema)
+        product_obj = job_data['product']
         metadata = product_obj['metadata']
         login_name = normalize_lookup_key(metadata['login_name'])
         login_keyword = normalize_lookup_key(metadata['login_keyword'])

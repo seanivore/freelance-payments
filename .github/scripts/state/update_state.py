@@ -5,14 +5,14 @@ Handles contract signing, payment status, and tracking event updates.
 
 Actions:
 1. Contract signing → Update contract.signatures
-2. Payment status → Update state_management.[initial|balance]_payment_intent
-3. Tracking events → Update state_management.client_status
+2. Payment status → Update state.[initial|balance]_payment_intent
+3. Tracking events → Update state.client_status
 
 v3 Schema:
 - contract.signatures.client.signed_date
-- state_management.initial_payment_intent.succeeded
-- state_management.balance_payment_intent.succeeded
-- state_management.client_status (contract_loaded, contract_scrolled_complete, invoice_viewed, downloaded_docs, signed_contract)
+- state.payment_1.succeeded
+- state.balance_payment_intent.succeeded
+- state.client_status (contract_loaded, contract_scrolled_complete, invoice_viewed, downloaded_docs, signed_contract)
 
 Usage:
     # Contract signing
@@ -81,12 +81,12 @@ def update_contract_signing(job_data: dict, signature_data: dict) -> dict:
     job_data['contract'] = contract
     
     # Update client_status.signed_contract timestamp
-    if 'state_management' not in job_data:
-        job_data['state_management'] = {}
-    if 'client_status' not in job_data['state_management']:
-        job_data['state_management']['client_status'] = {}
+    if 'state' not in job_data:
+        job_data['state'] = {}
+    if 'client_status' not in job_data['state']:
+        job_data['state']['client_status'] = {}
     
-    client_status = job_data['state_management']['client_status']
+    client_status = job_data['state']['client_status']
     signed_date = contract['signatures']['client'].get('signed_date') or datetime.utcnow().isoformat() + 'Z'
     client_status['signed_contract'] = signed_date
     
@@ -114,32 +114,32 @@ def update_payment_status(job_data: dict, payment_data: dict) -> dict:
     if not payment_number or payment_number not in [1, 2]:
         raise ValueError("payment_number must be 1 or 2")
     
-    # Initialize state_management if missing
-    if 'state_management' not in job_data:
-        job_data['state_management'] = {}
+    # Initialize state if missing
+    if 'state' not in job_data:
+        job_data['state'] = {}
     
     # Update payment intent status
     if payment_number == 1:
-        if 'initial_payment_intent' not in job_data['state_management']:
-            job_data['state_management']['initial_payment_intent'] = {}
+        if 'payment_1' not in job_data['state']:
+            job_data['state']['payment_1'] = {}
         
-        payment_intent = job_data['state_management']['initial_payment_intent']
+        payment_intent = job_data['state']['payment_1']
         if not payment_intent.get('created'):
             payment_intent['created'] = succeeded_timestamp or datetime.utcnow().isoformat() + 'Z'
         payment_intent['succeeded'] = succeeded_timestamp or datetime.utcnow().isoformat() + 'Z'
         
     elif payment_number == 2:
-        if 'balance_payment_intent' not in job_data['state_management']:
-            job_data['state_management']['balance_payment_intent'] = {}
+        if 'balance_payment_intent' not in job_data['state']:
+            job_data['state']['balance_payment_intent'] = {}
         
-        payment_intent = job_data['state_management']['balance_payment_intent']
+        payment_intent = job_data['state']['balance_payment_intent']
         if not payment_intent.get('created'):
             payment_intent['created'] = succeeded_timestamp or datetime.utcnow().isoformat() + 'Z'
         payment_intent['succeeded'] = succeeded_timestamp or datetime.utcnow().isoformat() + 'Z'
     
     # Check if all payments are complete
-    initial_paid = job_data['state_management'].get('initial_payment_intent', {}).get('succeeded') is not None
-    balance_paid = job_data['state_management'].get('balance_payment_intent', {}).get('succeeded') is not None
+    initial_paid = job_data['state'].get('payment_1', {}).get('succeeded') is not None
+    balance_paid = job_data['state'].get('balance_payment_intent', {}).get('succeeded') is not None
     all_paid = initial_paid and balance_paid
     
     return {
@@ -164,13 +164,13 @@ def update_tracking_event(job_data: dict, event_data: dict) -> dict:
     event_type = event_data.get('event_type')
     timestamp = event_data.get('timestamp') or event_data.get('event_data', {}).get('timestamp') or datetime.utcnow().isoformat() + 'Z'
     
-    # Initialize state_management.client_status if missing
-    if 'state_management' not in job_data:
-        job_data['state_management'] = {}
-    if 'client_status' not in job_data['state_management']:
-        job_data['state_management']['client_status'] = {}
+    # Initialize state.client_status if missing
+    if 'state' not in job_data:
+        job_data['state'] = {}
+    if 'client_status' not in job_data['state']:
+        job_data['state']['client_status'] = {}
     
-    client_status = job_data['state_management']['client_status']
+    client_status = job_data['state']['client_status']
     
     # Update based on event type
     if event_type == 'contract_loaded':
@@ -200,7 +200,7 @@ def update_state(job_id: str, action: str, data: dict, jobs_dir: str = "assets/j
     Update job state based on action type.
     
     Args:
-        job_id: Job identifier (product_object.id in v3 schema)
+        job_id: Job identifier (product.id in v3 schema)
         action: Action type (sign-contract, update-payment, track-event)
         data: Action-specific data dictionary
         jobs_dir: Directory containing job JSON files
@@ -239,8 +239,8 @@ def update_state(job_id: str, action: str, data: dict, jobs_dir: str = "assets/j
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Update job state (v3 schema)")
-    parser.add_argument('--job-id', required=True, help="Job ID (product_object.id)")
+    parser = argparse.ArgumentParser(title="Update job state (v3 schema)")
+    parser.add_argument('--job-id', required=True, help="Job ID (product.id)")
     parser.add_argument('--action', required=True, choices=['sign-contract', 'update-payment', 'track-event'],
                        help="Action type")
     parser.add_argument('--data', required=True, help="JSON string of action-specific data")
