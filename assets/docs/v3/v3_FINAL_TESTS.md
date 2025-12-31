@@ -2,9 +2,11 @@
 
 ## Summary 
 
+In our most recent session, 
+
 ## Bugs 
 
-## 1. Using `project_object.active= false` Change To Archive 
+### 1. Using `project_object.active= false` Change To Archive 
 
   * **Steps required in automation versus what happened** 
 
@@ -64,6 +66,76 @@
     8. Git Pull for updated (deleted) JSON file and new manifest with one less entry 
 
   All current feature flow functionality working, plus file deletion, and accurate manifest will indicate successful bug removal
+
+---
+
+## Testing Next Steps 
+
+  * **Walk through of user on site** 
+
+  1. Login works 
+  2. Loads proper contract 
+  3. Contract is formatted beautifully 
+  + Tools are beautiful, but custom doesn't mean ugly 
+    - Docu-sign et al. have perfected their visual design 
+    - Custom means light and versatile 
+    - Custom means ideally aesthetically above par because we're not pandering to masses 
+  + Perfection on all breakpoints 
+    - Business people use them all, sign on phone, iPad, computer 
+    - Again, the competitor has perfected this 
+    - But that means we get to be perfect with a personal twist 
+  + Maintain "CONTRACT" feel through legibility 
+    - Lesson cognitive load visually 
+    - Still want legal vibe with blocks of text, narrow to be taller, legal numbering, large spacing between objects 
+  + Typographical hierarchy present, but only barely for tha custom edge 
+    - Heading and spacing; easy to see sections and there are no window orphans 
+    - Black font on white paper, of course 
+    - What font would legal documents use; probably a serif 
+    - On document is one place we don't need to use the system UI font  
+  + Maintain "ON PAPER" scrolling feel 
+    - Document edges visible in vertical panel down page 
+    - Sharp drop shadow from paper hovering 
+    - Page breaks as real as possible 
+  + Go for standard PDF elements, too 
+    - Header and footers are important, with page numbering, etc. 
+    - Space for legal redundancies; easy to find copywriting that makes them feel safe 
+  + Contract sign layout is intuitive and feels secure, like signing at a bank 
+
+    - The document should look virtually like it is on a white page floating over a the vertical panel where it lives 
+    - Bonus points if we have page breaks that mimic the PDF 
+    - Standard PDF headers and footers, page counting, etc. present 
+    - Headings and spacing; it is easy to see sections and they have no window orphans 
+    - Maintain still a "legal document" feel 
+    -  looks nice and button to sign is lined up on client signature line 
+
+  * **Contract loading page console log** 
+
+```plaintext 
+Failed to load resource: the server responded with a status of 404 ()Understand this error
+uid-sst-846#contract:1 Access to fetch at 'https://freelance-payments-neon.vercel.app/api/track-event' from origin 'https://payments.august.style' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+freelance-payments-neon.vercel.app/api/track-event:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
+contract-controller.js:168 Failed to track contract loaded: TypeError: Failed to fetch
+    at trackContractLoaded (contract-controller.js:158:13)
+    at init (contract-controller.js:221:13)
+trackContractLoaded @ contract-controller.js:168Understand this warning
+uid-sst-846#contract:1 Access to fetch at 'https://freelance-payments-neon.vercel.app/api/track-event' from origin 'https://payments.august.style' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+freelance-payments-neon.vercel.app/api/track-event:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
+contract-controller.js:168 Failed to track contract loaded: TypeError: Failed to fetch
+    at trackContractLoaded (contract-controller.js:158:13)
+    at init (contract-controller.js:221:13)
+trackContractLoaded @ contract-controller.js:168Understand this warning
+uid-sst-846#contract:1 Access to fetch at 'https://freelance-payments-neon.vercel.app/api/track-event' from origin 'https://payments.august.style' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+freelance-payments-neon.vercel.app/api/track-event:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
+invoice-controller.js:98 Failed to track invoice viewed: TypeError: Failed to fetch
+    at trackInvoiceViewed (invoice-controller.js:88:13)
+    at init (invoice-controller.js:243:13)
+trackInvoiceViewed @ invoice-controller.js:98Understand this warning
+uid-sst-846#contract:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+``` 
+
+
+
+---
 
 ## Updates 
 

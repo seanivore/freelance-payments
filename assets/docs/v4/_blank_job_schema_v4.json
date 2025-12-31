@@ -18,6 +18,25 @@
     }
   },
 
+  "document": {
+    "contract_pdf": {
+      "id": null,
+      "drive_file_id": null,
+      "web_view_link": null, 
+      "sha256": null,
+      "generated_at": null, 
+      "file_id_path": null
+    },
+    "invoice_pdf": {
+      "id": null,
+      "drive_file_id": null,
+      "web_view_link": null, 
+      "sha256": null,
+      "generated_at": null,
+      "file_id_path": null
+    }
+  },
+
   "state_management": {
     "object_id": {
       "created": null,
