@@ -41,13 +41,13 @@
     "object_id": {
       "created": null,
       "product": null,
-      "initial_price": null,
-      "balance_price": null,
+      "price_1": null,
+      "price_2": null,
       "customer": null,
       "coupon": null,
       "checkout_session": {
-        "initial": null,
-        "balance": null
+        "payment_1": null,
+        "payment_2": null
       }
     },
     "client_status": {
@@ -59,13 +59,13 @@
       "downloaded_docs": 0,
       "signed_contract": null
     },
-    "initial_payment_intent": {
-      "created": null,
+    "payment_1": {
+      "intent": null,
       "processing": null,
       "succeeded": null
     },
-    "balance_payment_intent": {
-      "created": null,
+    "payment_2": {
+      "intent": null,
       "processing": null,
       "succeeded": null
     }
@@ -76,13 +76,11 @@
     "active": true,
     "description": null,
     "id": null,
-    "metadata": {
-      "login_name": null,
-      "login_keyword": null,
-      "service_usd": null,
-      "total_payments": null,
-      "discount_usd": null
-    },
+    "login_name": null,
+    "login_keyword": null,
+    "service_usd": null,
+    "total_payments": null,
+    "discount_usd": null,
     "type": "service", 
     "unit_label": "Payment"
   },
@@ -104,7 +102,7 @@
   },
 
   "coupon_object": {
-    "amount_off": null,
+    "amount_off": 0,
     "applies_to": {"products": [null]},
     "currency": "usd",
     "duration": "once",
@@ -124,7 +122,7 @@
     "nickname": "Initial Payment",
     "product": {"products": [null]},
     "id": null,
-    "unit_amount": null
+    "unit_amount": 0
   },
 
   "price_object_2": {
@@ -143,7 +141,7 @@
     "unit_amount": null
   },
 
-  "initial_checkout_session": {
+  "checkout_session_1": {
     "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
     "billing_address_collection": "required",
     "branding_settings": {
@@ -170,7 +168,7 @@
     }
   },
 
-  "balance_checkout_session": {
+  "checkout_session_2": {
     "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
     "billing_address_collection": "required",
     "branding_settings": {
