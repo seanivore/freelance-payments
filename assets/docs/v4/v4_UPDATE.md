@@ -18,92 +18,106 @@ The markdown to HTML rendering of our contract looks terrible and would take ver
     - Front end displays an embed of the actual PDF 
     - Easy to export for the User and gives us complete typographic design formatting control 
 
-## Wise Updates 
+---
 
-  + Instead of `initial_price_object` and `balance_price_object` 
-    - We should have one identical `price_object` object 
-    - But add `_1` or `_2` etc. to keep them different 
-    - This matches `price_object_n.count` at the top of the list 
-    - Delete `...metadata.payment_number` 
+## Invoice Template 
 
-  + I changed 
-- `initial_price_object` --> `price_object_1`
-- `balance_price_object` --> `price_object_2` 
-- `initial_price_object.metadata.payment_number` --> `price_object_1.count`
-- `balance_price_object.metadata.payment_number` --> `price_object_2.count`
-- `initial_price_object.metadata.payment_usd` --> `price_object_1.payment_usd`
-- `initial_price_object.metadata.balance_usd` --> `price_object_1.balance_usd`
-- `initial_price_object.metadata.pay_by` --> `price_object_1.pay_by`
-- `balance_price_object.metadata.payment_usd` --> `price_object_2.payment_usd`
-- `balance_price_object.metadata.balance_usd` --> `price_object_2.balance_usd`
-- `balance_price_object.metadata.pay_by` --> `price_object_2.pay_by`
-- `balance_price_object.metadata.pay_days` --> `price_object_2.pay_days`
-- `balance_price_object.metadata.late_fee` --> `price_object_2.late_fee`
-- `customer_object.description` --> `customer_object.title`
-- `customer_object.individual_name` --> `customer_object.name`
-- `customer_object.business_name` --> `customer_object.business`
-- `state_management.initial_payment_intent` --> `state_management.payment_1`
-- `state_management.initial_payment_intent.created` --> `state_management.payment_1.intent`
-- `state_management.balance_payment_intent` --> `state_management.payment_2`
-- `state_management.balance_payment_intent.created` --> `state_management.payment_2.intent`
-- `state_management.object_id.initial_price` --> `state_management.object_id.price_1`
-- `state_management.object_id.balance_price` --> `state_management.object_id.price_2`
-- `initial_checkout_session` --> `checkout_session_1`
-- `balance_checkout_session` --> `checkout_session_2`
-- `product_object.metadata.login_name` --> `product_object.login_name`
-- `product_object.metadata.login_keyword` --> `product_object.login_keyword`
-- `product_object.metadata.service_usd` --> `product_object.service_usd`
-- `product_object.metadata.total_payments` --> `product_object.total_payments`
-- `product_object.metadata.discount_usd` --> `product_object.discount_usd`
-- `state_management.object_id.checkout_session.initial` --> `state_management.object_id.checkout_session.payment_1`
-- `state_management.object_id.checkout_session.balance` --> `state_management.object_id.checkout_session.payment_2`
+  + Template is complete 
+    - Placed in Google Drive directory /FREELANCE-PAYMENTS/ 
+    - Anyone with the link has Edit access 
+  + [FREELANCE-PAYMENTS Directory](https://drive.google.com/drive/folders/1cJUCiwrLoWvftdpYaywvZqI7QFTLcIZY?usp=sharing)
 
+### JSON Schema v4 Updates 
 
+  + To prevent formatting issues due to length of template placeholders, and to improve some logic, I have changed the following job JSON values as mapped to their new value as mapped. 
 
+    - `initial_price_object` --> `price_object_1`
+    - `balance_price_object` --> `price_object_2` 
+    - `initial_price_object.metadata.payment_number` --> `price_object_1.count`
+    - `balance_price_object.metadata.payment_number` --> `price_object_2.count`
+    - `initial_price_object.metadata.payment_usd` --> `price_object_1.payment_usd`
+    - `initial_price_object.metadata.balance_usd` --> `price_object_1.balance_usd`
+    - `initial_price_object.metadata.pay_by` --> `price_object_1.pay_by`
+    - `balance_price_object.metadata.payment_usd` --> `price_object_2.payment_usd`
+    - `balance_price_object.metadata.balance_usd` --> `price_object_2.balance_usd`
+    - `balance_price_object.metadata.pay_by` --> `price_object_2.pay_by`
+    - `balance_price_object.metadata.pay_days` --> `price_object_2.pay_days`
+    - `balance_price_object.metadata.late_fee` --> `price_object_2.late_fee`
+    - `customer_object.description` --> `customer_object.title`
+    - `customer_object.individual_name` --> `customer_object.name`
+    - `customer_object.business_name` --> `customer_object.business`
+    - `state_management.initial_payment_intent` --> `state_management.payment_1`
+    - `state_management.initial_payment_intent.created` --> `state_management.payment_1.intent`
+    - `state_management.balance_payment_intent` --> `state_management.payment_2`
+    - `state_management.balance_payment_intent.created` --> `state_management.payment_2.intent`
+    - `state_management.object_id.initial_price` --> `state_management.object_id.price_1`
+    - `state_management.object_id.balance_price` --> `state_management.object_id.price_2`
+    - `initial_checkout_session` --> `checkout_session_1`
+    - `balance_checkout_session` --> `checkout_session_2`
+    - `product_object.metadata.login_name` --> `product_object.login_name`
+    - `product_object.metadata.login_keyword` --> `product_object.login_keyword`
+    - `product_object.metadata.service_usd` --> `product_object.service_usd`
+    - `product_object.metadata.total_payments` --> `product_object.total_payments`
+    - `product_object.metadata.discount_usd` --> `product_object.discount_usd`
+    - `state_management.object_id.checkout_session.initial` --> `state_management.object_id.checkout_session.payment_1`
+    - `state_management.object_id.checkout_session.balance` --> `state_management.object_id.checkout_session.payment_2`
 
-### Fitting Into Data Flow 
+### Mapping Placeholder Values   
 
-  + Variable = values change based on next payment logic 
-    - `price_object_n.count` of `product_object.metadata.total_payments` 
-    - These values need to change based on how many of the total payment are already paid 
+  * **Almost all placeholders are the same as the JSON mapped value** 
 
+    + Find them in the chart below 
+    + Just a handful of address values were shortened 
+    + There are two VARIABLE values with the logic provided below 
+    + There are two MATH values, with the calculation logic below the chart   
 
-| Template Placeholder           | Mapped JSON Value                     |           |
-| ------------------------------ | ------------------------------------- | --------- |
-| {{document.invoice.id}}        | `document.invoice.id`                 |           |
-| {{document.invoice.created}}   | `document.invoice.created`            |           |
-| {{contract.work_start}}        | `contract.work_start`                 |           | 
-| {{contract.work_end}}          | `contract.work_end`                   |           | 
-| {{project}}                    | `project`                             |           |
-| {{amount_due}}                 | `price_object_n.payment_usd`          | Variable  |
-| {{customer_object.business}}   | `customer_object.business`            |           |
-| {{customer_object.name}}       | `customer_object.name`                |           |
-| {{customer_object.title}}      | `customer_object.title`               |           |
-| {{address.line1}}              | `customer_object.address.line1`       |           |
-| {{city}}                       | `customer_object.address.city`        |           |
-| {{state}}                      | `customer_object.address.state`       |           |
-| {{postal_code}}                | `customer_object.address.postal_code` |           |
-| {{customer_object.email}}      | `customer_object.email`               |           |
-| {{customer_object.phone}}      | `customer_object.phone`               |           |
-| {{price_object_1.nickname}}    | `price_object_1.nickname`             |           |
-| {{price_object_2.nickname}}    | `price_object_2.nickname`             |           |
-| {{price_object_1.pay_by}}      | `price_object_1.pay_by`               |           |
-| {{price_object_2.pay_by}}      | `price_object_2.pay_by`               |           |
-| {{price_object_1.unit_amount}} | `price_object_1.unit_amount`          |           |
-| {{price_object_2.unit_amount}} | `price_object_2.unit_amount`          |           |
-| {{subtotal}}                   | `sum of unit amount 1 and 2`          | Math      | 
-| {{amount_off}}                 | `coupon_object.amount_off`            |           | 
-| {{total}}                      | `subtotal` less `amount_off`          | Math      | 
-| {{amount_paid}}                | `0 or payment_1 amount`               | Variable  | 
+    | Template Placeholder           | Mapped JSON Value                     |
+    | ------------------------------ | ------------------------------------- |
+    | {{document.invoice.id}}        | `document.invoice.id`                 |
+    | {{document.invoice.created}}   | `document.invoice.created`            |
+    | {{contract.work_start}}        | `contract.work_start`                 |
+    | {{contract.work_end}}          | `contract.work_end`                   |
+    | {{project}}                    | `project`                             |
+    | {{amount_due}}                 |  Variable                             |
+    | {{customer_object.business}}   | `customer_object.business`            |
+    | {{customer_object.name}}       | `customer_object.name`                |
+    | {{customer_object.title}}      | `customer_object.title`               |
+    | {{address.line1}}              | `customer_object.address.line1`       |
+    | {{city}}                       | `customer_object.address.city`        |
+    | {{state}}                      | `customer_object.address.state`       |
+    | {{postal_code}}                | `customer_object.address.postal_code` |
+    | {{customer_object.email}}      | `customer_object.email`               |
+    | {{customer_object.phone}}      | `customer_object.phone`               |
+    | {{price_object_1.nickname}}    | `price_object_1.nickname`             |
+    | {{price_object_2.nickname}}    | `price_object_2.nickname`             |
+    | {{price_object_1.pay_by}}      | `price_object_1.pay_by`               |
+    | {{price_object_2.pay_by}}      | `price_object_2.pay_by`               |
+    | {{price_object_1.unit_amount}} | `price_object_1.unit_amount`          |
+    | {{price_object_2.unit_amount}} | `price_object_2.unit_amount`          |
+    | {{subtotal}}                   |  Math                                 |
+    | {{amount_off}}                 | `coupon_object.amount_off`            |
+    | {{total}}                      |  Math                                 |
+    | {{amount_paid}}                |  Variable                             |
 
+  * **VARIABLE** 
 
-= `price_object_1.unit_amount` + `coupon_object.amount_off`
+  + {{amount_due}} and {{amount_off}} values change based on `state_management` payment logic: 
 
-If `state_management.payment_1` succeeded then {{amount_paid}} = `state_management.payment_1`
-If "null" then {{amount_paid}} = 0 
+    1. If `state_management.payment_1.succeeded` null, then {{amount_due}} is `price_object_1.unit_amount` and {{amount_paid}} is zero 
 
-If `state_management.payment_1` succeeded and `product_object.total_payments` = 1 then {{amount_paid}} = `state_management.payment_1`
+    2. If `state_management.payment_1.succeeded` contains a timestamp and `product_object.total_payments` is 1 then {{amount_due}} is zero and {{amount_paid}} is `price_object_1.unit_amount` 
 
+    3. If `state_management.payment_1.succeeded` contains a timestamp and `product_object.total_payments` is 2 then {{amount_due}} is `price_object_2.unit_amount` and {{amount_paid}} is `price_object_1.unit_amount`
+
+  * **MATH** 
+
+  + {{subtotal}} and {{total}} values are static, but must be calculated from other unit values: 
+
+    1. Find {{subtotal}} by getting the sum of `price_object.1.unit_amount` and `price_object.2.unit_amount`, except if  `product_object.total_payments` 1 then {{subtotal}} equals `price_object.1.unit_amount` 
+
+    2. Find {{total}} by taking the calculated {{subtotal}} and subtracting `coupon_object.amount_off`, except if there is no `coupon_object` then {{total}} equals the same as {{subtotal}}
+
+--- 
 
 price_object_2.unit_amount
 
