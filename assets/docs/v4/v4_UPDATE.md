@@ -14,16 +14,64 @@ The markdown to HTML rendering of our contract looks terrible and would take ver
 ### Our New Plan 
 
   + Use Google Drive API to complete prepared Contract and Invoice Google Document drive templates
-    - Add actual Job JSON mapping as template placeholders for simplicity
     - Call Drive API to create and deliver PDFs after Stripe Object creation confirmation 
     - Front end displays an embed of the actual PDF 
     - Easy to export for the User and gives us complete typographic design formatting control 
 
+## Wise Updates 
+
+  + Instead of `initial_price_object` and `balance_price_object` 
+    - We should have one identical `price_object` object 
+    - But add `_1` or `_2` etc. to keep them different 
+    - This matches `price_object_n.count` at the top of the list 
+    - Delete `...metadata.payment_number` 
+
+  + I changed 
+    - `initial_price_object` --> `price_object_1`
+    - `balance_price_object` --> `price_object_2` 
+    - `initial_price_object.metadata.payment_number` --> `price_object_1.count`
+    - `balance_price_object.metadata.payment_number` --> `price_object_2.count`
+    - `initial_price_object.metadata.payment_usd` --> `price_object_1.payment_usd`
+    - `initial_price_object.metadata.balance_usd` --> `price_object_1.balance_usd`
+    - `initial_price_object.metadata.pay_by` --> `price_object_1.pay_by`
+    - `balance_price_object.metadata.payment_usd` --> `price_object_2.payment_usd`
+    - `balance_price_object.metadata.balance_usd` --> `price_object_2.balance_usd`
+    - `balance_price_object.metadata.pay_by` --> `price_object_2.pay_by`
+    - `balance_price_object.metadata.pay_days` --> `price_object_2.pay_days`
+    - `balance_price_object.metadata.late_fee` --> `price_object_2.late_fee`
+    - `customer_object.description` --> `customer_object.title`
+    - `customer_object.individual_name` --> `customer_object.name`
+    - `customer_object.business_name` --> `customer_object.business`
+
+
 ### Fitting Into Data Flow 
 
-  * **
+  + Variable = `...payment_number` of `product_object.metadata.total_payments` 
+    - 
+
+| Template Placeholder           | Mapped JSON Value                     |           |
+| ------------------------------ | ------------------------------------- | --------- |
+| {{invoice.id}}                 | `document.invoice.id`                 |           |
+| {{invoice.created}}            | `document.invoice.created`            |           |
+| {{pay_by}}                     | `price_object_n.pay_by`               | Variable  |
+| {{project}}                    | `project`                             |           |
+| {{product_object.name}}        | `product_object.name`                 |           |
+| {{business_name}}              | `customer_object.business`            |           |
+| {{price_object_n.payment_usd}} | `price_object_n.payment_usd`          | Variable  |
+| {{address.line1}}              | `customer_object.address.line1`       |           |
+| {{city}}                       | `customer_object.address.city`        |           |
+| {{state}}                      | `customer_object.address.state`       |           |
+| {{postal_code}}                | `customer_object.address.postal_code` |           |
+| {{customer_object.email}}      | `customer_object.email`               |           |
+| {{customer_object.phone}}      | `customer_object.phone`               |           |
+| {{individual_name}}            | `customer_object.name`                |           |
+| {{customer_object.title}}      | `customer_object.title`               |           |
+
+
+
 
      it easy to export
+    - Mirror template placeholders with JSON mapped values 
     - Then call Drive API  
     - Front end will then display embed of the actual PDF making it easy to export 
     - We have completely  

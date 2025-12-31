@@ -88,9 +88,9 @@
   },
 
   "customer_object": {
-    "individual_name": null,
-    "business_name": null,
-    "description": null,
+    "name": null,
+    "business": null,
+    "title": null,
     "email": null,
     "phone": null,
     "id": null,
@@ -103,7 +103,7 @@
     }
   },
 
-    "coupon_object": {
+  "coupon_object": {
     "amount_off": null,
     "applies_to": {"products": [null]},
     "currency": "usd",
@@ -113,34 +113,30 @@
     "name": null
   },
 
-  "initial_price_object": {
+  "price_object_1": {
+    "count": 1, 
     "currency": "usd",
     "active": true,
     "billing_scheme": "per_unit",
-    "metadata": {
-      "payment_number": 1,
-      "payment_usd": null,
-      "balance_usd": null,
-      "pay_by": "start of work"
-    },
+    "payment_usd": null,
+    "balance_usd": null,
+    "pay_by": "start of work",
     "nickname": "Initial Payment",
     "product": {"products": [null]},
     "id": null,
     "unit_amount": null
   },
 
-  "balance_price_object": {
+  "price_object_2": {
+    "count": 2, 
     "currency": "usd",
     "active": true,
     "billing_scheme": "per_unit",
-    "metadata": {
-      "payment_number": 2,
-      "payment_usd": null,
-      "balance_usd": null,
-      "pay_by": "before project launch",
-      "pay_days": 14,
-      "late_fee": "$100"
-    },
+    "payment_usd": null,
+    "balance_usd": null,
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": "$100",
     "nickname": "Final Payment",
     "product": {"products": [null]},
     "id": null,
