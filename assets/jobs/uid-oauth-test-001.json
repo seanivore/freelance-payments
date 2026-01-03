@@ -83,7 +83,7 @@
   },
   "customer": {
     "name": "Test Client",
-    "business": "Test Business Inc.",
+    "business": "Test Business Inc. ",
     "title": "CEO",
     "email": "test@example.com",
     "phone": "555-1234",
