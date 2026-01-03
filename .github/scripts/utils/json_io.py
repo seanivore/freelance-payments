@@ -75,15 +75,46 @@ def save_job(job_id: str, job_data: Dict, jobs_dir: str = "assets/jobs") -> bool
         jobs_path = project_root / jobs_dir
         jobs_path.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
         job_path = jobs_path / f"{job_id}.json"
+    else:
+        # Ensure path is absolute (resolve relative to project root if needed)
+        if not job_path.is_absolute():
+            job_path = project_root / job_path
+        job_path = job_path.resolve()
+
+    # Ensure directory exists
+    job_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
+        # Write file with explicit error handling
         with open(job_path, 'w', encoding='utf-8') as f:
             json.dump(job_data, f, indent=2, ensure_ascii=False)
             f.write('\n')  # Add trailing newline
-        print(f"DEBUG: Saved job {job_id} to {job_path}", file=sys.stderr)
+        
+        # Verify file was written correctly
+        if not job_path.exists():
+            print(f"Error: File {job_path} was not created after write", file=sys.stderr)
+            return False
+        
+        # Verify content matches (quick check - read back and verify state.objects exists)
+        try:
+            with open(job_path, 'r', encoding='utf-8') as f:
+                verify_data = json.load(f)
+                if 'state' not in verify_data or 'objects' not in verify_data.get('state', {}):
+                    print(f"Warning: Saved file {job_path} missing state.objects structure", file=sys.stderr)
+        except Exception as verify_error:
+            print(f"Warning: Could not verify saved file {job_path}: {verify_error}", file=sys.stderr)
+        
+        print(f"DEBUG: Saved job {job_id} to {job_path} (absolute: {job_path.resolve()})", file=sys.stderr)
         return True
     except IOError as e:
         print(f"Error: Cannot write to {job_path}: {e}", file=sys.stderr)
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
+        return False
+    except Exception as e:
+        print(f"Error: Unexpected error saving {job_path}: {e}", file=sys.stderr)
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
         return False
 
 

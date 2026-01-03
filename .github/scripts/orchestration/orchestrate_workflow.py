@@ -129,10 +129,24 @@ def git_commit_and_push(message: str, files: list = None) -> bool:
         
         if has_unstaged:
             # Scripts have modified files - stash, pull with rebase, then pop
-            subprocess.run(['git', 'stash', '--include-untracked'], check=False)
+            stash_result = subprocess.run(['git', 'stash', '--include-untracked'], check=False, capture_output=True, text=True)
+            if stash_result.returncode != 0 and 'No local changes' not in stash_result.stdout:
+                print(f"Warning: git stash failed: {stash_result.stderr}", file=sys.stderr)
+            
             pull_result = subprocess.run(['git', 'pull', '--rebase'], check=False, capture_output=True, text=True)
+            if pull_result.returncode != 0:
+                print(f"Warning: git pull --rebase had issues: {pull_result.stderr}", file=sys.stderr)
+            
+            # Try to pop stash, but handle conflicts gracefully
             stash_pop_result = subprocess.run(['git', 'stash', 'pop'], check=False, capture_output=True, text=True)
-            # If stash pop has conflicts, that's okay - we'll add the files anyway
+            if stash_pop_result.returncode != 0:
+                # Stash pop failed (likely conflicts) - check if we have a stash entry
+                if 'No stash entries' not in stash_pop_result.stderr:
+                    print(f"Warning: git stash pop had conflicts or errors: {stash_pop_result.stderr}", file=sys.stderr)
+                    # Try to resolve by dropping the stash and re-adding files
+                    subprocess.run(['git', 'stash', 'drop'], check=False)
+                    # Files should still be in working directory (stash pop leaves them on conflict)
+                    # We'll add them explicitly below
         else:
             # No local changes, safe to pull with rebase
             subprocess.run(['git', 'pull', '--rebase'], check=False)

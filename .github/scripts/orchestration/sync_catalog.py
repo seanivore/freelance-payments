@@ -535,10 +535,27 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
             overall_stats['jobs_processed'] += 1
 
             # Save updated job (with Stripe IDs in state.objects)
+            # Verify state.objects has Stripe IDs before saving
+            state_objects = job_data.get('state', {}).get('objects', {})
+            if not state_objects.get('product'):
+                print(f"Warning: Job {job_id} has no product ID in state.objects before save - sync_job may have failed", file=sys.stderr)
+            
             if not save_job(job_id, job_data, jobs_dir=jobs_dir):
                 print(f"Warning: Failed to save job {job_id}", file=sys.stderr)
+                # Don't continue - this is a critical error
+                raise IOError(f"Failed to save job {job_id} after Stripe sync")
             else:
-                print(f"DEBUG: Successfully saved job {job_id}", file=sys.stderr)
+                # Verify save worked by checking file exists and has Stripe IDs
+                from utils.json_io import load_job
+                verify_job = load_job(job_id, jobs_dir)
+                if verify_job:
+                    verify_state = verify_job.get('state', {}).get('objects', {})
+                    if verify_state.get('product') == state_objects.get('product'):
+                        print(f"DEBUG: Successfully saved and verified job {job_id} with Stripe IDs", file=sys.stderr)
+                    else:
+                        print(f"Warning: Saved file for {job_id} but Stripe IDs don't match - product: {verify_state.get('product')} vs {state_objects.get('product')}", file=sys.stderr)
+                else:
+                    print(f"Warning: Saved job {job_id} but could not verify by reloading", file=sys.stderr)
 
         except Exception as e:
             print(f"Error syncing job {job_id}: {e}", file=sys.stderr)
