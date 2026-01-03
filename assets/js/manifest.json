@@ -1,17 +1,4 @@
 {
-  "jobs": {
-    "test-oauth-test": {
-      "file_path": "assets/jobs/uid-oauth-test-001.json",
-      "job_id": "uid-oauth-test-001",
-      "login_keyword": "oauth-test",
-      "login_name": "Test"
-    },
-    "test-v4-test": {
-      "file_path": "assets/jobs/uid-test-v4-001.json",
-      "job_id": "uid-test-v4-001",
-      "login_keyword": "v4-test",
-      "login_name": "Test"
-    }
-  },
-  "generated_at": "2026-01-03T20:20:15.908492Z"
+  "jobs": {},
+  "generated_at": "2026-01-03T20:26:50.539047Z"
 }
