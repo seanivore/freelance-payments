@@ -85,21 +85,11 @@
   }
 
   /**
-   * Track invoice viewed event
+   * Track invoice viewed event (uses EventTracker for batching)
    */
-  async function trackInvoiceViewed(jobId, paymentNumber) {
-    try {
-      await fetch('https://freelance-payments-neon.vercel.app/api/track-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          job_id: jobId,
-          event_type: 'invoice_viewed',
-          event_data: { payment_number: paymentNumber, timestamp: new Date().toISOString() }
-        })
-      });
-    } catch (e) {
-      console.warn('Failed to track invoice viewed:', e);
+  function trackInvoiceViewed(jobId, paymentNumber) {
+    if (typeof EventTracker !== 'undefined') {
+      EventTracker.trackInvoiceViewed(jobId, paymentNumber);
     }
   }
 
@@ -132,12 +122,19 @@
   /**
    * Setup download button (v4 schema: link to PDF)
    */
-  function setupDownloadButton(pdfUrl) {
+  function setupDownloadButton(pdfUrl, jobId) {
     if (!downloadButton) return;
     
     downloadButton.href = pdfUrl;
     downloadButton.download = pdfUrl.split('/').pop();
     downloadButton.style.display = 'inline-block';
+    
+    // Track download event
+    downloadButton.addEventListener('click', () => {
+      if (typeof EventTracker !== 'undefined' && jobId) {
+        EventTracker.trackDocumentDownloaded(jobId, 'invoice');
+      }
+    });
   }
 
   /**
@@ -230,7 +227,7 @@
     }
 
     // Setup download button
-    setupDownloadButton(pdfUrl);
+    setupDownloadButton(pdfUrl, jobId);
   }
 
   // Export for use in other scripts

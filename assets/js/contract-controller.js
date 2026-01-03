@@ -78,60 +78,53 @@
   /**
    * Setup download button (v4 schema: link to PDF)
    */
-  function setupDownloadButton(pdfUrl) {
+  function setupDownloadButton(pdfUrl, jobId) {
     if (!downloadButton) return;
     
     downloadButton.href = pdfUrl;
     downloadButton.download = pdfUrl.split('/').pop();
     downloadButton.style.display = 'inline-block';
+    
+    // Track download event
+    downloadButton.addEventListener('click', () => {
+      if (typeof EventTracker !== 'undefined' && jobId) {
+        EventTracker.trackDocumentDownloaded(jobId, 'contract');
+      }
+    });
   }
 
   /**
-   * Track contract loaded event
+   * Track contract loaded event (uses EventTracker for batching)
    */
-  async function trackContractLoaded(jobId) {
-    try {
-      await fetch('https://freelance-payments-neon.vercel.app/api/track-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          job_id: jobId,
-          event_type: 'contract_loaded',
-          event_data: { timestamp: new Date().toISOString() }
-        })
-      });
-    } catch (e) {
-      console.warn('Failed to track contract loaded:', e);
+  function trackContractLoaded(jobId) {
+    if (typeof EventTracker !== 'undefined') {
+      EventTracker.trackContractLoaded(jobId);
     }
   }
 
   /**
-   * Track contract scrolled to bottom
+   * Track contract scrolled to bottom (uses EventTracker for batching)
    */
   function setupScrollTracking(jobId) {
-    const contractEnd = document.querySelector('#contract-content .contract-end, #contract-content > *:last-child');
-    if (!contractEnd) return;
+    // Track scroll completion for PDF iframe (v4: PDF embedding)
+    const pdfViewer = pdfViewerDiv?.querySelector('iframe');
+    if (!pdfViewer) return;
 
+    // Use intersection observer on PDF iframe to detect when user has scrolled
+    // For PDFs, we'll track when the iframe is fully visible (user has likely scrolled through)
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Contract bottom is visible
-          fetch('https://freelance-payments-neon.vercel.app/api/track-event', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              job_id: jobId,
-              event_type: 'contract_scrolled_complete',
-              event_data: { timestamp: new Date().toISOString() }
-            })
-          }).catch(e => console.warn('Failed to track scroll:', e));
-
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
+          // PDF is mostly visible - user has likely scrolled through
+          if (typeof EventTracker !== 'undefined') {
+            EventTracker.trackContractScrolledComplete(jobId);
+          }
           observer.disconnect();
         }
       });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.9 });
 
-    observer.observe(contractEnd);
+    observer.observe(pdfViewer);
   }
 
   /**
@@ -184,7 +177,7 @@
     }
 
     // Setup download button
-    setupDownloadButton(pdfUrl);
+    setupDownloadButton(pdfUrl, jobId);
 
     // Setup scroll tracking (for PDF iframe)
     if (jobId) {
