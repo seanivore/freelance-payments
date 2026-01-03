@@ -1,4 +1,7 @@
-# PDF Generation Implementation 
+# v4 Update PDF Generation Implementation 
+*v4.0.0*
+
+---
 
 ## Summary
 
@@ -7,9 +10,86 @@ We're moving from markdown-to-HTML contract/invoice rendering to **Google Docs t
   - Professional formatting, consistent typography, no CSS/HTML 
   - Proper PDF exports that are easy and quick to produce 
 
-## Plan Updates, Resources, Notes 
+---
 
-### Alterations From Original Plan 
+**The following document is an effort to consolidate multiple documents and plan updates. It needs to be cleaned up and completed before getting into the actual steps that the document lists to complete itself.**
+
+---
+
+ - [Plan Overview](#plan-overview)
+ - [Alterations From Original Plan Document](#alterations-from-original-plan-document)
+ - [Updated New Job JSON Added Flow](#updated-new-job-json-added-flow)
+ - [Google Setup](#google-setup)
+ - [Frontend Prep to Serve PDF](#frontend-prep-to-serve-pdf)
+ - [Check Out Prep](#check-out-prep)
+ - [API Implementation](#api-implementation)
+ - [Webhook Integration](#webhook-integration)
+ - [Frontend Integration](#frontend-integration)
+ - [Testing](#testing)
+ - [Resources](#resources)
+
+---
+
+## Plan Overview 
+
+### Phase 1: Template Creation ✅ **DONE** 
+
++ Google document templates with placeholders have been created and carefully perfected. All necessary keys and secrets have been collected and placed in every necessary location including `.env`, `.env.local`, Vercel's env settings, and GitHub Secrets settings. 
+
+### Phase 2: Service Account Setup ✅ **DONE** 
+
++ Google Cloud Project setup with Drive API, Documents API, and App Scripts API activated. A Service Account is created with edit permission to the contract and invoice templates and the directory that they are kept in. OAuth is also set up should we want to use App Scripts API or gmail. 
+
+### Phase 3: Scripts, Pages, Schema Updates ⚠️ **UP NEXT AND READY** 
+
+* **WE NEED DETAILED PLAN FOR ALL FILES FIRST**
++ Before jumping into the implementation we need a comprehensive plan addressing each file in the project directory 
+  - Below is the v4 schema with a changelog identifying all of the job JSON mapped values that have changed 
+  - We need to carefully audit all files, creating a list indicating which have been updated, need update, are to delete, or are good as is 
+  - All new files requires should be included in this outline, taking into account those mentioned in steps below and those not mentioned 
+
+* **NOTHING MENTIONS PAGE DESIGN** 
++ Review, consider, and detail a plan for the design changes the HTML templates will need due to UX and UI doc presentation updates 
+  - The PDF should be embedded, looking like paper hovering over a vertical panel with a sharp drop shadow 
+  - Use well placed and carefully chose shadn UI for the 'sign document' button and the 'download' buttons 
+  - The sign button should have a downwards arrow and be placed over the location where the user will sign 
+  - Clicking to sign should create a pop-up modal, making the experience feel more secure and legitimate 
+  - Like other websites they need to write their legal name in full and then also add (or ideally select from pop-up calendar menu) the date 
+  - Bonus points of there is an option for them to choose from a few different script fonts for their signature 
+  - Double bonus points if there is a button that opens a small space to 'sign' their name by writing it with the mouse 
+
+* **THERE IS MUCH WE DIDN'T REVIEW AND WILL NEED TO RECONNECT** 
++ We never tested anything beyond user login so se should no assume that the events and automation JSON updates for state management are good 
+  - We need to make sure all state management of user behavior loading, scrolling, downloading, and signing are properly implemented 
+  - The only triggered automation flow we had tested, but will need to again after schema update implementation, was the catalog/manifest on admin push 
+  - User-behavior events, first being github pages, second are stripe webhooks from checkout session, all need to trigger as a separate group 
+  - User might complete everything in succession, so we need a timed delay giving user time 
+  - After X amount of minutes of inactivity then the update triggers JSON updates recording the state management details 
+
+* **NEW SCHEMA WITH CHANGE LOG** 
++ See detailed list of changes to the schema v3 -> v4 here `assets/docs/v4/_SCHEMA_CHANGELOG.md` 
+  - There is a new v4 schema completely empty here `assets/docs/v4/_blank_job_schema_v4.json` 
+  - Here we added examples so that it is always understood what format values should be `assets/docs/v4/_json_value_examples_v4.json` 
+
+### Phase 4: Integration
+
++ Update `/api/webhook.js` to trigger PDF generation **NOT ACCURATE: THEY NEED TO BE CREATE AFTER STRIPE OBJECT CREATION** 
+  - Update frontend controllers to display PDFs 
+  - Update event triggers on front end for automations test end-to-end flow 
+  - Install `googleapis` npm package, implement `/api/generate-pdf.js` (code in v1) 
+  - Test with JSON jobs 
+  - Implement `/api/generate-pdf.js` with the code structure above, test with sample JSON, then integrate with webhook handler
+
+### Phase 5: Deployment 
+
++ Deploy to Vercel 
+  - Test with real payment **REAL PAYMENT?** 
+  - **Missing steps for rest of testing, we have not even tested the user flow after login yet, particularly the event state triggers, then payment loading. Because we had to update everything with the PDFs before being able to continue testing the website** 
+  - Verify PDFs are generated and accessible 
+
+--- 
+
+## Alterations From Original Plan Document 
 
   * **IMPORTANT** that we confirm our build will reflect the changes to these original plans 
 
@@ -22,44 +102,12 @@ We're moving from markdown-to-HTML contract/invoice rendering to **Google Docs t
   3. ~~Backward Compatible: If PDF not generated, fall back to HTML rendering~~ **NO** backward capability wanted or needed and NO falling back to HTML rendering at all to ensure proper design client UX 
   + The v4 schema is already drastically changed and idk if you recall the image of the contract in HTML, but a broken site would be better than presenting something that looks like that to clients coming to me for development and design. Fortunately earlier PDF production also helps these shift make more sense. 
 
-### Implementation Overview **ADDED NOTES AND ALTERATIONS** 
-
-### Phase 1: Template Creation ✅ **DONE** 
-+ Create Google Document templates with placeholders; start storing all new important keys and secrets in ENV location including Vercel, GitHub Secrets, and `.env`/`.env.local`. 
-### Phase 2: Service Account Setup ✅ **DONE** 
-+ Create Google Cloud project where the Docs, Drive, and App Script API are turned on, then give API access key, set up a Service Account, and get OAuth setup with key. Store all credentials in ENV locations. 
-### Phase 3: Scripts, Pages, Schema Updates 
-+ Organize comprehensive file by file review plan to identify updates, deletions, creations. See new v4 Schema as part of file updates using changelog. Create any other new files not mentioned in upcoming phases. Pause to consider design changes to the HTML templates due to changes to UX and UI presentation of docs.  
-### Phase 4: Integration
-+ Update `/api/webhook.js` to trigger PDF generation **NOTE ACCURATE: THEY NEED TO BE CREATE AFTER STRIPE OBJECT CREATION**, update frontend controllers to display PDFs, update event triggers on front end for automations test end-to-end flow. Install `googleapis` npm package, implement `/api/generate-pdf.js` (code in v1), test with JSON jobs. 
-
-Implement `/api/generate-pdf.js` with the code structure above, test with sample JSON, then integrate with webhook handler.
-
-### Phase 5: Deployment 
-+ Deploy to Vercel, Test with real payment **REAL PAYMENT? missing steps for rest of testing, we have not even tested the user flow after login yet, particularly the event state triggers, then payment loading. Because we had to update everything with the PDFs before being able to continue testing the website** Verify PDFs are generated and accessible 
-
-### Next Steps 
-
-  1. Clean up this current document ✅
-  2. Fill in gaps from IMPLv1 
-     `assets/docs/v4/IMPL_v1_PDF_GENERATION.md`
-    - How to template, Google Service Account 
-    - Complete API implementation code (`/api/generate-pdf.js`)
-    - Webhook integration updates
-    - Frontend integration updates
-  3. Do the same to v4_UPDATE and leave it sparkling 
-     `assets/docs/v4/v4_UPDATE.md`
-  4. Reach a point ready for refactoring and testing 
-
-  * **Questions and thoughts to look for while consolidating** 
-  - Where is the plan for page design; exactly what files are no longer relevant and which have to be revamped like the HTML templates. Might be in IMPLv1 document but taking note because it feels like it has yet to be mentioned. 
-  - File changes mentioned: Webhook Handler: `api/webhook.js` (needs update to trigger PDF generation). Contract Controller: `assets/js/contract-controller.js` (needs update to display PDFs)
-
 ---
 
 ## Updated New Job JSON Added Flow 
 
   - New job JSON added -> finds matches -> create Stripe objects -> add state.objects and IDs to JSON -> create the contract and invoice PDFs and move them to the repository -> add `docs.invoice`, `docs.contract` details back on the JSON -> push all changes for live site 
+  - Secondary flow cycle = User logs in -> all movement across site evens is tracked and held for X minutes of inactivity -> all necessary JSON files are updated according to the user behavior for state management 
 
 ### Creating Contract And Invoice PDFs 
 
@@ -267,7 +315,8 @@ if __name__ == "__main__":
 
 ---
 
-## Frontend Prep: Serve PDF Using JSON Data & Get Signed 
+## Frontend Prep to Serve PDF 
+*Using JSON Data & Get Signed* 
 
   * **Get JSON data on creation** 
 
@@ -289,13 +338,14 @@ if __name__ == "__main__":
     `.github/scripts/state/update_state.py`
   +  Track `loaded`, `scrolled`, `downloaded`, `signed` → write to `state_management.events[]`.
 
-  
   * **Embedding frontend PDFs** 
 
     - Embed drive preview into `docs.contract.url` 
     - `iframe src="<webViewLink with /view replaced by /preview>" width="100%" height="800"`
     - "Show “Download PDF” linking to the same webViewLink"
     - No --> which URL end trigger immediate download? We don't want it to load in another window when they click download which is what would happen with webViewLink --> bad UX 
+
+---
 
 ## Check Out Prep 
 
@@ -304,7 +354,7 @@ if __name__ == "__main__":
   + "Resolve job_id from `client_reference_id` or metadata"
     - This one is **CONFUSING** and think we should make it super clear
     - What comes back from webhook? `https://docs.stripe.com/webhooks/handling-payment-events#deploy-endpoint` 
-    - Do we need to trigger a listen response after to get certain information 
+    - Do we need to trigger a listen response after to get certain information? 
   + Denote completion of payments 
     - Get earlier webhook setup for `payment_1.intent` and `processing` 
     - Get the `state.objects.checkout_session.payment_1/2` Checkout Session ID 
@@ -317,19 +367,9 @@ if __name__ == "__main__":
     - Change JSONs `product.active" from "true" to "false" 
     - MOVE JSON FILE OUT OF JOBS DIRECTORY AND INTO `assets/records` or some named directory 
 
-
-
-
-
-
-
-
-
-
 ---
 
 ## API Implementation 
-
 
 ### Vercel Serverless Function: `/api/generate-pdf.js`
 
@@ -586,6 +626,8 @@ async function updateJobJSON(jobId, pdfArtifacts) {
 }
 ```
 
+---
+
 ## Webhook Integration 
 
 ### Update `/api/webhook.js`
@@ -618,8 +660,9 @@ if (event.type === 'checkout.session.completed') {
 }
 ```
 
-## Frontend Integration 
+---
 
+## Frontend Integration 
 
 ### Update `contract-controller.js`
 
@@ -700,3 +743,6 @@ async function loadContract(jobId) {
 
 + Export Google Doc as PDF
 `https://developers.google.com/drive/api/v3/manage-downloads`
+
+---
+*Combined from previous documents and notes by Sean on 2026-01-03; needs accuracy review* 
