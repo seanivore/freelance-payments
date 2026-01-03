@@ -309,10 +309,10 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
             # Also update price2.id for consistency
             price2['id'] = price_2_id
 
-        # === CREATE COUPON (if exists) ===
+        # === CREATE COUPON (if exists and has amount_off > 0) ===
         coupon_id = None  # Initialize before use
         coupon = job_data.get('coupon')
-        if coupon:
+        if coupon and coupon.get('amount_off', 0) > 0:
             coupon_id = state_objects.get('coupon')
             if not coupon_id:
                 coupon_id = create_stripe_coupon(coupon)
