@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
-Umbrella Orchestrator for Workflow Coordination (v3 schema)
+Umbrella Orchestrator for Workflow Coordination (v4 schema)
 
 Single coordinator that runs all needed workflows, commits everything, then pushes ONCE.
 Uses immediate updates (each JSON file saved after Stripe objects created) with batched git commit.
 
-v3 Schema Changes:
+v4 Schema Changes:
 - No sync flags - compares filenames to manifest to determine what needs syncing
-- Uses consolidated scripts: sync_catalog.py, update_state.py
+- Uses consolidated scripts: sync_catalog.py, update_state.py, generate_pdfs.py
 - Immediate updates: sync_catalog.py saves each JSON file immediately after creating Stripe objects
+- PDF generation: After Stripe objects created, generate PDFs from Google Docs templates
 - Batched git commit: All changes committed together at the end (prevents multiple pushes)
 
 Process:
 1. Determine trigger type (push, workflow_dispatch, webhook)
 2. Run scripts in correct order:
    - sync_catalog.py (compares files to manifest, creates/archives Stripe objects, saves JSON immediately)
+   - generate_pdfs.py (if new products created, generates contract/invoice PDFs from Google Docs templates)
    - update_state.py (contract signing, payment status, tracking events, saves JSON immediately)
    - generate_manifest.py (always at end, saves manifest.json)
 3. Check if any changes were made (sync_catalog stats or action triggered)
@@ -161,7 +163,7 @@ def git_commit_and_push(message: str, files: list = None) -> bool:
 
 def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: str = None) -> dict:
     """
-    Orchestrate workflow execution (v3 schema with batching).
+    Orchestrate workflow execution (v4 schema with batching).
 
     Args:
         trigger: Trigger type ('push', 'workflow_dispatch', 'webhook')
@@ -248,7 +250,29 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 error_msg = e.stderr[:500] if e.stderr else str(e)
                 results['errors'].append(f"sync_catalog failed: {error_msg}")
 
-        # Step 2: Handle state updates (contract signing, payment status, tracking events)
+        # Step 2: Generate PDFs if new products were created (v4 schema)
+        if trigger == 'push' and sync_result and sync_result.get('products_created', 0) > 0:
+            try:
+                pdf_result = run_script(
+                    'pdf/generate_pdfs.py',
+                    jobs_dir='assets/jobs'
+                )
+                results['steps_run'].append('generate_pdfs')
+                
+                # Log PDF generation stats
+                if pdf_result:
+                    contracts = pdf_result.get('contracts_generated', 0)
+                    invoices = pdf_result.get('invoices_generated', 0)
+                    print(f"DEBUG: PDF generation: {contracts} contracts, {invoices} invoices", file=sys.stderr)
+                    
+                    if pdf_result.get('errors'):
+                        results['errors'].extend([f"PDF generation: {e}" for e in pdf_result['errors'][:3]])
+            except subprocess.CalledProcessError as e:
+                error_msg = e.stderr[:500] if e.stderr else str(e)
+                results['errors'].append(f"generate_pdfs failed: {error_msg}")
+                # Don't block workflow if PDF generation fails - manifest still needs to be generated
+
+        # Step 3: Handle state updates (contract signing, payment status, tracking events)
         if action and job_id:
             try:
                 # Use consolidated update_state.py
@@ -282,7 +306,7 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 error_msg = e.stderr[:500] if e.stderr else str(e)
                 results['errors'].append(f"update_state ({action}) failed: {error_msg}")
 
-        # Step 3: Generate manifest (always at end)
+        # Step 4: Generate manifest (always at end)
         try:
             manifest_result = run_script('generate_manifest.py')
             results['steps_run'].append('generate_manifest')
@@ -290,7 +314,7 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
             error_msg = e.stderr[:500] if e.stderr else str(e)
             results['errors'].append(f"generate_manifest failed: {error_msg}")
 
-        # Step 4: Always attempt commit (git_commit_and_push checks for actual changes)
+        # Step 5: Always attempt commit (git_commit_and_push checks for actual changes)
         # This handles cases where manifest might have changed even if sync_catalog stats were zero
         # git_commit_and_push will return False if there are no changes, which is fine
         commit_message = "🤖 Auto-update: "
@@ -301,7 +325,7 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
         elif action == 'track-event':
             commit_message += f"Tracking event ({payload_data.get('event_type', '?')}) for {job_id}"
         elif has_catalog_changes:
-            commit_message += "Stripe catalog sync and manifest update"
+            commit_message += "Stripe catalog sync, PDF generation, and manifest update"
         else:
             # sync_catalog ran but made no changes - manifest might still need update
             commit_message += "Manifest update"
