@@ -458,10 +458,14 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     
     for job_id in json_job_ids:
         if job_id in manifest_job_ids:
-            # Has manifest entry - check if needs archiving
+            # Has manifest entry - check if needs archiving or if Stripe objects exist
             job_data = jobs_by_id[job_id]
             product = job_data.get('product', {})
             price2 = job_data.get('price2')
+            state_objects = job_data.get('state', {}).get('objects', {})
+            
+            # Check if Stripe objects actually exist (product ID in state.objects)
+            has_stripe_objects = state_objects.get('product') is not None
             
             # Check if product is marked inactive OR balance payment is inactive
             product_active = product.get('active', True)
@@ -471,6 +475,10 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
                 # Archive this product
                 jobs_to_archive.append(job_id)
                 print(f"DEBUG: Job {job_id} marked for archiving (active=false)", file=sys.stderr)
+            elif not has_stripe_objects:
+                # In manifest but no Stripe objects - needs creation (e.g., previous sync failed)
+                jobs_to_create.append(job_id)
+                print(f"DEBUG: Job {job_id} in manifest but missing Stripe objects - will create", file=sys.stderr)
             else:
                 # Already synced and active - skip
                 jobs_to_skip.append(job_id)
