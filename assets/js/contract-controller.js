@@ -1,9 +1,11 @@
 /**
  * CONTRACT CONTROLLER
- * Loads job data and populates contract template dynamically
+ * Loads job data and displays contract PDF
  * 
- * Updated for v3 schema: Uses product.id, customer, price1, price2
+ * Updated for v4 schema: Uses product.id, customer, price1, price2
  * Works within single-page template (job.html) with #contract section
+ * 
+ * CRITICAL: v4 requires PDF embedding only - NO HTML fallback rendering
  */
 
 (function () {
@@ -11,6 +13,9 @@
 
   const contentDiv = document.getElementById('contract-content');
   const contractSection = document.getElementById('contract');
+  const pdfViewerDiv = document.getElementById('contract-pdf-viewer');
+  const downloadButton = document.getElementById('contract-download-btn');
+  const signButton = document.getElementById('contract-sign-btn');
 
   /**
    * Get job data from sessionStorage or load from path
@@ -45,109 +50,40 @@
   }
 
   /**
-   * Format date for display
+   * Embed contract PDF (v4 schema: PDF only, no HTML fallback)
    */
-  function formatDate(dateStr) {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  }
-
-  /**
-   * Format currency
-   */
-  function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-  }
-
-  /**
-   * Generate payment schedule HTML (v3 schema: price1 and price2)
-   */
-  function generatePaymentSchedule(jobData) {
-    const initialPrice = jobData.price1;
-    const balancePrice = jobData.price2;
-    const payments = [];
-
-    if (initialPrice) {
-      const amount = initialPrice.unit_amount / 100;
-      const payBy = initialPrice.metadata?.pay_by || 'start of work';
-      payments.push(`<li>Payment 1: ${formatCurrency(amount)} - ${initialPrice.nickname || 'Initial Payment'} (Due: ${payBy})</li>`);
+  function embedContractPDF(pdfUrl) {
+    if (!pdfViewerDiv) {
+      console.error('PDF viewer div not found');
+      return false;
     }
 
-    if (balancePrice) {
-      const amount = balancePrice.unit_amount / 100;
-      const payBy = balancePrice.metadata?.pay_by || 'before project launch';
-      payments.push(`<li>Payment 2: ${formatCurrency(amount)} - ${balancePrice.nickname || 'Final Payment'} (Due: ${payBy})</li>`);
-    }
-
-    return payments.length > 0 ? payments.join('') : '<li>No payments defined</li>';
+    // Create iframe for PDF embedding
+    const iframe = document.createElement('iframe');
+    iframe.src = pdfUrl;
+    iframe.style.width = '100%';
+    iframe.style.height = '800px';
+    iframe.style.border = 'none';
+    iframe.style.borderRadius = '8px';
+    iframe.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    iframe.setAttribute('title', 'Contract PDF');
+    
+    // Clear existing content
+    pdfViewerDiv.innerHTML = '';
+    pdfViewerDiv.appendChild(iframe);
+    
+    return true;
   }
 
   /**
-   * Replace template placeholders (v3 schema)
+   * Setup download button (v4 schema: link to PDF)
    */
-  function replacePlaceholders(template, data) {
-    let html = template;
-
-    // Client info (v3 schema: customer)
-    const customer = data.customer || {};
-    html = html.replace(/\{\{CLIENT_NAME\}\}/g, customer.business || customer.name || '');
-    html = html.replace(/\{\{CLIENT_CONTACT_NAME\}\}/g, customer.name || '');
-    html = html.replace(/\{\{CLIENT_TITLE\}\}/g, customer.title || '');
-    const address = customer.address || {};
-    html = html.replace(/\{\{CLIENT_ADDRESS\}\}/g,
-      `${address.line1 || ''}, ${address.city || ''}, ${address.state || ''} ${address.postal_code || ''}`.trim());
-
-    // Contract dates (v3 schema)
-    html = html.replace(/\{\{CONTRACT_DATE\}\}/g, formatDate(data.state?.object?.created || new Date().toISOString().split('T')[0]));
-    html = html.replace(/\{\{START_DATE\}\}/g, formatDate(data.contract?.work_start));
-    html = html.replace(/\{\{END_DATE\}\}/g, formatDate(data.contract?.work_end));
-
-    // Payment info (v3 schema: calculate from price objects)
-    const initialPrice = data.price1 || {};
-    const balancePrice = data.price2 || {};
-    const totalAmount = ((initialPrice.unit_amount || 0) + (balancePrice.unit_amount || 0)) / 100;
-    html = html.replace(/\{\{RATE_TYPE\}\}/g, 'Flat Rate');
-    html = html.replace(/\{\{TOTAL_FEE\}\}/g, formatCurrency(totalAmount));
-    html = html.replace(/\{\{DEPOSIT_PERCENT\}\}/g, initialPrice.unit_amount && totalAmount > 0
-      ? `${Math.round((initialPrice.unit_amount / 100 / totalAmount) * 100)}%` : '');
-    html = html.replace(/\{\{INVOICE_DAYS\}\}/g, balancePrice.metadata?.pay_days || '14');
-    html = html.replace(/\{\{LATE_FEE\}\}/g, formatCurrency(parseFloat(balancePrice.metadata?.late_fee?.replace('$', '') || '0') * 100));
-    html = html.replace(/\{\{HOURLY_FEE\}\}/g, formatCurrency(parseFloat(data.contract?.maintenance_monthly_fee?.replace('$', '') || '0') * 100));
-    html = html.replace(/\{\{PAYMENT_SCHEDULE\}\}/g, generatePaymentSchedule(data));
-
-    // Project scope
-    html = html.replace(/\{\{PROJECT_SCOPE_SUMMARY\}\}/g, data.project_scope_summary || '');
-
-    // Maintenance period
-    html = html.replace(/\{\{MAINTENANCE_PERIOD_MONTHS\}\}/g, data.contract?.maintenance_period_months || '3');
-
-    return html;
-  }
-
-  /**
-   * Load contract template and extract body content
-   */
-  async function loadContractTemplate() {
-    try {
-      const response = await fetch('/assets/templates/contract-template.html');
-      if (!response.ok) {
-        throw new Error('Failed to load contract template');
-      }
-      const fullHTML = await response.text();
-
-      // Extract body content (between <body> and </body> tags)
-      const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-      if (bodyMatch) {
-        return bodyMatch[1];
-      }
-
-      // Fallback: return full HTML if body tags not found
-      return fullHTML;
-    } catch (error) {
-      console.error('Error loading template:', error);
-      return null;
-    }
+  function setupDownloadButton(pdfUrl) {
+    if (!downloadButton) return;
+    
+    downloadButton.href = pdfUrl;
+    downloadButton.download = pdfUrl.split('/').pop();
+    downloadButton.style.display = 'inline-block';
   }
 
   /**
@@ -200,6 +136,7 @@
 
   /**
    * Initialize contract section (works within single-page template)
+   * v4 schema: PDF embedding only, NO HTML fallback
    */
   async function init() {
     // Only initialize if we're in the contract section
@@ -210,7 +147,9 @@
     const jobData = await getJobData();
 
     if (!jobData) {
-      contentDiv.innerHTML = '<p>Job data not found. Please start from the <a href="/">homepage</a>.</p>';
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p class="error">Job data not found. Please start from the <a href="/">homepage</a>.</p>';
+      }
       return;
     }
 
@@ -221,27 +160,40 @@
       await trackContractLoaded(jobId);
     }
 
-    // Load template
-    const template = await loadContractTemplate();
-    if (!template) {
-      contentDiv.innerHTML = '<p>Failed to load contract template.</p>';
+    // v4 schema: Get PDF URL from docs.contract.pdf
+    const pdfPath = jobData.docs?.contract?.pdf;
+    const pdfUrl = pdfPath 
+      ? `https://payments.august.style/${pdfPath}` 
+      : jobData.docs?.contract?.url;
+
+    if (!pdfUrl) {
+      // v4 requirement: NO HTML fallback - show error instead
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p class="error">Contract PDF not found. Please contact support.</p>';
+      }
+      console.error('Contract PDF not found for job:', jobId);
       return;
     }
 
-    // Replace placeholders
-    const contractHTML = replacePlaceholders(template, jobData);
+    // Embed PDF
+    if (!embedContractPDF(pdfUrl)) {
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p class="error">Failed to load contract PDF viewer.</p>';
+      }
+      return;
+    }
 
-    // Inject into page
-    contentDiv.innerHTML = contractHTML;
+    // Setup download button
+    setupDownloadButton(pdfUrl);
 
-    // Setup scroll tracking
+    // Setup scroll tracking (for PDF iframe)
     if (jobId) {
       setTimeout(() => setupScrollTracking(jobId), 500);
     }
 
-    // Attach signature handler if contract not signed (v3 schema: check signatures.client.signed_date)
+    // Attach signature handler if contract not signed (v4 schema: check signatures.client.signed_date)
     const isSigned = !!(jobData.contract?.signatures?.client?.signed_date);
-    if (!isSigned) {
+    if (!isSigned && signButton) {
       attachSignatureHandler(jobData);
     }
   }
@@ -277,7 +229,7 @@
       return;
     }
 
-    // Update job data (v3 schema: contract.signatures structure)
+    // Update job data (v4 schema: contract.signatures structure)
     if (!jobData.contract.signatures) {
       jobData.contract.signatures = { contractor: {}, client: {} };
     }

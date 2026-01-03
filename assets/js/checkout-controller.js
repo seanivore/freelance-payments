@@ -2,7 +2,7 @@
  * CHECKOUT CONTROLLER
  * Handles Stripe Checkout Session creation and redirect
  * 
- * Updated for v3 schema: Uses price1, price2, product.id
+ * Updated for v4 schema: Uses price1, price2, product.id, state.payment_1/payment_2
  * Creates Checkout Sessions on-demand (per CHECKOUT_SESSION_DETAILS.md)
  * Works within single-page template (job.html) with #payment-1 and #payment-2 sections
  */
@@ -16,7 +16,7 @@
   const paymentSection2 = document.getElementById('payment-2');
 
   /**
-   * Get payment number from hash or determine from state (v3 schema)
+   * Get payment number from hash or determine from state (v4 schema)
    */
   function getPaymentNumber(jobData) {
     // Try hash first (e.g., #payment-1)
@@ -26,10 +26,10 @@
       return parseInt(hashMatch[1], 10);
     }
 
-    // Check state to determine which payment is pending
-    const stateManagement = jobData.state || {};
-    const initialPaid = stateManagement.payment_1?.succeeded !== null;
-    const balancePaid = stateManagement.balance_payment_intent?.succeeded !== null;
+    // Check state to determine which payment is pending (v4 schema: state.payment_2, not balance_payment_intent)
+    const state = jobData.state || {};
+    const initialPaid = state.payment_1?.succeeded !== null;
+    const balancePaid = state.payment_2?.succeeded !== null;
 
     if (!initialPaid) return 1;
     if (!balancePaid) return 2;
@@ -66,7 +66,7 @@
   async function createCheckoutSession(jobData, paymentNumber) {
     const serverlessEndpoint = 'https://freelance-payments-neon.vercel.app/api/create-checkout-session';
 
-    // Get price object (v3 schema)
+    // Get price object (v4 schema)
     let priceObject = null;
     let priceId = null;
     let couponId = null;
@@ -74,7 +74,7 @@
     if (paymentNumber === 1) {
       priceObject = jobData.price1;
       priceId = priceObject?.id;
-      // Discounts only apply to first payment (v3 schema)
+      // Discounts only apply to first payment (v4 schema)
       couponId = jobData.coupon?.id || null;
     } else if (paymentNumber === 2) {
       priceObject = jobData.price2;
@@ -98,7 +98,7 @@
         body: JSON.stringify({
           price_id: priceId,
           coupon_id: couponId,
-          customer.id: customerId,
+          customer_id: customerId, // Fixed: should be customer_id, not customer.id
           job_id: jobId,
           payment_number: paymentNumber,
           return_url: `${window.location.origin}/${jobId}#completion`
@@ -119,7 +119,7 @@
   }
 
   /**
-   * Build checkout form HTML (v3 schema)
+   * Build checkout form HTML (v4 schema)
    */
   function buildCheckoutForm(jobData, priceObject, paymentNumber) {
     const amount = (priceObject.unit_amount || 0) / 100; // Convert cents to dollars
@@ -196,7 +196,7 @@
       return;
     }
 
-    // Get price object (v3 schema)
+    // Get price object (v4 schema)
     let priceObject = null;
     if (paymentNumber === 1) {
       priceObject = jobData.price1;
@@ -214,13 +214,13 @@
       return;
     }
 
-    // Check if already paid (v3 schema: check state)
-    const stateManagement = jobData.state || {};
+    // Check if already paid (v4 schema: check state.payment_1/payment_2)
+    const state = jobData.state || {};
     let isPaid = false;
     if (paymentNumber === 1) {
-      isPaid = stateManagement.payment_1?.succeeded !== null;
+      isPaid = state.payment_1?.succeeded !== null;
     } else if (paymentNumber === 2) {
-      isPaid = stateManagement.balance_payment_intent?.succeeded !== null;
+      isPaid = state.payment_2?.succeeded !== null;
     }
 
     if (isPaid) {

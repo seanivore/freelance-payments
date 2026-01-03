@@ -1,9 +1,11 @@
 /**
  * INVOICE CONTROLLER
- * Loads job data and displays specific payment invoice
+ * Loads job data and displays invoice PDF
  * 
- * Updated for v3 schema: Uses price1, price2, customer, product.id
+ * Updated for v4 schema: Uses price1, price2, customer, product.id
  * Works within single-page template (job.html) with #invoice section
+ * 
+ * CRITICAL: v4 requires PDF embedding only - NO HTML fallback rendering
  */
 
 (function () {
@@ -11,9 +13,11 @@
 
   const contentDiv = document.getElementById('invoice-content');
   const invoiceSection = document.getElementById('invoice');
+  const pdfViewerDiv = document.getElementById('invoice-pdf-viewer');
+  const downloadButton = document.getElementById('invoice-download-btn');
 
   /**
-   * Get payment number from hash, state, or default to first pending (v3 schema)
+   * Get payment number from hash, state, or default to first pending (v4 schema)
    */
   function getPaymentNumber(jobData) {
     // Try hash first (e.g., #invoice?payment=1)
@@ -23,10 +27,10 @@
       return parseInt(hashMatch[1], 10);
     }
 
-    // Check state to determine which payment is pending
-    const stateManagement = jobData.state || {};
-    const initialPaid = stateManagement.payment_1?.succeeded !== null;
-    const balancePaid = stateManagement.balance_payment_intent?.succeeded !== null;
+    // Check state to determine which payment is pending (v4 schema: state.payment_2, not balance_payment_intent)
+    const state = jobData.state || {};
+    const initialPaid = state.payment_1?.succeeded !== null;
+    const balancePaid = state.payment_2?.succeeded !== null;
 
     if (!initialPaid) return 1;
     if (!balancePaid) return 2;
@@ -100,108 +104,76 @@
   }
 
   /**
-   * Replace template placeholders (v3 schema)
+   * Embed invoice PDF (v4 schema: PDF only, no HTML fallback)
    */
-  function replacePlaceholders(template, jobData, priceObject, paymentNumber) {
-    let html = template;
-
-    // Invoice number (v3 schema: product.id)
-    const invoiceNumber = jobData.product?.id || '';
-    html = html.replace(/\{\{INVOICE_NUMBER\}\}/g, invoiceNumber);
-    html = html.replace(/\{\{INVOICE_DATE\}\}/g, formatDate(jobData.state?.object?.created || new Date().toISOString().split('T')[0]));
-
-    // Payment status (v3 schema: check state)
-    const stateManagement = jobData.state || {};
-    let isPaid = false;
-    if (paymentNumber === 1) {
-      isPaid = stateManagement.payment_1?.succeeded !== null;
-    } else if (paymentNumber === 2) {
-      isPaid = stateManagement.balance_payment_intent?.succeeded !== null;
-    }
-    const status = isPaid ? 'paid' : 'pending';
-    html = html.replace(/\{\{PAYMENT_STATUS\}\}/g, status);
-
-    // Client info (v3 schema: customer)
-    const customer = jobData.customer || {};
-    html = html.replace(/\{\{CLIENT_NAME\}\}/g, customer.business || customer.name || '');
-    html = html.replace(/\{\{CLIENT_CONTACT_NAME\}\}/g, customer.name || '');
-    const address = customer.address || {};
-    html = html.replace(/\{\{CLIENT_ADDRESS\}\}/g,
-      `${address.line1 || ''}, ${address.city || ''}, ${address.state || ''} ${address.postal_code || ''}`.trim());
-    html = html.replace(/\{\{CLIENT_EMAIL\}\}/g, customer.email || '');
-    html = html.replace(/\{\{CLIENT_PHONE\}\}/g, customer.phone || '');
-
-    // Payment details (v3 schema: price_object.unit_amount in cents)
-    const amount = (priceObject.unit_amount || 0) / 100; // Convert cents to dollars
-    html = html.replace(/\{\{PAYMENT_NUMBER\}\}/g, paymentNumber);
-    html = html.replace(/\{\{TOTAL_PAYMENTS\}\}/g, '2'); // v3 schema always has 2 payments
-    html = html.replace(/\{\{PAYMENT_AMOUNT\}\}/g, formatCurrency(amount));
-    html = html.replace(/\{\{PAYMENT_DESCRIPTION\}\}/g, priceObject.nickname || '');
-    html = html.replace(/\{\{PAYMENT_DETAILS\}\}/g, priceObject.nickname || '');
-    const payBy = priceObject.metadata?.pay_by || 'TBD';
-    html = html.replace(/\{\{DUE_DATE_OR_TERM\}\}/g, payBy);
-
-    // Contract date
-    html = html.replace(/\{\{CONTRACT_DATE\}\}/g, formatDate(jobData.state?.object?.created || new Date().toISOString().split('T')[0]));
-
-    // Payment terms (v3 schema: metadata.pay_days)
-    const balancePrice = jobData.price2 || {};
-    html = html.replace(/\{\{INVOICE_DAYS\}\}/g, balancePrice.metadata?.pay_days || '14');
-    const lateFeeStr = balancePrice.metadata?.late_fee || '';
-    if (lateFeeStr) {
-      html = html.replace(/\{\{#if LATE_FEE\}\}/g, '');
-      html = html.replace(/\{\{\/if\}\}/g, '');
-      html = html.replace(/\{\{LATE_FEE\}\}/g, lateFeeStr);
-    } else {
-      html = html.replace(/\{\{#if LATE_FEE\}\}[\s\S]*?\{\{\/if\}\}/g, '');
+  function embedInvoicePDF(pdfUrl) {
+    if (!pdfViewerDiv) {
+      console.error('PDF viewer div not found');
+      return false;
     }
 
-    // Project name (v3 schema: project field)
-    const projectName = jobData.project || jobData.customer?.business || `Project ${invoiceNumber}`;
-    html = html.replace(/\{\{PROJECT_NAME\}\}/g, projectName);
-
-    // Job ID for navigation
-    html = html.replace(/\{\{JOB_ID\}\}/g, invoiceNumber);
-
-    // Payment link (if pending, use hash-based routing)
-    if (!isPaid && priceObject.active === true) {
-      html = html.replace(/\{\{#if PAYMENT_LINK\}\}/g, '');
-      html = html.replace(/\{\{\/if\}\}/g, '');
-      html = html.replace(/\{\{PAYMENT_LINK\}\}/g, `#payment-${paymentNumber}`);
-    } else {
-      html = html.replace(/\{\{#if PAYMENT_LINK\}\}[\s\S]*?\{\{\/if\}\}/g, '');
-    }
-
-    return html;
+    // Create iframe for PDF embedding
+    const iframe = document.createElement('iframe');
+    iframe.src = pdfUrl;
+    iframe.style.width = '100%';
+    iframe.style.height = '800px';
+    iframe.style.border = 'none';
+    iframe.style.borderRadius = '8px';
+    iframe.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    iframe.setAttribute('title', 'Invoice PDF');
+    
+    // Clear existing content
+    pdfViewerDiv.innerHTML = '';
+    pdfViewerDiv.appendChild(iframe);
+    
+    return true;
   }
 
   /**
-   * Load invoice template and extract body content
+   * Setup download button (v4 schema: link to PDF)
    */
-  async function loadInvoiceTemplate() {
-    try {
-      const response = await fetch('/assets/templates/invoice-template.html');
-      if (!response.ok) {
-        throw new Error('Failed to load invoice template');
-      }
-      const fullHTML = await response.text();
+  function setupDownloadButton(pdfUrl) {
+    if (!downloadButton) return;
+    
+    downloadButton.href = pdfUrl;
+    downloadButton.download = pdfUrl.split('/').pop();
+    downloadButton.style.display = 'inline-block';
+  }
 
-      // Extract body content (between <body> and </body> tags)
-      const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-      if (bodyMatch) {
-        return bodyMatch[1];
-      }
+  /**
+   * Calculate amount due and amount paid (v4 schema)
+   */
+  function calculateAmounts(jobData) {
+    const state = jobData.state || {};
+    const payment1 = state.payment_1 || {};
+    const payment2 = state.payment_2 || {};
+    const price1 = jobData.price1 || {};
+    const price2 = jobData.price2 || {};
+    const product = jobData.product || {};
 
-      // Fallback: return full HTML if body tags not found
-      return fullHTML;
-    } catch (error) {
-      console.error('Error loading template:', error);
-      return null;
+    let amountDue = 0;
+    let amountPaid = 0;
+
+    if (!payment1.succeeded) {
+      amountDue = (price1.unit_amount || 0) / 100;
+    } else {
+      amountPaid += (price1.unit_amount || 0) / 100;
+      
+      if (product.total_payments === 2 && !payment2.succeeded) {
+        amountDue = (price2.unit_amount || 0) / 100;
+      }
     }
+
+    if (payment2.succeeded) {
+      amountPaid += (price2.unit_amount || 0) / 100;
+    }
+
+    return { amountDue, amountPaid };
   }
 
   /**
    * Initialize invoice section (works within single-page template)
+   * v4 schema: PDF embedding only, NO HTML fallback
    */
   async function init() {
     // Only initialize if we're in the invoice section
@@ -212,27 +184,18 @@
     const jobData = await getJobData();
 
     if (!jobData) {
-      contentDiv.innerHTML = '<p>Job data not found. Please start from the <a href="/">homepage</a>.</p>';
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p class="error">Job data not found. Please start from the <a href="/">homepage</a>.</p>';
+      }
       return;
     }
 
-    // Get payment number (v3 schema: determine from state or hash)
+    // Get payment number (v4 schema: determine from state or hash)
     const paymentNumber = getPaymentNumber(jobData);
     if (!paymentNumber) {
-      contentDiv.innerHTML = '<p>All payments are complete. <a href="#completion">View completion page</a>.</p>';
-      return;
-    }
-
-    // Get price object (v3 schema: price1 or price2)
-    let priceObject = null;
-    if (paymentNumber === 1) {
-      priceObject = jobData.price1;
-    } else if (paymentNumber === 2) {
-      priceObject = jobData.price2;
-    }
-
-    if (!priceObject) {
-      contentDiv.innerHTML = '<p>Payment not found. Please contact support.</p>';
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p>All payments are complete. <a href="#completion">View completion page</a>.</p>';
+      }
       return;
     }
 
@@ -243,18 +206,31 @@
       await trackInvoiceViewed(jobId, paymentNumber);
     }
 
-    // Load template
-    const template = await loadInvoiceTemplate();
-    if (!template) {
-      contentDiv.innerHTML = '<p>Failed to load invoice template.</p>';
+    // v4 schema: Get PDF URL from docs.invoice.pdf
+    const pdfPath = jobData.docs?.invoice?.pdf;
+    const pdfUrl = pdfPath 
+      ? `https://payments.august.style/${pdfPath}` 
+      : jobData.docs?.invoice?.url;
+
+    if (!pdfUrl) {
+      // v4 requirement: NO HTML fallback - show error instead
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p class="error">Invoice PDF not found. Please contact support.</p>';
+      }
+      console.error('Invoice PDF not found for job:', jobId);
       return;
     }
 
-    // Replace placeholders
-    const invoiceHTML = replacePlaceholders(template, jobData, priceObject, paymentNumber);
+    // Embed PDF
+    if (!embedInvoicePDF(pdfUrl)) {
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p class="error">Failed to load invoice PDF viewer.</p>';
+      }
+      return;
+    }
 
-    // Inject into page
-    contentDiv.innerHTML = invoiceHTML;
+    // Setup download button
+    setupDownloadButton(pdfUrl);
   }
 
   // Export for use in other scripts
