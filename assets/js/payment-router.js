@@ -3,7 +3,7 @@
  * Determines user routing based on contract signing status and payment completion
  * Routes: contract → invoice → checkout → completion
  * 
- * Updated for new schema: Uses price[] array, price.paid boolean, _metadata.job_id
+ * Updated for v4 schema: Uses state.payment_1/payment_2, product.id
  */
 
 (function () {
@@ -26,11 +26,11 @@
   }
 
   /**
-   * Determine route based on job state (v3 schema)
+   * Determine route based on job state (v4 schema)
    * Returns: { route: string, paymentNumber?: number, reason: string }
    * 
    * Routes: contract → invoice → checkout → completion
-   * Uses v3 schema: contract.signatures, state.client_status, price[] array
+   * Uses v4 schema: contract.signatures, state.client_status, state.payment_1/payment_2
    */
   function determineRoute(jobData) {
     if (!jobData) {
@@ -41,15 +41,15 @@
     }
 
     const contract = jobData.contract || {};
-    const stateManagement = jobData.state || {};
-    const clientStatus = stateManagement.client_status || {};
+    const state = jobData.state || {};
+    const clientStatus = state.client_status || {};
 
-    // v3 schema: prices are in separate objects (price1, price2)
-    // But we need to check payment status from state
-    const initialPayment = stateManagement.payment_1 || {};
-    const balancePayment = stateManagement.balance_payment_intent || {};
+    // v4 schema: prices are in separate objects (price1, price2)
+    // Payment status is checked from state.payment_1 and state.payment_2
+    const initialPayment = state.payment_1 || {};
+    const balancePayment = state.payment_2 || {};
 
-    // Check if contract is signed (v3 schema: contract.signatures.client.signed_date)
+    // Check if contract is signed (v4 schema: contract.signatures.client.signed_date)
     const isContractSigned = !!(contract.signatures &&
       contract.signatures.client &&
       contract.signatures.client.signed_date);
