@@ -178,8 +178,9 @@ def create_stripe_customer(customer: dict) -> str:
         'metadata': {}  # Stripe metadata (not v4 schema metadata)
     }
 
+    # Store title in metadata (Stripe Customer API doesn't support title field)
     if customer.get('title'):
-        customer_params['title'] = customer['title']
+        customer_params['metadata']['title'] = customer['title']
 
     if customer.get('address'):
         customer_params['address'] = {
