@@ -26,7 +26,7 @@ def load_job(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Dict]:
     Example:
         job_data = load_job("uid-test-001")
         if job_data:
-            print(job_data['client']['business'])
+            print(job_data['customer']['business'])
     """
     job_path = find_job_file(job_id, jobs_dir)
 
@@ -92,7 +92,7 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
     Find the file path for a given job_id.
 
     Args:
-        job_id: The job identifier (from product.id in v3 schema)
+        job_id: The job identifier (from product.id in v4 schema)
         jobs_dir: Directory containing job JSON files (relative to project root)
 
     Returns:
@@ -127,13 +127,9 @@ def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # Check v3 schema: product.id (matches filename)
+                # Check v4 schema: product.id (matches filename)
                 product_job_id = data.get('product', {}).get('id')
-                # Check v2 schema: _metadata.job_id
-                metadata_job_id = data.get('_metadata', {}).get('job_id')
-                # Check old schema: top-level job_id
-                old_job_id = data.get('job_id')
-                if product_job_id == job_id or metadata_job_id == job_id or old_job_id == job_id:
+                if product_job_id == job_id:
                     return json_file
         except (json.JSONDecodeError, IOError):
             continue
@@ -154,7 +150,7 @@ def list_all_jobs(jobs_dir: str = "assets/jobs") -> List[Dict]:
     Example:
         all_jobs = list_all_jobs()
         for job in all_jobs:
-            print(job['_metadata']['job_id'])
+            print(job['product']['id'])
     """
     # Resolve path relative to project root (2 levels up from utils/json_io.py)
     # utils/json_io.py -> .github/scripts/utils -> .github/scripts -> .github -> project_root
@@ -196,7 +192,7 @@ def list_all_jobs(jobs_dir: str = "assets/jobs") -> List[Dict]:
 
 def validate_job_schema(job_data: Dict) -> tuple[bool, List[str]]:
     """
-    Validate that a job has required fields.
+    Validate that a job has required fields (v4 schema).
 
     Args:
         job_data: Dictionary containing job data
@@ -212,39 +208,37 @@ def validate_job_schema(job_data: Dict) -> tuple[bool, List[str]]:
     """
     errors = []
 
-    # Check required top-level fields (new schema)
-    required_fields = ['_metadata', 'client', 'contract', 'product', 'price']
+    # Check required top-level fields (v4 schema)
+    required_fields = ['product', 'customer', 'contract']
     for field in required_fields:
         if field not in job_data:
             errors.append(f"Missing required field: {field}")
 
-    # Check _metadata structure
-    if '_metadata' in job_data:
-        if 'job_id' not in job_data['_metadata']:
-            errors.append("_metadata missing job_id")
-        if 'client_last_name' not in job_data['_metadata']:
-            errors.append("_metadata missing client_last_name")
-        if 'project_keyword' not in job_data['_metadata']:
-            errors.append("_metadata missing project_keyword")
-
-    # Check product structure
+    # Check product structure (v4 schema)
     if 'product' in job_data:
-        if 'stripe_product_id' not in job_data['product']:
-            # This is OK for new products, but should have sync flag
-            pass
-        if 'sync' not in job_data['product']:
-            errors.append("Product missing sync field")
+        product = job_data['product']
+        if 'id' not in product:
+            errors.append("Product missing id field")
+        if 'name' not in product:
+            errors.append("Product missing name field")
+        if 'login_name' not in product:
+            errors.append("Product missing login_name field")
+        if 'login_keyword' not in product:
+            errors.append("Product missing login_keyword field")
 
-    # Check price structure (not prices - new schema)
-    if 'price' in job_data:
-        if not isinstance(job_data['price'], list):
-            errors.append("Price must be a list")
-        else:
-            for i, price in enumerate(job_data['price']):
-                if 'payment_number' not in price:
-                    errors.append(f"Price {i} missing payment_number")
-                if 'sync' not in price:
-                    errors.append(f"Price {i} missing sync field")
+    # Check customer structure (v4 schema)
+    if 'customer' in job_data:
+        customer = job_data['customer']
+        if 'name' not in customer and 'business' not in customer:
+            errors.append("Customer missing both name and business fields")
+
+    # Check price structure (v4 schema: price1 and price2, not price[] array)
+    if 'price1' not in job_data:
+        errors.append("Missing price1 field")
+    if 'price1' in job_data:
+        price1 = job_data['price1']
+        if 'unit_amount' not in price1:
+            errors.append("price1 missing unit_amount field")
 
     return (len(errors) == 0, errors)
 
@@ -276,7 +270,7 @@ if __name__ == "__main__":
         jobs = list_all_jobs(args.jobs_dir)
         print(json.dumps({
             "count": len(jobs),
-            "jobs": [{"job_id": j.get('_metadata', {}).get('job_id'), "client": j.get('client', {}).get('business')} for j in jobs]
+            "jobs": [{"job_id": j.get('product', {}).get('id'), "customer": j.get('customer', {}).get('business')} for j in jobs]
         }, indent=2))
         sys.exit(0)
 

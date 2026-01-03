@@ -17,6 +17,7 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, Optional, Any
+from datetime import datetime, UTC
 import sys
 
 
@@ -37,22 +38,17 @@ def read_job_json(file_path: Path) -> Optional[Dict]:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        # Validate required fields - v3 schema uses product.metadata
+        # Validate required fields - v4 schema uses product.login_name and product.login_keyword (no metadata nesting)
         if 'product' not in data:
             print(f"⚠️  Missing 'product' field in {file_path.name}", file=sys.stderr)
             return None
         
-        product_obj = data['product']
-        if 'metadata' not in product_obj:
-            print(f"⚠️  Missing 'metadata' in product for {file_path.name}", file=sys.stderr)
+        product = data['product']
+        if 'login_name' not in product or 'login_keyword' not in product:
+            print(f"⚠️  Missing 'login_name' or 'login_keyword' in product for {file_path.name}", file=sys.stderr)
             return None
         
-        metadata = product_obj['metadata']
-        if 'login_name' not in metadata or 'login_keyword' not in metadata:
-            print(f"⚠️  Missing 'login_name' or 'login_keyword' in product.metadata for {file_path.name}", file=sys.stderr)
-            return None
-        
-        if 'id' not in product_obj:
+        if 'id' not in product:
             print(f"⚠️  Missing 'id' in product for {file_path.name}", file=sys.stderr)
             return None
         
@@ -72,8 +68,8 @@ def generate_manifest() -> Dict[str, Dict]:
     Returns: dict mapping "{login_name}-{login_keyword}" to entry dict with:
         - file_path: relative path to JSON file
         - job_id: product.id (matches filename)
-        - login_keyword: from product.metadata
-        - login_name: from product.metadata
+        - login_keyword: from product.login_keyword (v4 schema, no metadata nesting)
+        - login_name: from product.login_name (v4 schema, no metadata nesting)
     """
     # Get project root (3 levels up from .github/scripts/generate_manifest.py)
     script_dir = Path(__file__).parent
@@ -98,12 +94,11 @@ def generate_manifest() -> Dict[str, Dict]:
         if not job_data:
             continue
         
-        # Extract from product (v3 schema)
-        product_obj = job_data['product']
-        metadata = product_obj['metadata']
-        login_name = normalize_lookup_key(metadata['login_name'])
-        login_keyword = normalize_lookup_key(metadata['login_keyword'])
-        job_id = product_obj['id']
+        # Extract from product (v4 schema: login_name and login_keyword at product level, no metadata nesting)
+        product = job_data['product']
+        login_name = normalize_lookup_key(product['login_name'])
+        login_keyword = normalize_lookup_key(product['login_keyword'])
+        job_id = product['id']
         
         # Create lookup key: "{login_name}-{login_keyword}"
         lookup_key = f"{login_name}-{login_keyword}"
@@ -125,8 +120,8 @@ def generate_manifest() -> Dict[str, Dict]:
         manifest[lookup_key] = {
             "file_path": relative_path,
             "job_id": job_id,
-            "login_keyword": metadata['login_keyword'],
-            "login_name": metadata['login_name']
+            "login_keyword": product['login_keyword'],
+            "login_name": product['login_name']
         }
         print(f"✅ Added: {lookup_key} → {job_id} ({json_file.name})")
     
@@ -141,11 +136,9 @@ def main():
     script_dir = Path(__file__).parent
     project_root = script_dir.parent.parent
     
-    from datetime import datetime
-    
     manifest_data = {
         "jobs": generate_manifest(),
-        "generated_at": datetime.utcnow().isoformat() + "Z"
+        "generated_at": datetime.now(UTC).isoformat().replace('+00:00', 'Z')
     }
     
     # Output directory (relative to project root)

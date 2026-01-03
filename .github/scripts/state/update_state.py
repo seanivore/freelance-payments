@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Consolidated State Update Script (v3 schema)
+Consolidated State Update Script (v4 schema)
 Handles contract signing, payment status, and tracking event updates.
 
 Actions:
 1. Contract signing → Update contract.signatures
-2. Payment status → Update state.[initial|balance]_payment_intent
+2. Payment status → Update state.payment_1/payment_2
 3. Tracking events → Update state.client_status
 
-v3 Schema:
+v4 Schema:
 - contract.signatures.client.signed_date
 - state.payment_1.succeeded
-- state.balance_payment_intent.succeeded
+- state.payment_2.succeeded (not balance_payment_intent)
 - state.client_status (contract_loaded, contract_scrolled_complete, invoice_viewed, downloaded_docs, signed_contract)
 
 Usage:
@@ -37,7 +37,7 @@ import sys
 import json
 import argparse
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -46,7 +46,7 @@ from utils.json_io import load_job, save_job
 
 def update_contract_signing(job_data: dict, signature_data: dict) -> dict:
     """
-    Update contract signing status (v3 schema).
+    Update contract signing status (v4 schema).
     
     Args:
         job_data: Job JSON dictionary
@@ -87,7 +87,7 @@ def update_contract_signing(job_data: dict, signature_data: dict) -> dict:
         job_data['state']['client_status'] = {}
     
     client_status = job_data['state']['client_status']
-    signed_date = contract['signatures']['client'].get('signed_date') or datetime.utcnow().isoformat() + 'Z'
+    signed_date = contract['signatures']['client'].get('signed_date') or datetime.now(UTC).isoformat().replace('+00:00', 'Z')
     client_status['signed_contract'] = signed_date
     
     return {
@@ -99,7 +99,7 @@ def update_contract_signing(job_data: dict, signature_data: dict) -> dict:
 
 def update_payment_status(job_data: dict, payment_data: dict) -> dict:
     """
-    Update payment status (v3 schema).
+    Update payment status (v4 schema).
     
     Args:
         job_data: Job JSON dictionary
@@ -124,22 +124,22 @@ def update_payment_status(job_data: dict, payment_data: dict) -> dict:
             job_data['state']['payment_1'] = {}
         
         payment_intent = job_data['state']['payment_1']
-        if not payment_intent.get('created'):
-            payment_intent['created'] = succeeded_timestamp or datetime.utcnow().isoformat() + 'Z'
-        payment_intent['succeeded'] = succeeded_timestamp or datetime.utcnow().isoformat() + 'Z'
+        if not payment_intent.get('intent'):
+            payment_intent['intent'] = succeeded_timestamp or datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+        payment_intent['succeeded'] = succeeded_timestamp or datetime.now(UTC).isoformat().replace('+00:00', 'Z')
         
     elif payment_number == 2:
-        if 'balance_payment_intent' not in job_data['state']:
-            job_data['state']['balance_payment_intent'] = {}
+        if 'payment_2' not in job_data['state']:
+            job_data['state']['payment_2'] = {}
         
-        payment_intent = job_data['state']['balance_payment_intent']
-        if not payment_intent.get('created'):
-            payment_intent['created'] = succeeded_timestamp or datetime.utcnow().isoformat() + 'Z'
-        payment_intent['succeeded'] = succeeded_timestamp or datetime.utcnow().isoformat() + 'Z'
+        payment_intent = job_data['state']['payment_2']
+        if not payment_intent.get('intent'):
+            payment_intent['intent'] = succeeded_timestamp or datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+        payment_intent['succeeded'] = succeeded_timestamp or datetime.now(UTC).isoformat().replace('+00:00', 'Z')
     
     # Check if all payments are complete
     initial_paid = job_data['state'].get('payment_1', {}).get('succeeded') is not None
-    balance_paid = job_data['state'].get('balance_payment_intent', {}).get('succeeded') is not None
+    balance_paid = job_data['state'].get('payment_2', {}).get('succeeded') is not None
     all_paid = initial_paid and balance_paid
     
     return {
@@ -152,7 +152,7 @@ def update_payment_status(job_data: dict, payment_data: dict) -> dict:
 
 def update_tracking_event(job_data: dict, event_data: dict) -> dict:
     """
-    Update tracking event in client_status (v3 schema).
+    Update tracking event in client_status (v4 schema).
     
     Args:
         job_data: Job JSON dictionary
@@ -162,7 +162,7 @@ def update_tracking_event(job_data: dict, event_data: dict) -> dict:
         Update confirmation
     """
     event_type = event_data.get('event_type')
-    timestamp = event_data.get('timestamp') or event_data.get('event_data', {}).get('timestamp') or datetime.utcnow().isoformat() + 'Z'
+    timestamp = event_data.get('timestamp') or event_data.get('event_data', {}).get('timestamp') or datetime.now(UTC).isoformat().replace('+00:00', 'Z')
     
     # Initialize state.client_status if missing
     if 'state' not in job_data:
@@ -200,7 +200,7 @@ def update_state(job_id: str, action: str, data: dict, jobs_dir: str = "assets/j
     Update job state based on action type.
     
     Args:
-        job_id: Job identifier (product.id in v3 schema)
+        job_id: Job identifier (product.id in v4 schema)
         action: Action type (sign-contract, update-payment, track-event)
         data: Action-specific data dictionary
         jobs_dir: Directory containing job JSON files
@@ -239,7 +239,7 @@ def update_state(job_id: str, action: str, data: dict, jobs_dir: str = "assets/j
 
 
 def main():
-    parser = argparse.ArgumentParser(title="Update job state (v3 schema)")
+    parser = argparse.ArgumentParser(title="Update job state (v4 schema)")
     parser.add_argument('--job-id', required=True, help="Job ID (product.id)")
     parser.add_argument('--action', required=True, choices=['sign-contract', 'update-payment', 'track-event'],
                        help="Action type")
