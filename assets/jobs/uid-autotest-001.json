@@ -238,3 +238,4 @@
   "project_scope_summary": "Autonomous testing to verify end-to-end workflow functionality.",
   "project_scope_full": "This is an autonomous test project designed to verify that the entire workflow functions correctly: 1) Stripe objects are created (Product, Prices, Customer), 2) Stripe IDs are saved to JSON files, 3) PDFs are generated from Google Docs templates using OAuth authentication, 4) PDFs are saved to the repository, 5) Manifest is updated correctly. This test ensures all components work together seamlessly."
 }
+
