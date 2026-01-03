@@ -66,12 +66,33 @@ SCOPES = [
 
 def authenticate_google():
     """
-    Authenticate with Google using OAuth refresh token (primary) or Service Account (fallback).
+    Authenticate with Google using Service Account (primary for automation) or OAuth refresh token (fallback for client compatibility).
     
     Returns:
         Authenticated service objects (drive_service, docs_service)
     """
-    # Try OAuth refresh token first (for client compatibility, headless operation)
+    # Try Service Account first (for GitHub Actions automation - has template access)
+    service_account_key = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
+    if service_account_key:
+        try:
+            # Handle base64 encoded key (for Vercel)
+            if service_account_key.startswith('eyJ'):
+                import base64
+                service_account_key = base64.b64decode(service_account_key).decode('utf-8')
+            
+            creds_dict = json.loads(service_account_key)
+            creds = service_account.Credentials.from_service_account_info(
+                creds_dict,
+                scopes=SCOPES
+            )
+            drive_service = build('drive', 'v3', credentials=creds)
+            docs_service = build('docs', 'v1', credentials=creds)
+            print("DEBUG: Using Service Account authentication", file=sys.stderr)
+            return drive_service, docs_service
+        except Exception as e:
+            print(f"Warning: Service Account authentication failed: {e}. Trying OAuth...", file=sys.stderr)
+    
+    # Fallback to OAuth refresh token (for client compatibility, headless operation)
     refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
     client_id = os.getenv('GOOGLE_CLIENT_ID')
     client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
@@ -95,32 +116,12 @@ def authenticate_google():
             
             drive_service = build('drive', 'v3', credentials=creds)
             docs_service = build('docs', 'v1', credentials=creds)
+            print("DEBUG: Using OAuth refresh token authentication", file=sys.stderr)
             return drive_service, docs_service
         except Exception as e:
-            print(f"Warning: OAuth refresh token authentication failed: {e}. Trying Service Account...", file=sys.stderr)
+            print(f"Warning: OAuth refresh token authentication failed: {e}", file=sys.stderr)
     
-    # Fallback to Service Account (for GitHub Actions automation)
-    service_account_key = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
-    if service_account_key:
-        try:
-            # Handle base64 encoded key (for Vercel)
-            if service_account_key.startswith('eyJ'):
-                import base64
-                service_account_key = base64.b64decode(service_account_key).decode('utf-8')
-            
-            creds_dict = json.loads(service_account_key)
-            creds = service_account.Credentials.from_service_account_info(
-                creds_dict,
-                scopes=SCOPES
-            )
-            drive_service = build('drive', 'v3', credentials=creds)
-            docs_service = build('docs', 'v1', credentials=creds)
-            return drive_service, docs_service
-        except Exception as e:
-            print(f"Error: Service Account authentication failed: {e}", file=sys.stderr)
-            raise
-    
-    raise ValueError("Neither GOOGLE_REFRESH_TOKEN (with GOOGLE_CLIENT_ID/SECRET) nor GOOGLE_SERVICE_ACCOUNT_KEY environment variable set")
+    raise ValueError("Neither GOOGLE_SERVICE_ACCOUNT_KEY nor GOOGLE_REFRESH_TOKEN (with GOOGLE_CLIENT_ID/SECRET) environment variable set")
 
 
 def format_address(address: dict) -> str:
