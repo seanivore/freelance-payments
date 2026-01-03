@@ -217,12 +217,17 @@ if __name__ == "__main__":
 
 ## Google Setup 
 
-**SERVICE ACCOUNT** 
+**OAUTH (PRIMARY METHOD)**
+  + Web OAuth flow for client compatibility
+  + One-time setup: Visit `/api/google/auth` → Complete consent → Get refresh token
+  + Refresh token stored in GitHub Secrets as `GOOGLE_REFRESH_TOKEN`
+  + Python script uses refresh token for headless authentication in GitHub Actions
+  + Scopes: `https://www.googleapis.com/auth/documents`, `https://www.googleapis.com/auth/drive.file`
+
+**SERVICE ACCOUNT (FALLBACK)**
   + Needed for Drive API, Docs API 
-  + Has 'Edit' access to folder and template files 
-**OAUTH ACCESS**
-  + App Script API, Gmail API, etc. 
-  + May not need unless we want more advanced setup 
+  + Has 'Edit' access to folder and template files
+  + Used as fallback if OAuth refresh token is not available 
 
 ### Environmental Variables Prepared 
 
@@ -230,13 +235,14 @@ if __name__ == "__main__":
     - `VERCEL_OIDC_TOKEN` 
     - `STRIPE_API_KEY` (this is live don't use yet; change name to secret when ready)
     - `STRIPE_SECRET_KEY` (we call this sandbox for now)
-    - `GOOGLE_API_KEY` (possibly not helpful enough) 
-    - `GOOGLE_DRIVE_FOLDER_ID` (this folder and ID below are ID pulled form URL)
-    - `GOOGLE_TEMPLATE_CONTRACT_ID`
-    - `GOOGLE_TEMPLATE_INVOICE_ID`
-    - `GOOGLE_SERVICE_ACCOUNT_KEY` (JSON that only worked for `.env` and `.env.local`)
-    - `GOOGLE_SERVICE_ACCOUNT_KEY_B64` (Had to change to BASE64 to work in Vercel)
-    - `GOOGLE_OAUTH_KEY` (should we realize we do need App Script API power)
+    - `GOOGLE_CLIENT_ID` (OAuth client ID from Google Cloud Console)
+    - `GOOGLE_CLIENT_SECRET` (OAuth client secret from Google Cloud Console)
+    - `GOOGLE_REDIRECT_URI` (OAuth redirect URI: `https://freelance-payments-neon.vercel.app/api/google/callback`)
+    - `GOOGLE_REFRESH_TOKEN` (Obtained from initial OAuth flow, stored in GitHub Secrets)
+    - `GOOGLE_TEMPLATE_CONTRACT_ID` (Google Doc template ID for contracts)
+    - `GOOGLE_TEMPLATE_INVOICE_ID` (Google Doc template ID for invoices)
+    - `GOOGLE_SERVICE_ACCOUNT_KEY` (Fallback: JSON that only worked for `.env` and `.env.local`)
+    - `GOOGLE_SERVICE_ACCOUNT_KEY_B64` (Fallback: BASE64 encoded for Vercel)
 
 #### Snippet To Deal With Base64 Key 
 
@@ -389,314 +395,7 @@ npm install googleapis
 ```javascript
 import { google } from 'googleapis';
 import { JWT } from 'google-auth-library';
-
-export default async function handler(req, res) {
-  // Only allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { job_id, document_type } = req.body;
-
-  try {
-    // 1. Authenticate with service account
-    const auth = await authenticateGoogle();
-
-    // 2. Load job JSON (from GitHub or pass in request)
-    const jobData = await loadJobJSON(job_id);
-
-    // 3. Generate PDFs based on document_type
-    const results = {};
-
-    if (document_type === 'contract' || document_type === 'both') {
-      results.contract_pdf = await generateContractPDF(auth, jobData);
-    }
-
-    if (document_type === 'invoice' || document_type === 'both') {
-      results.invoice_pdf = await generateInvoicePDF(auth, jobData);
-    }
-
-    // 4. Update job JSON with PDF artifacts
-    await updateJobJSON(job_id, results);
-```
-
-**IN THE REST OF THE CODE, AS FOLLOWS HERE, IT IS INACCURATE GIVEN OUR CHANGES IN PROCESS AND ARCHITECTURE OF THE DESIGN SYSTEM -- DO NOT USE DIRECTLY**
-
-
-```javascript 
-    // 5. Archive PDFs to repository (optional, via GitHub API)
-
-    return res.status(200).json({
-      success: true,
-      job_id,
-      ...results
-    });
-
-  } catch (error) {
-    console.error('PDF generation error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-}
-
-// Authenticate with Google using service account
-async function authenticateGoogle() {
-  const serviceAccountKey = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
-  
-  const auth = new JWT({
-    email: serviceAccountKey.client_email,
-    key: serviceAccountKey.private_key,
-    scopes: [
-      'https://www.googleapis.com/auth/drive',
-      'https://www.googleapis.com/auth/documents'
-    ]
-  });
-
-  return auth;
-}
-
-// Generate Contract PDF
-async function generateContractPDF(auth, jobData) {
-  const drive = google.drive({ version: 'v3', auth });
-  const docs = google.docs({ version: 'v1', auth });
-
-  const templateId = process.env.GOOGLE_TEMPLATE_CONTRACT_ID;
-
-  // 1. Copy template
-  const copyResponse = await drive.files.copy({
-    fileId: templateId,
-    requestBody: {
-      name: `Contract-${jobData.product_object.id}-${Date.now()}`
-    }
-  });
-
-  const newDocId = copyResponse.data.id;
-
-  // 2. Prepare placeholder replacements
-  const replacements = {
-    '{{client_name}}': jobData.customer_object.business_name || jobData.customer_object.individual_name,
-    '{{client_address}}': formatAddress(jobData.customer_object.address),
-    '{{project_title}}': jobData.product_object.name,
-    '{{deliverables}}': jobData.project_scope_summary || jobData.project_scope_full,
-    '{{start_date}}': formatDate(jobData.contract.work_start),
-    '{{end_date}}': formatDate(jobData.contract.work_end),
-    '{{total_amount}}': formatCurrency(
-      (jobData.initial_price_object.unit_amount || 0) + 
-      (jobData.balance_price_object?.unit_amount || 0)
-    ),
-    '{{payment_terms}}': formatPaymentTerms(jobData),
-    '{{jurisdiction}}': jobData.contract.legal_jurisdiction,
-    '{{contractor_name}}': 'Sean August Horvath',
-    '{{contractor_address}}': '102 Lunenburg Ave, West Townsend, MA 01474',
-    '{{contractor_phone}}': '+1 424-744-7687',
-    '{{contractor_email}}': 'sean@august.style',
-    '{{contractor_website}}': 'https://august.style',
-    '{{maintenance_period}}': `${jobData.contract.maintenance_period_months} months`,
-    '{{maintenance_fee}}': jobData.contract.maintenance_monthly_fee
-  };
-
-  // 3. Replace placeholders in document
-  await replacePlaceholders(docs, newDocId, replacements);
-
-  // 4. Export as PDF
-  const pdfResponse = await drive.files.export({
-    fileId: newDocId,
-    mimeType: 'application/pdf'
-  }, {
-    responseType: 'stream'
-  });
-
-  // 5. Upload PDF to Drive
-  const pdfMetadata = {
-    name: `Contract-${jobData.product_object.id}-${Date.now()}.pdf`,
-    parents: [process.env.GOOGLE_DRIVE_FOLDER_ID] // Optional: specific folder
-  };
-
-  const pdfFile = await drive.files.create({
-    requestBody: pdfMetadata,
-    media: {
-      mimeType: 'application/pdf',
-      body: pdfResponse.data
-    },
-    fields: 'id, webViewLink'
-  });
-
-  // 6. Set PDF permissions (anyone with link)
-  await drive.permissions.create({
-    fileId: pdfFile.data.id,
-    requestBody: {
-      role: 'reader',
-      type: 'anyone'
-    }
-  });
-
-  // 7. Calculate SHA256 hash (for signature verification)
-  const sha256 = await calculateSHA256(pdfResponse.data);
-
-  // 8. Clean up temporary doc
-  await drive.files.delete({ fileId: newDocId });
-
-  return {
-    drive_file_id: pdfFile.data.id,
-    url: pdfFile.data.webViewLink,
-    sha256: sha256,
-    generated_at: new Date().toISOString()
-  };
-}
-
-// Generate Invoice PDF (similar structure)
-async function generateInvoicePDF(auth, jobData) {
-  // Similar to generateContractPDF, but:
-  // - Use GOOGLE_TEMPLATE_INVOICE_ID
-  // - Handle dynamic table for {{item_rows}}
-  // - Map invoice-specific placeholders
-}
-
-// Replace placeholders in Google Doc
-async function replacePlaceholders(docs, documentId, replacements) {
-  const requests = [];
-
-  for (const [placeholder, value] of Object.entries(replacements)) {
-    // Find and replace each placeholder
-    requests.push({
-      replaceAllText: {
-        containsText: {
-          text: placeholder,
-          matchCase: true
-        },
-        replaceText: value
-      }
-    });
-  }
-
-  await docs.documents.batchUpdate({
-    documentId: documentId,
-    requestBody: {
-      requests: requests
-    }
-  });
-}
-
-// Handle dynamic table rows for invoice
-async function replaceInvoiceTable(docs, documentId, jobData) {
-  // 1. Find table in document
-  // 2. Delete sample row
-  // 3. Insert rows for each price object
-  // This is more complex - may need to use Apps Script or manual table manipulation
-}
-
-// Helper functions
-function formatAddress(address) {
-  return `${address.line1}, ${address.city}, ${address.state} ${address.postal_code}`;
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-
-function formatCurrency(cents) {
-  return `$${(cents / 100).toFixed(2)}`;
-}
-
-function formatPaymentTerms(jobData) {
-  const terms = [];
-  if (jobData.initial_price_object) {
-    terms.push(`Payment 1: ${formatCurrency(jobData.initial_price_object.unit_amount)} - ${jobData.initial_price_object.metadata.pay_by}`);
-  }
-  if (jobData.balance_price_object) {
-    terms.push(`Payment 2: ${formatCurrency(jobData.balance_price_object.unit_amount)} - ${jobData.balance_price_object.metadata.pay_by}`);
-  }
-  return terms.join('\n');
-}
-
-async function calculateSHA256(buffer) {
-  // Use crypto library to calculate SHA256 hash
-  const crypto = require('crypto');
-  return crypto.createHash('sha256').update(buffer).digest('hex');
-}
-
-async function loadJobJSON(jobId) {
-  // Load from GitHub repository or pass in request body
-  // For now, assume it's passed in request or fetch from GitHub API
-}
-
-async function updateJobJSON(jobId, pdfArtifacts) {
-  // Update job JSON with PDF artifacts
-  // Trigger GitHub Actions to commit changes
-}
-```
-
----
-
-## Webhook Integration 
-
-### Update `/api/webhook.js`
-
-**Current**: Handles `checkout.session.completed` webhook
-
-**Add**: Call PDF generation after payment succeeds
-
-```javascript
-// In webhook handler, after validating payment:
-if (event.type === 'checkout.session.completed') {
-  const session = event.data.object;
-  const jobId = session.client_reference_id; // e.g., "uid-sst-846-client"
-  
-  // Extract actual job_id (remove "-client" suffix if present)
-  const actualJobId = jobId.replace(/-client$/, '');
-  
-  // Generate PDFs
-  await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/generate-pdf`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.INTERNAL_API_KEY}` // Optional: secure internal calls
-    },
-    body: JSON.stringify({
-      job_id: actualJobId,
-      document_type: 'both' // Generate both contract and invoice
-    })
-  });
-}
-```
-
----
-
-## Frontend Integration 
-
-### Update `contract-controller.js`
-
-**Current**: Renders HTML from JSON
-
-**New**: Embed PDF viewer if PDF exists, fallback to HTML
-
-```javascript
-async function loadContract(jobId) {
-  const jobData = await fetchJobJSON(jobId);
-  
-  // Check if PDF exists
-  if (jobData.pdf_artifacts?.contract_pdf?.url) {
-    // Embed Google Drive PDF viewer
-    const pdfUrl = jobData.pdf_artifacts.contract_pdf.url;
-    const viewerUrl = pdfUrl.replace('/view', '/preview');
-    
-    document.getElementById('contract-content').innerHTML = `
-      <iframe 
-        src="${viewerUrl}" 
-        width="100%" 
-        height="800px" 
-        frameborder="0">
-      </iframe>
-      <a href="${pdfUrl}" download class="download-button">
-        Download Contract PDF
-      </a>
-    `;
-  } else {
-    // Fallback to HTML rendering (current method)
-    renderContractHTML(jobData);
-  }
-}
-```
+``` 
 
 ---
 

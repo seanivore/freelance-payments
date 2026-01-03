@@ -15,6 +15,7 @@
     "tailwindcss": "^3.4.1"
   },
   "dependencies": {
-    "stripe": "^14.21.0"
+    "stripe": "^14.21.0",
+    "googleapis": "^144.0.0"
   }
 }

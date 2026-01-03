@@ -38,7 +38,9 @@
 - **update-payment.js**: Updated comments for v4 schema
 - **track-event.js**: Updated comments for v4 schema
 - **webhook.js**: Updated comments for v4 schema
-- **Status**: All endpoints updated
+- **google/auth.js**: NEW - OAuth consent URL generator
+- **google/callback.js**: NEW - OAuth callback handler for refresh token extraction
+- **Status**: All endpoints updated, OAuth endpoints ready for initial setup
 
 ### Phase 6: Frontend HTML Updates ✅
 - **job.html**: Added PDF viewer containers, download buttons, signature modal
@@ -60,7 +62,12 @@
 - ✅ Manifest generation works correctly
 
 ### Ready for Integration Testing
-- ⏳ PDF generation (requires Google API credentials)
+- ⏳ **OAuth Initial Setup** (one-time manual step):
+  - Visit `/api/google/auth` to get OAuth URL
+  - Complete OAuth consent flow
+  - Extract refresh token from `/api/google/callback` response
+  - Add `GOOGLE_REFRESH_TOKEN` to GitHub Secrets
+- ⏳ PDF generation (requires refresh token or Service Account fallback)
 - ⏳ Stripe catalog sync (requires Stripe API key)
 - ⏳ Full workflow: New job JSON → Stripe objects → PDFs → Manifest
 - ⏳ Frontend PDF embedding
@@ -98,7 +105,9 @@
 
 ## 🔧 Known Issues / Notes
 
-- **OAuth Authentication**: PDF generation script uses OAuth as primary (for client compatibility), Service Account as fallback (for GitHub Actions automation)
+- **OAuth Authentication**: PDF generation script uses OAuth refresh token as primary (for client compatibility), Service Account as fallback (for GitHub Actions automation)
+- **OAuth Initial Setup**: One-time manual step required - visit `/api/google/auth`, complete consent, extract refresh token, add to GitHub Secrets
+- **OAuth Scopes**: Using `drive.file` instead of full `drive` scope for narrower access (only app-created/opened files)
 - **PDF Generation Timing**: PDFs generated immediately after Stripe objects created (during initial push workflow)
 - **No HTML Fallback**: v4 requirement - site shows error if PDF missing, never falls back to HTML rendering
 - **Event Batching**: Events batched for 5 minutes of inactivity, flushed on page unload
@@ -107,6 +116,8 @@
 
 **New Files**:
 - `.github/scripts/pdf/generate_pdfs.py`
+- `api/google/auth.js` (OAuth consent URL generator)
+- `api/google/callback.js` (OAuth callback handler)
 - `assets/js/event-tracker.js`
 - `assets/docs/v4/FILE_AUDIT.md`
 - `assets/docs/v4/IMPLEMENTATION_STATUS.md`

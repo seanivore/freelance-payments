@@ -59,31 +59,45 @@ except ImportError:
 
 # OAuth scopes required
 SCOPES = [
-    'https://www.googleapis.com/auth/drive',
-    'https://www.googleapis.com/auth/documents'
+    'https://www.googleapis.com/auth/documents',
+    'https://www.googleapis.com/auth/drive.file'  # Narrower scope: only app-created/opened files
 ]
 
 
 def authenticate_google():
     """
-    Authenticate with Google using OAuth (primary) or Service Account (fallback).
+    Authenticate with Google using OAuth refresh token (primary) or Service Account (fallback).
     
     Returns:
         Authenticated service objects (drive_service, docs_service)
     """
-    # Try OAuth first (for client compatibility)
-    oauth_key = os.getenv('GOOGLE_OAUTH_KEY')
-    if oauth_key:
+    # Try OAuth refresh token first (for client compatibility, headless operation)
+    refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
+    client_id = os.getenv('GOOGLE_CLIENT_ID')
+    client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+    
+    if refresh_token and client_id and client_secret:
         try:
-            # Parse OAuth credentials
-            oauth_creds = json.loads(oauth_key)
-            flow = InstalledAppFlow.from_client_config(oauth_creds, SCOPES)
-            creds = flow.run_local_server(port=0)
+            from google.oauth2.credentials import Credentials
+            
+            # Create credentials from refresh token
+            creds = Credentials(
+                token=None,  # Will be refreshed automatically
+                refresh_token=refresh_token,
+                token_uri='https://oauth2.googleapis.com/token',
+                client_id=client_id,
+                client_secret=client_secret,
+                scopes=SCOPES
+            )
+            
+            # Refresh the access token (required before first use)
+            creds.refresh(Request())
+            
             drive_service = build('drive', 'v3', credentials=creds)
             docs_service = build('docs', 'v1', credentials=creds)
             return drive_service, docs_service
         except Exception as e:
-            print(f"Warning: OAuth authentication failed: {e}. Trying Service Account...", file=sys.stderr)
+            print(f"Warning: OAuth refresh token authentication failed: {e}. Trying Service Account...", file=sys.stderr)
     
     # Fallback to Service Account (for GitHub Actions automation)
     service_account_key = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
@@ -106,7 +120,7 @@ def authenticate_google():
             print(f"Error: Service Account authentication failed: {e}", file=sys.stderr)
             raise
     
-    raise ValueError("Neither GOOGLE_OAUTH_KEY nor GOOGLE_SERVICE_ACCOUNT_KEY environment variable set")
+    raise ValueError("Neither GOOGLE_REFRESH_TOKEN (with GOOGLE_CLIENT_ID/SECRET) nor GOOGLE_SERVICE_ACCOUNT_KEY environment variable set")
 
 
 def format_address(address: dict) -> str:
