@@ -184,3 +184,4 @@
   "project_scope_summary": "Test project to verify OAuth authentication works correctly for PDF generation from Google Docs templates.",
   "project_scope_full": "This is a comprehensive test project designed to verify that the OAuth refresh token authentication system works correctly. The workflow should: 1) Create Stripe objects (Product, Prices, Customer), 2) Generate PDFs from Google Docs templates using OAuth authentication, 3) Save PDFs to the repository, 4) Update the manifest. This test ensures all components work together seamlessly."
 }
+ 
