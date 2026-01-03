@@ -264,8 +264,9 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                 error_msg = e.stderr[:500] if e.stderr else str(e)
                 results['errors'].append(f"sync_catalog failed: {error_msg}")
 
-        # Step 2: Generate PDFs if new products were created (v4 schema)
-        if trigger == 'push' and sync_result and sync_result.get('products_created', 0) > 0:
+        # Step 2: Generate PDFs for jobs that need them (v4 schema)
+        # Always attempt PDF generation - script is idempotent (only generates missing PDFs)
+        if trigger == 'push' and sync_result:
             try:
                 pdf_result = run_script(
                     'pdf/generate_pdfs.py',

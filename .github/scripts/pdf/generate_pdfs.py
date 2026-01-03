@@ -534,7 +534,7 @@ def generate_pdfs(jobs_dir: str = "assets/jobs") -> dict:
         
         # Save updated job JSON
         try:
-            save_job(job_data, jobs_dir)
+            save_job(job_id, job_data, jobs_dir)
         except Exception as e:
             stats['errors'].append(f"Failed to save job JSON for {job_id}: {str(e)}")
     
