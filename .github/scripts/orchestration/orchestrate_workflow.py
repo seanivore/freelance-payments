@@ -283,7 +283,15 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                     if pdf_result.get('errors'):
                         results['errors'].extend([f"PDF generation: {e}" for e in pdf_result['errors'][:3]])
             except subprocess.CalledProcessError as e:
-                error_msg = e.stderr[:500] if e.stderr else str(e)
+                # Include both stdout (JSON) and stderr (DEBUG) in error message
+                error_parts = []
+                if e.stdout:
+                    error_parts.append(f"stdout: {e.stdout[:500]}")
+                if e.stderr:
+                    error_parts.append(f"stderr: {e.stderr[:500]}")
+                if not error_parts:
+                    error_parts.append(str(e))
+                error_msg = " | ".join(error_parts)
                 results['errors'].append(f"generate_pdfs failed: {error_msg}")
                 # Don't block workflow if PDF generation fails - manifest still needs to be generated
 
