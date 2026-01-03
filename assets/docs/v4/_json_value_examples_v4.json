@@ -1,144 +1,140 @@
 {
-  "project": null,
+  "project": "Purchase Highland Park Pizza Online",
   "contract": {
-    "work_start": null,
-    "work_end": null,
-    "legal_jurisdiction": null,
+    "work_start": "2026-01-13",
+    "work_end": "2026-01-23",
+    "legal_jurisdiction": "California",
     "maintenance_period_months": 3,
     "maintenance_monthly_fee": 15000,
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-12T10:00:00Z"
       },
       "client": {
-        "legal_name": null,
-        "signed_date": null
+        "legal_name": "Jim Miller",
+        "signed_date": "2026-01-12T10:00:00Z"
       }
     }
   },
 
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null, 
-      "drive_id": null,
-      "url": null, 
-      "sha256": null,
-      "created": null
+      "id": "kon-123-abc",
+      "pdf": "assets/pdf/contract/kon-123-abc.pdf", 
+      "drive_id": "1BYf71d5Bryy8SrfnQdxSeIfzQilsvHQ8bqUKTh5QB1c",
+      "url": "https://docs.google.com/document/d/1BJI1-d1NJu9pgLKI7Z_EHP9Y2rd6bqR57yZVJxwXJB8/preview", 
+      "sha256": "3a7bd3e2360a3d80bcd42f64c7f0e71f7f6f8e3ec3d2b2a9c9b9a1f0d4c3b2a1",
+      "created": "2026-01-10T10:00:00Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null, 
-      "drive_id": null,
-      "url": null, 
-      "sha256": null,
-      "created": null
+      "id": "inv-123-abc",
+      "pdf": "assets/pdf/contract/inv-123-abc.pdf", 
+      "drive_id": "1BJI1-d1NJu9pgLKI7Z_EHP9Y2rd6bqR57yZVJxwXJB8",
+      "url": "https://docs.google.com/document/d/1BYf71d5Bryy8SrfnQdxSeIfzQilsvHQ8bqUKTh5QB1c/preview", 
+      "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "created": "2026-01-10T10:00:00Z"
     }
   },
 
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null,
+      "created": "2026-01-10T10:00:00Z",
+      "product": "uid-123-abc",
+      "price_1": "price_ad829hd7...",
+      "price_2": "price_al392d87...",
+      "customer": "cus-123-abc",
+      "coupon": "cou-123-abc",
       "checkout_session": {
-        "payment_1": null,
-        "payment_2": null
+        "payment_1": "cs-2jd8w4hf6",
+        "payment_2": "cs-2l9kr7dh5g"
       }
     },
     "client_status": {
-      "logged_in": null,
-      "contract_loaded": null,
-      "contract_scrolled_complete": null,
-      "viewed_contract": true,
-      "viewed_invoice": true,
-      "downloaded_docs": 0,
-      "signed_contract": null
+      "logged_in": "2026-01-11T10:00:00Z",
+      "contract_loaded": "2026-01-11T10:00:00Z",
+      "contract_scrolled_complete": "2026-01-11T10:00:00Z",
+      "viewed_contract": "2026-01-11T10:00:00Z",
+      "viewed_invoice": "2026-01-11T10:00:00Z",
+      "downloaded_docs": 2,
+      "signed_contract": "2026-01-12T10:00:00Z"
     },
     "payment_1": {
-      "intent": null,
-      "processing": null,
-      "succeeded": null
+      "intent": "2026-01-12T11:11:00Z",
+      "processing": "2026-01-12T11:41:00Z",
+      "succeeded": "2026-01-12T14:11:00Z"
     },
     "payment_2": {
-      "intent": null,
-      "processing": null,
-      "succeeded": null
+      "intent": "2026-01-23T11:11:00Z",
+      "processing": "2026-01-23T11:41:00Z",
+      "succeeded": "2026-01-23T14:11:00Z"
     }
   },
 
   "product": {
-    "name": null,
+    "name": "Order Pizza Online",
     "active": true,
-    "description": null,
-    "id": null,
-    "login_name": null,
-    "login_keyword": null,
-    "service_usd": null,
-    "total_payments": null,
-    "discount_usd": null,
+    "description": "Build and integration of payment system for ordering product on client website",
+    "id": "uid-123-abc",
+    "login_name": "Miller",
+    "login_keyword": "pizza-payments",
+    "service_usd": 345000,
+    "total_payments": 2,
+    "discount_usd": 25000,
     "type": "service", 
     "unit_label": "Payment"
   },
 
   "customer": {
-    "name": null,
-    "business": null,
-    "title": null,
-    "email": null,
-    "phone": null,
-    "id": null,
+    "name": "Jim Miller",
+    "business": "Highland Park Pizza, Inc.",
+    "title": "Owner",
+    "email": "j.miller@parkpizzahighland.com",
+    "phone": "424-736-8394",
+    "id": "cus-123-abc",
     "address": {
-      "city": null,
-      "line1": null,
-      "state": null,
-      "postal_code": null,
-      "country": null
+      "city": "Los Angeles",
+      "line1": "1920 Highland Park Dr",
+      "state": "CA",
+      "postal_code": "90029",
+      "country": "US"
     }
   },
 
   "coupon": {
-    "amount_off": 0,
-    "applies_to": {"products": [null]},
+    "amount_off": 25000,
+    "applies_to": {"products": ["uid-123-abc"]},
     "currency": "usd",
     "duration": "once",
-    "id": null,
+    "id": "cou-123-abc",
     "max_redemptions": 1,
-    "name": null
+    "name": "PIZZA_TIME"
   },
 
   "price1": {
     "count": 1, 
     "currency": "usd",
+    "unit_amount": 200000,
     "active": true,
     "billing_scheme": "per_unit",
-    "payment_usd": null,
-    "balance_usd": null,
     "pay_by": "start of work",
     "nickname": "Initial Payment",
-    "product": {"products": [null]},
-    "id": null,
-    "unit_amount": 0
+    "product": {"products": ["uid-123-abc"]},
+    "id": "stripe-provided-price-1"
   },
 
   "price2": {
     "count": 2, 
     "currency": "usd",
+    "unit_amount": 145000,
     "active": true,
     "billing_scheme": "per_unit",
-    "payment_usd": null,
-    "balance_usd": null,
     "pay_by": "before project launch",
     "pay_days": 14,
     "late_fee": "$100",
     "nickname": "Final Payment",
-    "product": {"products": [null]},
-    "id": null,
-    "unit_amount": null
+    "product": {"products": ["uid-123-abc"]},
+    "id": "stripe-provided-price-2"
   },
 
   "checkout_session_1": {
@@ -151,12 +147,12 @@
       "button_color": "#9C528B",
       "display_name": "august.style designer"
     },
-    "client_reference_id": null,
+    "client_reference_id": "cus-123-abc",
     "currency": "usd",
     "customer_creation": "always",
-    "custom_text": {"after_submit": {"message": "Time to create magic 💎"}},
-    "discounts": [{"coupon": null}],
-    "line_items": [{"price": null, "quantity": 1}],
+    "custom_text": {"after_submit": {"message": "Let's build an awesome pizza checkout site!"}},
+    "discounts": [{"coupon": "cou-123-abc"}],
+    "line_items": [{"price": "stripe-provided-price-1", "quantity": 1}],
     "mode": "payment", 
     "redirect_on_completion": "always",
     "return_url": "https://payments.august.style/payment-success",
@@ -182,8 +178,8 @@
     "currency": "usd",
     "customer_creation": "always",
     "discounts": null,
-    "custom_text": {"after_submit": {"message": "Hope you love it 💃"}},
-    "line_items": [{"price": null, "quantity": 1}],
+    "custom_text": {"after_submit": {"message": "Sell those pizzas!"}},
+    "line_items": [{"price": "stripe-provided-price-2", "quantity": 1}],
     "mode": "payment", 
     "redirect_on_completion": "always",
     "return_url": "https://payments.august.style/payment-success",
@@ -195,6 +191,6 @@
     }
   },
 
-"project_scope_summary": null,
-"project_scope_full": null
+"project_scope_summary": "Shortened version of the project scope that maps into part of the contract flow; it should have all of the most important details and then direct people to see the Full Scope document attached to the back of the contract.",
+"project_scope_full": "The full description of the project scope in the full long form. This is mapped to the page directly after the signature location at the end of the contract so that it seems like it is attached to the contract."
 }
