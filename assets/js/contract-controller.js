@@ -264,6 +264,11 @@
       }
 
       alert('Contract signed! Redirecting to invoice...');
+      
+      // Track contract signed event (if not already tracked by modal)
+      if (typeof EventTracker !== 'undefined') {
+        EventTracker.trackContractSigned(jobId);
+      }
     } catch (error) {
       console.error('Error signing contract:', error);
       alert('Contract signed locally, but failed to update server. Please contact support.');

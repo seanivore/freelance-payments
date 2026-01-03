@@ -314,6 +314,13 @@
               };
 
               await ContractController.handleContractSigning(jobData, signatureData);
+              
+              // Track contract signed event
+              const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
+              if (typeof EventTracker !== 'undefined' && jobId) {
+                EventTracker.trackContractSigned(jobId);
+              }
+              
               modal.classList.add('hidden');
             } else {
               alert('Job data not found. Please refresh the page.');
