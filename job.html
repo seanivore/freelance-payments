@@ -303,24 +303,22 @@
 
           // Call contract controller's signing handler
           if (typeof ContractController !== 'undefined' && ContractController.handleContractSigning) {
-            const jobData = ContractController.getJobData();
+            const jobData = ContractController.getJobData() || window._currentJobData;
             if (jobData) {
-              // Update job data with signatures
-              if (!jobData.contract) jobData.contract = {};
-              if (!jobData.contract.signatures) jobData.contract.signatures = {};
-              
-              jobData.contract.signatures.contractor = {
-                legal_name: contractorName,
-                signed_date: new Date(contractorDate).toISOString() + 'Z'
-              };
-              jobData.contract.signatures.client = {
-                legal_name: clientName,
-                signed_date: new Date(clientDate).toISOString() + 'Z'
+              const signatureData = {
+                contractorName: contractorName,
+                contractorDate: new Date(contractorDate).toISOString() + 'Z',
+                clientName: clientName,
+                clientDate: new Date(clientDate).toISOString() + 'Z'
               };
 
-              await ContractController.handleContractSigning(jobData);
+              await ContractController.handleContractSigning(jobData, signatureData);
               modal.classList.add('hidden');
+            } else {
+              alert('Job data not found. Please refresh the page.');
             }
+          } else {
+            alert('Contract controller not loaded. Please refresh the page.');
           }
         });
       }

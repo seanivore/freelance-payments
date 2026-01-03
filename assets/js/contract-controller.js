@@ -199,30 +199,28 @@
   }
 
   /**
-   * Attach signature functionality
+   * Attach signature functionality (v4: modal-based signing)
    */
   function attachSignatureHandler(jobData) {
-    const signButton = document.querySelector('[onclick="signContract()"]');
+    // The modal is handled by job.html's inline script
+    // This function ensures the sign button is visible and stores jobData reference
     if (signButton) {
-      signButton.addEventListener('click', async () => {
-        await handleContractSigning(jobData);
-      });
+      signButton.classList.remove('hidden');
+      // Store jobData reference for modal handler
+      window._currentJobData = jobData;
     }
-
-    // Make signature handler available globally
-    window.signContract = async () => {
-      await handleContractSigning(jobData);
-    };
   }
 
   /**
-   * Handle contract signing
+   * Handle contract signing (called from modal form submission)
+   * v4 schema: contract.signatures structure
    */
-  async function handleContractSigning(jobData) {
-    const contractorSignature = document.querySelector('[data-field="contractor_signature"]')?.textContent.trim();
-    const contractorDate = document.querySelector('[data-field="contractor_date"]')?.textContent.trim();
-    const clientSignature = document.querySelector('[data-field="client_signature"]')?.textContent.trim();
-    const clientDate = document.querySelector('[data-field="client_date"]')?.textContent.trim();
+  async function handleContractSigning(jobData, signatureData) {
+    // signatureData should contain: contractorName, contractorDate, clientName, clientDate
+    const contractorSignature = signatureData.contractorName || signatureData.contractor?.legal_name;
+    const contractorDate = signatureData.contractorDate || signatureData.contractor?.signed_date;
+    const clientSignature = signatureData.clientName || signatureData.client?.legal_name;
+    const clientDate = signatureData.clientDate || signatureData.client?.signed_date;
 
     if (!contractorSignature || !contractorDate || !clientSignature || !clientDate) {
       alert('Please fill in all signature fields before signing.');
@@ -230,6 +228,7 @@
     }
 
     // Update job data (v4 schema: contract.signatures structure)
+    if (!jobData.contract) jobData.contract = {};
     if (!jobData.contract.signatures) {
       jobData.contract.signatures = { contractor: {}, client: {} };
     }
