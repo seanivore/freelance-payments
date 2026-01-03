@@ -5,7 +5,7 @@
  * POST /api/track-event
  * Body: { job_id: string, event_type: string, event_data: object }
  * 
- * Queues events for batch processing to update state.client_status in JSON files
+ * Queues events for batch processing to update state.client_status in JSON files (v4 schema)
  */
 
 module.exports = async (req, res) => {

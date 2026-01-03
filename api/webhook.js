@@ -32,12 +32,12 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
 
-  // Handle the event (v3 schema: Checkout Sessions instead of Payment Intents)
+  // Handle the event (v4 schema: Checkout Sessions instead of Payment Intents)
   switch (event.type) {
     case 'checkout.session.completed':
       const session = event.data.object;
 
-      // Extract metadata (v3 schema)
+      // Extract metadata (v4 schema)
       const metadata = session.metadata || {};
       const jobId = metadata.job_id;
       const paymentNumber = parseInt(metadata.payment_number, 10);
@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
         });
       }
 
-      // Prepare payment data (v3 schema: succeeded timestamp)
+      // Prepare payment data (v4 schema: succeeded timestamp)
       const succeededTimestamp = new Date().toISOString() + 'Z';
       const paymentData = {
         succeeded: succeededTimestamp
