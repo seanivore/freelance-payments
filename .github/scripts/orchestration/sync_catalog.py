@@ -541,7 +541,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
 
 
 def main():
-    parser = argparse.ArgumentParser(title="Sync jobs to Stripe catalog (v4 schema)")
+    parser = argparse.ArgumentParser(description="Sync jobs to Stripe catalog (v4 schema)")
     parser.add_argument('--jobs-dir', default='assets/jobs', help="Jobs directory")
     parser.add_argument('--manifest-path', default='assets/js/manifest.json', help="Path to manifest.json")
 

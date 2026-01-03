@@ -247,7 +247,7 @@ if __name__ == "__main__":
     # Simple CLI for testing
     import argparse
 
-    parser = argparse.ArgumentParser(title="Job JSON I/O utilities")
+    parser = argparse.ArgumentParser(description="Job JSON I/O utilities")
     parser.add_argument('action', choices=['load', 'list', 'validate'])
     parser.add_argument('--job-id', help="Job ID to load")
     parser.add_argument('--jobs-dir', default="assets/jobs", help="Jobs directory")

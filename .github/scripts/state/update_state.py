@@ -239,7 +239,7 @@ def update_state(job_id: str, action: str, data: dict, jobs_dir: str = "assets/j
 
 
 def main():
-    parser = argparse.ArgumentParser(title="Update job state (v4 schema)")
+    parser = argparse.ArgumentParser(description="Update job state (v4 schema)")
     parser.add_argument('--job-id', required=True, help="Job ID (product.id)")
     parser.add_argument('--action', required=True, choices=['sign-contract', 'update-payment', 'track-event'],
                        help="Action type")

@@ -529,7 +529,7 @@ def generate_pdfs(jobs_dir: str = "assets/jobs") -> dict:
 
 def main():
     """Main execution"""
-    parser = argparse.ArgumentParser(title="Generate PDFs from Google Docs templates")
+    parser = argparse.ArgumentParser(description="Generate PDFs from Google Docs templates")
     parser.add_argument('--jobs-dir', default='assets/jobs', help='Directory containing job JSON files')
     
     args = parser.parse_args()
