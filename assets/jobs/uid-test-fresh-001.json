@@ -17,33 +17,31 @@
       }
     }
   },
-
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-uid-test-fresh-001",
+      "pdf": "assets/pdf/contract/kon-uid-test-fresh-001.pdf",
+      "file_id": "1Mp5vcqz9IXIp8Ncq3AZMyxA0G_IxLcs0j97om6ra_xc",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-uid-test-fresh-001.pdf",
+      "sha256": "d3376a642b079db233e2d55dfe21085239adcd81510832dfb7d11e17350af196",
+      "created": "2026-01-04T12:44:29.618218Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-uid-test-fresh-001",
+      "pdf": "assets/pdf/invoice/inv-uid-test-fresh-001.pdf",
+      "file_id": "1eDjuTv7-NyX7rOZKrxmXXP7OZKJK-zMs6yCCPdGClDY",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-uid-test-fresh-001.pdf",
+      "sha256": "62011b3fbbb0bbc8d5f6a1a2709537db44ea433b2e782d3ee4d825faeadd0be2",
+      "created": "2026-01-04T12:44:35.664057Z"
     }
   },
-
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
+      "created": "2026-01-04T12:44:22.830204Z",
+      "product": "uid-test-fresh-001",
+      "price_1": "price_1SlqfT9fljwH26CPqqCkKE1V",
+      "price_2": "price_1SlqfT9fljwH26CPjPK9lV0G",
+      "customer": "cus_TjJIJz729HOeTX",
       "coupon": null,
       "checkout_session": {
         "payment_1": "parameters_stored",
@@ -70,7 +68,6 @@
       "succeeded": null
     }
   },
-
   "product": {
     "name": "Brand Identity Design Package",
     "active": true,
@@ -84,7 +81,6 @@
     "type": "service",
     "unit_label": "Payment"
   },
-
   "customer": {
     "name": "Sarah Thompson",
     "business": "Thompson Creative Studio",
@@ -100,7 +96,6 @@
       "country": "US"
     }
   },
-
   "coupon": {
     "amount_off": 0,
     "applies_to": {
@@ -114,7 +109,6 @@
     "max_redemptions": 1,
     "name": null
   },
-
   "price1": {
     "count": 1,
     "currency": "usd",
@@ -128,9 +122,8 @@
         null
       ]
     },
-    "id": null
+    "id": "price_1SlqfT9fljwH26CPqqCkKE1V"
   },
-
   "price2": {
     "count": 1,
     "currency": "usd",
@@ -146,9 +139,8 @@
         null
       ]
     },
-    "id": null
+    "id": "price_1SlqfT9fljwH26CPjPK9lV0G"
   },
-
   "checkout_session_1": {
     "automatic_tax": {
       "enabled": true,
@@ -179,7 +171,7 @@
     ],
     "line_items": [
       {
-        "price": null,
+        "price": "price_1SlqfT9fljwH26CPqqCkKE1V",
         "quantity": 1
       }
     ],
@@ -198,7 +190,6 @@
       }
     }
   },
-
   "checkout_session_2": {
     "automatic_tax": {
       "enabled": true,
@@ -225,7 +216,7 @@
     },
     "line_items": [
       {
-        "price": null,
+        "price": "price_1SlqfT9fljwH26CPjPK9lV0G",
         "quantity": 1
       }
     ],

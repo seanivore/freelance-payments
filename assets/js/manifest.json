@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-04T12:41:21.549627Z"
+  "jobs": {
+    "thompson-branding": {
+      "file_path": "assets/jobs/uid-test-fresh-001.json",
+      "job_id": "uid-test-fresh-001",
+      "login_keyword": "branding",
+      "login_name": "Thompson"
+    }
+  },
+  "generated_at": "2026-01-04T12:44:35.737808Z"
 }
