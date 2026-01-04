@@ -22,16 +22,22 @@
      * Uses hash anchors to navigate between sections: contract, invoice, payment-1, payment-2
      */
     (async function () {
+      // Ensure DOM is ready
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+      }
+
       const path = window.location.pathname;
       const hash = window.location.hash; // e.g., #contract, #invoice, #payment-1
       const cleanPath = path.replace(/^\/|\/$/g, ''); // Remove leading/trailing slashes
 
       try {
-        // Extract job_id from path (should be uid-xxx-xxx format)
+        // Extract job_id from path (should start with uid-)
         const jobId = cleanPath;
 
-        if (!jobId || !jobId.match(/^uid-[a-z]{3}-[0-9]{3}$/)) {
-          throw new Error('Invalid job ID format');
+        // Basic validation: must start with uid- and contain only alphanumeric and hyphens
+        if (!jobId || !jobId.match(/^uid-[a-z0-9-]+$/i)) {
+          throw new Error('Invalid job ID format. Job IDs must start with "uid-"');
         }
 
         // Load manifest to verify job_id exists
@@ -140,14 +146,31 @@
 
       } catch (error) {
         console.error('❌ Error loading job page:', error);
-        document.body.innerHTML = `
-          <div style="text-align: center; margin-top: 50px; font-family: sans-serif; padding: 2rem;">
-            <h1>Page Not Found</h1>
-            <p>Sorry, the job you're looking for doesn't exist or couldn't be loaded.</p>
-            <p style="color: #666; font-size: 0.9em;">${error.message}</p>
-            <a href="/" style="color: #4a9eff; text-decoration: underline; margin-top: 1rem; display: inline-block;">Return to Homepage</a>
-          </div>
-        `;
+        // Wait for body to be ready before setting innerHTML
+        if (document.body) {
+          document.body.innerHTML = `
+            <div style="text-align: center; margin-top: 50px; font-family: sans-serif; padding: 2rem;">
+              <h1>Page Not Found</h1>
+              <p>Sorry, the job you're looking for doesn't exist or couldn't be loaded.</p>
+              <p style="color: #666; font-size: 0.9em;">${error.message}</p>
+              <a href="/" style="color: #4a9eff; text-decoration: underline; margin-top: 1rem; display: inline-block;">Return to Homepage</a>
+            </div>
+          `;
+        } else {
+          // If body doesn't exist yet, wait for DOMContentLoaded
+          document.addEventListener('DOMContentLoaded', () => {
+            if (document.body) {
+              document.body.innerHTML = `
+                <div style="text-align: center; margin-top: 50px; font-family: sans-serif; padding: 2rem;">
+                  <h1>Page Not Found</h1>
+                  <p>Sorry, the job you're looking for doesn't exist or couldn't be loaded.</p>
+                  <p style="color: #666; font-size: 0.9em;">${error.message}</p>
+                  <a href="/" style="color: #4a9eff; text-decoration: underline; margin-top: 1rem; display: inline-block;">Return to Homepage</a>
+                </div>
+              `;
+            }
+          });
+        }
       }
     })();
   </script>
