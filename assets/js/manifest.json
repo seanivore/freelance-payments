@@ -1,11 +1,53 @@
 {
   "jobs": {
+    "anderson-corporate": {
+      "file_path": "assets/jobs/uid-test-business.json",
+      "job_id": "uid-test-business",
+      "login_keyword": "corporate",
+      "login_name": "Anderson"
+    },
+    "johnson-branding": {
+      "file_path": "assets/jobs/uid-test-discount.json",
+      "job_id": "uid-test-discount",
+      "login_keyword": "branding",
+      "login_name": "Johnson"
+    },
+    "williams-enterprise": {
+      "file_path": "assets/jobs/uid-test-high.json",
+      "job_id": "uid-test-high",
+      "login_keyword": "enterprise",
+      "login_name": "Williams"
+    },
+    "brown-logo": {
+      "file_path": "assets/jobs/uid-test-low.json",
+      "job_id": "uid-test-low",
+      "login_keyword": "logo",
+      "login_name": "Brown"
+    },
+    "davis-precise": {
+      "file_path": "assets/jobs/uid-test-odd.json",
+      "job_id": "uid-test-odd",
+      "login_keyword": "precise",
+      "login_name": "Davis"
+    },
+    "martinez-website": {
+      "file_path": "assets/jobs/uid-test-paid1.json",
+      "job_id": "uid-test-paid1",
+      "login_keyword": "website",
+      "login_name": "Martinez"
+    },
     "test-pdfgen": {
       "file_path": "assets/jobs/uid-test-pdfgen.json",
       "job_id": "uid-test-pdfgen",
       "login_keyword": "pdfgen",
       "login_name": "Test"
+    },
+    "smith-website": {
+      "file_path": "assets/jobs/uid-test-single.json",
+      "job_id": "uid-test-single",
+      "login_keyword": "website",
+      "login_name": "Smith"
     }
   },
-  "generated_at": "2026-01-04T05:52:07.770229Z"
+  "generated_at": "2026-01-04T08:52:36.993167Z"
 }
