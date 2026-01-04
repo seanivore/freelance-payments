@@ -164,7 +164,8 @@ def calculate_amount_due(job_data: dict) -> str:
     
     # If payment_1 not succeeded, amount_due is price1
     if not payment_1.get('succeeded'):
-        return format_currency(price1.get('unit_amount', 0))
+        amount = price1.get('unit_amount')
+        return format_currency(amount if amount is not None else 0)
     
     # If payment_1 succeeded and total_payments is 1, amount_due is 0
     if product.get('total_payments') == 1:
@@ -173,7 +174,8 @@ def calculate_amount_due(job_data: dict) -> str:
     # If payment_1 succeeded and total_payments is 2, amount_due is price2
     if product.get('total_payments') == 2:
         if not payment_2.get('succeeded'):
-            return format_currency(price2.get('unit_amount', 0))
+            amount = price2.get('unit_amount')
+            return format_currency(amount if amount is not None else 0)
         return '$0.00'
     
     return '$0.00'
@@ -189,9 +191,11 @@ def calculate_amount_paid(job_data: dict) -> str:
     
     total = 0
     if payment_1.get('succeeded'):
-        total += price1.get('unit_amount', 0)
+        amount = price1.get('unit_amount')
+        total += amount if amount is not None else 0
     if payment_2.get('succeeded'):
-        total += price2.get('unit_amount', 0)
+        amount = price2.get('unit_amount')
+        total += amount if amount is not None else 0
     
     return format_currency(total)
 

@@ -100,12 +100,30 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       width: 100%;
       min-height: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: block;
     }
 
     @media (max-width: 640px) {
       .pdf-viewer-container iframe {
         min-height: 400px;
+        max-height: 70vh;
       }
+    }
+
+    /* Scroll indicator animation */
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    .animate-bounce {
+      animation: bounce 1s infinite;
     }
 
     /* Error message styling */

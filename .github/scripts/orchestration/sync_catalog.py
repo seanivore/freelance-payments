@@ -301,7 +301,8 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
         price_1_id = state_objects.get('price_1')
         price_2_id = state_objects.get('price_2')
         
-        if price1:
+        # Only create price1 if it's active and has unit_amount set
+        if price1 and price1.get('active', True) and price1.get('unit_amount') is not None:
             if not price_1_id:
                 price_1_id = create_stripe_price(price1, product_id)
                 stats['prices_created'] += 1
@@ -310,7 +311,8 @@ def sync_job(job_data: dict, manifest_job_ids: set, should_create: bool) -> dict
             # Also update price1.id for consistency
             price1['id'] = price_1_id
 
-        if price2:
+        # Only create price2 if it's active and has unit_amount set
+        if price2 and price2.get('active', True) and price2.get('unit_amount') is not None:
             if not price_2_id:
                 price_2_id = create_stripe_price(price2, product_id)
                 stats['prices_created'] += 1

@@ -58,7 +58,26 @@
       return false;
     }
 
-    // Create iframe for PDF embedding
+    // Clear existing content
+    pdfViewerDiv.innerHTML = '';
+
+    // Add scroll indicator message
+    const scrollIndicator = document.createElement('div');
+    scrollIndicator.className = 'text-center text-sm text-muted-foreground mb-3 pb-2 border-b border-border/30';
+    scrollIndicator.innerHTML = `
+      <div class="flex items-center justify-center gap-2">
+        <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+        </svg>
+        <span>Scroll down to view full contract</span>
+        <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+        </svg>
+      </div>
+    `;
+    pdfViewerDiv.appendChild(scrollIndicator);
+
+    // Create iframe for PDF embedding with better scrolling
     const iframe = document.createElement('iframe');
     iframe.src = pdfUrl;
     iframe.style.width = '100%';
@@ -66,11 +85,24 @@
     iframe.style.border = 'none';
     iframe.style.borderRadius = '8px';
     iframe.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    iframe.style.display = 'block';
     iframe.setAttribute('title', 'Contract PDF');
+    iframe.setAttribute('scrolling', 'yes');
     
-    // Clear existing content
-    pdfViewerDiv.innerHTML = '';
     pdfViewerDiv.appendChild(iframe);
+    
+    // Remove scroll indicator after a delay
+    setTimeout(() => {
+      if (scrollIndicator.parentNode) {
+        scrollIndicator.style.opacity = '0';
+        scrollIndicator.style.transition = 'opacity 0.5s';
+        setTimeout(() => {
+          if (scrollIndicator.parentNode) {
+            scrollIndicator.remove();
+          }
+        }, 500);
+      }
+    }, 5000);
     
     return true;
   }
