@@ -17,7 +17,7 @@
   <script src="https://js.stripe.com/v3/"></script>
 
   <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
 
   <!-- Print styles -->
   <style>
@@ -276,7 +276,8 @@
       <div class="max-w-6xl mx-auto px-4 md:px-6 print:p-0">
         <!-- PDF Viewer Container -->
         <div id="invoice-pdf-viewer" class="pdf-viewer-container">
-          <!-- PDF iframe will be inserted here by invoice-controller.js -->
+          <!-- PDF.js canvas will be inserted here by invoice-controller.js -->
+          <canvas id="invoice-pdf-canvas"></canvas>
         </div>
 
 
