@@ -56,11 +56,11 @@ module.exports = async (req, res) => {
       discounts.push({ coupon: coupon_id });
     }
 
-    // Create Checkout Session with embedded mode (per JSON schema)
+    // Create Checkout Session with custom UI mode (Stripe Elements)
     const sessionParams = {
       mode: 'payment',
       line_items: lineItems,
-      ui_mode: 'embedded', // Embedded checkout (per JSON schema)
+      ui_mode: 'custom', // Custom UI with Stripe Elements (per user request)
       return_url: return_url || `${req.headers.origin}/${job_id}#completion`,
       expires_at: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours from now
       metadata: {
@@ -105,10 +105,10 @@ module.exports = async (req, res) => {
     // Create session
     const session = await stripe.checkout.sessions.create(sessionParams);
 
-    // For embedded mode, return client_secret and publishable key
+    // For custom UI mode, return client_secret and publishable key for Stripe Elements
     res.status(200).json({
       session_id: session.id,
-      client_secret: session.client_secret, // Required for embedded checkout
+      client_secret: session.client_secret, // Required for Stripe Elements confirmPayment()
       publishable_key: process.env.STRIPE_PUBLISHABLE_KEY || null, // Return publishable key if available
       session_url: session.url // Fallback if needed
     });
