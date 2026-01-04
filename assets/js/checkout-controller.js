@@ -154,97 +154,134 @@
   }
 
   /**
-   * Wait for Stripe.js to load or load it dynamically
+   * Stripe.js Loader (deterministic single-load with CSP/CORS handling)
+   * WHY: Deterministic single-load for Stripe.js with clear failure modes,
+   * CSP-friendly attributes, and a short retry to handle transient CDN failures.
    */
-  function waitForStripe(maxAttempts = 100, interval = 100) {
-    return new Promise((resolve, reject) => {
-      // Check if already loaded
-      if (typeof window.Stripe !== 'undefined' || typeof Stripe !== 'undefined') {
-        resolve();
-        return;
-      }
+  const StripeLoader = (() => {
+    let loadPromise = null;
 
-      // Check if script tag exists
-      const stripeScript = document.querySelector('script[src*="js.stripe.com"]');
-      if (!stripeScript) {
-        // Script tag doesn't exist - load it dynamically
-        console.warn('Stripe.js script tag not found, loading dynamically...');
-        const script = document.createElement('script');
-        script.src = 'https://js.stripe.com/v3/';
-        script.async = true;
-        script.onload = () => {
-          // Wait a bit more for Stripe to initialize
-          setTimeout(() => {
-            if (typeof window.Stripe !== 'undefined' || typeof Stripe !== 'undefined') {
-              resolve();
-            } else {
-              reject(new Error('Stripe.js loaded but Stripe function not available'));
-            }
-          }, 100);
-        };
-        script.onerror = () => {
-          reject(new Error('Failed to load Stripe.js from CDN'));
-        };
-        document.head.appendChild(script);
-        return;
-      }
-
-      // Script tag exists - wait for it to load
-      let attempts = 0;
-      const checkStripe = () => {
-        attempts++;
-        if (typeof window.Stripe !== 'undefined' || typeof Stripe !== 'undefined') {
-          resolve();
-        } else if (attempts >= maxAttempts) {
-          reject(new Error(`Stripe.js failed to load after ${maxAttempts * interval / 1000} seconds. Please check your internet connection and refresh the page.`));
+    function injectStripeScript() {
+      return new Promise((resolve, reject) => {
+        // If script tag already present, reuse it
+        let script = document.querySelector('script[src="https://js.stripe.com/v3/"]');
+        
+        if (!script) {
+          script = document.createElement('script');
+          script.src = 'https://js.stripe.com/v3/';
+          script.async = true;
+          script.crossOrigin = 'anonymous';
+          
+          script.onerror = () => {
+            reject(new Error('Stripe.js script failed to load (network/CSP). Check Content-Security-Policy, ad/script blockers, and network.'));
+          };
+          
+          script.onload = () => resolve();
+          document.head.appendChild(script);
         } else {
-          setTimeout(checkStripe, interval);
+          // If it's already in the DOM, assume onload has fired or will soon
+          if (script.dataset.loaded === 'true') {
+            resolve();
+          } else {
+            script.addEventListener('load', () => resolve());
+            script.addEventListener('error', () => reject(new Error('Stripe.js existing script failed to load.')));
+          }
         }
-      };
-      checkStripe();
-    });
-  }
+      });
+    }
+
+    async function waitForStripeFunction(timeoutMs = 4000) {
+      const start = Date.now();
+      while (typeof window.Stripe === 'undefined') {
+        if (Date.now() - start > timeoutMs) {
+          throw new Error('Stripe function not available after loading script. Possible CSP blocking or extension interference.');
+        }
+        await new Promise(r => setTimeout(r, 50));
+      }
+    }
+
+    async function loadStripe({ retries = 1 } = {}) {
+      if (!loadPromise) {
+        loadPromise = (async () => {
+          try {
+            await injectStripeScript();
+            await waitForStripeFunction(4000);
+            
+            // Mark loaded to help future calls
+            const script = document.querySelector('script[src="https://js.stripe.com/v3/"]');
+            if (script) script.dataset.loaded = 'true';
+          } catch (err) {
+            // Retry once if requested (handles transient CDN failures)
+            if (retries > 0) {
+              await new Promise(r => setTimeout(r, 250));
+              return loadStripe({ retries: retries - 1 });
+            }
+            throw err;
+          }
+        })();
+      }
+      return loadPromise;
+    }
+
+    return { loadStripe };
+  })();
 
   /**
    * Mount Stripe Embedded Checkout
+   * WHY: Prevent double mounts from MutationObserver + provide crisp error messages.
+   * Includes defensive checks for publishable key and clientSecret presence.
    */
   async function mountEmbeddedCheckout(clientSecret, containerDiv) {
     try {
-      // Wait for Stripe.js to be fully loaded
-      await waitForStripe();
+      // 1) Validate inputs early
+      if (!clientSecret || typeof clientSecret !== 'string') {
+        throw new Error('Missing client_secret for Embedded Checkout. The server must return client_secret for embedded mode.');
+      }
 
-      // Get publishable key (should be set in job.html or from API response)
       const publishableKey = window.STRIPE_PUBLISHABLE_KEY;
       if (!publishableKey) {
-        throw new Error('Stripe publishable key not configured. Please ensure STRIPE_PUBLISHABLE_KEY is set in Vercel environment variables.');
+        throw new Error('Stripe publishable key not configured. Set STRIPE_PUBLISHABLE_KEY via environment or include it in the API response.');
       }
 
-      // Clear container and create mount point
+      // 2) Avoid concurrent mounts
+      if (containerDiv.dataset.mounting === 'true') {
+        // Already mounting; no-op
+        return;
+      }
+      containerDiv.dataset.mounting = 'true';
+
+      // 3) Ensure Stripe.js is loaded exactly once
+      await StripeLoader.loadStripe({ retries: 1 });
+
+      // 4) Prepare mount point
       containerDiv.innerHTML = '<div id="checkout-embedded-mount"></div>';
       const mountPoint = document.getElementById('checkout-embedded-mount');
-
+      
       if (!mountPoint) {
-        throw new Error('Failed to create checkout mount point');
+        throw new Error('Failed to create checkout mount point.');
       }
 
-      // Initialize Stripe (use window.Stripe if available, fallback to Stripe)
-      const StripeConstructor = window.Stripe || Stripe;
-      if (!StripeConstructor) {
-        throw new Error('Stripe constructor not available');
+      // 5) Initialize Stripe and embedded checkout
+      const stripe = window.Stripe(publishableKey);
+      
+      if (!stripe || typeof stripe.initEmbeddedCheckout !== 'function') {
+        throw new Error('Stripe.initEmbeddedCheckout is unavailable. Check Stripe.js version and ensure v3 is loaded.');
       }
-      const stripe = StripeConstructor(publishableKey);
 
-      // Initialize Embedded Checkout
-      const checkout = await stripe.initEmbeddedCheckout({
-        clientSecret: clientSecret
-      });
-
-      // Mount to container
+      const checkout = await stripe.initEmbeddedCheckout({ clientSecret });
       checkout.mount(mountPoint);
+
+      // 6) Mark as mounted
+      containerDiv.dataset.mounting = 'false';
+      containerDiv.dataset.mounted = 'true';
 
     } catch (error) {
       console.error('Error mounting embedded checkout:', error);
-      showErrorState(containerDiv, `Failed to load payment form: ${error.message}. Please refresh the page and try again.`);
+      containerDiv.dataset.mounting = 'false';
+      showErrorState(
+        containerDiv,
+        `Failed to load payment form: ${error.message}. Tips: Verify Content-Security-Policy allows https://js.stripe.com. Disable ad/script blockers for this domain. Serve over HTTPS and check network tab for blocked/failed requests.`
+      );
     }
   }
 
@@ -346,7 +383,17 @@
 
           // For embedded mode, use client_secret to mount Stripe Checkout
           if (data.client_secret) {
-            await mountEmbeddedCheckout(data.client_secret, contentDiv);
+            try {
+              await mountEmbeddedCheckout(data.client_secret, contentDiv);
+            } catch (e) {
+              // Fallback: if embedded checkout fails (e.g., Stripe.js blocked), redirect to hosted checkout
+              if (data.session_url) {
+                console.warn('Embedded checkout failed, falling back to Stripe-hosted redirect:', e.message);
+                window.location.href = data.session_url;
+                return;
+              }
+              throw e;
+            }
           } else if (data.session_url) {
             // Fallback: redirect if no client_secret (shouldn't happen with embedded mode)
             console.warn('No client_secret, falling back to redirect');
