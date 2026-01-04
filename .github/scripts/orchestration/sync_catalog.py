@@ -123,6 +123,28 @@ def modify_stripe_product(product_id: str, product: dict) -> str:
     return stripe_product.id
 
 
+def check_stripe_product_exists(product_id: str) -> bool:
+    """
+    Check if a Stripe product exists (by trying to retrieve it).
+    
+    Args:
+        product_id: Product ID to check (job_id in v4 schema)
+    
+    Returns:
+        True if product exists, False otherwise
+    """
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    try:
+        product = stripe.Product.retrieve(product_id)
+        return product is not None
+    except stripe.error.InvalidRequestError:
+        # Product doesn't exist
+        return False
+    except Exception as e:
+        print(f"Warning: Error checking product {product_id}: {e}", file=sys.stderr)
+        return False
+
+
 def archive_stripe_product(product_id: str) -> None:
     """Archive Stripe Product (set active=false)."""
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
@@ -468,35 +490,47 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     # 3. No match + JSON exists → Create (new job)
     # 4. No match + manifest entry exists → Archive (orphaned)
     
-    jobs_to_archive = []  # Inactive jobs with Stripe product (in manifest) → Archive Stripe + Delete JSON
-    jobs_to_delete = []   # Inactive jobs without Stripe product (not in manifest) → Delete JSON only
+    jobs_to_archive = []  # Inactive jobs with Stripe product → Archive Stripe + Delete JSON
+    jobs_to_delete = []   # Inactive jobs (all get deleted, but some also need Stripe archived)
     jobs_to_skip = []
     jobs_to_create = []
     
+    # First pass: Handle inactive products (check Stripe directly, not manifest)
     for job_id in json_job_ids:
         job_data = jobs_by_id[job_id]
         product = job_data.get('product', {})
         product_active = product.get('active', True)
         
         if not product_active:
-            # Inactive: Always delete JSON (Stripe keeps records indefinitely)
-            if job_id in manifest_job_ids:
+            # Inactive: Check Stripe directly to see if product exists
+            product_id = job_id  # In v4 schema, product.id = job_id
+            has_stripe_product = check_stripe_product_exists(product_id)
+            
+            if has_stripe_product:
                 # Case 1: Inactive + has Stripe product → Archive Stripe product + Delete JSON
                 jobs_to_archive.append(job_id)
                 jobs_to_delete.append(job_id)
-                print(f"DEBUG: Job {job_id} marked for archiving Stripe product and deleting JSON (active=false)", file=sys.stderr)
+                print(f"DEBUG: Job {job_id} marked for archiving Stripe product and deleting JSON (active=false, product exists in Stripe)", file=sys.stderr)
             else:
                 # Case 2: Inactive + no Stripe product → Delete JSON only
                 jobs_to_delete.append(job_id)
                 print(f"DEBUG: Job {job_id} marked for deletion (active=false, no Stripe product)", file=sys.stderr)
-        elif job_id in manifest_job_ids:
-            # Case 3: Active + in manifest → Skip (already synced)
-            jobs_to_skip.append(job_id)
-            print(f"DEBUG: Job {job_id} already synced and active - skipping", file=sys.stderr)
-        else:
-            # Case 4: Active + not in manifest → Create (new job)
-            jobs_to_create.append(job_id)
-            print(f"DEBUG: Job {job_id} is new - will create Stripe objects", file=sys.stderr)
+    
+    # Second pass: Handle active products (use manifest for matching)
+    for job_id in json_job_ids:
+        job_data = jobs_by_id[job_id]
+        product = job_data.get('product', {})
+        product_active = product.get('active', True)
+        
+        if product_active:
+            if job_id in manifest_job_ids:
+                # Case 3: Active + in manifest → Skip (already synced)
+                jobs_to_skip.append(job_id)
+                print(f"DEBUG: Job {job_id} already synced and active - skipping", file=sys.stderr)
+            else:
+                # Case 4: Active + not in manifest → Create (new job)
+                jobs_to_create.append(job_id)
+                print(f"DEBUG: Job {job_id} is new - will create Stripe objects", file=sys.stderr)
     
     # Case 4: Find orphaned products (in manifest but no JSON file) → Archive
     orphaned_job_ids = manifest_job_ids - json_job_ids
