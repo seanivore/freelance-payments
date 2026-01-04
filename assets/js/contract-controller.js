@@ -51,6 +51,7 @@
 
   /**
    * Embed contract PDF (v4 schema: PDF only, no HTML fallback)
+   * Fixed scrolling and positioned sign button overlay
    */
   function embedContractPDF(pdfUrl) {
     if (!pdfViewerDiv) {
@@ -58,52 +59,31 @@
       return false;
     }
 
-    // Clear existing content
+    // Clear existing content (but preserve sign button if it exists)
+    const existingSignBtn = pdfViewerDiv.querySelector('#contract-sign-btn');
     pdfViewerDiv.innerHTML = '';
 
-    // Add scroll indicator message
-    const scrollIndicator = document.createElement('div');
-    scrollIndicator.className = 'text-center text-sm text-muted-foreground mb-3 pb-2 border-b border-border/30';
-    scrollIndicator.innerHTML = `
-      <div class="flex items-center justify-center gap-2">
-        <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-        </svg>
-        <span>Scroll down to view full contract</span>
-        <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-        </svg>
-      </div>
-    `;
-    pdfViewerDiv.appendChild(scrollIndicator);
-
-    // Create iframe for PDF embedding with better scrolling
+    // Create iframe for PDF embedding - full height for proper scrolling
     const iframe = document.createElement('iframe');
     iframe.src = pdfUrl;
     iframe.style.width = '100%';
-    iframe.style.height = '800px';
+    iframe.style.height = '90vh';
+    iframe.style.minHeight = '600px';
     iframe.style.border = 'none';
     iframe.style.borderRadius = '8px';
     iframe.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
     iframe.style.display = 'block';
     iframe.setAttribute('title', 'Contract PDF');
-    iframe.setAttribute('scrolling', 'yes');
-    
+    // Remove scrolling attribute - let browser handle it naturally
+    iframe.setAttribute('loading', 'lazy');
+
     pdfViewerDiv.appendChild(iframe);
-    
-    // Remove scroll indicator after a delay
-    setTimeout(() => {
-      if (scrollIndicator.parentNode) {
-        scrollIndicator.style.opacity = '0';
-        scrollIndicator.style.transition = 'opacity 0.5s';
-        setTimeout(() => {
-          if (scrollIndicator.parentNode) {
-            scrollIndicator.remove();
-          }
-        }, 500);
-      }
-    }, 5000);
-    
+
+    // Restore sign button if it existed (will be positioned by CSS)
+    if (existingSignBtn) {
+      pdfViewerDiv.appendChild(existingSignBtn);
+    }
+
     return true;
   }
 
@@ -112,11 +92,11 @@
    */
   function setupDownloadButton(pdfUrl, jobId) {
     if (!downloadButton) return;
-    
+
     downloadButton.href = pdfUrl;
     downloadButton.download = pdfUrl.split('/').pop();
     downloadButton.style.display = 'inline-block';
-    
+
     // Track download event
     downloadButton.addEventListener('click', () => {
       if (typeof EventTracker !== 'undefined' && jobId) {
@@ -187,8 +167,8 @@
 
     // v4 schema: Get PDF URL from docs.contract.pdf
     const pdfPath = jobData.docs?.contract?.pdf;
-    const pdfUrl = pdfPath 
-      ? `https://payments.august.style/${pdfPath}` 
+    const pdfUrl = pdfPath
+      ? `https://payments.august.style/${pdfPath}`
       : jobData.docs?.contract?.url;
 
     if (!pdfUrl) {
@@ -225,6 +205,7 @@
 
   /**
    * Attach signature functionality (v4: modal-based signing)
+   * Sign button is now positioned as overlay on PDF viewer
    */
   function attachSignatureHandler(jobData) {
     // The modal is handled by job.html's inline script
@@ -233,6 +214,11 @@
       signButton.classList.remove('hidden');
       // Store jobData reference for modal handler
       window._currentJobData = jobData;
+      
+      // Ensure button is positioned correctly (in case PDF viewer was recreated)
+      if (!signButton.parentElement || signButton.parentElement !== pdfViewerDiv) {
+        pdfViewerDiv.appendChild(signButton);
+      }
     }
   }
 
@@ -296,7 +282,7 @@
       }
 
       alert('Contract signed! Redirecting to invoice...');
-      
+
       // Track contract signed event (if not already tracked by modal)
       if (typeof EventTracker !== 'undefined') {
         EventTracker.trackContractSigned(jobId);

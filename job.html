@@ -85,6 +85,8 @@
       border-radius: 12px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06);
       margin: 2rem 0;
+      position: relative;
+      overflow: visible;
     }
 
     @media (max-width: 640px) {
@@ -99,31 +101,28 @@
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       width: 100%;
+      height: 90vh;
       min-height: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
       display: block;
+      border: none;
     }
 
     @media (max-width: 640px) {
       .pdf-viewer-container iframe {
+        height: 70vh;
         min-height: 400px;
-        max-height: 70vh;
       }
-    }
-
-    /* Scroll indicator animation */
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0);
+      
+      .pdf-viewer-container #contract-sign-btn {
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.75rem;
       }
-      50% {
-        transform: translateY(-5px);
+      
+      .pdf-viewer-container #contract-sign-btn svg {
+        width: 1.25rem;
+        height: 1.25rem;
       }
-    }
-
-    .animate-bounce {
-      animation: bounce 1s infinite;
     }
 
     /* Error message styling */
@@ -233,8 +232,14 @@
     <section id="contract" class="job-section">
       <div class="max-w-4xl mx-auto px-6 print:p-0">
         <!-- PDF Viewer Container -->
-        <div id="contract-pdf-viewer" class="pdf-viewer-container">
+        <div id="contract-pdf-viewer" class="pdf-viewer-container relative">
           <!-- PDF iframe will be inserted here by contract-controller.js -->
+          <!-- Sign button overlay positioned at bottom right of PDF -->
+          <button id="contract-sign-btn" class="absolute bottom-4 right-4 bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 hidden z-10 no-print" title="Sign Contract">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+            </svg>
+          </button>
         </div>
 
         <!-- Action Buttons -->
@@ -245,12 +250,6 @@
             </svg>
             Download Contract
           </a>
-          <button id="contract-sign-btn" class="btn btn-primary hidden transition-all duration-200 hover:shadow-lg">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Sign Contract
-          </button>
         </div>
 
         <!-- Error/Content Container -->
