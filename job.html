@@ -19,6 +19,15 @@
     // Stripe publishable key will be set by API response or can be set here
     // The API returns it with checkout session, but we can also set it here as fallback
     // window.STRIPE_PUBLISHABLE_KEY = 'pk_test_...'; // Uncomment and set if needed
+    
+    // Verify Stripe.js loaded (for debugging)
+    window.addEventListener('load', () => {
+      if (typeof Stripe === 'undefined' && typeof window.Stripe === 'undefined') {
+        console.warn('Stripe.js may not have loaded properly');
+      } else {
+        console.log('Stripe.js loaded successfully');
+      }
+    });
   </script>
 
 
