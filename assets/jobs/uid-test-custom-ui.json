@@ -17,11 +17,11 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-04T00:00:00.000ZZ"
       },
       "client": {
-        "legal_name": "Test Client Name",
-        "signed_date": null
+        "legal_name": "seana",
+        "signed_date": "2026-01-04T00:00:00.000ZZ"
       }
     }
   },
@@ -63,7 +63,7 @@
       "viewed_contract": null,
       "viewed_invoice": null,
       "downloaded_docs": 0,
-      "signed_contract": null
+      "signed_contract": "2026-01-04T00:00:00.000ZZ"
     },
     "payment_1": {
       "intent": null,
