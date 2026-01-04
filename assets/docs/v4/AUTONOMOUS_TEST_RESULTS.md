@@ -78,20 +78,51 @@ When you return, test these flows:
 
 1. **Homepage Login**
    - [X] Enter `TestClient` / `custom-ui`
-   - [ ] Verify redirect to job page -- Not sure what this means. I mean, the login screen loaded and then the contract. 
+   - [ ] Verify redirect to job page -- **Not sure what this means. I mean, the login screen loaded and then the contract** 
    - [X] Check console for any errors
 
 2. **Contract Section**
    - [X] Verify PDF loads (if generated)
    - [X] Check console for `contract_loaded` event
-   - [ ] Scroll to bottom, verify `contract_scrolled_complete` event
-   - [ ] Sign contract, verify `contract_signed` event
-
-
+   - [ ] Scroll to bottom, verify `contract_scrolled_complete` event --> **this event doesn't work but NBD** 
+   - [X] Sign contract, verify `contract_signed` event
 
 3. **Invoice Section**
-   - [ ] Verify invoice PDF loads
-   - [ ] Check console for `invoice_viewed` event
+   - [X] Verify invoice PDF loads
+   - [X] Check console for `invoice_viewed` event
+
+Going to payment next the page error says "The following parameters are not supported with `ui_mode: custom`: after_expiration." 
+(Which is an error for us not for users but just fyi lol)
+I see in vercel contract loaded but no that "create checkout session" 
+I thiink they all have to do with switching to embedding. 
+
+📊 Event queued: invoice_viewed for job uid-test-custom-ui (will send after 5min inactivity or on page unload)
+checkout-controller.js:386 Checkout section 1 already initializing, skipping...
+checkout-controller.js:93  POST https://freelance-payments-neon.vercel.app/api/create-checkout-session 500 (Internal Server Error)
+createCheckoutSession @ checkout-controller.js:93
+init @ checkout-controller.js:466
+checkAndInit @ checkout-controller.js:528
+attributes
+(anonymous) @ VM171:93
+(anonymous) @ VM171:92
+checkout-controller.js:116 Error creating checkout session: Error: The following parameters are not supported with `ui_mode: custom`: after_expiration.
+    at createCheckoutSession (checkout-controller.js:110:15)
+createCheckoutSession @ checkout-controller.js:116
+await in createCheckoutSession
+init @ checkout-controller.js:466
+checkAndInit @ checkout-controller.js:528
+attributes
+(anonymous) @ VM171:93
+(anonymous) @ VM171:92
+checkout-controller.js:502 Checkout error: Error: The following parameters are not supported with `ui_mode: custom`: after_expiration.
+    at createCheckoutSession (checkout-controller.js:110:15)
+(anonymous) @ checkout-controller.js:502
+Promise.catch
+init @ checkout-controller.js:501
+checkAndInit @ checkout-controller.js:528
+attributes
+(anonymous) @ VM171:93
+(anonymous) @ VM171:92
 
 4. **Payment 1 - Stripe Elements**
    - [ ] Verify Payment Element loads (custom UI)

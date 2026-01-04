@@ -69,13 +69,9 @@ module.exports = async (req, res) => {
         job_id: job_id,
         payment_number: payment_number.toString(),
         created_via: 'freelance-payments-api'
-      },
-      // Enable after-expiration recovery (per CHECKOUT_SESSION_DETAILS.md)
-      after_expiration: {
-        recovery: {
-          enabled: true
-        }
       }
+      // Note: after_expiration is not supported with ui_mode: 'custom'
+      // Sessions still expire after expires_at (24 hours), but recovery must be handled differently
     };
 
     // Add customer if provided (v4 schema: customer_id from request body)
