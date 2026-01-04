@@ -228,7 +228,8 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
     job_id = job_data.get('product', {}).get('id', 'unknown')
     
     # Debug: Log template access attempt
-    print(f"DEBUG: Attempting to copy template {template_id[:10]}...{template_id[-10:] if len(template_id) > 20 else template_id}", file=sys.stderr)
+    template_display = f"{template_id[:10]}...{template_id[-10:]}" if len(template_id) > 20 else template_id
+    print(f"DEBUG: Attempting to copy contract template (ID: {template_display})", file=sys.stderr)
     
     # Copy template (supportsAllDrives=true for shared drives)
     try:
@@ -238,10 +239,21 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
             supportsAllDrives=True  # Required for shared drives/files
         ).execute()
         new_doc_id = copy_response['id']
-        print(f"DEBUG: Successfully copied template, new doc ID: {new_doc_id}", file=sys.stderr)
+        print(f"DEBUG: Successfully copied contract template, new doc ID: {new_doc_id}", file=sys.stderr)
     except Exception as e:
-        print(f"DEBUG: Copy failed for template {template_id[:10]}...{template_id[-10:] if len(template_id) > 20 else template_id}: {type(e).__name__}: {str(e)}", file=sys.stderr)
-        raise
+        error_type = type(e).__name__
+        error_msg = str(e)
+        # Provide specific error messages for common issues
+        if "404" in error_msg or "not found" in error_msg.lower():
+            detailed_error = f"Template file not found (404). Template ID: {template_display}. Ensure: 1) Template ID is correct in GitHub Secrets, 2) Template file is shared with OAuth account (development@august.style), 3) OAuth account has Editor access to template file."
+        elif "403" in error_msg or "permission" in error_msg.lower():
+            detailed_error = f"Permission denied (403). Template ID: {template_display}. Ensure OAuth account (development@august.style) has Editor access to template file."
+        elif "invalid_scope" in error_msg:
+            detailed_error = f"Invalid OAuth scope. Refresh token was generated with different scopes. Regenerate token using /api/google/auth endpoint."
+        else:
+            detailed_error = f"{error_type}: {error_msg}"
+        print(f"DEBUG: Contract template copy failed: {detailed_error}", file=sys.stderr)
+        raise Exception(f"Failed to copy contract template: {detailed_error}")
     
     try:
         # Prepare placeholder replacements (v4 schema)
@@ -323,7 +335,8 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
     job_id = job_data.get('product', {}).get('id', 'unknown')
     
     # Debug: Log template access attempt
-    print(f"DEBUG: Attempting to copy template {template_id[:10]}...{template_id[-10:] if len(template_id) > 20 else template_id}", file=sys.stderr)
+    template_display = f"{template_id[:10]}...{template_id[-10:]}" if len(template_id) > 20 else template_id
+    print(f"DEBUG: Attempting to copy invoice template (ID: {template_display})", file=sys.stderr)
     
     # Copy template (supportsAllDrives=true for shared drives)
     try:
@@ -333,10 +346,21 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
             supportsAllDrives=True  # Required for shared drives/files
         ).execute()
         new_doc_id = copy_response['id']
-        print(f"DEBUG: Successfully copied template, new doc ID: {new_doc_id}", file=sys.stderr)
+        print(f"DEBUG: Successfully copied invoice template, new doc ID: {new_doc_id}", file=sys.stderr)
     except Exception as e:
-        print(f"DEBUG: Copy failed for template {template_id[:10]}...{template_id[-10:] if len(template_id) > 20 else template_id}: {type(e).__name__}: {str(e)}", file=sys.stderr)
-        raise
+        error_type = type(e).__name__
+        error_msg = str(e)
+        # Provide specific error messages for common issues
+        if "404" in error_msg or "not found" in error_msg.lower():
+            detailed_error = f"Template file not found (404). Template ID: {template_display}. Ensure: 1) Template ID is correct in GitHub Secrets, 2) Template file is shared with OAuth account (development@august.style), 3) OAuth account has Editor access to template file."
+        elif "403" in error_msg or "permission" in error_msg.lower():
+            detailed_error = f"Permission denied (403). Template ID: {template_display}. Ensure OAuth account (development@august.style) has Editor access to template file."
+        elif "invalid_scope" in error_msg:
+            detailed_error = f"Invalid OAuth scope. Refresh token was generated with different scopes. Regenerate token using /api/google/auth endpoint."
+        else:
+            detailed_error = f"{error_type}: {error_msg}"
+        print(f"DEBUG: Invoice template copy failed: {detailed_error}", file=sys.stderr)
+        raise Exception(f"Failed to copy invoice template: {detailed_error}")
     
     try:
         # Prepare placeholder replacements (v4 schema)
@@ -420,11 +444,36 @@ def generate_pdfs(jobs_dir: str = "assets/jobs") -> dict:
     # Authenticate with Google
     try:
         drive_service, docs_service = authenticate_google()
+        print("DEBUG: Google authentication successful", file=sys.stderr)
+    except ValueError as e:
+        # ValueError means missing env vars or auth failed
+        error_msg = str(e)
+        if "GOOGLE_REFRESH_TOKEN" in error_msg or "GOOGLE_CLIENT_ID" in error_msg:
+            return {
+                "contracts_generated": 0,
+                "invoices_generated": 0,
+                "errors": [f"Authentication failed: Missing required environment variables. Check: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN"]
+            }
+        else:
+            return {
+                "contracts_generated": 0,
+                "invoices_generated": 0,
+                "errors": [f"Authentication failed: {error_msg}"]
+            }
     except Exception as e:
+        error_type = type(e).__name__
+        error_msg = str(e)
+        # Check for specific OAuth errors
+        if "invalid_scope" in error_msg or "invalid_grant" in error_msg:
+            return {
+                "contracts_generated": 0,
+                "invoices_generated": 0,
+                "errors": [f"Authentication failed: OAuth token error ({error_type}). The refresh token may have been generated with different scopes. Regenerate token using /api/google/auth endpoint with updated scopes."]
+            }
         return {
             "contracts_generated": 0,
             "invoices_generated": 0,
-            "errors": [f"Authentication failed: {str(e)}"]
+            "errors": [f"Authentication failed: {error_type}: {error_msg}"]
         }
     
     # Get template IDs from environment
