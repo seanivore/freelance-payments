@@ -364,12 +364,44 @@
     </div>
   </div>
 
-  <!-- Load controllers -->
-  <script src="/assets/js/event-tracker.js"></script>
-  <script src="/assets/js/payment-router.js"></script>
-  <script src="/assets/js/contract-controller.js"></script>
-  <script src="/assets/js/invoice-controller.js"></script>
-  <script src="/assets/js/checkout-controller.js"></script>
+  <!-- Load controllers (wait for PDF.js to load) -->
+  <script>
+    // Wait for PDF.js to load before initializing controllers
+    (function() {
+      function initControllers() {
+        if (typeof pdfjsLib === 'undefined') {
+          console.warn('PDF.js not loaded yet, retrying...');
+          setTimeout(initControllers, 100);
+          return;
+        }
+        
+        // Load controllers after PDF.js is ready
+        const scripts = [
+          '/assets/js/event-tracker.js',
+          '/assets/js/payment-router.js',
+          '/assets/js/contract-controller.js',
+          '/assets/js/invoice-controller.js',
+          '/assets/js/checkout-controller.js'
+        ];
+        
+        let loaded = 0;
+        scripts.forEach(src => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.onload = () => {
+            loaded++;
+            if (loaded === scripts.length) {
+              console.log('All controllers loaded');
+            }
+          };
+          document.body.appendChild(script);
+        });
+      }
+      
+      // Start checking after a short delay to let PDF.js start loading
+      setTimeout(initControllers, 200);
+    })();
+  </script>
 
   <!-- Signature Modal Handler -->
   <script>
