@@ -36,12 +36,6 @@
       "login_keyword": "website",
       "login_name": "Martinez"
     },
-    "test-pdfgen": {
-      "file_path": "assets/jobs/uid-test-pdfgen.json",
-      "job_id": "uid-test-pdfgen",
-      "login_keyword": "pdfgen",
-      "login_name": "Test"
-    },
     "smith-website": {
       "file_path": "assets/jobs/uid-test-single.json",
       "job_id": "uid-test-single",
@@ -49,5 +43,5 @@
       "login_name": "Smith"
     }
   },
-  "generated_at": "2026-01-04T11:34:14.122463Z"
+  "generated_at": "2026-01-04T11:37:37.503923Z"
 }
