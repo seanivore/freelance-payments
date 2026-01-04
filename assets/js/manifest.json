@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-04T15:15:16.775956Z"
+  "jobs": {
+    "testclient-custom-ui": {
+      "file_path": "assets/jobs/uid-test-custom-ui.json",
+      "job_id": "uid-test-custom-ui",
+      "login_keyword": "custom-ui",
+      "login_name": "TestClient"
+    }
+  },
+  "generated_at": "2026-01-04T17:26:03.043810Z"
 }

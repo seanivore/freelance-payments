@@ -2,7 +2,11 @@
   "project": {
     "name": "Custom UI Test Project",
     "description": "Full end-to-end test of Stripe Elements custom UI integration",
-    "keywords": ["web-design", "branding", "custom-ui-test"]
+    "keywords": [
+      "web-design",
+      "branding",
+      "custom-ui-test"
+    ]
   },
   "contract": {
     "work_start": "2026-01-15",
@@ -23,33 +27,33 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-uid-test-custom-ui",
+      "pdf": "assets/pdf/contract/kon-uid-test-custom-ui.pdf",
+      "file_id": "1UGMhZKpZmtyebnqc4J9anR54OHcDBHRELPJTt4gM018",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-uid-test-custom-ui.pdf",
+      "sha256": "fb2fbbc4bf310a925b08639b950d499e5a31c3134835eb5ba5aa52a0ba6c2157",
+      "created": "2026-01-04T17:25:57.471378Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-uid-test-custom-ui",
+      "pdf": "assets/pdf/invoice/inv-uid-test-custom-ui.pdf",
+      "file_id": "1BzdDMjqxu_uomr8RG84m6ohjwwZ1baXKFJJFrxKM79M",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-uid-test-custom-ui.pdf",
+      "sha256": "59b3917b39602f7bfae98e6c4bc314e17626fc11a40a0801d5ba83de514fe712",
+      "created": "2026-01-04T17:26:02.965854Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null,
+      "created": "2026-01-04T17:25:49.865972Z",
+      "product": "uid-test-custom-ui",
+      "price_1": "price_1Slv3q9fljwH26CPfLiyzEU5",
+      "price_2": "price_1Slv3q9fljwH26CP9WuEACeP",
+      "customer": "cus_TjNplHax8Hy5wI",
+      "coupon": "sDZAObHH",
       "checkout_session": {
-        "payment_1": null,
-        "payment_2": null
+        "payment_1": "parameters_stored",
+        "payment_2": "parameters_stored"
       }
     },
     "client_status": {
@@ -103,7 +107,9 @@
   "coupon": {
     "amount_off": 50000,
     "applies_to": {
-      "products": ["uid-test-custom-ui"]
+      "products": [
+        "uid-test-custom-ui"
+      ]
     },
     "currency": "usd",
     "duration": "once",
@@ -120,9 +126,11 @@
     "pay_by": "start of work",
     "nickname": "Initial Payment",
     "product": {
-      "products": ["uid-test-custom-ui"]
+      "products": [
+        "uid-test-custom-ui"
+      ]
     },
-    "id": null
+    "id": "price_1Slv3q9fljwH26CPfLiyzEU5"
   },
   "price2": {
     "count": 2,
@@ -135,9 +143,11 @@
     "late_fee": "$100",
     "nickname": "Final Payment",
     "product": {
-      "products": ["uid-test-custom-ui"]
+      "products": [
+        "uid-test-custom-ui"
+      ]
     },
-    "id": null
+    "id": "price_1Slv3q9fljwH26CP9WuEACeP"
   },
   "checkout_session_1": {
     "automatic_tax": {
@@ -164,12 +174,12 @@
     },
     "discounts": [
       {
-        "coupon": null
+        "coupon": "sDZAObHH"
       }
     ],
     "line_items": [
       {
-        "price": null,
+        "price": "price_1Slv3q9fljwH26CPfLiyzEU5",
         "quantity": 1
       }
     ],
@@ -214,7 +224,7 @@
     },
     "line_items": [
       {
-        "price": null,
+        "price": "price_1Slv3q9fljwH26CP9WuEACeP",
         "quantity": 1
       }
     ],
