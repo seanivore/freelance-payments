@@ -287,17 +287,34 @@
 
   /**
    * Initialize checkout section (works within single-page template)
+   * Prevents multiple initializations with init flags
    */
   async function init(paymentNumber) {
+    // Prevent multiple initializations
+    const sectionId = paymentNumber === 1 ? 'payment-1' : 'payment-2';
+    const section = paymentNumber === 1 ? paymentSection1 : paymentSection2;
+    const contentDiv = paymentNumber === 1 ? checkoutContent1 : checkoutContent2;
+    
+    if (!section || section.classList.contains('hidden')) {
+      return; // Section not visible, don't initialize
+    }
+    
+    // Check if already initializing or initialized
+    if (section.dataset.initStarted === 'true') {
+      console.log(`Checkout section ${paymentNumber} already initializing, skipping...`);
+      return;
+    }
+    
+    section.dataset.initStarted = 'true';
+    
     const jobData = getJobData();
 
     if (!jobData) {
       const errorMsg = '<p>Job data not found. Please start from the <a href="/">homepage</a>.</p>';
-      if (paymentNumber === 1 && checkoutContent1) {
-        checkoutContent1.innerHTML = errorMsg;
-      } else if (paymentNumber === 2 && checkoutContent2) {
-        checkoutContent2.innerHTML = errorMsg;
+      if (contentDiv) {
+        contentDiv.innerHTML = errorMsg;
       }
+      section.dataset.initStarted = 'false';
       return;
     }
 
@@ -354,16 +371,12 @@
     // Check if price ID exists (required for Stripe Checkout)
     const priceId = priceObject?.id;
     if (!priceId) {
-      const errorMsg = '<p>Payment not set up yet. Please contact support or try again later.</p>';
-      const contentDiv = paymentNumber === 1 ? checkoutContent1 : checkoutContent2;
       if (contentDiv) {
         showErrorState(contentDiv, 'Payment is not yet configured. The Stripe catalog may still be syncing.');
       }
+      section.dataset.initStarted = 'false';
       return;
     }
-
-    // Show loading state and redirect directly to Stripe
-    const contentDiv = paymentNumber === 1 ? checkoutContent1 : checkoutContent2;
     if (contentDiv) {
       showLoadingState(contentDiv);
 
@@ -405,6 +418,7 @@
         .catch(error => {
           console.error('Checkout error:', error);
           showErrorState(contentDiv, error.message || 'Failed to create checkout session. Please try again.');
+          section.dataset.initStarted = 'false'; // Reset on error so user can retry
         });
     }
   }

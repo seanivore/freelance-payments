@@ -276,6 +276,20 @@
         throw new Error('Failed to update contract');
       }
 
+      // Reload job data from server to get fresh state before routing
+      // This ensures we have the latest payment status, not stale sessionStorage
+      try {
+        const jobPath = sessionStorage.getItem('jobPath') || `assets/jobs/${jobId}.json`;
+        const freshResponse = await fetch(`/${jobPath}?t=${Date.now()}`); // Cache bust
+        if (freshResponse.ok) {
+          const freshJobData = await freshResponse.json();
+          sessionStorage.setItem('jobData', JSON.stringify(freshJobData));
+          jobData = freshJobData; // Use fresh data for routing
+        }
+      } catch (e) {
+        console.warn('Could not reload fresh job data, using local:', e);
+      }
+
       alert('Contract signed! Redirecting to invoice...');
 
       // Track contract signed event (if not already tracked by modal)
@@ -288,9 +302,12 @@
     }
 
     // Route to next step (invoice/checkout) using hash-based routing
+    // CRITICAL: Always route to invoice after signing, never completion
+    // Completion should only be reached after actual payment via webhook
     if (typeof PaymentRouter !== 'undefined') {
-      const routeInfo = PaymentRouter.determineRoute(jobData);
-      PaymentRouter.routeUser(routeInfo);
+      // Force route to invoice - don't trust determineRoute after signing
+      // because sessionStorage might have stale payment data
+      window.location.hash = 'invoice';
     } else {
       // Fallback: update hash directly
       window.location.hash = 'invoice';

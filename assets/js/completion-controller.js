@@ -37,6 +37,7 @@
 
   /**
    * Initialize completion section
+   * Reloads fresh job data to ensure accurate payment status
    */
   async function init() {
     // Only initialize if we're in the completion section
@@ -44,16 +45,31 @@
       return;
     }
 
-    const jobData = getJobData();
+    let jobData = getJobData();
+    const jobId = jobData?.product?.id || sessionStorage.getItem('jobId');
 
-    if (!jobData) {
+    if (!jobData || !jobId) {
       if (completionContent) {
         completionContent.innerHTML = '<p class="error">Job data not found. Please start from the <a href="/">homepage</a>.</p>';
       }
       return;
     }
 
-    const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
+    // CRITICAL: Reload fresh job data from server to get accurate payment status
+    // sessionStorage might have stale data - webhooks update the JSON file, not sessionStorage
+    try {
+      const jobPath = sessionStorage.getItem('jobPath') || `assets/jobs/${jobId}.json`;
+      const freshResponse = await fetch(`/${jobPath}?t=${Date.now()}`); // Cache bust
+      if (freshResponse.ok) {
+        const freshJobData = await freshResponse.json();
+        sessionStorage.setItem('jobData', JSON.stringify(freshJobData));
+        jobData = freshJobData; // Use fresh data
+        console.log('Completion: Reloaded fresh job data from server');
+      }
+    } catch (e) {
+      console.warn('Could not reload fresh job data for completion, using sessionStorage:', e);
+    }
+
     const state = jobData.state || {};
     const payment1 = state.payment_1 || {};
     const payment2 = state.payment_2 || {};
