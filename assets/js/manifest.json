@@ -18,12 +18,6 @@
       "login_keyword": "enterprise",
       "login_name": "Williams"
     },
-    "brown-logo": {
-      "file_path": "assets/jobs/uid-test-low.json",
-      "job_id": "uid-test-low",
-      "login_keyword": "logo",
-      "login_name": "Brown"
-    },
     "davis-precise": {
       "file_path": "assets/jobs/uid-test-odd.json",
       "job_id": "uid-test-odd",
@@ -35,13 +29,7 @@
       "job_id": "uid-test-paid1",
       "login_keyword": "website",
       "login_name": "Martinez"
-    },
-    "smith-website": {
-      "file_path": "assets/jobs/uid-test-single.json",
-      "job_id": "uid-test-single",
-      "login_keyword": "website",
-      "login_name": "Smith"
     }
   },
-  "generated_at": "2026-01-04T11:37:37.503923Z"
+  "generated_at": "2026-01-04T11:53:48.016751Z"
 }
