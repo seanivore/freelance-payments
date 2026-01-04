@@ -91,38 +91,27 @@ When you return, test these flows:
    - [X] Verify invoice PDF loads
    - [X] Check console for `invoice_viewed` event
 
-Going to payment next the page error says "The following parameters are not supported with `ui_mode: custom`: after_expiration." 
-(Which is an error for us not for users but just fyi lol)
-I see in vercel contract loaded but no that "create checkout session" 
-I thiink they all have to do with switching to embedding. 
+Jumped me right to the invoice this time -- yay state management. 
 
-📊 Event queued: invoice_viewed for job uid-test-custom-ui (will send after 5min inactivity or on page unload)
-checkout-controller.js:386 Checkout section 1 already initializing, skipping...
-checkout-controller.js:93  POST https://freelance-payments-neon.vercel.app/api/create-checkout-session 500 (Internal Server Error)
-createCheckoutSession @ checkout-controller.js:93
-init @ checkout-controller.js:466
-checkAndInit @ checkout-controller.js:528
-attributes
-(anonymous) @ VM171:93
-(anonymous) @ VM171:92
-checkout-controller.js:116 Error creating checkout session: Error: The following parameters are not supported with `ui_mode: custom`: after_expiration.
-    at createCheckoutSession (checkout-controller.js:110:15)
-createCheckoutSession @ checkout-controller.js:116
-await in createCheckoutSession
-init @ checkout-controller.js:466
-checkAndInit @ checkout-controller.js:528
-attributes
-(anonymous) @ VM171:93
-(anonymous) @ VM171:92
-checkout-controller.js:502 Checkout error: Error: The following parameters are not supported with `ui_mode: custom`: after_expiration.
-    at createCheckoutSession (checkout-controller.js:110:15)
-(anonymous) @ checkout-controller.js:502
-Promise.catch
-init @ checkout-controller.js:501
-checkAndInit @ checkout-controller.js:528
-attributes
-(anonymous) @ VM171:93
-(anonymous) @ VM171:92
+```python
+# Set your secret key. Remember to switch to your live secret key in production.
+# See your keys here: https://dashboard.stripe.com/apikeys
+import stripe
+stripe.api_key = "{{TEST_SECRET_KEY}}"
+
+session = stripe.checkout.Session.create(
+  ui_mode="custom",
+  billing_address_collection="required",
+  line_items=[{"price": "price_1Slv3q9fljwH26CP9WuEACeP", "quantity": 1}],
+  name_collection={
+    "business": {"enabled": True, "optional": True},
+    "individual": {"enabled": True},
+  },
+  phone_number_collection={"enabled": True},
+  redirect_on_completion="always",
+  return_url="https://payments.august.style...",
+)
+```
 
 4. **Payment 1 - Stripe Elements**
    - [ ] Verify Payment Element loads (custom UI)

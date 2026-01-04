@@ -90,15 +90,20 @@ module.exports = async (req, res) => {
     // Add billing address collection
     sessionParams.billing_address_collection = 'required';
 
-    // Add branding settings if provided (from job JSON schema)
-    // These can be passed from frontend if needed, or use defaults
-    sessionParams.branding_settings = {
-      font_family: 'noto_sans',
-      background_color: '#1f1f1f',
-      border_style: 'pill',
-      button_color: '#9C528B',
-      display_name: 'august.style designer'
+    // Add name collection (supported with ui_mode: custom)
+    sessionParams.name_collection = {
+      individual: { enabled: true },
+      business: { enabled: true, optional: true }
     };
+
+    // Add phone number collection (supported with ui_mode: custom)
+    sessionParams.phone_number_collection = { enabled: true };
+
+    // Add redirect on completion
+    sessionParams.redirect_on_completion = 'always';
+
+    // Note: branding_settings is NOT supported with ui_mode: 'custom'
+    // Custom UI mode uses Stripe Elements which handles styling client-side
 
     // Create session
     const session = await stripe.checkout.sessions.create(sessionParams);
