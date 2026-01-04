@@ -468,8 +468,8 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     # 3. No match + JSON exists → Create (new job)
     # 4. No match + manifest entry exists → Archive (orphaned)
     
-    jobs_to_archive = []
-    jobs_to_delete = []  # Inactive jobs with no Stripe product (not in manifest)
+    jobs_to_archive = []  # Inactive jobs with Stripe product (in manifest) → Archive Stripe + Delete JSON
+    jobs_to_delete = []   # Inactive jobs without Stripe product (not in manifest) → Delete JSON only
     jobs_to_skip = []
     jobs_to_create = []
     
@@ -478,26 +478,25 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
         product = job_data.get('product', {})
         product_active = product.get('active', True)
         
-        if job_id in manifest_job_ids:
-            # Has manifest entry (Stripe product exists)
-            if not product_active:
-                # Case 1: Match + active=false → Archive Stripe product, keep JSON
+        if not product_active:
+            # Inactive: Always delete JSON (Stripe keeps records indefinitely)
+            if job_id in manifest_job_ids:
+                # Case 1: Inactive + has Stripe product → Archive Stripe product + Delete JSON
                 jobs_to_archive.append(job_id)
-                print(f"DEBUG: Job {job_id} marked for archiving (active=false, has Stripe product)", file=sys.stderr)
+                jobs_to_delete.append(job_id)
+                print(f"DEBUG: Job {job_id} marked for archiving Stripe product and deleting JSON (active=false)", file=sys.stderr)
             else:
-                # Case 2: Match + active=true → Skip (already synced)
-                jobs_to_skip.append(job_id)
-                print(f"DEBUG: Job {job_id} already synced and active - skipping", file=sys.stderr)
-        else:
-            # No manifest entry (no Stripe product)
-            if not product_active:
-                # Case 3: No match + active=false → Delete JSON file (never synced, no Stripe product to archive)
+                # Case 2: Inactive + no Stripe product → Delete JSON only
                 jobs_to_delete.append(job_id)
                 print(f"DEBUG: Job {job_id} marked for deletion (active=false, no Stripe product)", file=sys.stderr)
-            else:
-                # Case 4: No match + active=true → Create (new job)
-                jobs_to_create.append(job_id)
-                print(f"DEBUG: Job {job_id} is new - will create Stripe objects", file=sys.stderr)
+        elif job_id in manifest_job_ids:
+            # Case 3: Active + in manifest → Skip (already synced)
+            jobs_to_skip.append(job_id)
+            print(f"DEBUG: Job {job_id} already synced and active - skipping", file=sys.stderr)
+        else:
+            # Case 4: Active + not in manifest → Create (new job)
+            jobs_to_create.append(job_id)
+            print(f"DEBUG: Job {job_id} is new - will create Stripe objects", file=sys.stderr)
     
     # Case 4: Find orphaned products (in manifest but no JSON file) → Archive
     orphaned_job_ids = manifest_job_ids - json_job_ids
@@ -539,6 +538,15 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
             print(f"DEBUG: Archived product {product_id} (job_id: {job_id})", file=sys.stderr)
         except Exception as e:
             print(f"Warning: Failed to archive product for job {job_id}: {e}", file=sys.stderr)
+    
+    # Step 4: Delete JSON files for inactive jobs (after archiving Stripe products)
+    for job_id in jobs_to_delete:
+        try:
+            if delete_job(job_id, jobs_dir=jobs_dir):
+                overall_stats['jobs_deleted'] = overall_stats.get('jobs_deleted', 0) + 1
+                print(f"DEBUG: Deleted JSON file for job {job_id} (inactive)", file=sys.stderr)
+        except Exception as e:
+            print(f"Warning: Failed to delete JSON file for job {job_id}: {e}", file=sys.stderr)
     
     # Step 5: Create Stripe objects for new jobs
     for job_id in jobs_to_create:
