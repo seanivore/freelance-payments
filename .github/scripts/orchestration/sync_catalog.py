@@ -191,9 +191,14 @@ def create_stripe_customer(customer: dict) -> str:
             'country': customer['address'].get('country', 'US')
         }
 
+    # Add cus- prefix to customer ID if not already present
+    customer_id = customer.get('id')
+    if customer_id and not customer_id.startswith('cus-'):
+        customer_id = f'cus-{customer_id}'
+    
     # Try to use custom ID
     try:
-        customer = stripe.Customer.create(id=customer.get('id'), **customer_params)
+        customer = stripe.Customer.create(id=customer_id, **customer_params)
     except stripe.error.InvalidRequestError:
         customer = stripe.Customer.create(**customer_params)
 
@@ -204,8 +209,13 @@ def create_stripe_coupon(coupon: dict) -> str:
     """Create Stripe Coupon. Returns coupon_id."""
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
+    # Add cou- prefix to coupon ID if not already present
+    coupon_id = coupon.get('id')
+    if coupon_id and not coupon_id.startswith('cou-'):
+        coupon_id = f'cou-{coupon_id}'
+
     coupon_params = {
-        'id': coupon.get('id'),  # Coupons allow custom IDs
+        'id': coupon_id,  # Coupons allow custom IDs
         'amount_off': coupon.get('amount_off'),
         'currency': coupon.get('currency', 'usd').lower(),
         'duration': coupon.get('duration', 'once'),

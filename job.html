@@ -49,44 +49,137 @@
       padding: 2rem 0;
     }
 
+    @media (max-width: 640px) {
+      .job-section {
+        padding: 1.5rem 0;
+      }
+    }
+
     /* Navigation bar */
     .job-nav {
       position: sticky;
       top: 0;
       z-index: 50;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (max-width: 640px) {
+      .job-nav {
+        padding: 0.75rem 1rem;
+      }
+      
+      .job-nav .flex {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
     }
 
     /* PDF viewer styling - paper-like appearance with shadow */
     .pdf-viewer-container {
       background: #f5f5f5;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06);
       margin: 2rem 0;
+    }
+
+    @media (max-width: 640px) {
+      .pdf-viewer-container {
+        padding: 1rem;
+        margin: 1rem 0;
+      }
     }
 
     .pdf-viewer-container iframe {
       background: white;
-      border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      min-height: 600px;
+    }
+
+    @media (max-width: 640px) {
+      .pdf-viewer-container iframe {
+        min-height: 400px;
+      }
     }
 
     /* Error message styling */
     .error {
       color: #dc2626;
-      padding: 1rem;
+      padding: 1rem 1.25rem;
       background: #fee2e2;
-      border-radius: 4px;
-      margin: 1rem 0;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      border-left: 4px solid #dc2626;
+      font-weight: 500;
+    }
+
+    @media (max-width: 640px) {
+      .error {
+        padding: 0.875rem 1rem;
+        margin: 1rem 0;
+      }
     }
 
     /* Signature button overlay */
     .signature-button-overlay {
       position: relative;
       margin-top: 2rem;
+    }
+
+    /* Active navigation link */
+    .nav-link.active {
+      color: hsl(var(--primary));
+      font-weight: 600;
+      border-bottom: 2px solid hsl(var(--primary));
+      padding-bottom: 0.25rem;
+    }
+
+    /* Smooth transitions */
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+
+    /* Button improvements */
+    .btn {
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Loading spinner improvements */
+    #loading {
+      background: hsl(var(--background));
+    }
+
+    /* Section visibility */
+    .job-section.hidden {
+      display: none;
+    }
+
+    /* Print improvements */
+    @media print {
+      .pdf-viewer-container {
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+      
+      .pdf-viewer-container iframe {
+        box-shadow: none;
+        border-radius: 0;
+      }
     }
   </style>
 </head>
@@ -102,12 +195,14 @@
 
   <!-- Navigation bar (shown after content loads) -->
   <nav id="job-nav" class="job-nav hidden no-print">
-    <div class="max-w-4xl mx-auto px-6 py-4">
-      <div class="flex items-center justify-between">
-        <a href="/" class="text-sm text-muted-foreground hover:text-foreground">← Back to Home</a>
-        <div class="flex gap-4">
-          <a href="#contract" class="text-sm hover:text-primary">Contract</a>
-          <a href="#invoice" class="text-sm hover:text-primary">Invoice</a>
+    <div class="max-w-4xl mx-auto px-4 md:px-6 py-3 md:py-4">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <a href="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors">← Back to Home</a>
+        <div class="flex gap-3 md:gap-4 flex-wrap">
+          <a href="#contract" class="text-sm hover:text-primary transition-colors font-medium nav-link" data-section="contract">Contract</a>
+          <a href="#invoice" class="text-sm hover:text-primary transition-colors font-medium nav-link" data-section="invoice">Invoice</a>
+          <a href="#payment-1" class="text-sm hover:text-primary transition-colors font-medium nav-link hidden" data-section="payment-1" id="nav-payment-1">Payment 1</a>
+          <a href="#payment-2" class="text-sm hover:text-primary transition-colors font-medium nav-link hidden" data-section="payment-2" id="nav-payment-2">Payment 2</a>
         </div>
       </div>
     </div>
@@ -125,14 +220,14 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex gap-4 justify-center mt-4 no-print">
-          <a id="contract-download-btn" href="#" download class="btn btn-outline hidden">
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-6 no-print">
+          <a id="contract-download-btn" href="#" download class="btn btn-outline hidden transition-all duration-200 hover:shadow-md">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
             Download Contract
           </a>
-          <button id="contract-sign-btn" class="btn btn-primary hidden">
+          <button id="contract-sign-btn" class="btn btn-primary hidden transition-all duration-200 hover:shadow-lg">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -156,8 +251,8 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex gap-4 justify-center mt-4 no-print">
-          <a id="invoice-download-btn" href="#" download class="btn btn-outline hidden">
+        <div class="flex justify-center mt-6 no-print">
+          <a id="invoice-download-btn" href="#" download class="btn btn-outline hidden transition-all duration-200 hover:shadow-md">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
@@ -407,8 +502,22 @@
         }
 
         // Handle hash changes (user clicks nav links)
+        // Update active nav link based on hash
+        function updateActiveNav() {
+          const hash = window.location.hash.substring(1) || 'contract';
+          document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('data-section') === hash || 
+                (hash.startsWith('payment-') && link.getAttribute('data-section') === hash)) {
+              link.classList.add('active');
+            }
+          });
+        }
+
+        // Update on hash change
         window.addEventListener('hashchange', function () {
           const newHash = window.location.hash.substring(1);
+          updateActiveNav();
           const sections = document.querySelectorAll('.job-section');
           sections.forEach(section => {
             section.classList.add('hidden');
@@ -419,7 +528,50 @@
             targetElement.classList.remove('hidden');
             targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
+          
+          updateActiveNav();
         });
+
+        // Update payment nav links visibility based on job state
+        function updatePaymentNavVisibility(jobData) {
+          if (!jobData || !jobData.state) return;
+          
+          const state = jobData.state;
+          const payment1Nav = document.getElementById('nav-payment-1');
+          const payment2Nav = document.getElementById('nav-payment-2');
+          const product = jobData.product || {};
+          const totalPayments = product.total_payments || 1;
+          
+          // Show payment 1 nav if job has payments and payment 1 not completed
+          if (payment1Nav && totalPayments >= 1) {
+            const payment1Succeeded = state.payment_1?.succeeded;
+            if (!payment1Succeeded) {
+              payment1Nav.classList.remove('hidden');
+            }
+          }
+          
+          // Show payment 2 nav if job has 2 payments and payment 1 completed but payment 2 not completed
+          if (payment2Nav && totalPayments >= 2) {
+            const payment1Succeeded = state.payment_1?.succeeded;
+            const payment2Succeeded = state.payment_2?.succeeded;
+            if (payment1Succeeded && !payment2Succeeded) {
+              payment2Nav.classList.remove('hidden');
+            }
+          }
+        }
+
+        // Update nav on initial load
+        if (targetSection) {
+          setTimeout(() => {
+            updateActiveNav();
+            try {
+              const jobData = JSON.parse(sessionStorage.getItem('jobData') || '{}');
+              updatePaymentNavVisibility(jobData);
+            } catch (e) {
+              console.error('Error updating nav visibility:', e);
+            }
+          }, 150);
+        }
       }
 
       // Initialize when DOM is ready

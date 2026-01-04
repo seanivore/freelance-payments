@@ -49,13 +49,24 @@
         throw new Error('No jobs found in system.');
       }
 
-      // Create lookup key
+      // Normalize inputs
       const normalizedLastName = normalizeLookupKey(lastName);
       const normalizedKeyword = normalizeLookupKey(projectKeyword);
-      const lookupKey = `${normalizedLastName}-${normalizedKeyword}`;
 
-      // Find job entry in manifest (now an object with file_path, job_id, etc.)
-      const jobEntry = manifest.jobs[lookupKey];
+      // Find job entry by matching login_name and login_keyword separately
+      let jobEntry = null;
+      let lookupKey = null;
+      
+      for (const [key, entry] of Object.entries(manifest.jobs)) {
+        const entryLoginName = normalizeLookupKey(entry.login_name || '');
+        const entryKeyword = normalizeLookupKey(entry.login_keyword || '');
+        
+        if (entryLoginName === normalizedLastName && entryKeyword === normalizedKeyword) {
+          jobEntry = entry;
+          lookupKey = key;
+          break;
+        }
+      }
 
       if (!jobEntry) {
         throw new Error('Job not found. Please check your last name and project keyword.');

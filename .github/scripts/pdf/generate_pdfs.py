@@ -272,10 +272,12 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
         
         replacements = {
             '{{docs.contract.id}}': f'kon-{job_id}',
-            '{{docs.contract.created}}': datetime.now(UTC).isoformat().replace('+00:00', 'Z'),
+            '{{docs.contract.created}}': format_date(datetime.now(UTC).isoformat()),
             '{{contract.work_start}}': format_date(contract.get('work_start')),
             '{{contract.work_end}}': format_date(contract.get('work_end')),
+            '{{contract.legal_jurisdiction}}': contract.get('legal_jurisdiction', ''),
             '{{project}}': job_data.get('project', ''),
+            '{{amount_due}}': calculate_amount_due(job_data),
             '{{customer.business}}': customer.get('business', ''),
             '{{customer.name}}': customer.get('name', ''),
             '{{customer.title}}': customer.get('title', ''),
@@ -283,24 +285,25 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
             '{{city}}': customer.get('address', {}).get('city', ''),
             '{{state}}': customer.get('address', {}).get('state', ''),
             '{{postal_code}}': customer.get('address', {}).get('postal_code', ''),
+            '{{country}}': customer.get('address', {}).get('country', ''),
             '{{customer.email}}': customer.get('email', ''),
             '{{customer.phone}}': customer.get('phone', ''),
+            '{{product.login_name}}': product.get('login_name', ''),
+            '{{product.login_keyword}}': product.get('login_keyword', ''),
             '{{price1.nickname}}': price1.get('nickname', 'Initial Payment'),
             '{{price2.nickname}}': price2.get('nickname', 'Final Payment'),
+            '{{price2.pay_days}}': str(price2.get('pay_days', '')),
+            '{{price2.late_fee}}': price2.get('late_fee', ''),
             '{{price1.pay_by}}': price1.get('pay_by', 'start of work'),
             '{{price2.pay_by}}': price2.get('pay_by', 'before project launch'),
             '{{price1.unit_amount}}': format_currency(price1.get('unit_amount', 0)),
             '{{price2.unit_amount}}': format_currency(price2.get('unit_amount', 0)),
+            '{{project_scope_summary}}': job_data.get('project_scope_summary', ''),
+            '{{project_scope_full}}': job_data.get('project_scope_full', ''),
             '{{subtotal}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0))),
             '{{amount_off}}': format_currency(job_data.get('coupon', {}).get('amount_off', 0)),
             '{{total}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0)) - job_data.get('coupon', {}).get('amount_off', 0)),
-            '{{amount_due}}': calculate_amount_due(job_data),
-            '{{amount_paid}}': calculate_amount_paid(job_data),
-            '{{contract.legal_jurisdiction}}': contract.get('legal_jurisdiction', ''),
-            '{{contract.maintenance_period_months}}': str(contract.get('maintenance_period_months', 3)),
-            '{{contract.maintenance_monthly_fee}}': format_currency(contract.get('maintenance_monthly_fee', 0)),
-            '{{project_scope_summary}}': job_data.get('project_scope_summary', ''),
-            '{{project_scope_full}}': job_data.get('project_scope_full', '')
+            '{{amount_paid}}': calculate_amount_paid(job_data)
         }
         
         # Replace placeholders
@@ -385,9 +388,10 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
         
         replacements = {
             '{{docs.invoice.id}}': f'inv-{job_id}',
-            '{{docs.invoice.created}}': datetime.now(UTC).isoformat().replace('+00:00', 'Z'),
+            '{{docs.invoice.created}}': format_date(datetime.now(UTC).isoformat()),
             '{{contract.work_start}}': format_date(job_data.get('contract', {}).get('work_start')),
             '{{contract.work_end}}': format_date(job_data.get('contract', {}).get('work_end')),
+            '{{contract.legal_jurisdiction}}': job_data.get('contract', {}).get('legal_jurisdiction', ''),
             '{{project}}': job_data.get('project', ''),
             '{{amount_due}}': calculate_amount_due(job_data),
             '{{customer.business}}': customer.get('business', ''),
@@ -397,18 +401,26 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
             '{{city}}': customer.get('address', {}).get('city', ''),
             '{{state}}': customer.get('address', {}).get('state', ''),
             '{{postal_code}}': customer.get('address', {}).get('postal_code', ''),
+            '{{country}}': customer.get('address', {}).get('country', ''),
             '{{customer.email}}': customer.get('email', ''),
             '{{customer.phone}}': customer.get('phone', ''),
+            '{{product.login_name}}': product.get('login_name', ''),
+            '{{product.login_keyword}}': product.get('login_keyword', ''),
             '{{price1.nickname}}': price1.get('nickname', 'Initial Payment'),
             '{{price2.nickname}}': price2.get('nickname', 'Final Payment'),
+            '{{price2.pay_days}}': str(price2.get('pay_days', '')),
+            '{{price2.late_fee}}': price2.get('late_fee', ''),
             '{{price1.pay_by}}': price1.get('pay_by', 'start of work'),
             '{{price2.pay_by}}': price2.get('pay_by', 'before project launch'),
             '{{price1.unit_amount}}': format_currency(price1.get('unit_amount', 0)),
             '{{price2.unit_amount}}': format_currency(price2.get('unit_amount', 0)),
+            '{{project_scope_summary}}': job_data.get('project_scope_summary', ''),
+            '{{project_scope_full}}': job_data.get('project_scope_full', ''),
             '{{subtotal}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0))),
             '{{amount_off}}': format_currency(job_data.get('coupon', {}).get('amount_off', 0)),
             '{{total}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0)) - job_data.get('coupon', {}).get('amount_off', 0)),
-            '{{amount_paid}}': calculate_amount_paid(job_data)
+            '{{amount_paid}}': calculate_amount_paid(job_data),
+            '{{today}}': format_date(datetime.now(UTC).isoformat())
         }
         
         # Replace placeholders
