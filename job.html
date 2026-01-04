@@ -304,18 +304,26 @@
 
     <!-- Checkout Section - Payment 1 -->
     <section id="payment-1" class="job-section">
-      <div class="max-w-2xl mx-auto px-6">
+      <div class="max-w-4xl mx-auto px-6">
+        <div class="mb-6 text-center">
+          <h1 class="text-2xl font-semibold mb-2">Complete Payment</h1>
+          <p class="text-muted-foreground">Secure checkout powered by Stripe</p>
+        </div>
         <div id="checkout-content-1">
-          <!-- Checkout for payment 1 will be populated here by checkout-controller.js -->
+          <!-- Stripe Embedded Checkout will be mounted here by checkout-controller.js -->
         </div>
       </div>
     </section>
 
     <!-- Checkout Section - Payment 2 -->
     <section id="payment-2" class="job-section">
-      <div class="max-w-2xl mx-auto px-6">
+      <div class="max-w-4xl mx-auto px-6">
+        <div class="mb-6 text-center">
+          <h1 class="text-2xl font-semibold mb-2">Complete Payment</h1>
+          <p class="text-muted-foreground">Secure checkout powered by Stripe</p>
+        </div>
         <div id="checkout-content-2">
-          <!-- Checkout for payment 2 will be populated here by checkout-controller.js -->
+          <!-- Stripe Embedded Checkout will be mounted here by checkout-controller.js -->
         </div>
       </div>
     </section>
@@ -449,8 +457,7 @@
               }
 
               modal.classList.add('hidden');
-            } else {
-              alert('Job data not found. Please refresh the page.');
+       {               alert('Job data not      . Please refresh the page.');
             }
           } else {
             alert('Contract controller not loaded. Please refresh the page.');
@@ -601,8 +608,7 @@
               updatePaymentNavVisibility(jobData);
             } catch (e) {
               console.error('Error updating nav visibility:', e);
-            }
-          }, 150);
+          }    }, 150);
         }
       }
 

@@ -175,7 +175,7 @@
 
       // Initialize Stripe
       const stripe = Stripe(publishableKey);
-      
+
       // Initialize Embedded Checkout
       const checkout = await stripe.initEmbeddedCheckout({
         clientSecret: clientSecret
@@ -279,7 +279,8 @@
           if (data.client_secret) {
             mountEmbeddedCheckout(data.client_secret, contentDiv);
           } else if (data.session_url) {
-            // Fallback: redirect if no client_secret
+            // Fallback: redirect if no client_secret (shouldn't happen with embedded mode)
+            console.warn('No client_secret, falling back to redirect');
             window.location.href = data.session_url;
           } else {
             throw new Error('No checkout session data received');
