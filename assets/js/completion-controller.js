@@ -129,6 +129,8 @@
         `;
       } else if (payment1Paid && !payment2Paid) {
         const amount2 = (price2.unit_amount || 0) / 100;
+        const workEnd = jobData.contract?.work_end || 'project completion';
+        const customerName = jobData.customer?.name || 'valued client';
         completionMessage = `
           <div class="card p-8 text-center">
             <div class="mb-6">
@@ -141,9 +143,15 @@
               Your first payment has been processed successfully.
             </p>
             <p class="text-muted-foreground mb-6">
-              Your remaining balance of ${formatCurrency(amount2)} will be due before project completion.
+              Your remaining balance of ${formatCurrency(amount2)} will be due before ${workEnd}.
             </p>
-            <a href="#invoice" class="btn btn-primary">View Invoice</a>
+            <p class="text-sm text-muted-foreground mb-6">
+              You can pay now or wait until we email you. Thank you for your business, ${customerName}!
+            </p>
+            <div class="flex gap-4 justify-center">
+              <a href="#payment-2" class="btn btn-primary">Pay Now</a>
+              <a href="#invoice" class="btn btn-outline">View Invoice</a>
+            </div>
           </div>
         `;
       } else {

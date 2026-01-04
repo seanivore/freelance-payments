@@ -226,6 +226,9 @@
     return { loadStripe };
   })();
 
+  // Store checkout instances to unmount when needed
+  const checkoutInstances = new Map();
+
   /**
    * Mount Stripe Embedded Checkout
    * WHY: Prevent double mounts from MutationObserver + provide crisp error messages.
@@ -243,17 +246,29 @@
         throw new Error('Stripe publishable key not configured. Set STRIPE_PUBLISHABLE_KEY via environment or include it in the API response.');
       }
 
-      // 2) Avoid concurrent mounts
+      // 2) Unmount any existing checkout instances to prevent "multiple Embedded Checkout objects" error
+      checkoutInstances.forEach((checkout, container) => {
+        try {
+          if (checkout && typeof checkout.unmount === 'function') {
+            checkout.unmount();
+          }
+        } catch (e) {
+          console.warn('Error unmounting existing checkout:', e);
+        }
+      });
+      checkoutInstances.clear();
+
+      // 3) Avoid concurrent mounts
       if (containerDiv.dataset.mounting === 'true') {
         // Already mounting; no-op
         return;
       }
       containerDiv.dataset.mounting = 'true';
 
-      // 3) Ensure Stripe.js is loaded exactly once
+      // 4) Ensure Stripe.js is loaded exactly once
       await StripeLoader.loadStripe({ retries: 1 });
 
-      // 4) Prepare mount point
+      // 5) Prepare mount point
       containerDiv.innerHTML = '<div id="checkout-embedded-mount"></div>';
       const mountPoint = document.getElementById('checkout-embedded-mount');
 
@@ -261,7 +276,7 @@
         throw new Error('Failed to create checkout mount point.');
       }
 
-      // 5) Initialize Stripe and embedded checkout
+      // 6) Initialize Stripe and embedded checkout
       const stripe = window.Stripe(publishableKey);
 
       if (!stripe || typeof stripe.initEmbeddedCheckout !== 'function') {
@@ -271,7 +286,10 @@
       const checkout = await stripe.initEmbeddedCheckout({ clientSecret });
       checkout.mount(mountPoint);
 
-      // 6) Mark as mounted
+      // Store checkout instance for cleanup
+      checkoutInstances.set(containerDiv, checkout);
+
+      // 7) Mark as mounted
       containerDiv.dataset.mounting = 'false';
       containerDiv.dataset.mounted = 'true';
 
@@ -294,19 +312,19 @@
     const sectionId = paymentNumber === 1 ? 'payment-1' : 'payment-2';
     const section = paymentNumber === 1 ? paymentSection1 : paymentSection2;
     const contentDiv = paymentNumber === 1 ? checkoutContent1 : checkoutContent2;
-    
+
     if (!section || section.classList.contains('hidden')) {
       return; // Section not visible, don't initialize
     }
-    
+
     // Check if already initializing or initialized
     if (section.dataset.initStarted === 'true') {
       console.log(`Checkout section ${paymentNumber} already initializing, skipping...`);
       return;
     }
-    
+
     section.dataset.initStarted = 'true';
-    
+
     const jobData = getJobData();
 
     if (!jobData) {

@@ -307,7 +307,7 @@
 
       alert('Contract signed! Redirecting to invoice...');
 
-      // Track contract signed event (if not already tracked by modal)
+      // Track contract signed event (only once, per person)
       if (typeof EventTracker !== 'undefined') {
         EventTracker.trackContractSigned(jobId);
       }

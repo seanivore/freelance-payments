@@ -19,7 +19,7 @@
     // Stripe publishable key will be set by API response or can be set here
     // The API returns it with checkout session, but we can also set it here as fallback
     // window.STRIPE_PUBLISHABLE_KEY = 'pk_test_...'; // Uncomment and set if needed
-    
+
     // Verify Stripe.js loaded (for debugging)
     window.addEventListener('load', () => {
       if (typeof Stripe === 'undefined' && typeof window.Stripe === 'undefined') {
@@ -256,11 +256,10 @@
   <nav id="job-nav" class="job-nav hidden no-print">
     <div class="max-w-4xl mx-auto px-4 md:px-6 py-3 md:py-4">
       <div class="flex items-center justify-between flex-wrap gap-2">
-        <a href="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors">← Back to Home</a>
         <div class="flex gap-3 md:gap-4 flex-wrap">
           <a href="#contract" class="text-sm hover:text-primary transition-colors font-medium nav-link" data-section="contract">Contract</a>
           <a href="#invoice" class="text-sm hover:text-primary transition-colors font-medium nav-link" data-section="invoice">Invoice</a>
-          <a href="#payment-1" class="text-sm hover:text-primary transition-colors font-medium nav-link hidden" data-section="payment-1" id="nav-payment-1">Payment 1</a>
+          <a href="#payment-1" class="text-sm hover:text-primary transition-colors font-medium nav-link hidden" data-section="payment-1" id="nav-payment-1">Payments</a>
           <a href="#payment-2" class="text-sm hover:text-primary transition-colors font-medium nav-link hidden" data-section="payment-2" id="nav-payment-2">Payment 2</a>
         </div>
       </div>
@@ -351,35 +350,35 @@
   <!-- Signature Modal (shadcn UI style) -->
   <div id="signature-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-      <h2 class="text-2xl font-semibold mb-4">Sign Contract</h2>
+      <h2 class="text-2xl font-semibold mb-4 text-gray-900">Sign Contract</h2>
 
       <form id="signature-form" class="space-y-4">
         <!-- Contractor Signature -->
         <div>
-          <label class="block text-sm font-medium mb-2">Contractor Name</label>
-          <input type="text" id="contractor-name" value="Sean August Horvath" readonly class="w-full px-3 py-2 border rounded-md bg-gray-50">
+          <label class="block text-sm font-medium mb-2 text-gray-900">Contractor Name</label>
+          <input type="text" id="contractor-name" value="Sean August Horvath" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900">
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">Contractor Date</label>
-          <input type="date" id="contractor-date" required class="w-full px-3 py-2 border rounded-md">
+          <label class="block text-sm font-medium mb-2 text-gray-900">Contractor Date</label>
+          <input type="date" id="contractor-date" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
         </div>
 
         <!-- Client Signature -->
         <div>
-          <label class="block text-sm font-medium mb-2">Your Full Legal Name</label>
-          <input type="text" id="client-name" required placeholder="Enter your full legal name" class="w-full px-3 py-2 border rounded-md">
+          <label class="block text-sm font-medium mb-2 text-gray-900">Your Full Legal Name</label>
+          <input type="text" id="client-name" required placeholder="Enter your full legal name" class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white placeholder-gray-500">
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">Date</label>
-          <input type="date" id="client-date" required class="w-full px-3 py-2 border rounded-md">
+          <label class="block text-sm font-medium mb-2 text-gray-900">Date</label>
+          <input type="date" id="client-date" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
         </div>
 
         <!-- Optional: Signature font selector -->
         <div>
-          <label class="block text-sm font-medium mb-2">Signature Style (Optional)</label>
-          <select id="signature-font" class="w-full px-3 py-2 border rounded-md">
+          <label class="block text-sm font-medium mb-2 text-gray-900">Signature Style (Optional)</label>
+          <select id="signature-font" class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
             <option value="cursive">Cursive</option>
             <option value="script">Script</option>
             <option value="handwriting">Handwriting</option>
@@ -459,11 +458,7 @@
 
               await ContractController.handleContractSigning(jobData, signatureData);
 
-              // Track contract signed event
-              const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
-              if (typeof EventTracker !== 'undefined' && jobId) {
-                EventTracker.trackContractSigned(jobId);
-              }
+              // Note: contract_signed event is tracked in handleContractSigning to avoid duplicates
 
               // Close modal after successful signing
               modal.classList.add('hidden');
