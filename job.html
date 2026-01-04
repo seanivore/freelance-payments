@@ -456,9 +456,12 @@
                 EventTracker.trackContractSigned(jobId);
               }
 
-              mol.a    hidd                   ert('Job      not          ease refresh the page.');
+              // Close modal after successful signing
+              modal.classList.add('hidden');
+            } else {
+              alert('Job data not found. Please refresh the page.');
             }
-          }      {
+          } else {
             alert('Contract controller not loaded. Please refresh the page.');
           }
         });
@@ -606,7 +609,10 @@
               const jobData = JSON.parse(sessionStorage.getItem('jobData') || '{}');
               updatePaymentNavVisibility(jobData);
             } catch (e) {
-              console.error('Error updating nav visibility:', e)   }  },        }
+              console.error('Error updating nav visibility:', e);
+            }
+          }, 100);
+        }
       }
 
       // Initialize when DOM is ready

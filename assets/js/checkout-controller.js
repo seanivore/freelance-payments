@@ -154,24 +154,46 @@
   }
 
   /**
+   * Wait for Stripe.js to load
+   */
+  function waitForStripe(maxAttempts = 50, interval = 100) {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const checkStripe = () => {
+        attempts++;
+        if (typeof Stripe !== 'undefined' && typeof window.Stripe !== 'undefined') {
+          resolve();
+        } else if (attempts >= maxAttempts) {
+          reject(new Error('Stripe.js failed to load after waiting'));
+        } else {
+          setTimeout(checkStripe, interval);
+        }
+      };
+      checkStripe();
+    });
+  }
+
+  /**
    * Mount Stripe Embedded Checkout
    */
   async function mountEmbeddedCheckout(clientSecret, containerDiv) {
     try {
-      // Check if Stripe is loaded
-      if (typeof Stripe === 'undefined') {
-        throw new Error('Stripe.js not loaded. Please refresh the page.');
-      }
+      // Wait for Stripe.js to be fully loaded
+      await waitForStripe();
 
-      // Get publishable key (should be set in job.html)
+      // Get publishable key (should be set in job.html or from API response)
       const publishableKey = window.STRIPE_PUBLISHABLE_KEY;
       if (!publishableKey) {
-        throw new Error('Stripe publishable key not configured');
+        throw new Error('Stripe publishable key not configured. Please ensure STRIPE_PUBLISHABLE_KEY is set in Vercel environment variables.');
       }
 
       // Clear container and create mount point
       containerDiv.innerHTML = '<div id="checkout-embedded-mount"></div>';
       const mountPoint = document.getElementById('checkout-embedded-mount');
+
+      if (!mountPoint) {
+        throw new Error('Failed to create checkout mount point');
+      }
 
       // Initialize Stripe
       const stripe = Stripe(publishableKey);
@@ -186,7 +208,7 @@
 
     } catch (error) {
       console.error('Error mounting embedded checkout:', error);
-      showErrorState(containerDiv, `Failed to load payment form: ${error.message}. Please try again.`);
+      showErrorState(containerDiv, `Failed to load payment form: ${error.message}. Please refresh the page and try again.`);
     }
   }
 
@@ -274,15 +296,21 @@
 
       // Create checkout session and embed Stripe Checkout
       createCheckoutSession(jobData, paymentNumber)
-        .then(data => {
-          // Store publishable key if provided by API
-          if (data.publishable_key && !window.STRIPE_PUBLISHABLE_KEY) {
+        .then(async data => {
+          // Store publishable key if provided by API (priority: API response > existing value)
+          if (data.publishable_key) {
             window.STRIPE_PUBLISHABLE_KEY = data.publishable_key;
+            console.log('Stripe publishable key received from API');
+          }
+
+          // Ensure we have a publishable key before proceeding
+          if (!window.STRIPE_PUBLISHABLE_KEY) {
+            throw new Error('Stripe publishable key not available. Please ensure STRIPE_PUBLISHABLE_KEY is set in Vercel environment variables.');
           }
 
           // For embedded mode, use client_secret to mount Stripe Checkout
           if (data.client_secret) {
-            mountEmbeddedCheckout(data.client_secret, contentDiv);
+            await mountEmbeddedCheckout(data.client_secret, contentDiv);
           } else if (data.session_url) {
             // Fallback: redirect if no client_secret (shouldn't happen with embedded mode)
             console.warn('No client_secret, falling back to redirect');

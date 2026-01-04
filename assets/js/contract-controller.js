@@ -190,7 +190,7 @@
 
     // Attach signature handler if contract not signed (v4 schema: check signatures.client.signed_date)
     const isSigned = !!(jobData.contract?.signatures?.client?.signed_date);
-    if (!isSigned && signButton) {
+    if (!isSigned) {
       attachSignatureHandler(jobData);
     }
   }
