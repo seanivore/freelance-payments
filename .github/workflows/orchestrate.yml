@@ -9,7 +9,6 @@ on:
       - freelance-payments
     paths:
       - "assets/jobs/*.json"
-      - ".github/scripts/generate_manifest.py"
       - ".github/scripts/orchestration/*.py"
   workflow_dispatch:
     inputs:
@@ -31,6 +30,10 @@ on:
 jobs:
   orchestrate:
     runs-on: ubuntu-latest
+    # Ensure only one workflow runs at a time (prevents conflicts)
+    concurrency:
+      group: workflow-orchestrate
+      cancel-in-progress: false # Wait for current workflow to finish
 
     steps:
       - name: Checkout repository
@@ -54,7 +57,7 @@ jobs:
           git config pull.rebase true
           git config push.autoSetupRemote true
 
-      - name: Run orchestrator
+      - name: Run workflow
         env:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
@@ -65,12 +68,17 @@ jobs:
           GOOGLE_TEMP_FOLDER_ID: ${{ secrets.GOOGLE_TEMP_FOLDER_ID }}
         run: |
           if [ "${{ github.event_name }}" == "push" ]; then
-            python3 .github/scripts/orchestration/orchestrate_workflow.py \
-              --trigger push
-          else
-            python3 .github/scripts/orchestration/orchestrate_workflow.py \
-              --trigger workflow_dispatch \
-              --action "${{ github.event.inputs.action }}" \
+            # TRIGGER=admin-push
+            python3 .github/scripts/orchestration/admin_push.py
+          elif [ "${{ github.event.inputs.action }}" == "update-payment" ]; then
+            # TRIGGER=payment
+            python3 .github/scripts/orchestration/payments.py \
               --job-id "${{ github.event.inputs.job_id }}" \
+              --payload '${{ github.event.inputs.payload }}'
+          else
+            # TRIGGER=user-behavior (sign-contract or track-event)
+            python3 .github/scripts/orchestration/user_behavior.py \
+              --job-id "${{ github.event.inputs.job_id }}" \
+              --action "${{ github.event.inputs.action }}" \
               --payload '${{ github.event.inputs.payload }}'
           fi
