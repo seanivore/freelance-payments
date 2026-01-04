@@ -83,3 +83,4 @@
 - Breakpoints already exist in CSS (640px, 768px, 1024px, 1280px, 1536px)
 - Return URLs are working correctly (dynamic, not static)
 - Price.product.products can remain empty - it's not used by Stripe API
+

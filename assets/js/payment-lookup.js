@@ -56,11 +56,11 @@
       // Find job entry by matching login_name and login_keyword separately
       let jobEntry = null;
       let lookupKey = null;
-      
+
       for (const [key, entry] of Object.entries(manifest.jobs)) {
         const entryLoginName = normalizeLookupKey(entry.login_name || '');
         const entryKeyword = normalizeLookupKey(entry.login_keyword || '');
-        
+
         if (entryLoginName === normalizedLastName && entryKeyword === normalizedKeyword) {
           jobEntry = entry;
           lookupKey = key;
