@@ -36,6 +36,8 @@ To test webhooks locally:
 1. Use Stripe CLI: `stripe listen --forward-to localhost:3000/api/webhook`
 2. Trigger test payment: `stripe trigger checkout.session.completed`
 
+
+
 ## Why Multiple Checkout Sessions Are Created
 
 If you see many `POST /v1/checkout/sessions` calls:
@@ -50,3 +52,6 @@ If you see many `POST /v1/checkout/sessions` calls:
 3. User completes payment → Stripe sends `checkout.session.completed` webhook
 4. Webhook updates JSON → Sets `state.payment_1.succeeded` or `state.payment_2.succeeded`
 5. User returns → Completion controller reloads fresh JSON → Shows correct status
+
+
+**NOTE JUSTS TO PUSH** 

@@ -594,7 +594,7 @@ def read_job_json(file_path: Path) -> Optional[Dict]:
 def generate_manifest(jobs_dir: str, manifest_path: str) -> dict:
     """Generate manifest mapping lookup keys to job entries"""
     script_dir = Path(__file__).parent
-    project_root = script_dir.parent.parent
+    project_root = script_dir.parent.parent.parent  # .github/scripts/orchestration -> .github/scripts -> .github -> project root
     jobs_path = project_root / jobs_dir
     manifest = {}
     
@@ -644,7 +644,7 @@ def generate_manifest(jobs_dir: str, manifest_path: str) -> dict:
 def write_manifest(manifest: dict, manifest_path: str):
     """Write manifest to file"""
     script_dir = Path(__file__).parent
-    project_root = script_dir.parent.parent
+    project_root = script_dir.parent.parent.parent  # .github/scripts/orchestration -> .github/scripts -> .github -> project root
     output_file = project_root / manifest_path
     
     output_file.parent.mkdir(parents=True, exist_ok=True)
