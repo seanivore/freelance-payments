@@ -90,14 +90,11 @@ module.exports = async (req, res) => {
     // Add billing address collection
     sessionParams.billing_address_collection = 'required';
 
-    // Add name collection (supported with ui_mode: custom)
-    sessionParams.name_collection = {
-      individual: { enabled: true },
-      business: { enabled: true, optional: true }
-    };
-
     // Add phone number collection (supported with ui_mode: custom)
     sessionParams.phone_number_collection = { enabled: true };
+
+    // Note: name_collection is NOT supported with ui_mode: 'custom'
+    // Name collection is handled via Stripe Elements Payment Element UI
 
     // Note: redirect_on_completion is NOT supported with ui_mode: 'custom'
     // Redirect is handled via return_url and frontend confirmPayment() redirect

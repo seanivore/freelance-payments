@@ -143,10 +143,6 @@
     "discounts": [{"coupon": "cou-123-abc"}],
     "line_items": [{"price": "stripe-provided-price-1", "quantity": 1}],
     "mode": "payment",
-    "name_collection": {
-      "individual": {"enabled": true},
-      "business": {"enabled": true, "optional": true}
-    },
     "phone_number_collection": {"enabled": true},
     "return_url": "https://payments.august.style/{job_id}#completion",
     "ui_mode": "custom"
@@ -158,10 +154,6 @@
     "discounts": null,
     "line_items": [{"price": "stripe-provided-price-2", "quantity": 1}],
     "mode": "payment",
-    "name_collection": {
-      "individual": {"enabled": true},
-      "business": {"enabled": true, "optional": true}
-    },
     "phone_number_collection": {"enabled": true},
     "return_url": "https://payments.august.style/{job_id}#completion",
     "ui_mode": "custom"

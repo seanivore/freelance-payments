@@ -170,10 +170,6 @@
     "discounts": null,
     "line_items": [{"price": null, "quantity": 1}],
     "mode": "payment",
-    "name_collection": {
-      "individual": {"enabled": true},
-      "business": {"enabled": true, "optional": true}
-    },
     "phone_number_collection": {"enabled": true},
     "return_url": "https://payments.august.style/{job_id}#completion",
     "ui_mode": "custom"
