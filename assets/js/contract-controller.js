@@ -214,7 +214,7 @@
       signButton.classList.remove('hidden');
       // Store jobData reference for modal handler
       window._currentJobData = jobData;
-      
+
       // Ensure button is positioned correctly (in case PDF viewer was recreated)
       if (!signButton.parentElement || signButton.parentElement !== pdfViewerDiv) {
         pdfViewerDiv.appendChild(signButton);

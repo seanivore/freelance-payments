@@ -266,6 +266,8 @@ v4 requires PDF-only display. If PDF generation fails, show an error, not HTML r
 **How**: Add email service (SendGrid, etc.) to send PDF links to client and contractor
 **Files**: `.github/scripts/pdf/generate_pdfs.py`, `api/webhook.js`
 
+**OR** I saw one of the scopes we added from Google was "send email as me" which could work great. 
+
 ### 2. Event Tracking
 **Where**: Frontend JavaScript files
 **How**: Already partially implemented (`api/track-event.js`). Expand to track more user actions:
