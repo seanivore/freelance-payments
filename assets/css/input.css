@@ -253,13 +253,14 @@
     height: 300px;
     border-radius: 50%;
     background: radial-gradient(circle,
-        rgba(156, 82, 139, calc(0.4 * var(--glow-intensity))) 0%,
-        rgba(156, 82, 139, calc(0.2 * var(--glow-intensity))) 30%,
+        rgba(156, 82, 139, calc(0.5 * var(--glow-intensity))) 0%,
+        rgba(156, 82, 139, calc(0.25 * var(--glow-intensity))) 30%,
         transparent 70%);
     pointer-events: none;
     z-index: 0;
-    opacity: var(--glow-intensity);
-    transition: opacity 0.3s ease-out, transform 0.1s ease-out;
+    opacity: 1;
+    /* Always visible, intensity controlled by gradient */
+    transition: opacity 0.3s ease-out, transform 0.1s ease-out, left 0.1s ease-out, top 0.1s ease-out;
     left: var(--glow-x, 50%);
     top: var(--glow-y, 50%);
     transform: translate(-50%, -50%);

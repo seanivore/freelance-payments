@@ -74,9 +74,12 @@
       cardElement.style.setProperty('--glow-x', cardRelativeX + '%');
       cardElement.style.setProperty('--glow-y', cardRelativeY + '%');
     } else {
-      // Fade out when mouse leaves card
-      glowElement.style.opacity = '0';
-      cardElement.style.setProperty('--glow-intensity', '0.3');
+      // Subtle persistent glow when mouse is not over card
+      glowElement.style.opacity = '0.15'; // Subtle ambient glow
+      cardElement.style.setProperty('--glow-intensity', '0.25'); // Base edge glow
+      // Center the glow in the card for ambient effect
+      cardElement.style.setProperty('--glow-x', '50%');
+      cardElement.style.setProperty('--glow-y', '50%');
     }
   }
 
@@ -85,10 +88,12 @@
   window.addEventListener('resize', updateCardRect);
   document.addEventListener('mousemove', handleMouseMove);
 
-  // Handle mouse leave to fade out
+  // Handle mouse leave - return to subtle ambient glow
   cardElement.addEventListener('mouseleave', () => {
-    glowElement.style.opacity = '0';
-    cardElement.style.setProperty('--glow-intensity', '0.3');
+    glowElement.style.opacity = '0.15'; // Subtle ambient glow
+    cardElement.style.setProperty('--glow-intensity', '0.25'); // Base edge glow
+    cardElement.style.setProperty('--glow-x', '50%');
+    cardElement.style.setProperty('--glow-y', '50%');
   });
 
   // Initial fade-in
