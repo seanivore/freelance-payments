@@ -119,107 +119,35 @@
   }
 
   /**
-   * Build checkout form HTML (v4 schema)
-   * Enhanced design with better colors, typography, and visual hierarchy
+   * Show loading state while redirecting to Stripe
    */
-  function buildCheckoutForm(jobData, priceObject, paymentNumber) {
-    const amount = (priceObject.unit_amount || 0) / 100; // Convert cents to dollars
-    const jobId = jobData.product?.id || '';
-    const totalPayments = jobData.product?.total_payments || 2;
-    const hasDiscount = paymentNumber === 1 && jobData.coupon && jobData.coupon.amount_off > 0;
-    const discountAmount = hasDiscount ? (jobData.coupon.amount_off || 0) / 100 : 0;
-    const finalAmount = hasDiscount ? amount - discountAmount : amount;
+  function showLoadingState(contentDiv) {
+    contentDiv.innerHTML = `
+      <div class="card p-8 text-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-6"></div>
+        <h2 class="text-2xl font-semibold mb-2">Redirecting to Stripe Checkout</h2>
+        <p class="text-muted-foreground mb-4">Secure payment powered by Stripe</p>
+        <p class="text-sm text-muted-foreground">Please wait...</p>
+      </div>
+    `;
+  }
 
-    return `
-      <div class="card p-6 md:p-8 space-y-6 shadow-lg">
-        <!-- Header with Payment Badge -->
-        <div class="card-header pb-4 text-center">
-          <div class="flex items-center justify-center gap-2 mb-3">
-            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/30">
-              Payment ${paymentNumber} of ${totalPayments}
-            </span>
-          </div>
-          <h1 class="card-title text-2xl md:text-3xl">Complete Payment</h1>
-          <p class="text-sm text-muted-foreground mt-2">
-            Secure checkout powered by Stripe
-          </p>
-        </div>
-
-        <!-- Enhanced Payment Summary Card -->
-        <div class="bg-gradient-to-br from-card via-muted/30 to-card rounded-lg p-6 space-y-4 border border-primary/20 shadow-lg">
-          <!-- Amount Display - Large and Prominent -->
-          <div class="text-center py-4 border-b border-border/50">
-            <p class="text-sm text-muted-foreground mb-2 uppercase tracking-wide">Total Amount</p>
-            <p class="text-4xl md:text-5xl font-bold text-foreground">${formatCurrency(finalAmount)}</p>
-            ${hasDiscount ? `
-            <p class="text-sm text-muted-foreground mt-2 line-through">${formatCurrency(amount)}</p>
-            ` : ''}
-          </div>
-
-          <!-- Payment Details -->
-          <div class="space-y-3 pt-2">
-            <div class="flex items-center justify-between">
-              <span class="text-muted-foreground flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Description:
-              </span>
-              <span class="font-medium text-foreground">${priceObject.nickname || 'Payment'}</span>
-            </div>
-            
-            ${hasDiscount ? `
-            <div class="flex items-center justify-between pt-2 border-t border-border/30">
-              <span class="text-muted-foreground flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                Discount:
-              </span>
-              <span class="font-semibold text-green-500 flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                -${formatCurrency(discountAmount)}
-              </span>
-            </div>
-            <div class="bg-green-500/10 border border-green-500/20 rounded-md p-2">
-              <p class="text-xs text-green-600 font-medium text-center">${jobData.coupon.name || 'Discount Applied'}</p>
-            </div>
-            ` : ''}
-          </div>
-        </div>
-
-        <!-- Enhanced Pay Button -->
-        <button id="pay-button" class="btn btn-primary w-full py-4 text-lg font-semibold 
-          bg-gradient-to-r from-primary to-primary/80 
-          hover:from-primary/90 hover:to-primary/70 
-          transition-all duration-200 shadow-lg hover:shadow-xl
-          flex items-center justify-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+  /**
+   * Show error state
+   */
+  function showErrorState(contentDiv, errorMessage) {
+    contentDiv.innerHTML = `
+      <div class="card p-6">
+        <div class="text-center mb-4">
+          <svg class="w-16 h-16 mx-auto text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          Pay ${formatCurrency(finalAmount)}
-        </button>
-
-        <!-- Loading state (hidden initially) -->
-        <div id="checkout-loading" class="hidden text-center py-6">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p class="text-sm text-muted-foreground">Redirecting to secure payment...</p>
-          <p class="text-xs text-muted-foreground mt-2">Powered by Stripe</p>
         </div>
-
-        <!-- Error message (hidden initially) -->
-        <div id="checkout-error" class="hidden text-sm text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-lg"></div>
-
-        <!-- Navigation -->
-        <div class="flex gap-3 justify-center pt-4 border-t border-border/50">
-          <a href="#invoice" class="btn btn-outline text-sm">
-            ← Back to Invoice
-          </a>
-          <a href="#contract" class="btn btn-outline text-sm">
-            View Contract
-          </a>
+        <h2 class="text-xl font-semibold mb-4 text-center">Payment Error</h2>
+        <p class="text-muted-foreground mb-6 text-center">${errorMessage}</p>
+        <div class="flex gap-3 justify-center">
+          <a href="#invoice" class="btn btn-outline">← Back to Invoice</a>
+          <button onclick="location.reload()" class="btn btn-primary">Try Again</button>
         </div>
       </div>
     `;
@@ -291,45 +219,32 @@
       return;
     }
 
-    // Build checkout form
-    const checkoutHTML = buildCheckoutForm(jobData, priceObject, paymentNumber);
+    // Check if price ID exists (required for Stripe Checkout)
+    const priceId = priceObject?.id;
+    if (!priceId) {
+      const errorMsg = '<p>Payment not set up yet. Please contact support or try again later.</p>';
+      const contentDiv = paymentNumber === 1 ? checkoutContent1 : checkoutContent2;
+      if (contentDiv) {
+        showErrorState(contentDiv, 'Payment is not yet configured. The Stripe catalog may still be syncing.');
+      }
+      return;
+    }
+
+    // Show loading state and redirect directly to Stripe
     const contentDiv = paymentNumber === 1 ? checkoutContent1 : checkoutContent2;
     if (contentDiv) {
-      contentDiv.innerHTML = checkoutHTML;
+      showLoadingState(contentDiv);
 
-      // Attach pay button handler
-      const payButton = document.getElementById('pay-button');
-      const loadingDiv = document.getElementById('checkout-loading');
-      const errorDiv = document.getElementById('checkout-error');
-
-      if (payButton) {
-        payButton.addEventListener('click', async () => {
-          payButton.disabled = true;
-          payButton.classList.add('hidden');
-          if (loadingDiv) loadingDiv.classList.remove('hidden');
-          if (errorDiv) {
-            errorDiv.classList.add('hidden');
-            errorDiv.textContent = '';
-          }
-
-          try {
-            // Create checkout session on-demand
-            const sessionUrl = await createCheckoutSession(jobData, paymentNumber);
-
-            // Redirect to Stripe Checkout Session
-            window.location.href = sessionUrl;
-          } catch (error) {
-            console.error('Checkout error:', error);
-            if (errorDiv) {
-              errorDiv.textContent = error.message || 'Failed to create checkout session. Please try again.';
-              errorDiv.classList.remove('hidden');
-            }
-            payButton.disabled = false;
-            payButton.classList.remove('hidden');
-            if (loadingDiv) loadingDiv.classList.add('hidden');
-          }
+      // Create checkout session and redirect immediately
+      createCheckoutSession(jobData, paymentNumber)
+        .then(sessionUrl => {
+          // Redirect to Stripe Checkout Session
+          window.location.href = sessionUrl;
+        })
+        .catch(error => {
+          console.error('Checkout error:', error);
+          showErrorState(contentDiv, error.message || 'Failed to create checkout session. Please try again.');
         });
-      }
     }
   }
 
