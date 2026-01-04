@@ -191,7 +191,12 @@
     // Attach signature handler if contract not signed (v4 schema: check signatures.client.signed_date)
     const isSigned = !!(jobData.contract?.signatures?.client?.signed_date);
     if (!isSigned) {
-      attachSignatureHandler(jobData);
+      try {
+        attachSignatureHandler(jobData);
+      } catch (error) {
+        console.error('Error attaching signature handler:', error);
+        // Non-fatal error - contract can still be viewed
+      }
     }
   }
 
