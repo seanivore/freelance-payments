@@ -52,6 +52,3 @@ If you see many `POST /v1/checkout/sessions` calls:
 3. User completes payment → Stripe sends `checkout.session.completed` webhook
 4. Webhook updates JSON → Sets `state.payment_1.succeeded` or `state.payment_2.succeeded`
 5. User returns → Completion controller reloads fresh JSON → Shows correct status
-
-
-**NOTE JUSTS TO PUSH** 

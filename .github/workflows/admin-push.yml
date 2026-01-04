@@ -13,8 +13,6 @@ on:
   push:
     branches:
       - freelance-payments
-    paths:
-      - "assets/jobs/*.json"
 
 jobs:
   admin-push:

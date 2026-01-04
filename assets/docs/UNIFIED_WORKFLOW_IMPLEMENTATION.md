@@ -14,8 +14,6 @@
   - Step 3: Delete JSON files for inactive jobs
   - Steps 4-9: Create Stripe objects, generate PDFs, add artifacts
 
-
-
 ### 3. **Workflow Queuing**
 - Added `concurrency` group to `orchestrate.yml`
 - Only one workflow runs at a time
