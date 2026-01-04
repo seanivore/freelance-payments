@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-04T03:26:34.248078Z"
+  "jobs": {
+    "test-pdfgen": {
+      "file_path": "assets/jobs/uid-test-pdfgen.json",
+      "job_id": "uid-test-pdfgen",
+      "login_keyword": "pdfgen",
+      "login_name": "Test"
+    }
+  },
+  "generated_at": "2026-01-04T05:52:07.770229Z"
 }
