@@ -38,7 +38,7 @@ from datetime import datetime, UTC
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils.json_io import list_all_jobs, save_job, find_job_file, load_job
+from utils.json_io import list_all_jobs, save_job, find_job_file, load_job, delete_job
 
 # Import Stripe
 try:
@@ -469,28 +469,35 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     # 4. No match + manifest entry exists → Archive (orphaned)
     
     jobs_to_archive = []
+    jobs_to_delete = []  # Inactive jobs with no Stripe product (not in manifest)
     jobs_to_skip = []
     jobs_to_create = []
     
     for job_id in json_job_ids:
+        job_data = jobs_by_id[job_id]
+        product = job_data.get('product', {})
+        product_active = product.get('active', True)
+        
         if job_id in manifest_job_ids:
-            # Case 1 or 2: Has manifest entry - check product.active
-            job_data = jobs_by_id[job_id]
-            product = job_data.get('product', {})
-            product_active = product.get('active', True)
-            
+            # Has manifest entry (Stripe product exists)
             if not product_active:
-                # Case 1: Match + active=false → Archive
+                # Case 1: Match + active=false → Archive Stripe product, keep JSON
                 jobs_to_archive.append(job_id)
-                print(f"DEBUG: Job {job_id} marked for archiving (active=false)", file=sys.stderr)
+                print(f"DEBUG: Job {job_id} marked for archiving (active=false, has Stripe product)", file=sys.stderr)
             else:
                 # Case 2: Match + active=true → Skip (already synced)
                 jobs_to_skip.append(job_id)
                 print(f"DEBUG: Job {job_id} already synced and active - skipping", file=sys.stderr)
         else:
-            # Case 3: No manifest entry → Create (new job)
-            jobs_to_create.append(job_id)
-            print(f"DEBUG: Job {job_id} is new - will create Stripe objects", file=sys.stderr)
+            # No manifest entry (no Stripe product)
+            if not product_active:
+                # Case 3: No match + active=false → Delete JSON file (never synced, no Stripe product to archive)
+                jobs_to_delete.append(job_id)
+                print(f"DEBUG: Job {job_id} marked for deletion (active=false, no Stripe product)", file=sys.stderr)
+            else:
+                # Case 4: No match + active=true → Create (new job)
+                jobs_to_create.append(job_id)
+                print(f"DEBUG: Job {job_id} is new - will create Stripe objects", file=sys.stderr)
     
     # Case 4: Find orphaned products (in manifest but no JSON file) → Archive
     orphaned_job_ids = manifest_job_ids - json_job_ids
@@ -498,7 +505,16 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
         jobs_to_archive.append(job_id)
         print(f"DEBUG: Job {job_id} is orphaned (in manifest but no JSON file) - will archive", file=sys.stderr)
     
-    # Step 3: Archive products
+    # Step 3: Delete inactive JSON files (no Stripe product to archive)
+    for job_id in jobs_to_delete:
+        try:
+            if delete_job(job_id, jobs_dir=jobs_dir):
+                overall_stats['jobs_deleted'] = overall_stats.get('jobs_deleted', 0) + 1
+                print(f"DEBUG: Deleted JSON file for job {job_id} (inactive, no Stripe product)", file=sys.stderr)
+        except Exception as e:
+            print(f"Warning: Failed to delete JSON file for job {job_id}: {e}", file=sys.stderr)
+    
+    # Step 4: Archive Stripe products (inactive but have Stripe product)
     for job_id in jobs_to_archive:
         try:
             # Get product_id from state if job file exists
@@ -524,7 +540,7 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
         except Exception as e:
             print(f"Warning: Failed to archive product for job {job_id}: {e}", file=sys.stderr)
     
-    # Step 4: Create Stripe objects for new jobs
+    # Step 5: Create Stripe objects for new jobs
     for job_id in jobs_to_create:
         job_data = jobs_by_id[job_id]
         

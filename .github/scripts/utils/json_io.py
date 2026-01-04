@@ -118,6 +118,36 @@ def save_job(job_id: str, job_data: Dict, jobs_dir: str = "assets/jobs") -> bool
         return False
 
 
+def delete_job(job_id: str, jobs_dir: str = "assets/jobs") -> bool:
+    """
+    Delete a job JSON file by job_id.
+    
+    Args:
+        job_id: The job identifier (e.g., "uid-test-001")
+        jobs_dir: Directory containing job JSON files
+    
+    Returns:
+        True if file was deleted, False if not found or error
+    
+    Example:
+        if delete_job("uid-test-001"):
+            print("Job file deleted")
+    """
+    job_path = find_job_file(job_id, jobs_dir)
+    
+    if not job_path:
+        print(f"Warning: Job file not found for deletion: {job_id}", file=sys.stderr)
+        return False
+    
+    try:
+        job_path.unlink()
+        print(f"Deleted job file: {job_path}", file=sys.stderr)
+        return True
+    except OSError as e:
+        print(f"Error: Cannot delete {job_path}: {e}", file=sys.stderr)
+        return False
+
+
 def find_job_file(job_id: str, jobs_dir: str = "assets/jobs") -> Optional[Path]:
     """
     Find the file path for a given job_id.
