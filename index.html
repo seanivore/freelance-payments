@@ -25,26 +25,24 @@
     <div id="frosted-card" class="card p-6 md:p-8 space-y-6 shadow-lg relative backdrop-blur-xl bg-card/80 border border-border/50 glow-card w-full">
       <!-- Header -->
       <div class="card-header pb-4 text-center">
-        <h1 class="card-title text-2xl md:text-3xl">Payment Lookup</h1>
+        <h1 class="card-title text-2xl md:text-3xl">Horvath Payments Portal</h1>
         <p class="text-sm text-muted-foreground mt-3">
-          Enter your last name and project keyword to access your payment information.
+          Login to sign contracts, download invoices, and make any payments owed.
         </p>
       </div>
 
       <!-- Form -->
       <form id="lookup-form" class="space-y-4">
         <!-- Last Name Input -->
-        <div class="space-y-2">
-          <label for="last-name" class="label">Last Name</label>
-          <input type="text" id="last-name" name="last_name" class="input" placeholder="Enter your last name" required autocomplete="family-name" />
+        <div>
+          <input type="text" id="last-name" name="last_name" class="input" placeholder="Last Name" required autocomplete="family-name" />
         </div>
 
         <!-- Project Keyword Input -->
         <div class="space-y-2">
-          <label for="project-keyword" class="label">Project Keyword</label>
-          <input type="text" id="project-keyword" name="project_keyword" class="input" placeholder="e.g., art-website, logo-design" required autocomplete="off" />
-          <p class="text-xs text-muted-foreground">
-            This should match the keyword provided in your contract.
+          <input type="text" id="project-keyword" name="project_keyword" class="input" placeholder="Project Keyword" required autocomplete="off" />
+          <p class="text-xs text-muted-foreground text-center">
+            Enter the information provided in your notification email.
           </p>
         </div>
 
@@ -55,7 +53,7 @@
 
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary w-full mt-6 py-3 text-base font-semibold transition-all duration-200 hover:shadow-lg">
-          Look Up Payment
+          Lookup Payments
         </button>
       </form>
     </div>
