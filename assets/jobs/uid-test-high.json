@@ -50,23 +50,12 @@
     },
     "client_status": {
       "logged_in": null,
-<<<<<<< Updated upstream
       "contract_loaded": "2026-01-04T11:58:10.604Z",
-      "contract_scrolled_complete": null,
+      "contract_scrolled_complete": true,
       "viewed_contract": true,
       "viewed_invoice": true,
-=======
-      "contract_loaded": null,
-      "contract_scrolled_complete": true,
-      "viewed_contract": false,
-      "viewed_invoice": false,
->>>>>>> Stashed changes
       "downloaded_docs": 0,
-<<<<<<< Updated upstream
       "signed_contract": "2026-01-04T12:01:08.530Z"
-=======
-      "signed_contract": "2026-01-04T12:01:08.532Z"
->>>>>>> Stashed changes
     },
     "payment_1": {
       "intent": null,

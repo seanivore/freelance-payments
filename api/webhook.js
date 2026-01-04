@@ -27,36 +27,54 @@ module.exports = async (req, res) => {
   let event;
 
   try {
-    // Get raw body - Vercel provides req.body as parsed JSON by default
-    // For webhook signature verification, we need the raw body string
-    // Try to get raw body from request stream if available
+    // Get raw body for Stripe signature verification
+    // Vercel serverless functions parse req.body as JSON by default
+    // Try multiple approaches to get raw body
     let rawBody;
 
-    if (Buffer.isBuffer(req.body)) {
-      // Already a buffer (body parsing disabled)
+    // Approach 1: Check if rawBody is available (some Vercel setups provide this)
+    if (req.rawBody) {
+      rawBody = Buffer.isBuffer(req.rawBody) ? req.rawBody : Buffer.from(req.rawBody, 'utf8');
+    }
+    // Approach 2: Check if body is already a Buffer
+    else if (Buffer.isBuffer(req.body)) {
       rawBody = req.body;
-    } else if (typeof req.body === 'string') {
-      // Already a string
+    }
+    // Approach 3: Check if body is a string
+    else if (typeof req.body === 'string') {
       rawBody = Buffer.from(req.body, 'utf8');
-    } else {
-      // Body was parsed as JSON - need to read from stream
-      // For Vercel, we'll need to read the raw body differently
-      // Try reading from req as stream
-      rawBody = await new Promise((resolve, reject) => {
-        let data = Buffer.alloc(0);
-        req.on('data', chunk => {
-          data = Buffer.concat([data, Buffer.from(chunk)]);
+    }
+    // Approach 4: Try to read from stream (may not work if Vercel already consumed it)
+    else {
+      try {
+        rawBody = await new Promise((resolve, reject) => {
+          let data = Buffer.alloc(0);
+          req.on('data', chunk => {
+            data = Buffer.concat([data, Buffer.from(chunk)]);
+          });
+          req.on('end', () => resolve(data));
+          req.on('error', reject);
+          // Timeout after 5 seconds
+          setTimeout(() => reject(new Error('Stream read timeout')), 5000);
         });
-        req.on('end', () => resolve(data));
-        req.on('error', reject);
-      });
+      } catch (streamError) {
+        // If stream reading fails, try to reconstruct from parsed JSON
+        // This won't match signature but might work for testing
+        console.warn('Could not read raw body from stream, attempting JSON reconstruction:', streamError.message);
+        rawBody = Buffer.from(JSON.stringify(req.body), 'utf8');
+      }
     }
 
     // Verify webhook signature with raw body
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
-    return res.status(400).json({ error: `Webhook Error: ${err.message}` });
+    console.error('Body type:', typeof req.body);
+    console.error('Has rawBody:', !!req.rawBody);
+    return res.status(400).json({
+      error: `Webhook Error: ${err.message}`,
+      hint: 'Vercel may be parsing the body. Check if rawBody is available or configure Vercel to disable body parsing for this route.'
+    });
   }
 
   // Handle the event (v4 schema: Checkout Sessions instead of Payment Intents)
