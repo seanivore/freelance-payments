@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "test-drive-scope-test": {
-      "file_path": "assets/jobs/uid-test-74281.json",
-      "job_id": "uid-test-74281",
-      "login_keyword": "drive-scope-test",
-      "login_name": "Test"
-    }
-  },
-  "generated_at": "2026-01-04T03:06:56.876157Z"
+  "jobs": {},
+  "generated_at": "2026-01-04T03:26:34.248078Z"
 }
