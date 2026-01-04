@@ -56,12 +56,12 @@ module.exports = async (req, res) => {
       discounts.push({ coupon: coupon_id });
     }
 
-    // Create Checkout Session
+    // Create Checkout Session with embedded mode (per JSON schema)
     const sessionParams = {
       mode: 'payment',
       line_items: lineItems,
-      success_url: return_url || `${req.headers.origin}/${job_id}#completion`,
-      cancel_url: return_url || `${req.headers.origin}/${job_id}#invoice`,
+      ui_mode: 'embedded', // Embedded checkout (per JSON schema)
+      return_url: return_url || `${req.headers.origin}/${job_id}#completion`,
       expires_at: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours from now
       metadata: {
         job_id: job_id,
@@ -92,12 +92,24 @@ module.exports = async (req, res) => {
     // Add billing address collection
     sessionParams.billing_address_collection = 'required';
 
+    // Add branding settings if provided (from job JSON schema)
+    // These can be passed from frontend if needed, or use defaults
+    sessionParams.branding_settings = {
+      font_family: 'noto_sans',
+      background_color: '#1f1f1f',
+      border_style: 'pill',
+      button_color: '#9C528B',
+      display_name: 'august.style designer'
+    };
+
     // Create session
     const session = await stripe.checkout.sessions.create(sessionParams);
 
+    // For embedded mode, return client_secret instead of URL
     res.status(200).json({
       session_id: session.id,
-      session_url: session.url
+      client_secret: session.client_secret, // Required for embedded checkout
+      session_url: session.url // Fallback if needed
     });
 
   } catch (error) {

@@ -111,7 +111,7 @@
       }
 
       const data = await response.json();
-      return data.session_url; // Stripe Checkout Session URL
+      return data; // Return full response with client_secret and session_url
     } catch (error) {
       console.error('Error creating checkout session:', error);
       throw error;
@@ -151,6 +151,43 @@
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Mount Stripe Embedded Checkout
+   */
+  async function mountEmbeddedCheckout(clientSecret, containerDiv) {
+    try {
+      // Check if Stripe is loaded
+      if (typeof Stripe === 'undefined') {
+        throw new Error('Stripe.js not loaded. Please refresh the page.');
+      }
+
+      // Get publishable key (should be set in job.html)
+      const publishableKey = window.STRIPE_PUBLISHABLE_KEY;
+      if (!publishableKey) {
+        throw new Error('Stripe publishable key not configured');
+      }
+
+      // Clear container and create mount point
+      containerDiv.innerHTML = '<div id="checkout-embedded-mount"></div>';
+      const mountPoint = document.getElementById('checkout-embedded-mount');
+
+      // Initialize Stripe
+      const stripe = Stripe(publishableKey);
+      
+      // Initialize Embedded Checkout
+      const checkout = await stripe.initEmbeddedCheckout({
+        clientSecret: clientSecret
+      });
+
+      // Mount to container
+      checkout.mount(mountPoint);
+
+    } catch (error) {
+      console.error('Error mounting embedded checkout:', error);
+      showErrorState(containerDiv, `Failed to load payment form: ${error.message}. Please try again.`);
+    }
   }
 
   /**
@@ -235,11 +272,18 @@
     if (contentDiv) {
       showLoadingState(contentDiv);
 
-      // Create checkout session and redirect immediately
+      // Create checkout session and embed Stripe Checkout
       createCheckoutSession(jobData, paymentNumber)
-        .then(sessionUrl => {
-          // Redirect to Stripe Checkout Session
-          window.location.href = sessionUrl;
+        .then(data => {
+          // For embedded mode, use client_secret to mount Stripe Checkout
+          if (data.client_secret) {
+            mountEmbeddedCheckout(data.client_secret, contentDiv);
+          } else if (data.session_url) {
+            // Fallback: redirect if no client_secret
+            window.location.href = data.session_url;
+          } else {
+            throw new Error('No checkout session data received');
+          }
         })
         .catch(error => {
           console.error('Checkout error:', error);

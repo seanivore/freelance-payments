@@ -15,6 +15,11 @@
 
   <!-- Stripe.js (needed for checkout sections) -->
   <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    // Set Stripe publishable key (test mode - update to live key in production)
+    // TODO: Move to environment variable or get from API
+    window.STRIPE_PUBLISHABLE_KEY = 'pk_test_51Q...'; // Replace with actual test key
+  </script>
 
 
   <!-- Print styles -->
