@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "auto-autotest": {
-      "file_path": "assets/jobs/uid-autotest-001.json",
-      "job_id": "uid-autotest-001",
-      "login_keyword": "autotest",
-      "login_name": "Auto"
-    }
-  },
-  "generated_at": "2026-01-03T20:46:05.577616Z"
+  "jobs": {},
+  "generated_at": "2026-01-04T02:02:13.780060Z"
 }
