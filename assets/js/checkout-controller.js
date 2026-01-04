@@ -230,15 +230,21 @@
   const elementsInstances = new Map();
 
   /**
-   * Mount Stripe Elements (Payment Element) with custom UI
-   * WHY: Use Stripe Elements for better product tracking and automation integration.
+   * Mount Stripe Checkout with custom UI mode
+   * WHY: For ui_mode: custom, we must use initCheckout() with Checkout Session client secret,
+   * NOT elements() which expects PaymentIntent client secret.
    * Custom UI mode allows full control over checkout flow while maintaining Stripe's optimized payment handling.
    */
   async function mountStripeElements(clientSecret, containerDiv, returnUrl) {
     try {
       // 1) Validate inputs early
       if (!clientSecret || typeof clientSecret !== 'string') {
-        throw new Error('Missing client_secret for Stripe Elements. The server must return client_secret for custom UI mode.');
+        throw new Error('Missing client_secret for Stripe Checkout. The server must return client_secret for custom UI mode.');
+      }
+
+      // Validate client secret format (should be cs_test_xxx or cs_live_xxx for Checkout Sessions)
+      if (!clientSecret.startsWith('cs_')) {
+        throw new Error(`Invalid client secret format. Expected Checkout Session client secret (cs_xxx), got: ${clientSecret.substring(0, 20)}...`);
       }
 
       const publishableKey = window.STRIPE_PUBLISHABLE_KEY;
@@ -246,14 +252,14 @@
         throw new Error('Stripe publishable key not configured. Set STRIPE_PUBLISHABLE_KEY via environment or include it in the API response.');
       }
 
-      // 2) Clean up any existing Elements instances
-      elementsInstances.forEach((elements, container) => {
+      // 2) Clean up any existing Checkout instances
+      elementsInstances.forEach((checkout, container) => {
         try {
-          if (elements && typeof elements.unmount === 'function') {
-            elements.unmount();
+          if (checkout && typeof checkout.unmount === 'function') {
+            checkout.unmount();
           }
         } catch (e) {
-          console.warn('Error unmounting existing Elements:', e);
+          console.warn('Error unmounting existing Checkout:', e);
         }
       });
       elementsInstances.clear();
@@ -271,94 +277,43 @@
       // 5) Initialize Stripe
       const stripe = window.Stripe(publishableKey);
 
-      if (!stripe || typeof stripe.elements !== 'function') {
-        throw new Error('Stripe.elements is unavailable. Check Stripe.js version and ensure v3 is loaded.');
+      if (!stripe || typeof stripe.initCheckout !== 'function') {
+        throw new Error('Stripe.initCheckout is unavailable. Check Stripe.js version and ensure latest version is loaded.');
       }
 
-      // 6) Create Elements instance with client secret
-      const elements = stripe.elements({ clientSecret });
-
-      // 7) Create and mount Payment Element
-      const paymentElement = elements.create('payment', {
-        layout: 'tabs'
+      // 6) Initialize Checkout with Checkout Session client secret (for ui_mode: custom)
+      const checkout = await stripe.initCheckout({
+        clientSecret: clientSecret
       });
 
-      // 8) Prepare mount point
-      containerDiv.innerHTML = `
-        <form id="payment-form">
-          <div id="payment-element"></div>
-          <button type="submit" id="submit-button" class="btn btn-primary mt-6 w-full">
-            <span id="button-text">Pay now</span>
-            <span id="spinner" class="hidden">Processing...</span>
-          </button>
-          <div id="payment-message" class="hidden mt-4 text-red-600"></div>
-        </form>
-      `;
+      // 7) Prepare mount point (Checkout will create its own form)
+      containerDiv.innerHTML = '<div id="checkout-container"></div>';
 
-      const paymentElementContainer = document.getElementById('payment-element');
-      if (!paymentElementContainer) {
-        throw new Error('Failed to create payment element container.');
+      const checkoutContainer = document.getElementById('checkout-container');
+      if (!checkoutContainer) {
+        throw new Error('Failed to create checkout container.');
       }
 
-      paymentElement.mount(paymentElementContainer);
+      // 8) Mount Checkout (this creates the payment form automatically)
+      checkout.mount(checkoutContainer);
 
-      // 9) Handle form submission
-      const form = document.getElementById('payment-form');
-      const submitButton = document.getElementById('submit-button');
-      const buttonText = document.getElementById('button-text');
-      const spinner = document.getElementById('spinner');
-      const paymentMessage = document.getElementById('payment-message');
-
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        // Disable form during submission
-        submitButton.disabled = true;
-        buttonText.classList.add('hidden');
-        spinner.classList.remove('hidden');
-        paymentMessage.classList.add('hidden');
-
-        try {
-          // Confirm payment with Stripe
-          const { error } = await stripe.confirmPayment({
-            elements,
-            clientSecret,
-            confirmParams: {
-              return_url: returnUrl || `${window.location.origin}${window.location.pathname}#completion`,
-            },
-          });
-
-          if (error) {
-            // Show error to user
-            paymentMessage.textContent = error.message || 'An error occurred. Please try again.';
-            paymentMessage.classList.remove('hidden');
-            submitButton.disabled = false;
-            buttonText.classList.remove('hidden');
-            spinner.classList.add('hidden');
-          } else {
-            // Payment will redirect automatically via return_url
-            // This should not normally be reached, but handle gracefully
-            console.log('Payment confirmed, redirecting...');
-          }
-        } catch (err) {
-          console.error('Error confirming payment:', err);
-          paymentMessage.textContent = err.message || 'An unexpected error occurred. Please try again.';
-          paymentMessage.classList.remove('hidden');
-          submitButton.disabled = false;
-          buttonText.classList.remove('hidden');
-          spinner.classList.add('hidden');
-        }
+      // 9) Listen for Checkout events
+      checkout.on('change', (event) => {
+        // Handle checkout state changes if needed
+        console.log('Checkout state changed:', event);
       });
 
-      // Store Elements instance for cleanup
-      elementsInstances.set(containerDiv, elements);
+      // Store Checkout instance for cleanup
+      elementsInstances.set(containerDiv, checkout);
 
       // 10) Mark as mounted
       containerDiv.dataset.mounting = 'false';
       containerDiv.dataset.mounted = 'true';
 
+      console.log('✅ Stripe Checkout mounted successfully with custom UI mode');
+
     } catch (error) {
-      console.error('Error mounting Stripe Elements:', error);
+      console.error('Error mounting Stripe Checkout:', error);
       containerDiv.dataset.mounting = 'false';
       showErrorState(
         containerDiv,

@@ -91,27 +91,62 @@ When you return, test these flows:
    - [X] Verify invoice PDF loads
    - [X] Check console for `invoice_viewed` event
 
-Jumped me right to the invoice this time -- yay state management. 
 
-```python
-# Set your secret key. Remember to switch to your live secret key in production.
-# See your keys here: https://dashboard.stripe.com/apikeys
-import stripe
-stripe.api_key = "{{TEST_SECRET_KEY}}"
+ERROR: Failed to load payment form: Invalid value for elements(): clientSecret should be a client secret of the form ${id}_secret_${secret}. You specified: cs_test_a14T7UMseHsdCsAPFjt2XE9Apg8YxQZJ9wlVLtmTl9JyLdRUS00dqYIaDi_secret_fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdwbEhqYWAnPydmcHZxamgneCUl.. Tips: Verify Content-Security-Policy allows https://js.stripe.com. Disable ad/script blockers for this domain. Serve over HTTPS and check network tab for blocked/failed requests.
 
-session = stripe.checkout.Session.create(
-  ui_mode="custom",
-  billing_address_collection="required",
-  line_items=[{"price": "price_1Slv3q9fljwH26CP9WuEACeP", "quantity": 1}],
-  name_collection={
-    "business": {"enabled": True, "optional": True},
-    "individual": {"enabled": True},
-  },
-  phone_number_collection={"enabled": True},
-  redirect_on_completion="always",
-  return_url="https://payments.august.style...",
-)
-```
+That js.stripe website just has this...
+
+<Error>
+<Code>AccessDenied</Code>
+<Message>Access Denied</Message>
+<RequestId>P1X18G5K7GPJA4H6</RequestId>
+<HostId>6Prsyn+lR/eSSpFDTfPdV0Ie9vvoOw4CjKVZjMmIwzayRrgQ9/R8xedtcAqV28TUrTT+oWc9yVc=</HostId>
+</Error>
+
+checkout-controller.js:361 Error mounting Stripe Elements: IntegrationError: Invalid value for elements(): clientSecret should be a client secret of the form ${id}_secret_${secret}. You specified: cs_test_a14T7UMseHsdCsAPFjt2XE9Apg8YxQZJ9wlVLtmTl9JyLdRUS00dqYIaDi_secret_fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdwbEhqYWAnPydmcHZxamgneCUl.
+    at pe (v3/:1:251894)
+    at me (v3/:1:251973)
+    at new t (v3/:1:522130)
+    at e.<anonymous> (v3/:1:675734)
+    at e.<anonymous> (v3/:1:96657)
+    at e.o (v3/:1:732835)
+    at mountStripeElements (checkout-controller.js:279:31)
+    at async checkout-controller.js:483:15
+
+  For ui_mode: custom, use the client secret with initCheckout on your front end.
+  https://docs.stripe.com/js/custom_checkout/init
+
+Load Stripe.js
+
+settings
+Use Stripe.js to remain PCI compliant by sending payment details directly to Stripe without hitting your server. Always load Stripe.js from js.stripe.com to remain compliant. Don’t include the script in a bundle or host it yourself.
+
+You can load Stripe.js by including the script in your HTML file or using loadStripe.
+
+Define the payment form
+
+settings
+To securely collect the customer’s information, create an empty placeholder div. Stripe inserts an iframe into the div.
+
+Initialize Stripe.js
+
+settings
+Initialize Stripe.js with your publishable API key
+
+Fetch a Checkout Session client secret
+https://docs.stripe.com/js/custom_checkout/init
+settings
+Make a request to your server to create a Checkout Session and retrieve the client secret.
+
+Initialize Checkout
+
+settings
+Use clientSecret to initialize Checkout, passing a client secret string or a Promise that resolves to it. The Checkout object forms the backbone of your checkout page and contains data from the Checkout Session and methods to update it.
+
+create a source 
+https://docs.stripe.com/api/sources/create
+and then retrieve source for client_secret 
+
 
 4. **Payment 1 - Stripe Elements**
    - [ ] Verify Payment Element loads (custom UI)
