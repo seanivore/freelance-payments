@@ -120,59 +120,104 @@
 
   /**
    * Build checkout form HTML (v4 schema)
+   * Enhanced design with better colors, typography, and visual hierarchy
    */
   function buildCheckoutForm(jobData, priceObject, paymentNumber) {
     const amount = (priceObject.unit_amount || 0) / 100; // Convert cents to dollars
     const jobId = jobData.product?.id || '';
+    const totalPayments = jobData.product?.total_payments || 2;
+    const hasDiscount = paymentNumber === 1 && jobData.coupon && jobData.coupon.amount_off > 0;
+    const discountAmount = hasDiscount ? (jobData.coupon.amount_off || 0) / 100 : 0;
+    const finalAmount = hasDiscount ? amount - discountAmount : amount;
 
     return `
-      <div class="card p-6 space-y-6">
-        <!-- Header -->
-        <div class="card-header pb-4">
-          <h1 class="card-title">Complete Payment</h1>
+      <div class="card p-6 md:p-8 space-y-6 shadow-lg">
+        <!-- Header with Payment Badge -->
+        <div class="card-header pb-4 text-center">
+          <div class="flex items-center justify-center gap-2 mb-3">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/30">
+              Payment ${paymentNumber} of ${totalPayments}
+            </span>
+          </div>
+          <h1 class="card-title text-2xl md:text-3xl">Complete Payment</h1>
           <p class="text-sm text-muted-foreground mt-2">
-            Payment ${paymentNumber} of 2
+            Secure checkout powered by Stripe
           </p>
         </div>
 
-        <!-- Payment Summary -->
-        <div class="bg-muted/50 rounded-lg p-4 space-y-2">
-          <div class="flex justify-between">
-            <span class="text-muted-foreground">Amount:</span>
-            <span class="font-semibold text-lg">${formatCurrency(amount)}</span>
+        <!-- Enhanced Payment Summary Card -->
+        <div class="bg-gradient-to-br from-card via-muted/30 to-card rounded-lg p-6 space-y-4 border border-primary/20 shadow-lg">
+          <!-- Amount Display - Large and Prominent -->
+          <div class="text-center py-4 border-b border-border/50">
+            <p class="text-sm text-muted-foreground mb-2 uppercase tracking-wide">Total Amount</p>
+            <p class="text-4xl md:text-5xl font-bold text-foreground">${formatCurrency(finalAmount)}</p>
+            ${hasDiscount ? `
+            <p class="text-sm text-muted-foreground mt-2 line-through">${formatCurrency(amount)}</p>
+            ` : ''}
           </div>
-          <div class="flex justify-between">
-            <span class="text-muted-foreground">Description:</span>
-            <span>${priceObject.nickname || 'Payment'}</span>
+
+          <!-- Payment Details -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Description:
+              </span>
+              <span class="font-medium text-foreground">${priceObject.nickname || 'Payment'}</span>
+            </div>
+            
+            ${hasDiscount ? `
+            <div class="flex items-center justify-between pt-2 border-t border-border/30">
+              <span class="text-muted-foreground flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Discount:
+              </span>
+              <span class="font-semibold text-green-500 flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                -${formatCurrency(discountAmount)}
+              </span>
+            </div>
+            <div class="bg-green-500/10 border border-green-500/20 rounded-md p-2">
+              <p class="text-xs text-green-600 font-medium text-center">${jobData.coupon.name || 'Discount Applied'}</p>
+            </div>
+            ` : ''}
           </div>
-          ${paymentNumber === 1 && jobData.coupon ? `
-          <div class="flex justify-between text-sm">
-            <span class="text-muted-foreground">Discount:</span>
-            <span class="text-green-600">${jobData.coupon.name || 'Applied'}</span>
-          </div>
-          ` : ''}
         </div>
 
-        <!-- Pay Button -->
-        <button id="pay-button" class="btn btn-primary w-full">
-          Pay ${formatCurrency(amount)}
+        <!-- Enhanced Pay Button -->
+        <button id="pay-button" class="btn btn-primary w-full py-4 text-lg font-semibold 
+          bg-gradient-to-r from-primary to-primary/80 
+          hover:from-primary/90 hover:to-primary/70 
+          transition-all duration-200 shadow-lg hover:shadow-xl
+          flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          Pay ${formatCurrency(finalAmount)}
         </button>
 
         <!-- Loading state (hidden initially) -->
-        <div id="checkout-loading" class="hidden text-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+        <div id="checkout-loading" class="hidden text-center py-6">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p class="text-sm text-muted-foreground">Redirecting to secure payment...</p>
+          <p class="text-xs text-muted-foreground mt-2">Powered by Stripe</p>
         </div>
 
         <!-- Error message (hidden initially) -->
-        <div id="checkout-error" class="hidden text-sm text-destructive bg-destructive/10 p-3 rounded"></div>
+        <div id="checkout-error" class="hidden text-sm text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-lg"></div>
 
         <!-- Navigation -->
-        <div class="flex gap-4 justify-center pt-4 border-t">
-          <a href="#invoice" class="btn btn-outline">
-            Back to Invoice
+        <div class="flex gap-3 justify-center pt-4 border-t border-border/50">
+          <a href="#invoice" class="btn btn-outline text-sm">
+            ← Back to Invoice
           </a>
-          <a href="#contract" class="btn btn-outline">
+          <a href="#contract" class="btn btn-outline text-sm">
             View Contract
           </a>
         </div>
