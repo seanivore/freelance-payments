@@ -118,7 +118,7 @@
       // Get first page
       const page = await pdf.getPage(1);
       const viewport = page.getViewport({ scale: 1.5 });
-      
+
       // Set canvas dimensions
       canvas.height = viewport.height;
       canvas.width = viewport.width;
@@ -136,18 +136,18 @@
       for (let pageNum = 2; pageNum <= numPages; pageNum++) {
         const nextPage = await pdf.getPage(pageNum);
         const nextViewport = nextPage.getViewport({ scale: 1.5 });
-        
+
         // Create new canvas for each additional page
         const nextCanvas = document.createElement('canvas');
         nextCanvas.height = nextViewport.height;
         nextCanvas.width = nextViewport.width;
         nextCanvas.className = 'mt-4';
-        
+
         const nextContext = {
           canvasContext: nextCanvas.getContext('2d'),
           viewport: nextViewport
         };
-        
+
         await nextPage.render(nextContext).promise;
         pdfViewerDiv.appendChild(nextCanvas);
       }
@@ -181,7 +181,7 @@
       amountDue = (price1.unit_amount || 0) / 100;
     } else {
       amountPaid += (price1.unit_amount || 0) / 100;
-      
+
       if (product.total_payments === 2 && !payment2.succeeded) {
         amountDue = (price2.unit_amount || 0) / 100;
       }
@@ -231,8 +231,8 @@
 
     // v4 schema: Get PDF URL from docs.invoice.pdf
     const pdfPath = jobData.docs?.invoice?.pdf;
-    const pdfUrl = pdfPath 
-      ? `https://payments.august.style/${pdfPath}` 
+    const pdfUrl = pdfPath
+      ? `https://payments.august.style/${pdfPath}`
       : jobData.docs?.invoice?.url;
 
     if (!pdfUrl) {

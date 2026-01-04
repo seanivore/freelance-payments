@@ -73,7 +73,7 @@
       // Get first page
       const page = await pdf.getPage(1);
       const viewport = page.getViewport({ scale: 1.5 });
-      
+
       // Set canvas dimensions
       canvas.height = viewport.height;
       canvas.width = viewport.width;
@@ -91,18 +91,18 @@
       for (let pageNum = 2; pageNum <= numPages; pageNum++) {
         const nextPage = await pdf.getPage(pageNum);
         const nextViewport = nextPage.getViewport({ scale: 1.5 });
-        
+
         // Create new canvas for each additional page
         const nextCanvas = document.createElement('canvas');
         nextCanvas.height = nextViewport.height;
         nextCanvas.width = nextViewport.width;
         nextCanvas.className = 'mt-4';
-        
+
         const nextContext = {
           canvasContext: nextCanvas.getContext('2d'),
           viewport: nextViewport
         };
-        
+
         await nextPage.render(nextContext).promise;
         pdfViewerDiv.appendChild(nextCanvas);
       }
@@ -123,10 +123,10 @@
   function setupSignButton(jobId) {
     const signButton = document.getElementById('contract-sign-btn');
     const actionsDiv = document.getElementById('contract-actions');
-    
+
     if (signButton && actionsDiv) {
       actionsDiv.classList.remove('hidden');
-      
+
       // Track if needed (button click handled by modal script)
       signButton.addEventListener('click', () => {
         if (typeof EventTracker !== 'undefined' && jobId) {
@@ -244,7 +244,7 @@
     // This function ensures the sign button is visible and stores jobData reference
     const signButton = document.getElementById('contract-sign-btn');
     const actionsDiv = document.getElementById('contract-actions');
-    
+
     if (signButton && actionsDiv) {
       actionsDiv.classList.remove('hidden');
       // Store jobData reference for modal handler
