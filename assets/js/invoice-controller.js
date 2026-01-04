@@ -114,7 +114,7 @@
       }
 
       // Set PDF.js worker
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.js';
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.0.379/build/pdf.worker.min.js';
 
       // Load PDF
       const loadingTask = pdfjsLib.getDocument(pdfUrl);
