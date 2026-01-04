@@ -154,17 +154,49 @@
   }
 
   /**
-   * Wait for Stripe.js to load
+   * Wait for Stripe.js to load or load it dynamically
    */
-  function waitForStripe(maxAttempts = 50, interval = 100) {
+  function waitForStripe(maxAttempts = 100, interval = 100) {
     return new Promise((resolve, reject) => {
+      // Check if already loaded
+      if (typeof window.Stripe !== 'undefined' || typeof Stripe !== 'undefined') {
+        resolve();
+        return;
+      }
+
+      // Check if script tag exists
+      const stripeScript = document.querySelector('script[src*="js.stripe.com"]');
+      if (!stripeScript) {
+        // Script tag doesn't exist - load it dynamically
+        console.warn('Stripe.js script tag not found, loading dynamically...');
+        const script = document.createElement('script');
+        script.src = 'https://js.stripe.com/v3/';
+        script.async = true;
+        script.onload = () => {
+          // Wait a bit more for Stripe to initialize
+          setTimeout(() => {
+            if (typeof window.Stripe !== 'undefined' || typeof Stripe !== 'undefined') {
+              resolve();
+            } else {
+              reject(new Error('Stripe.js loaded but Stripe function not available'));
+            }
+          }, 100);
+        };
+        script.onerror = () => {
+          reject(new Error('Failed to load Stripe.js from CDN'));
+        };
+        document.head.appendChild(script);
+        return;
+      }
+
+      // Script tag exists - wait for it to load
       let attempts = 0;
       const checkStripe = () => {
         attempts++;
-        if (typeof Stripe !== 'undefined' && typeof window.Stripe !== 'undefined') {
+        if (typeof window.Stripe !== 'undefined' || typeof Stripe !== 'undefined') {
           resolve();
         } else if (attempts >= maxAttempts) {
-          reject(new Error('Stripe.js failed to load after waiting'));
+          reject(new Error(`Stripe.js failed to load after ${maxAttempts * interval / 1000} seconds. Please check your internet connection and refresh the page.`));
         } else {
           setTimeout(checkStripe, interval);
         }
@@ -195,8 +227,12 @@
         throw new Error('Failed to create checkout mount point');
       }
 
-      // Initialize Stripe
-      const stripe = Stripe(publishableKey);
+      // Initialize Stripe (use window.Stripe if available, fallback to Stripe)
+      const StripeConstructor = window.Stripe || Stripe;
+      if (!StripeConstructor) {
+        throw new Error('Stripe constructor not available');
+      }
+      const stripe = StripeConstructor(publishableKey);
 
       // Initialize Embedded Checkout
       const checkout = await stripe.initEmbeddedCheckout({
