@@ -54,7 +54,8 @@ module.exports = async (req, res) => {
     // This queues the update for batch processing
     const githubToken = process.env.GITHUB_TOKEN;
     const repo = process.env.GITHUB_REPO || 'seanivore/freelance-payments';
-    const workflowId = 'orchestrate.yml';
+    // Note: GitHub API uses the workflow filename
+    const workflowId = 'user-behavior.yml';
 
     if (githubToken) {
       try {

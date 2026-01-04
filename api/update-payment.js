@@ -35,14 +35,14 @@ module.exports = async (req, res) => {
     const repoOwner = process.env.GITHUB_REPO_OWNER || 'seanivore';
     const repoName = process.env.GITHUB_REPO_NAME || 'freelance-payments';
 
-    // Trigger GitHub Actions workflow_dispatch (new orchestrator workflow)
-    const workflowId = 'orchestrate.yml';
+    // Trigger GitHub Actions workflow_dispatch (payment workflow)
+    // Note: GitHub API uses the workflow filename
+    const workflowId = 'payment.yml';
     const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`;
 
     const payload = JSON.stringify({
       ref: 'freelance-payments',
       inputs: {
-        action: 'update-payment',
         job_id: job_id,
         payload: JSON.stringify({
           payment_number: payment_number,

@@ -335,27 +335,22 @@
         console.warn('Could not reload fresh job data, using local:', e);
       }
 
-      alert('Contract signed! Redirecting to invoice...');
-
       // Track contract signed event (only once, per person)
       if (typeof EventTracker !== 'undefined') {
         EventTracker.trackContractSigned(jobId);
       }
+
+      alert('Contract signed! Redirecting to invoice...');
+
+      // Route to next step (invoice/checkout) using hash-based routing
+      // CRITICAL: Always route to invoice after signing, never completion
+      // Completion should only be reached after actual payment via webhook
+      window.location.hash = 'invoice';
     } catch (error) {
       console.error('Error signing contract:', error);
       alert('Contract signed locally, but failed to update server. Please contact support.');
-    }
-
-    // Route to next step (invoice/checkout) using hash-based routing
-    // CRITICAL: Always route to invoice after signing, never completion
-    // Completion should only be reached after actual payment via webhook
-    if (typeof PaymentRouter !== 'undefined') {
-      // Force route to invoice - don't trust determineRoute after signing
-      // because sessionStorage might have stale payment data
-      window.location.hash = 'invoice';
-    } else {
-      // Fallback: update hash directly
-      window.location.hash = 'invoice';
+      // Don't route if signing failed - user should try again
+      return;
     }
   }
 

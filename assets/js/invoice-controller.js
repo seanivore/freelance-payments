@@ -26,11 +26,16 @@
       return parseInt(hashMatch[1], 10);
     }
 
-    // Check state to determine which payment is pending (v4 schema: state.payment_2, not balance_payment_intent)
+    // Check state to determine which payment is pending (v4 schema: state.payment_1/payment_2)
     const state = jobData.state || {};
-    const initialPaid = state.payment_1?.succeeded !== null;
-    const balancePaid = state.payment_2?.succeeded !== null;
+    const payment1 = state.payment_1 || {};
+    const payment2 = state.payment_2 || {};
 
+    // Check if payments are actually succeeded (succeeded must be a non-null timestamp)
+    const initialPaid = payment1.succeeded !== null && payment1.succeeded !== undefined;
+    const balancePaid = payment2.succeeded !== null && payment2.succeeded !== undefined;
+
+    // Return first unpaid payment, or null if all paid
     if (!initialPaid) return 1;
     if (!balancePaid) return 2;
 
