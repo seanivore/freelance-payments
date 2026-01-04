@@ -504,16 +504,9 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
         jobs_to_archive.append(job_id)
         print(f"DEBUG: Job {job_id} is orphaned (in manifest but no JSON file) - will archive", file=sys.stderr)
     
-    # Step 3: Delete inactive JSON files (no Stripe product to archive)
-    for job_id in jobs_to_delete:
-        try:
-            if delete_job(job_id, jobs_dir=jobs_dir):
-                overall_stats['jobs_deleted'] = overall_stats.get('jobs_deleted', 0) + 1
-                print(f"DEBUG: Deleted JSON file for job {job_id} (inactive, no Stripe product)", file=sys.stderr)
-        except Exception as e:
-            print(f"Warning: Failed to delete JSON file for job {job_id}: {e}", file=sys.stderr)
-    
-    # Step 4: Archive Stripe products (inactive but have Stripe product)
+    # Step 3: Archive Stripe products FIRST (before deleting JSON files, so we can read product_id)
+    # This handles inactive jobs that have Stripe products
+    for job_id in jobs_to_archive:
     for job_id in jobs_to_archive:
         try:
             # Get product_id from state if job file exists
