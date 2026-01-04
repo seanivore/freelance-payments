@@ -68,7 +68,7 @@ Implement `/api/generate-pdf.js` with the code structure above, test with sample
 | {{customer.business}}           | `customer.business`                                       |
 | {{customer.name}}               | `customer.name`                                           |
 | {{customer.title}}              | `customer.title`                                          |
-| {{address.line1}}               | `customer.address.line1`                                  |
+| {{customer.address.line1}}      | `customer.address.line1`                                  |
 | {{city}}                        | `customer.address.city`                                   |
 | {{state}}                       | `customer.address.state`                                  |
 | {{postal_code}}                 | `customer.address.postal_code`                            |
@@ -91,7 +91,7 @@ Implement `/api/generate-pdf.js` with the code structure above, test with sample
 | {{amount_off}}                  | formatCurrency(`coupon.amount_off`)                       |
 | {{total}}                       | formatCurrency(`{{subtotal}}`–`{{discount}}`)             |
 | {{amount_paid}}                 | Variable                                                  |
-| {{today}}                       | formatDate(day-of-creating-invoice)                       |
+| {{today}}                       | formatDate(day-invoice-is-created)                       |
 
   * **VARIABLE** 
 
