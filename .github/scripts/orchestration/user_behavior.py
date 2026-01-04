@@ -43,15 +43,17 @@ except ImportError:
     print(json.dumps({"error": "Stripe library not installed. Run: pip install stripe"}), file=sys.stderr)
     sys.exit(2)
 
-# Import Google APIs
+# Import Google APIs (optional - only needed for PDF generation in admin-push workflow)
+# user-behavior workflow doesn't generate PDFs, so these are optional here
 try:
     from google.auth.transport.requests import Request
     from googleapiclient.discovery import build
     from googleapiclient.http import MediaIoBaseDownload
     import io
+    GOOGLE_APIS_AVAILABLE = True
 except ImportError:
-    print(json.dumps({"error": "Google libraries not installed. Run: pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client"}), file=sys.stderr)
-    sys.exit(2)
+    GOOGLE_APIS_AVAILABLE = False
+    # Not an error - user-behavior workflow doesn't need Google APIs
 
 
 # ============================================================================

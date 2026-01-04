@@ -87,20 +87,7 @@ When you return, test these flows:
    - [ ] Scroll to bottom, verify `contract_scrolled_complete` event
    - [ ] Sign contract, verify `contract_signed` event
 
-After signing you get this error and the below load in the console. 
-The screen says "Contract signed locally, but failed to update server. Please contact support"
-It then says "All payments are complete. View completion page." -- no invoice loads at all, nothing more in the console, clicking invoice does nothing but you can go back to contract. 
 
-contract-controller.js:298  POST https://freelance-payments-neon.vercel.app/api/sign-contract 500 (Internal Server Error)
-handleContractSigning @ contract-controller.js:298
-(anonymous) @ VM124:54
-
-contract-controller.js:345 Error signing contract: Error: Failed to update contract
-    at Object.handleContractSigning (contract-controller.js:321:15)
-    at async HTMLFormElement.<anonymous> (<anonymous>:54:15)
-handleContractSigning @ contract-controller.js:345
-await in handleContractSigning
-(anonymous) @ VM124:54
 
 3. **Invoice Section**
    - [ ] Verify invoice PDF loads
