@@ -64,7 +64,7 @@
         const freshJobData = await freshResponse.json();
         sessionStorage.setItem('jobData', JSON.stringify(freshJobData));
         jobData = freshJobData; // Use fresh data
-        console.log('Completion: Reloaded fresh job data from server');
+        console.log('✅ Completion: Reloaded fresh payment status from server (checking payment_1/payment_2 state)');
       }
     } catch (e) {
       console.warn('Could not reload fresh job data for completion, using sessionStorage:', e);
@@ -189,8 +189,12 @@
   };
 
   // Initialize when completion section becomes visible
+  // Only initialize if user actually navigated to completion section (hash matches)
   function checkAndInit() {
-    if (completionSection && !completionSection.classList.contains('hidden')) {
+    const hash = window.location.hash;
+    const isOnCompletion = hash === '#completion' || hash.includes('#completion');
+
+    if (completionSection && !completionSection.classList.contains('hidden') && isOnCompletion) {
       init();
     }
   }
@@ -207,5 +211,8 @@
   } else {
     checkAndInit();
   }
+
+  // Listen for hash changes (user navigating between sections)
+  window.addEventListener('hashchange', checkAndInit);
 
 })();

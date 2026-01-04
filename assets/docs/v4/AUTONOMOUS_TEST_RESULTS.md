@@ -81,6 +81,23 @@ When you return, test these flows:
    - [ ] Verify redirect to job page
    - [ ] Check console for any errors
 
+  OKAY stopping at first step because of the bold details about what api to be using. 
+  I can see we are using 
+    API versions - 2025-12-15.clover - Default - Latest
+                   2025-06-30.basil
+
+
+  LOADED START OF CONTRACT 
+  - GOOD: event-tracker.js:38 📊 Event queued: contract_loaded for job uid-test-custom-ui (will send after 5min inactivity or on page unload)
+checkout-controller.js:116 Error creating checkout session: Error: Invalid Stripe API version: 2023-10-16. **In order to use `ui_mode: custom`, you must upgrade to Stripe API version 2025-03-31.basil**.
+    at createCheckoutSession (checkout-controller.js:110:15)
+createCheckoutSession @ checkout-controller.js:116
+checkout-controller.js:502 Checkout error: Error: Invalid Stripe API version: 2023-10-16. In order to use `ui_mode: custom`, you must upgrade to Stripe API version 2025-03-31.basil.
+    at createCheckoutSession (checkout-controller.js:110:15)
+(anonymous) @ checkout-controller.js:502
+uid-test-custom-ui#contract:1  Failed to load resource: the server responded with a status of 404 ()
+
+
 2. **Contract Section**
    - [ ] Verify PDF loads (if generated)
    - [ ] Check console for `contract_loaded` event

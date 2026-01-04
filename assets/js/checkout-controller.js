@@ -508,6 +508,7 @@
 
   /**
    * Initialize checkout sections when they become visible
+   * Only initializes if the hash matches the payment section (user navigated there)
    */
   function checkAndInit() {
     const jobData = getJobData();
@@ -517,10 +518,15 @@
     const paymentNumber = getPaymentNumber(jobData);
     if (!paymentNumber) return;
 
-    // Initialize the appropriate section
-    if (paymentNumber === 1 && paymentSection1 && !paymentSection1.classList.contains('hidden')) {
+    // Check if user actually navigated to this payment section (hash matches)
+    const hash = window.location.hash;
+    const isOnPayment1 = hash === '#payment-1' || hash.startsWith('#payment-1');
+    const isOnPayment2 = hash === '#payment-2' || hash.startsWith('#payment-2');
+
+    // Only initialize if section is visible AND hash matches (user navigated there)
+    if (paymentNumber === 1 && paymentSection1 && !paymentSection1.classList.contains('hidden') && isOnPayment1) {
       init(1);
-    } else if (paymentNumber === 2 && paymentSection2 && !paymentSection2.classList.contains('hidden')) {
+    } else if (paymentNumber === 2 && paymentSection2 && !paymentSection2.classList.contains('hidden') && isOnPayment2) {
       init(2);
     }
   }
@@ -542,6 +548,9 @@
   } else {
     checkAndInit();
   }
+
+  // Listen for hash changes (user navigating between sections)
+  window.addEventListener('hashchange', checkAndInit);
 
   // Export for use in other scripts
   window.CheckoutController = {

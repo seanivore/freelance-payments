@@ -6,7 +6,9 @@
  * POST /api/webhook
  */
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2025-03-31.basil' // Required for ui_mode: 'custom'
+});
 
 // Disable body parsing for Stripe webhook signature verification
 // Vercel serverless functions need raw body as Buffer/string

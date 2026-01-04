@@ -108,6 +108,7 @@
 
   /**
    * Track contract scrolled to bottom (uses EventTracker for batching)
+   * Only tracks after user has actually scrolled, not just when PDF loads
    */
   function setupScrollTracking(jobId) {
     // Track scroll completion for PDF iframe (v4: PDF embedding)
@@ -120,22 +121,51 @@
     }
     pdfViewer.dataset.scrollTrackingSetup = 'true';
 
-    // Use intersection observer on PDF iframe to detect when user has scrolled
-    // For PDFs, we'll track when the iframe is fully visible (user has likely scrolled through)
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
-          // PDF is mostly visible - user has likely scrolled through
-          console.log('📜 Contract PDF scrolled to completion (90%+ visible)');
-          if (typeof EventTracker !== 'undefined') {
-            EventTracker.trackContractScrolledComplete(jobId);
-          }
-          observer.disconnect();
-        }
-      });
-    }, { threshold: 0.9 });
+    let hasScrolled = false;
+    let scrollTimeout = null;
+    let intersectionObserver = null;
 
-    observer.observe(pdfViewer);
+    // Wait for iframe to load first
+    pdfViewer.addEventListener('load', () => {
+      // Wait a moment for PDF to render, then set up scroll tracking
+      setTimeout(() => {
+        // Listen for scroll events on window (PDF iframe scrolls bubble up)
+        const scrollHandler = () => {
+          if (!hasScrolled) {
+            hasScrolled = true;
+            // Clear any existing timeout
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+
+            // Wait a moment after scroll stops, then check if PDF is mostly visible
+            scrollTimeout = setTimeout(() => {
+              // Use intersection observer to verify PDF is mostly visible after user scrolled
+              if (intersectionObserver) {
+                intersectionObserver.disconnect();
+              }
+
+              intersectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                  // Only track if user has scrolled AND PDF is 90%+ visible
+                  if (entry.isIntersecting && entry.intersectionRatio >= 0.9 && hasScrolled) {
+                    console.log('📜 Contract PDF scrolled to completion (user scrolled and PDF 90%+ visible)');
+                    if (typeof EventTracker !== 'undefined') {
+                      EventTracker.trackContractScrolledComplete(jobId);
+                    }
+                    intersectionObserver.disconnect();
+                    window.removeEventListener('scroll', scrollHandler, true);
+                  }
+                });
+              }, { threshold: 0.9 });
+
+              intersectionObserver.observe(pdfViewer);
+            }, 500); // Wait 500ms after scroll stops
+          }
+        };
+
+        // Listen for scroll events (capture phase to catch iframe scrolls)
+        window.addEventListener('scroll', scrollHandler, true);
+      }, 1500); // Wait 1.5 seconds after PDF loads before enabling scroll tracking
+    });
   }
 
   /**
@@ -354,5 +384,8 @@
   } else {
     checkAndInit();
   }
+
+  // Listen for hash changes (user navigating between sections)
+  window.addEventListener('hashchange', checkAndInit);
 
 })();

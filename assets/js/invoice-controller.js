@@ -206,9 +206,11 @@
       return;
     }
 
-    // Track invoice viewed when invoice section loads (no scroll tracking needed)
-    if (jobId) {
+    // Track invoice viewed only once when user actually navigates to invoice section
+    // Use a flag to prevent duplicate tracking
+    if (jobId && !invoiceSection.dataset.invoiceTracked) {
       trackInvoiceViewed(jobId, paymentNumber);
+      invoiceSection.dataset.invoiceTracked = 'true';
     }
   }
 
@@ -220,8 +222,12 @@
   };
 
   // Initialize when invoice section becomes visible (single-page template)
+  // Only initialize if user actually navigated to invoice section (hash matches)
   function checkAndInit() {
-    if (invoiceSection && !invoiceSection.classList.contains('hidden')) {
+    const hash = window.location.hash;
+    const isOnInvoice = hash === '#invoice' || hash.startsWith('#invoice');
+
+    if (invoiceSection && !invoiceSection.classList.contains('hidden') && isOnInvoice) {
       init();
     }
   }
@@ -238,5 +244,8 @@
   } else {
     checkAndInit();
   }
+
+  // Listen for hash changes (user navigating between sections)
+  window.addEventListener('hashchange', checkAndInit);
 
 })();

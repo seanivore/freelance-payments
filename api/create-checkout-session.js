@@ -9,7 +9,9 @@
  * v4 schema: Uses customer_id (not customer.id)
  */
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2025-03-31.basil' // Required for ui_mode: 'custom'
+});
 
 module.exports = async (req, res) => {
   // Set CORS headers
