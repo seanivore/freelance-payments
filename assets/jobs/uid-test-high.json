@@ -62,7 +62,11 @@
       "viewed_invoice": false,
 >>>>>>> Stashed changes
       "downloaded_docs": 0,
+<<<<<<< Updated upstream
       "signed_contract": "2026-01-04T12:01:08.530Z"
+=======
+      "signed_contract": "2026-01-04T12:01:08.532Z"
+>>>>>>> Stashed changes
     },
     "payment_1": {
       "intent": null,
