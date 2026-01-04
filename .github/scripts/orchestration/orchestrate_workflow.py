@@ -235,7 +235,8 @@ def orchestrate(trigger: str, action: str = None, job_id: str = None, payload: s
                     stats.get('prices_created', 0) > 0 or
                     stats.get('customers_created', 0) > 0 or
                     stats.get('coupons_created', 0) > 0 or
-                    stats.get('products_archived', 0) > 0
+                    stats.get('products_archived', 0) > 0 or
+                    stats.get('jobs_deleted', 0) > 0  # Include deletions as changes
                 )
                 
                 # Print stats and stderr output so we can see what sync_catalog found
