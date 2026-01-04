@@ -16,9 +16,9 @@
   <!-- Stripe.js (needed for checkout sections) -->
   <script src="https://js.stripe.com/v3/"></script>
   <script>
-    // Set Stripe publishable key (test mode - update to live key in production)
-    // TODO: Move to environment variable or get from API
-    window.STRIPE_PUBLISHABLE_KEY = 'pk_test_51Q...'; // Replace with actual test key
+    // Stripe publishable key will be set by API response or can be set here
+    // The API returns it with checkout session, but we can also set it here as fallback
+    // window.STRIPE_PUBLISHABLE_KEY = 'pk_test_...'; // Uncomment and set if needed
   </script>
 
 
@@ -456,8 +456,8 @@
                 EventTracker.trackContractSigned(jobId);
               }
 
-              modal.classList.add('hidden');
-       {               alert('Job data not      . Please refresh the page.');
+              modal.classList.add('hidden'
+               ert('Job data not          ease refresh the page.');
             }
           } else {
             alert('Contract controller not loaded. Please refresh the page.');
@@ -608,8 +608,7 @@
               updatePaymentNavVisibility(jobData);
             } catch (e) {
               console.error('Error updating nav visibility:', e);
-          }    }, 150);
-        }
+          }  },        }
       }
 
       // Initialize when DOM is ready

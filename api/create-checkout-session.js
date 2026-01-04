@@ -105,10 +105,11 @@ module.exports = async (req, res) => {
     // Create session
     const session = await stripe.checkout.sessions.create(sessionParams);
 
-    // For embedded mode, return client_secret instead of URL
+    // For embedded mode, return client_secret and publishable key
     res.status(200).json({
       session_id: session.id,
       client_secret: session.client_secret, // Required for embedded checkout
+      publishable_key: process.env.STRIPE_PUBLISHABLE_KEY || null, // Return publishable key if available
       session_url: session.url // Fallback if needed
     });
 

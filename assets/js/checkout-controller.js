@@ -275,6 +275,11 @@
       // Create checkout session and embed Stripe Checkout
       createCheckoutSession(jobData, paymentNumber)
         .then(data => {
+          // Store publishable key if provided by API
+          if (data.publishable_key && !window.STRIPE_PUBLISHABLE_KEY) {
+            window.STRIPE_PUBLISHABLE_KEY = data.publishable_key;
+          }
+
           // For embedded mode, use client_secret to mount Stripe Checkout
           if (data.client_secret) {
             mountEmbeddedCheckout(data.client_secret, contentDiv);
