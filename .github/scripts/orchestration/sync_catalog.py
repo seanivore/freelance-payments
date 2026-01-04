@@ -541,7 +541,6 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     # Step 3: Archive Stripe products FIRST (before deleting JSON files, so we can read product_id)
     # This handles inactive jobs that have Stripe products
     for job_id in jobs_to_archive:
-    for job_id in jobs_to_archive:
         try:
             # Get product_id from state if job file exists
             # Otherwise use job_id (which should match product_id in v3 schema)
