@@ -88,6 +88,19 @@
       overflow: visible;
     }
 
+    /* Ensure sign button is above iframe */
+    #contract-sign-btn {
+      z-index: 50 !important;
+      pointer-events: auto !important;
+    }
+
+    /* Make sure iframe doesn't block button */
+    .pdf-viewer-container iframe {
+      pointer-events: auto;
+      position: relative;
+      z-index: 1;
+    }
+
     @media (max-width: 1024px) {
       .pdf-viewer-container {
         padding: 0.75rem 0;
@@ -259,7 +272,7 @@
         <div id="contract-pdf-viewer" class="pdf-viewer-container relative">
           <!-- PDF iframe will be inserted here by contract-controller.js -->
           <!-- Sign button overlay positioned at bottom right of PDF -->
-          <button id="contract-sign-btn" class="absolute bottom-4 right-4 bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 hidden z-10 no-print" title="Sign Contract">
+          <button id="contract-sign-btn" class="absolute bottom-6 right-6 bg-primary text-primary-foreground rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-110 hidden z-50 no-print pointer-events-auto" title="Sign Contract" style="z-index: 50;">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
             </svg>

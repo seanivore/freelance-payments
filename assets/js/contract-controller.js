@@ -59,8 +59,11 @@
       return false;
     }
 
-    // Clear existing content (but preserve sign button if it exists)
+    // Store sign button reference before clearing
     const existingSignBtn = pdfViewerDiv.querySelector('#contract-sign-btn');
+    const signBtnParent = existingSignBtn?.parentElement;
+    
+    // Clear existing content (but preserve sign button)
     pdfViewerDiv.innerHTML = '';
 
     // Create iframe for PDF embedding - full height for proper scrolling
@@ -71,17 +74,22 @@
     iframe.style.minHeight = '600px';
     iframe.style.border = 'none';
     iframe.style.borderRadius = '8px';
-    iframe.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    iframe.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
     iframe.style.display = 'block';
+    iframe.style.position = 'relative';
+    iframe.style.zIndex = '1';
     iframe.setAttribute('title', 'Contract PDF');
-    // Remove scrolling attribute - let browser handle it naturally
     iframe.setAttribute('loading', 'lazy');
 
     pdfViewerDiv.appendChild(iframe);
 
-    // Restore sign button if it existed (will be positioned by CSS)
+    // Restore sign button AFTER iframe (so it's on top)
     if (existingSignBtn) {
       pdfViewerDiv.appendChild(existingSignBtn);
+      // Ensure it's visible and clickable
+      existingSignBtn.style.zIndex = '50';
+      existingSignBtn.style.pointerEvents = 'auto';
+      existingSignBtn.style.position = 'absolute';
     }
 
     return true;
