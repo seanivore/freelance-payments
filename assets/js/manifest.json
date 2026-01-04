@@ -1,11 +1,5 @@
 {
   "jobs": {
-    "anderson-corporate": {
-      "file_path": "assets/jobs/uid-test-business.json",
-      "job_id": "uid-test-business",
-      "login_keyword": "corporate",
-      "login_name": "Anderson"
-    },
     "johnson-branding": {
       "file_path": "assets/jobs/uid-test-discount.json",
       "job_id": "uid-test-discount",
@@ -31,5 +25,5 @@
       "login_name": "Martinez"
     }
   },
-  "generated_at": "2026-01-04T11:53:48.016751Z"
+  "generated_at": "2026-01-04T11:56:12.669958Z"
 }
