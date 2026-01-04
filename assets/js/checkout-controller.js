@@ -165,17 +165,17 @@
       return new Promise((resolve, reject) => {
         // If script tag already present, reuse it
         let script = document.querySelector('script[src="https://js.stripe.com/v3/"]');
-        
+
         if (!script) {
           script = document.createElement('script');
           script.src = 'https://js.stripe.com/v3/';
           script.async = true;
           script.crossOrigin = 'anonymous';
-          
+
           script.onerror = () => {
             reject(new Error('Stripe.js script failed to load (network/CSP). Check Content-Security-Policy, ad/script blockers, and network.'));
           };
-          
+
           script.onload = () => resolve();
           document.head.appendChild(script);
         } else {
@@ -206,7 +206,7 @@
           try {
             await injectStripeScript();
             await waitForStripeFunction(4000);
-            
+
             // Mark loaded to help future calls
             const script = document.querySelector('script[src="https://js.stripe.com/v3/"]');
             if (script) script.dataset.loaded = 'true';
@@ -256,14 +256,14 @@
       // 4) Prepare mount point
       containerDiv.innerHTML = '<div id="checkout-embedded-mount"></div>';
       const mountPoint = document.getElementById('checkout-embedded-mount');
-      
+
       if (!mountPoint) {
         throw new Error('Failed to create checkout mount point.');
       }
 
       // 5) Initialize Stripe and embedded checkout
       const stripe = window.Stripe(publishableKey);
-      
+
       if (!stripe || typeof stripe.initEmbeddedCheckout !== 'function') {
         throw new Error('Stripe.initEmbeddedCheckout is unavailable. Check Stripe.js version and ensure v3 is loaded.');
       }
