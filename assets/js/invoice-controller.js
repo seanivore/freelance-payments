@@ -14,7 +14,6 @@
   const contentDiv = document.getElementById('invoice-content');
   const invoiceSection = document.getElementById('invoice');
   const pdfViewerDiv = document.getElementById('invoice-pdf-viewer');
-  const downloadButton = document.getElementById('invoice-download-btn');
 
   /**
    * Get payment number from hash, state, or default to first pending (v4 schema)
@@ -94,48 +93,75 @@
   }
 
   /**
-   * Embed invoice PDF (v4 schema: PDF only, no HTML fallback)
+   * Embed invoice PDF using PDF.js (v4 schema: PDF only, no HTML fallback)
    */
-  function embedInvoicePDF(pdfUrl) {
+  async function embedInvoicePDF(pdfUrl) {
     if (!pdfViewerDiv) {
       console.error('PDF viewer div not found');
       return false;
     }
 
-    // Create iframe for PDF embedding
-    const iframe = document.createElement('iframe');
-    iframe.src = pdfUrl;
-    iframe.style.width = '100%';
-    iframe.style.height = '800px';
-    iframe.style.border = 'none';
-    iframe.style.borderRadius = '8px';
-    iframe.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-    iframe.setAttribute('title', 'Invoice PDF');
-    
-    // Clear existing content
-    pdfViewerDiv.innerHTML = '';
-    pdfViewerDiv.appendChild(iframe);
-    
-    return true;
+    const canvas = document.getElementById('invoice-pdf-canvas');
+    if (!canvas) {
+      console.error('PDF canvas not found');
+      return false;
+    }
+
+    try {
+      // Set PDF.js worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+      // Load PDF
+      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      const pdf = await loadingTask.promise;
+
+      // Get first page
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 1.5 });
+      
+      // Set canvas dimensions
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      // Render PDF page to canvas
+      const renderContext = {
+        canvasContext: canvas.getContext('2d'),
+        viewport: viewport
+      };
+
+      await page.render(renderContext).promise;
+
+      // Render all pages
+      const numPages = pdf.numPages;
+      for (let pageNum = 2; pageNum <= numPages; pageNum++) {
+        const nextPage = await pdf.getPage(pageNum);
+        const nextViewport = nextPage.getViewport({ scale: 1.5 });
+        
+        // Create new canvas for each additional page
+        const nextCanvas = document.createElement('canvas');
+        nextCanvas.height = nextViewport.height;
+        nextCanvas.width = nextViewport.width;
+        nextCanvas.className = 'mt-4';
+        
+        const nextContext = {
+          canvasContext: nextCanvas.getContext('2d'),
+          viewport: nextViewport
+        };
+        
+        await nextPage.render(nextContext).promise;
+        pdfViewerDiv.appendChild(nextCanvas);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error loading PDF:', error);
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p class="error">Failed to load invoice PDF. Please try again or contact support.</p>';
+      }
+      return false;
+    }
   }
 
-  /**
-   * Setup download button (v4 schema: link to PDF)
-   */
-  function setupDownloadButton(pdfUrl, jobId) {
-    if (!downloadButton) return;
-    
-    downloadButton.href = pdfUrl;
-    downloadButton.download = pdfUrl.split('/').pop();
-    downloadButton.style.display = 'inline-block';
-    
-    // Track download event
-    downloadButton.addEventListener('click', () => {
-      if (typeof EventTracker !== 'undefined' && jobId) {
-        EventTracker.trackDocumentDownloaded(jobId, 'invoice');
-      }
-    });
-  }
 
   /**
    * Calculate amount due and amount paid (v4 schema)
@@ -218,16 +244,14 @@
       return;
     }
 
-    // Embed PDF
-    if (!embedInvoicePDF(pdfUrl)) {
+    // Embed PDF using PDF.js
+    const pdfLoaded = await embedInvoicePDF(pdfUrl);
+    if (!pdfLoaded) {
       if (contentDiv) {
         contentDiv.innerHTML = '<p class="error">Failed to load invoice PDF viewer.</p>';
       }
       return;
     }
-
-    // Setup download button
-    setupDownloadButton(pdfUrl, jobId);
   }
 
   // Export for use in other scripts

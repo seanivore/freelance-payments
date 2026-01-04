@@ -14,8 +14,6 @@
   const contentDiv = document.getElementById('contract-content');
   const contractSection = document.getElementById('contract');
   const pdfViewerDiv = document.getElementById('contract-pdf-viewer');
-  const downloadButton = document.getElementById('contract-download-btn');
-  const signButton = document.getElementById('contract-sign-btn');
 
   /**
    * Get job data from sessionStorage or load from path
@@ -50,67 +48,92 @@
   }
 
   /**
-   * Embed contract PDF (v4 schema: PDF only, no HTML fallback)
-   * Fixed scrolling and positioned sign button overlay
+   * Embed contract PDF using PDF.js (v4 schema: PDF only, no HTML fallback)
    */
-  function embedContractPDF(pdfUrl) {
+  async function embedContractPDF(pdfUrl) {
     if (!pdfViewerDiv) {
       console.error('PDF viewer div not found');
       return false;
     }
 
-    // Store sign button reference before clearing
-    const existingSignBtn = pdfViewerDiv.querySelector('#contract-sign-btn');
-    const signBtnParent = existingSignBtn?.parentElement;
-    
-    // Clear existing content (but preserve sign button)
-    pdfViewerDiv.innerHTML = '';
-
-    // Create iframe for PDF embedding - full height for proper scrolling
-    const iframe = document.createElement('iframe');
-    iframe.src = pdfUrl;
-    iframe.style.width = '100%';
-    iframe.style.height = '90vh';
-    iframe.style.minHeight = '600px';
-    iframe.style.border = 'none';
-    iframe.style.borderRadius = '8px';
-    iframe.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-    iframe.style.display = 'block';
-    iframe.style.position = 'relative';
-    iframe.style.zIndex = '1';
-    iframe.setAttribute('title', 'Contract PDF');
-    iframe.setAttribute('loading', 'lazy');
-
-    pdfViewerDiv.appendChild(iframe);
-
-    // Restore sign button AFTER iframe (so it's on top)
-    if (existingSignBtn) {
-      pdfViewerDiv.appendChild(existingSignBtn);
-      // Ensure it's visible and clickable
-      existingSignBtn.style.zIndex = '50';
-      existingSignBtn.style.pointerEvents = 'auto';
-      existingSignBtn.style.position = 'absolute';
+    const canvas = document.getElementById('contract-pdf-canvas');
+    if (!canvas) {
+      console.error('PDF canvas not found');
+      return false;
     }
 
-    return true;
+    try {
+      // Set PDF.js worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+      // Load PDF
+      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      const pdf = await loadingTask.promise;
+
+      // Get first page
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 1.5 });
+      
+      // Set canvas dimensions
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      // Render PDF page to canvas
+      const renderContext = {
+        canvasContext: canvas.getContext('2d'),
+        viewport: viewport
+      };
+
+      await page.render(renderContext).promise;
+
+      // Render all pages
+      const numPages = pdf.numPages;
+      for (let pageNum = 2; pageNum <= numPages; pageNum++) {
+        const nextPage = await pdf.getPage(pageNum);
+        const nextViewport = nextPage.getViewport({ scale: 1.5 });
+        
+        // Create new canvas for each additional page
+        const nextCanvas = document.createElement('canvas');
+        nextCanvas.height = nextViewport.height;
+        nextCanvas.width = nextViewport.width;
+        nextCanvas.className = 'mt-4';
+        
+        const nextContext = {
+          canvasContext: nextCanvas.getContext('2d'),
+          viewport: nextViewport
+        };
+        
+        await nextPage.render(nextContext).promise;
+        pdfViewerDiv.appendChild(nextCanvas);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error loading PDF:', error);
+      if (contentDiv) {
+        contentDiv.innerHTML = '<p class="error">Failed to load contract PDF. Please try again or contact support.</p>';
+      }
+      return false;
+    }
   }
 
   /**
-   * Setup download button (v4 schema: link to PDF)
+   * Setup sign button visibility (download handled by browser PDF viewer)
    */
-  function setupDownloadButton(pdfUrl, jobId) {
-    if (!downloadButton) return;
-
-    downloadButton.href = pdfUrl;
-    downloadButton.download = pdfUrl.split('/').pop();
-    downloadButton.style.display = 'inline-block';
-
-    // Track download event
-    downloadButton.addEventListener('click', () => {
-      if (typeof EventTracker !== 'undefined' && jobId) {
-        EventTracker.trackDocumentDownloaded(jobId, 'contract');
-      }
-    });
+  function setupSignButton(jobId) {
+    const signButton = document.getElementById('contract-sign-btn');
+    const actionsDiv = document.getElementById('contract-actions');
+    
+    if (signButton && actionsDiv) {
+      actionsDiv.classList.remove('hidden');
+      
+      // Track if needed (button click handled by modal script)
+      signButton.addEventListener('click', () => {
+        if (typeof EventTracker !== 'undefined' && jobId) {
+          // Event tracking handled by modal submission
+        }
+      });
+    }
   }
 
   /**
@@ -188,16 +211,17 @@
       return;
     }
 
-    // Embed PDF
-    if (!embedContractPDF(pdfUrl)) {
+    // Embed PDF using PDF.js
+    const pdfLoaded = await embedContractPDF(pdfUrl);
+    if (!pdfLoaded) {
       if (contentDiv) {
         contentDiv.innerHTML = '<p class="error">Failed to load contract PDF viewer.</p>';
       }
       return;
     }
 
-    // Setup download button
-    setupDownloadButton(pdfUrl, jobId);
+    // Setup sign button
+    setupSignButton(jobId);
 
     // Setup scroll tracking (for PDF iframe)
     if (jobId) {
@@ -213,20 +237,18 @@
 
   /**
    * Attach signature functionality (v4: modal-based signing)
-   * Sign button is now positioned as overlay on PDF viewer
+   * Sign button is now in side actions panel
    */
   function attachSignatureHandler(jobData) {
     // The modal is handled by job.html's inline script
     // This function ensures the sign button is visible and stores jobData reference
-    if (signButton) {
-      signButton.classList.remove('hidden');
+    const signButton = document.getElementById('contract-sign-btn');
+    const actionsDiv = document.getElementById('contract-actions');
+    
+    if (signButton && actionsDiv) {
+      actionsDiv.classList.remove('hidden');
       // Store jobData reference for modal handler
       window._currentJobData = jobData;
-
-      // Ensure button is positioned correctly (in case PDF viewer was recreated)
-      if (!signButton.parentElement || signButton.parentElement !== pdfViewerDiv) {
-        pdfViewerDiv.appendChild(signButton);
-      }
     }
   }
 
