@@ -99,9 +99,8 @@ module.exports = async (req, res) => {
     // Add phone number collection (supported with ui_mode: custom)
     sessionParams.phone_number_collection = { enabled: true };
 
-    // Add redirect on completion
-    sessionParams.redirect_on_completion = 'always';
-
+    // Note: redirect_on_completion is NOT supported with ui_mode: 'custom'
+    // Redirect is handled via return_url and frontend confirmPayment() redirect
     // Note: branding_settings is NOT supported with ui_mode: 'custom'
     // Custom UI mode uses Stripe Elements which handles styling client-side
 

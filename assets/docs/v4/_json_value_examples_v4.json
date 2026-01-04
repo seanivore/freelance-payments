@@ -148,7 +148,6 @@
       "business": {"enabled": true, "optional": true}
     },
     "phone_number_collection": {"enabled": true},
-    "redirect_on_completion": "always",
     "return_url": "https://payments.august.style/{job_id}#completion",
     "ui_mode": "custom"
   },
@@ -164,7 +163,6 @@
       "business": {"enabled": true, "optional": true}
     },
     "phone_number_collection": {"enabled": true},
-    "redirect_on_completion": "always",
     "return_url": "https://payments.august.style/{job_id}#completion",
     "ui_mode": "custom"
   },
