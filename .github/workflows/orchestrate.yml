@@ -10,6 +10,7 @@ on:
     paths:
       - "assets/jobs/*.json"
       - ".github/scripts/generate_manifest.py"
+      - ".github/scripts/orchestration/*.py"
   workflow_dispatch:
     inputs:
       action:
