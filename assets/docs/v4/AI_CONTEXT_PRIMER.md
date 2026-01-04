@@ -1,8 +1,8 @@
 # AI Context Primer: Freelance Payments System
 
-**Last Updated**: 2025-12-30  
-**System Version**: v3 (Google Docs → PDF Pipeline)  
-**Status**: Production-ready, PDF generation enhancement in progress
+**Last Updated**: 2026-01-03  
+**System Version**: v4 (OAuth-only PDF Generation)  
+**Status**: Production-ready, OAuth authentication implemented
 
 ---
 
@@ -53,9 +53,10 @@ This is a **freelance payment collection micro-site** (`payments.august.style`) 
   - `/api/update-payment` - Updates payment status, triggers GitHub Actions
   - `/api/track-event` - Tracks user events (contract loaded, scrolled, etc.)
   - `/api/webhook` - Stripe webhook handler (listens for `checkout.session.completed`)
-  - `/api/generate-pdf` - **NEW**: Google Docs → PDF generation (to be implemented)
-- Has: `STRIPE_SECRET_KEY`, `GOOGLE_SERVICE_ACCOUNT_KEY`, `GOOGLE_TEMPLATE_CONTRACT_ID`, `GOOGLE_TEMPLATE_INVOICE_ID` configured
-- Does: Creates payment sessions, validates webhooks, triggers GitHub Actions, generates PDFs
+  - `/api/google/auth` - OAuth consent URL generator (one-time setup)
+  - `/api/google/callback` - OAuth callback handler (extracts refresh token)
+- Has: `STRIPE_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GOOGLE_TEMPLATE_CONTRACT_ID`, `GOOGLE_TEMPLATE_INVOICE_ID` configured
+- Does: Creates payment sessions, validates webhooks, triggers GitHub Actions, handles OAuth flow
 
 **3. GitHub Actions**
 - Workflows:
@@ -64,19 +65,72 @@ This is a **freelance payment collection micro-site** (`payments.august.style`) 
 - Triggers: Push to `freelance-payments` branch, `workflow_dispatch` (from Vercel)
 - Updates: JSON files in `assets/jobs/`, `assets/js/manifest.json`
 
-**4. Google Drive API** (NEW)
+**4. Google Drive/Docs API** (v4)
 - Template storage: Google Docs templates with `{{placeholder}}` syntax
-- PDF generation: Clone template → Replace placeholders → Export as PDF
-- Storage: PDFs stored in Google Drive, URLs stored in job JSON
-- Archive: PDFs also committed to repo `assets/completed_docs/` for provenance
+- PDF generation: Clone template → Replace placeholders → Export as PDF → Save to repo
+- Authentication: OAuth refresh token (internal organization setup)
+- Storage: PDFs stored in repo `assets/pdf/contract/` and `assets/pdf/invoice/`
+- Template IDs: Contract (`1BJI1-d1NJu9pgLKI7Z_EHP9Y2rd6bqR57yZVJxwXJB8`), Invoice (`1BYf71d5Bryy8SrfnQdxSeIfzQilsvHQ8bqUKTh5QB1c`)
 
 ---
 
-## Data Structure: Job JSON Schema (v3)
+## v4 Schema Changes Summary
 
-Each client project is represented by a single JSON file in `assets/jobs/` named `{job_id}.json` (e.g., `uid-sst-846.json`).
+### Key Changes from v3 → v4
 
-### Core Structure
+**1. Flattened Structure**
+- Removed `metadata` nesting level throughout
+- Shortened field names (e.g., `product_object` → `product`, `state_management` → `state`)
+- Direct field access (e.g., `product.login_name` instead of `product.metadata.login_name`)
+
+**2. Price Object Renaming**
+- `initial_price_object` → `price1`
+- `balance_price_object` → `price2`
+- `state.objects.initial_price` → `state.objects.price_1`
+- `state.objects.balance_price` → `state.objects.price_2`
+
+**3. Customer Object Simplification**
+- `customer_object` → `customer`
+- `customer_object.description` → `customer.title` (stored in Stripe metadata)
+- `customer_object.individual_name` → `customer.name`
+- `customer_object.business_name` → `customer.business`
+
+**4. State Management Updates**
+- `state_management` → `state`
+- `state_management.object_id` → `state.objects`
+- `state_management.initial_payment_intent` → `state.payment_1`
+- `state_management.balance_payment_intent` → `state.payment_2`
+
+**5. Checkout Session Updates**
+- `initial_checkout_session` → `checkout_session_1`
+- `balance_checkout_session` → `checkout_session_2`
+
+**6. PDF Generation (NEW in v4)**
+- PDFs generated immediately after Stripe objects created (during initial push workflow)
+- Stored in repo: `assets/pdf/contract/kon-{job_id}.pdf` and `assets/pdf/invoice/inv-{job_id}.pdf`
+- Metadata stored in `docs.contract` and `docs.invoice` fields
+- No HTML fallback - frontend only displays PDFs or shows error
+
+**7. Authentication (v4 Update)**
+- OAuth-only authentication (Service Account removed)
+- Internal Google Cloud organization setup
+- Refresh token stored in GitHub Secrets as `GOOGLE_REFRESH_TOKEN`
+- Template files shared with OAuth user account (`development@august.style`)
+
+For complete changelog, see `assets/docs/v4/_SCHEMA_CHANGELOG.md`.
+
+---
+
+## Data Structure: Job JSON Schema (v4)
+
+Each client project is represented by a single JSON file in `assets/jobs/` named `{job_id}.json` (e.g., `uid-abc-123.json`).
+
+**Note**: The example below shows v3 schema structure. For v4 schema examples, see:
+- `assets/docs/v4/_blank_job_schema_v4.json` - Blank template for new jobs
+- `assets/docs/v4/_json_value_examples_v4.json` - Example with sample values
+- `assets/docs/v4/_SCHEMA_CHANGELOG.md` - Complete changelog of v3→v4 changes
+
+### Core Structure (v3 example - see files above for v4)
 
 ```json
 {
@@ -372,7 +426,7 @@ Each client project is represented by a single JSON file in `assets/jobs/` named
 ### Template Storage
 
 - Templates stored in Google Drive
-- Service account has access to templates
+- OAuth user account (`development@august.style`) has Editor access to templates
 - Templates are **immutable** (don't modify after creation, create new version if needed)
 
 ---
@@ -482,23 +536,17 @@ Each client project is represented by a single JSON file in `assets/jobs/` named
 
 ### Google Drive Access
 
-- **Service Account**: Authenticates API calls (no user login required)
-- **Template Access**: Service account has read access to templates
-- **PDF Storage**: Service account creates PDFs in designated Drive folder
-- **Public Access**: PDFs set to "anyone with link" OR served via authenticated proxy
+- **OAuth Authentication**: Uses refresh token for headless authentication in GitHub Actions
+- **Template Access**: OAuth user account has Editor access to templates
+- **PDF Storage**: PDFs saved directly to repository (`assets/pdf/contract/` and `assets/pdf/invoice/`)
+- **Public Access**: PDFs served via GitHub Pages (public repository)
 
-### Authenticated Proxy (Recommended)
+### Repository Storage
 
-Instead of public Drive links, serve PDFs through Vercel:
-- `/api/pdf/{job_id}/contract` → Validates request → Fetches from Drive → Returns PDF
-- Prevents broad discoverability
-- Allows access logging
-
-### Repository Archive
-
-- PDFs committed to `assets/completed_docs/` with immutable names: `{job_id}-{timestamp}-contract.pdf`
+- PDFs committed to `assets/pdf/contract/` and `assets/pdf/invoice/` with names: `kon-{job_id}.pdf` and `inv-{job_id}.pdf`
 - Provides audit trail and backup
-- Job JSON stores Drive file IDs and URLs for live access
+- Job JSON stores PDF paths and URLs for frontend access
+- Temporary Google Doc copies are deleted immediately after PDF export
 
 ---
 
@@ -510,11 +558,12 @@ Instead of public Drive links, serve PDFs through Vercel:
 # Stripe
 STRIPE_SECRET_KEY=sk_live_...
 
-# Google Drive API
-GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account",...}
-GOOGLE_TEMPLATE_CONTRACT_ID=1a2b3c4d5e6f7g8h9i0j
-GOOGLE_TEMPLATE_INVOICE_ID=9z8y7x6w5v4u3t2s1r0q
-GOOGLE_DRIVE_FOLDER_ID=folder123...  # Where PDFs are stored
+# Google OAuth (for PDF generation)
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_REFRESH_TOKEN=your-refresh-token  # Obtained from /api/google/auth flow
+GOOGLE_TEMPLATE_CONTRACT_ID=1BJI1-d1NJu9pgLKI7Z_EHP9Y2rd6bqR57yZVJxwXJB8
+GOOGLE_TEMPLATE_INVOICE_ID=1BYf71d5Bryy8SrfnQdxSeIfzQilsvHQ8bqUKTh5QB1c
 
 # Email (optional)
 SENDGRID_API_KEY=SG...
@@ -574,19 +623,20 @@ freelance-payments/
 ## Key Design Decisions
 
 1. **JSON as Single Source of Truth**: All state, Stripe IDs, PDF artifacts stored in JSON files
-2. **Event-Driven**: PDFs generated on payment success, not on contract signing
-3. **Immutable PDFs**: Once generated, PDFs are never modified (new versions get new timestamps)
-4. **Dual Storage**: PDFs in Google Drive (live access) + Repository (archive/audit)
+2. **Event-Driven**: PDFs generated immediately after Stripe objects created (during initial push workflow)
+3. **Immutable PDFs**: Once generated, PDFs are never modified (new jobs get new UIDs)
+4. **Repository Storage**: PDFs stored only in repository (`assets/pdf/contract/` and `assets/pdf/invoice/`)
 5. **Template-Based**: Google Docs templates handle all formatting, no CSS/HTML gymnastics
-6. **Backward Compatible**: If PDF not generated, fall back to HTML rendering
+6. **No HTML Fallback**: Frontend only displays PDFs or shows error (v4 requirement)
 
 ---
 
 ## Testing Checklist
 
 - [ ] Google Docs templates created with correct placeholders
-- [ ] Service account authenticated and has template access
-- [ ] `/api/generate-pdf` endpoint implemented
+- [ ] OAuth refresh token obtained and stored in GitHub Secrets
+- [ ] Template files shared with OAuth user account (`development@august.style`)
+- [ ] PDF generation script tested in GitHub Actions
 - [ ] PDF generation tested with sample JSON
 - [ ] PDFs stored in Drive and accessible
 - [ ] PDFs committed to repository archive
@@ -600,9 +650,10 @@ freelance-payments/
 
 ## Next Steps
 
-1. **Create Google Docs templates** with placeholders
-2. **Set up Google Service Account** and authenticate
-3. **Implement `/api/generate-pdf`** endpoint
+1. **Create Google Docs templates** with placeholders ✅
+2. **Set up Google OAuth** (internal organization) and obtain refresh token ✅
+3. **Share templates** with OAuth user account ✅
+4. **Test PDF generation** end-to-end in GitHub Actions
 4. **Test PDF generation** with sample job JSON
 5. **Update frontend** to display PDFs instead of HTML
 6. **Add email delivery** (optional)

@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
 
     const scopes = [
       'https://www.googleapis.com/auth/documents',
-      'https://www.googleapis.com/auth/drive.file'
+      'https://www.googleapis.com/auth/drive'  // Full drive scope needed to access shared template files
     ];
 
     const authUrl = oauth2Client.generateAuthUrl({

@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        title: "Action type (sign-contract, update-payment, track-event)"
+        description: "Action type (sign-contract, update-payment, track-event)"
         required: true
         type: choice
         options:
@@ -21,10 +21,10 @@ on:
           - update-payment
           - track-event
       job_id:
-        title: "Job ID"
+        description: "Job ID"
         required: true
       payload:
-        title: "JSON payload"
+        description: "JSON payload"
         required: true
 
 jobs:
@@ -59,7 +59,6 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
           GOOGLE_TEMPLATE_CONTRACT_ID: ${{ secrets.GOOGLE_TEMPLATE_CONTRACT_ID }}
           GOOGLE_TEMPLATE_INVOICE_ID: ${{ secrets.GOOGLE_TEMPLATE_INVOICE_ID }}
         run: |

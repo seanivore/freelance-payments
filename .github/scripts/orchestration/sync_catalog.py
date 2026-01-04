@@ -450,45 +450,37 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
         'products_archived': 0
     }
 
-    # Step 1: Process JSON files that have matching manifest entries
-    # Check product.active to decide: archive or skip
+    # Simplified 4-case logic:
+    # 1. Match + active=false → Archive
+    # 2. Match + active=true → Skip (already synced)
+    # 3. No match + JSON exists → Create (new job)
+    # 4. No match + manifest entry exists → Archive (orphaned)
+    
     jobs_to_archive = []
     jobs_to_skip = []
     jobs_to_create = []
     
     for job_id in json_job_ids:
         if job_id in manifest_job_ids:
-            # Has manifest entry - check if needs archiving or if Stripe objects exist
+            # Case 1 or 2: Has manifest entry - check product.active
             job_data = jobs_by_id[job_id]
             product = job_data.get('product', {})
-            price2 = job_data.get('price2')
-            state_objects = job_data.get('state', {}).get('objects', {})
-            
-            # Check if Stripe objects actually exist (product ID in state.objects)
-            has_stripe_objects = state_objects.get('product') is not None
-            
-            # Check if product is marked inactive OR balance payment is inactive
             product_active = product.get('active', True)
-            balance_active = price2.get('active', True) if price2 else True
             
-            if not product_active or (price2 and not balance_active):
-                # Archive this product
+            if not product_active:
+                # Case 1: Match + active=false → Archive
                 jobs_to_archive.append(job_id)
                 print(f"DEBUG: Job {job_id} marked for archiving (active=false)", file=sys.stderr)
-            elif not has_stripe_objects:
-                # In manifest but no Stripe objects - needs creation (e.g., previous sync failed)
-                jobs_to_create.append(job_id)
-                print(f"DEBUG: Job {job_id} in manifest but missing Stripe objects - will create", file=sys.stderr)
             else:
-                # Already synced and active - skip
+                # Case 2: Match + active=true → Skip (already synced)
                 jobs_to_skip.append(job_id)
                 print(f"DEBUG: Job {job_id} already synced and active - skipping", file=sys.stderr)
         else:
-            # No manifest entry - needs creation
+            # Case 3: No manifest entry → Create (new job)
             jobs_to_create.append(job_id)
             print(f"DEBUG: Job {job_id} is new - will create Stripe objects", file=sys.stderr)
     
-    # Step 2: Find orphaned products (in manifest but no JSON file)
+    # Case 4: Find orphaned products (in manifest but no JSON file) → Archive
     orphaned_job_ids = manifest_job_ids - json_job_ids
     for job_id in orphaned_job_ids:
         jobs_to_archive.append(job_id)

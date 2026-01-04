@@ -46,9 +46,7 @@ from utils.json_io import list_all_jobs, save_job, find_job_file
 
 # Import Google APIs
 try:
-    from google.oauth2 import service_account
     from google.auth.transport.requests import Request
-    from google_auth_oauthlib.flow import InstalledAppFlow
     from googleapiclient.discovery import build
     from googleapiclient.http import MediaIoBaseDownload
     import io
@@ -60,68 +58,46 @@ except ImportError:
 # OAuth scopes required
 SCOPES = [
     'https://www.googleapis.com/auth/documents',
-    'https://www.googleapis.com/auth/drive.file'  # Narrower scope: only app-created/opened files
+    'https://www.googleapis.com/auth/drive'  # Full drive scope needed to access shared template files
 ]
 
 
 def authenticate_google():
     """
-    Authenticate with Google using Service Account (primary for automation) or OAuth refresh token (fallback for client compatibility).
+    Authenticate with Google using OAuth refresh token (OAuth-only authentication).
     
     Returns:
         Authenticated service objects (drive_service, docs_service)
     """
-    # Try Service Account first (for GitHub Actions automation - has template access)
-    service_account_key = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
-    if service_account_key:
-        try:
-            # Handle base64 encoded key (for Vercel)
-            if service_account_key.startswith('eyJ'):
-                import base64
-                service_account_key = base64.b64decode(service_account_key).decode('utf-8')
-            
-            creds_dict = json.loads(service_account_key)
-            creds = service_account.Credentials.from_service_account_info(
-                creds_dict,
-                scopes=SCOPES
-            )
-            drive_service = build('drive', 'v3', credentials=creds)
-            docs_service = build('docs', 'v1', credentials=creds)
-            print("DEBUG: Using Service Account authentication", file=sys.stderr)
-            return drive_service, docs_service
-        except Exception as e:
-            print(f"Warning: Service Account authentication failed: {e}. Trying OAuth...", file=sys.stderr)
-    
-    # Fallback to OAuth refresh token (for client compatibility, headless operation)
     refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
     client_id = os.getenv('GOOGLE_CLIENT_ID')
     client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
     
-    if refresh_token and client_id and client_secret:
-        try:
-            from google.oauth2.credentials import Credentials
-            
-            # Create credentials from refresh token
-            creds = Credentials(
-                token=None,  # Will be refreshed automatically
-                refresh_token=refresh_token,
-                token_uri='https://oauth2.googleapis.com/token',
-                client_id=client_id,
-                client_secret=client_secret,
-                scopes=SCOPES
-            )
-            
-            # Refresh the access token (required before first use)
-            creds.refresh(Request())
-            
-            drive_service = build('drive', 'v3', credentials=creds)
-            docs_service = build('docs', 'v1', credentials=creds)
-            print("DEBUG: Using OAuth refresh token authentication", file=sys.stderr)
-            return drive_service, docs_service
-        except Exception as e:
-            print(f"Warning: OAuth refresh token authentication failed: {e}", file=sys.stderr)
+    if not (refresh_token and client_id and client_secret):
+        raise ValueError("GOOGLE_REFRESH_TOKEN, GOOGLE_CLIENT_ID, and GOOGLE_CLIENT_SECRET environment variables must be set")
     
-    raise ValueError("Neither GOOGLE_SERVICE_ACCOUNT_KEY nor GOOGLE_REFRESH_TOKEN (with GOOGLE_CLIENT_ID/SECRET) environment variable set")
+    try:
+        from google.oauth2.credentials import Credentials
+        
+        # Create credentials from refresh token
+        creds = Credentials(
+            token=None,  # Will be refreshed automatically
+            refresh_token=refresh_token,
+            token_uri='https://oauth2.googleapis.com/token',
+            client_id=client_id,
+            client_secret=client_secret,
+            scopes=SCOPES
+        )
+        
+        # Refresh the access token (required before first use)
+        creds.refresh(Request())
+        
+        drive_service = build('drive', 'v3', credentials=creds)
+        docs_service = build('docs', 'v1', credentials=creds)
+        print("DEBUG: Using OAuth refresh token authentication", file=sys.stderr)
+        return drive_service, docs_service
+    except Exception as e:
+        raise ValueError(f"OAuth authentication failed: {e}. Ensure refresh token is valid and template files are shared with the OAuth user account.")
 
 
 def format_address(address: dict) -> str:
@@ -251,12 +227,21 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
     """Generate contract PDF from template"""
     job_id = job_data.get('product', {}).get('id', 'unknown')
     
-    # Copy template
-    copy_response = drive_service.files().copy(
-        fileId=template_id,
-        body={'name': f'Contract-{job_id}-{int(datetime.now(UTC).timestamp())}'}
-    ).execute()
-    new_doc_id = copy_response['id']
+    # Debug: Log template access attempt
+    print(f"DEBUG: Attempting to copy template {template_id[:10]}...{template_id[-10:] if len(template_id) > 20 else template_id}", file=sys.stderr)
+    
+    # Copy template (supportsAllDrives=true for shared drives)
+    try:
+        copy_response = drive_service.files().copy(
+            fileId=template_id,
+            body={'name': f'Contract-{job_id}-{int(datetime.now(UTC).timestamp())}'},
+            supportsAllDrives=True  # Required for shared drives/files
+        ).execute()
+        new_doc_id = copy_response['id']
+        print(f"DEBUG: Successfully copied template, new doc ID: {new_doc_id}", file=sys.stderr)
+    except Exception as e:
+        print(f"DEBUG: Copy failed for template {template_id[:10]}...{template_id[-10:] if len(template_id) > 20 else template_id}: {type(e).__name__}: {str(e)}", file=sys.stderr)
+        raise
     
     try:
         # Prepare placeholder replacements (v4 schema)
@@ -337,12 +322,21 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
     """Generate invoice PDF from template (similar to contract)"""
     job_id = job_data.get('product', {}).get('id', 'unknown')
     
-    # Copy template
-    copy_response = drive_service.files().copy(
-        fileId=template_id,
-        body={'name': f'Invoice-{job_id}-{int(datetime.now(UTC).timestamp())}'}
-    ).execute()
-    new_doc_id = copy_response['id']
+    # Debug: Log template access attempt
+    print(f"DEBUG: Attempting to copy template {template_id[:10]}...{template_id[-10:] if len(template_id) > 20 else template_id}", file=sys.stderr)
+    
+    # Copy template (supportsAllDrives=true for shared drives)
+    try:
+        copy_response = drive_service.files().copy(
+            fileId=template_id,
+            body={'name': f'Invoice-{job_id}-{int(datetime.now(UTC).timestamp())}'},
+            supportsAllDrives=True  # Required for shared drives/files
+        ).execute()
+        new_doc_id = copy_response['id']
+        print(f"DEBUG: Successfully copied template, new doc ID: {new_doc_id}", file=sys.stderr)
+    except Exception as e:
+        print(f"DEBUG: Copy failed for template {template_id[:10]}...{template_id[-10:] if len(template_id) > 20 else template_id}: {type(e).__name__}: {str(e)}", file=sys.stderr)
+        raise
     
     try:
         # Prepare placeholder replacements (v4 schema)
@@ -434,8 +428,8 @@ def generate_pdfs(jobs_dir: str = "assets/jobs") -> dict:
         }
     
     # Get template IDs from environment
-    contract_template_id = os.getenv('GOOGLE_TEMPLATE_CONTRACT_ID')
-    invoice_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_ID')
+    contract_template_id = os.getenv('GOOGLE_TEMPLATE_CONTRACT_ID', '').strip()
+    invoice_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_ID', '').strip()
     
     if not contract_template_id or not invoice_template_id:
         return {
@@ -443,6 +437,10 @@ def generate_pdfs(jobs_dir: str = "assets/jobs") -> dict:
             "invoices_generated": 0,
             "errors": ["GOOGLE_TEMPLATE_CONTRACT_ID or GOOGLE_TEMPLATE_INVOICE_ID not set"]
         }
+    
+    # Debug: Log template IDs (first/last few chars only for security)
+    print(f"DEBUG: Contract template ID: {contract_template_id[:10]}...{contract_template_id[-10:] if len(contract_template_id) > 20 else contract_template_id}", file=sys.stderr)
+    print(f"DEBUG: Invoice template ID: {invoice_template_id[:10]}...{invoice_template_id[-10:] if len(invoice_template_id) > 20 else invoice_template_id}", file=sys.stderr)
     
     # Get project root for resolving paths
     utils_dir = Path(__file__).parent.parent  # .github/scripts
@@ -470,11 +468,6 @@ def generate_pdfs(jobs_dir: str = "assets/jobs") -> dict:
             stats['errors'].append(f"Job missing product.id")
             continue
         
-        # Check if PDFs already exist (idempotency)
-        docs = job_data.get('docs', {})
-        contract_doc = docs.get('contract', {})
-        invoice_doc = docs.get('invoice', {})
-        
         # Initialize docs if missing
         if 'docs' not in job_data:
             job_data['docs'] = {}
@@ -483,14 +476,15 @@ def generate_pdfs(jobs_dir: str = "assets/jobs") -> dict:
         if 'invoice' not in job_data['docs']:
             job_data['docs']['invoice'] = {}
         
-        # Generate contract PDF if needed
-        if not contract_doc.get('created'):
+        # Generate contract PDF (only called for new jobs, so no idempotency check needed)
+        # Simple file existence check to avoid overwriting if script retries
+        pdf_filename = f'kon-{job_id}.pdf'
+        pdf_path = contract_dir / pdf_filename
+        if not pdf_path.exists():
             try:
                 result = generate_contract_pdf(drive_service, docs_service, job_data, contract_template_id)
                 
                 # Save PDF to repo
-                pdf_filename = f'kon-{job_id}.pdf'
-                pdf_path = contract_dir / pdf_filename
                 with open(pdf_path, 'wb') as f:
                     f.write(result['pdf_bytes'])
                 
@@ -508,14 +502,15 @@ def generate_pdfs(jobs_dir: str = "assets/jobs") -> dict:
             except Exception as e:
                 stats['errors'].append(f"Contract PDF generation failed for {job_id}: {str(e)}")
         
-        # Generate invoice PDF if needed
-        if not invoice_doc.get('created'):
+        # Generate invoice PDF (only called for new jobs, so no idempotency check needed)
+        # Simple file existence check to avoid overwriting if script retries
+        pdf_filename = f'inv-{job_id}.pdf'
+        pdf_path = invoice_dir / pdf_filename
+        if not pdf_path.exists():
             try:
                 result = generate_invoice_pdf(drive_service, docs_service, job_data, invoice_template_id)
                 
                 # Save PDF to repo
-                pdf_filename = f'inv-{job_id}.pdf'
-                pdf_path = invoice_dir / pdf_filename
                 with open(pdf_path, 'wb') as f:
                     f.write(result['pdf_bytes'])
                 
