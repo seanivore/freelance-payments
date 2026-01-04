@@ -232,10 +232,17 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
     print(f"DEBUG: Attempting to copy contract template (ID: {template_display})", file=sys.stderr)
     
     # Copy template (supportsAllDrives=true for shared drives)
+    # Use temp folder if configured to organize temporary files
+    temp_folder_id = os.getenv('GOOGLE_TEMP_FOLDER_ID', '').strip()
+    copy_body = {'name': f'Contract-{job_id}-{int(datetime.now(UTC).timestamp())}'}
+    if temp_folder_id:
+        copy_body['parents'] = [temp_folder_id]
+        print(f"DEBUG: Using temp folder for contract copy: {temp_folder_id[:10]}...{temp_folder_id[-10:] if len(temp_folder_id) > 20 else temp_folder_id}", file=sys.stderr)
+    
     try:
         copy_response = drive_service.files().copy(
             fileId=template_id,
-            body={'name': f'Contract-{job_id}-{int(datetime.now(UTC).timestamp())}'},
+            body=copy_body,
             supportsAllDrives=True  # Required for shared drives/files
         ).execute()
         new_doc_id = copy_response['id']
@@ -339,10 +346,17 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
     print(f"DEBUG: Attempting to copy invoice template (ID: {template_display})", file=sys.stderr)
     
     # Copy template (supportsAllDrives=true for shared drives)
+    # Use temp folder if configured to organize temporary files
+    temp_folder_id = os.getenv('GOOGLE_TEMP_FOLDER_ID', '').strip()
+    copy_body = {'name': f'Invoice-{job_id}-{int(datetime.now(UTC).timestamp())}'}
+    if temp_folder_id:
+        copy_body['parents'] = [temp_folder_id]
+        print(f"DEBUG: Using temp folder for invoice copy: {temp_folder_id[:10]}...{temp_folder_id[-10:] if len(temp_folder_id) > 20 else temp_folder_id}", file=sys.stderr)
+    
     try:
         copy_response = drive_service.files().copy(
             fileId=template_id,
-            body={'name': f'Invoice-{job_id}-{int(datetime.now(UTC).timestamp())}'},
+            body=copy_body,
             supportsAllDrives=True  # Required for shared drives/files
         ).execute()
         new_doc_id = copy_response['id']

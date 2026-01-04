@@ -61,6 +61,7 @@ jobs:
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
           GOOGLE_TEMPLATE_CONTRACT_ID: ${{ secrets.GOOGLE_TEMPLATE_CONTRACT_ID }}
           GOOGLE_TEMPLATE_INVOICE_ID: ${{ secrets.GOOGLE_TEMPLATE_INVOICE_ID }}
+          GOOGLE_TEMP_FOLDER_ID: ${{ secrets.GOOGLE_TEMP_FOLDER_ID }}
         run: |
           if [ "${{ github.event_name }}" == "push" ]; then
             python3 .github/scripts/orchestration/orchestrate_workflow.py \

@@ -425,8 +425,9 @@ Each client project is represented by a single JSON file in `assets/jobs/` named
 
 ### Template Storage
 
-- Templates stored in Google Drive
-- OAuth user account (`development@august.style`) has Editor access to templates
+- Templates stored in Google Drive folder (`TEMPLATES=1cJUCiwrLoWvftdpYaywvZqI7QFTLcIZY`)
+- Temporary Google Docs are created in `UPDATES` folder (`GOOGLE_TEMP_FOLDER_ID=1JGRnguvUX-hZtv9UDtSZC7dIPrHE-CLE`) before deletion
+- OAuth user account (`horvathaugust@gmail.com`) has Editor access to templates
 - Templates are **immutable** (don't modify after creation, create new version if needed)
 
 ---
@@ -564,6 +565,7 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_REFRESH_TOKEN=your-refresh-token  # Obtained from /api/google/auth flow
 GOOGLE_TEMPLATE_CONTRACT_ID=1BJI1-d1NJu9pgLKI7Z_EHP9Y2rd6bqR57yZVJxwXJB8
 GOOGLE_TEMPLATE_INVOICE_ID=1BYf71d5Bryy8SrfnQdxSeIfzQilsvHQ8bqUKTh5QB1c
+GOOGLE_TEMP_FOLDER_ID=1JGRnguvUX-hZtv9UDtSZC7dIPrHE-CLE  # Folder for temporary Google Docs before deletion
 
 # Email (optional)
 SENDGRID_API_KEY=SG...
