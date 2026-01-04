@@ -1,29 +1,4 @@
 {
-  "jobs": {
-    "johnson-branding": {
-      "file_path": "assets/jobs/uid-test-discount.json",
-      "job_id": "uid-test-discount",
-      "login_keyword": "branding",
-      "login_name": "Johnson"
-    },
-    "williams-enterprise": {
-      "file_path": "assets/jobs/uid-test-high.json",
-      "job_id": "uid-test-high",
-      "login_keyword": "enterprise",
-      "login_name": "Williams"
-    },
-    "davis-precise": {
-      "file_path": "assets/jobs/uid-test-odd.json",
-      "job_id": "uid-test-odd",
-      "login_keyword": "precise",
-      "login_name": "Davis"
-    },
-    "martinez-website": {
-      "file_path": "assets/jobs/uid-test-paid1.json",
-      "job_id": "uid-test-paid1",
-      "login_keyword": "website",
-      "login_name": "Martinez"
-    }
-  },
-  "generated_at": "2026-01-04T12:34:08.433296Z"
+  "jobs": {},
+  "generated_at": "2026-01-04T12:41:21.549627Z"
 }
