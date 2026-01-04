@@ -25,14 +25,17 @@
    * Queue an event for batch processing
    */
   function queueEvent(jobId, eventType, eventData = {}) {
-    eventQueue.push({
+    const event = {
       job_id: jobId,
       event_type: eventType,
       event_data: {
         ...eventData,
         timestamp: new Date().toISOString()
       }
-    });
+    };
+
+    eventQueue.push(event);
+    console.log(`📊 Event queued: ${eventType} for job ${jobId} (will send after 5min inactivity or on page unload)`);
 
     // Reset batch timer
     if (batchTimeout) {
@@ -55,16 +58,26 @@
     const eventsToSend = [...eventQueue];
     eventQueue = []; // Clear queue
 
+    console.log(`📤 Sending ${eventsToSend.length} batched event(s) to API...`);
+
     // Send each event (API handles batching on backend if needed)
     for (const event of eventsToSend) {
       try {
-        await fetch(API_ENDPOINT, {
+        const response = await fetch(API_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(event)
         });
+
+        if (response.ok) {
+          console.log(`✅ Event sent: ${event.event_type} for job ${event.job_id}`);
+        } else {
+          console.warn(`⚠️ Event API returned ${response.status} for ${event.event_type}`);
+          // Re-queue failed events
+          eventQueue.push(event);
+        }
       } catch (e) {
-        console.warn('Failed to track event:', e);
+        console.warn('❌ Failed to track event:', e);
         // Re-queue failed events
         eventQueue.push(event);
       }

@@ -114,12 +114,19 @@
     const pdfViewer = pdfViewerDiv?.querySelector('iframe');
     if (!pdfViewer) return;
 
+    // Prevent multiple observers from being created
+    if (pdfViewer.dataset.scrollTrackingSetup === 'true') {
+      return;
+    }
+    pdfViewer.dataset.scrollTrackingSetup = 'true';
+
     // Use intersection observer on PDF iframe to detect when user has scrolled
     // For PDFs, we'll track when the iframe is fully visible (user has likely scrolled through)
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
           // PDF is mostly visible - user has likely scrolled through
+          console.log('📜 Contract PDF scrolled to completion (90%+ visible)');
           if (typeof EventTracker !== 'undefined') {
             EventTracker.trackContractScrolledComplete(jobId);
           }
