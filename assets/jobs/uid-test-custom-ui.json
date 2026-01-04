@@ -58,7 +58,7 @@
     },
     "client_status": {
       "logged_in": null,
-      "contract_loaded": null,
+      "contract_loaded": "2026-01-04T21:42:54.384Z",
       "contract_scrolled_complete": null,
       "viewed_contract": null,
       "viewed_invoice": null,
