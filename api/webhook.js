@@ -8,6 +8,8 @@
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+// Disable body parsing for Stripe webhook signature verification
+// Vercel serverless functions need raw body as Buffer/string
 module.exports = async (req, res) => {
   // Only allow POST
   if (req.method !== 'POST') {
@@ -25,8 +27,33 @@ module.exports = async (req, res) => {
   let event;
 
   try {
-    // Verify webhook signature
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    // Get raw body - Vercel provides req.body as parsed JSON by default
+    // For webhook signature verification, we need the raw body string
+    // Try to get raw body from request stream if available
+    let rawBody;
+
+    if (Buffer.isBuffer(req.body)) {
+      // Already a buffer (body parsing disabled)
+      rawBody = req.body;
+    } else if (typeof req.body === 'string') {
+      // Already a string
+      rawBody = Buffer.from(req.body, 'utf8');
+    } else {
+      // Body was parsed as JSON - need to read from stream
+      // For Vercel, we'll need to read the raw body differently
+      // Try reading from req as stream
+      rawBody = await new Promise((resolve, reject) => {
+        let data = Buffer.alloc(0);
+        req.on('data', chunk => {
+          data = Buffer.concat([data, Buffer.from(chunk)]);
+        });
+        req.on('end', () => resolve(data));
+        req.on('error', reject);
+      });
+    }
+
+    // Verify webhook signature with raw body
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });

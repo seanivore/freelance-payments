@@ -495,26 +495,46 @@ def sync_catalog(jobs_dir: str = "assets/jobs", manifest_path: str = "assets/js/
     jobs_to_skip = []
     jobs_to_create = []
     
-    # First pass: Handle inactive products (check Stripe directly, not manifest)
+    # First pass: Handle products that should be archived (all payments complete)
     for job_id in json_job_ids:
         job_data = jobs_by_id[job_id]
         product = job_data.get('product', {})
+        state = job_data.get('state', {})
+        payment_1 = state.get('payment_1', {})
+        payment_2 = state.get('payment_2', {})
+        
+        # Check if all payments are complete
+        payment_1_complete = payment_1.get('succeeded') is not None
+        payment_2_complete = payment_2.get('succeeded') is not None
+        total_payments = product.get('total_payments', 2)
+        
+        # Determine if all payments are done
+        all_payments_complete = False
+        if total_payments == 1:
+            all_payments_complete = payment_1_complete
+        elif total_payments == 2:
+            all_payments_complete = payment_1_complete and payment_2_complete
+        
+        # Also check product.active flag (for manual deactivation)
         product_active = product.get('active', True)
         
-        if not product_active:
-            # Inactive: Check Stripe directly to see if product exists
+        # Archive if: (1) all payments complete OR (2) manually set to inactive
+        if not product_active or all_payments_complete:
+            # Check Stripe directly to see if product exists
             product_id = job_id  # In v4 schema, product.id = job_id
             has_stripe_product = check_stripe_product_exists(product_id)
             
             if has_stripe_product:
-                # Case 1: Inactive + has Stripe product → Archive Stripe product + Delete JSON
+                # Case 1: All payments complete or inactive + has Stripe product → Archive Stripe product + Delete JSON
                 jobs_to_archive.append(job_id)
                 jobs_to_delete.append(job_id)
-                print(f"DEBUG: Job {job_id} marked for archiving Stripe product and deleting JSON (active=false, product exists in Stripe)", file=sys.stderr)
+                reason = "all payments complete" if all_payments_complete else "manually set to inactive"
+                print(f"DEBUG: Job {job_id} marked for archiving Stripe product and deleting JSON ({reason}, product exists in Stripe)", file=sys.stderr)
             else:
-                # Case 2: Inactive + no Stripe product → Delete JSON only
+                # Case 2: All payments complete or inactive + no Stripe product → Delete JSON only
                 jobs_to_delete.append(job_id)
-                print(f"DEBUG: Job {job_id} marked for deletion (active=false, no Stripe product)", file=sys.stderr)
+                reason = "all payments complete" if all_payments_complete else "manually set to inactive"
+                print(f"DEBUG: Job {job_id} marked for deletion ({reason}, no Stripe product)", file=sys.stderr)
     
     # Second pass: Handle active products (use manifest for matching)
     for job_id in json_job_ids:

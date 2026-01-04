@@ -183,11 +183,6 @@
 
     const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
 
-    // Track invoice viewed
-    if (jobId) {
-      await trackInvoiceViewed(jobId, paymentNumber);
-    }
-
     // v4 schema: Get PDF URL from docs.invoice.pdf
     const pdfPath = jobData.docs?.invoice?.pdf;
     const pdfUrl = pdfPath
@@ -210,6 +205,43 @@
       }
       return;
     }
+
+    // Setup scroll tracking (for PDF iframe) - tracks invoice_viewed when user scrolls through
+    if (jobId) {
+      setTimeout(() => setupScrollTracking(jobId, paymentNumber), 500);
+    }
+  }
+
+  /**
+   * Track invoice scrolled to completion (uses EventTracker for batching)
+   */
+  function setupScrollTracking(jobId, paymentNumber) {
+    // Track scroll completion for PDF iframe (v4: PDF embedding)
+    const pdfViewer = pdfViewerDiv?.querySelector('iframe');
+    if (!pdfViewer) return;
+
+    // Prevent multiple observers from being created
+    if (pdfViewer.dataset.scrollTrackingSetup === 'true') {
+      return;
+    }
+    pdfViewer.dataset.scrollTrackingSetup = 'true';
+
+    // Use intersection observer on PDF iframe to detect when user has scrolled
+    // For PDFs, we'll track when the iframe is fully visible (user has likely scrolled through)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.9) {
+          // PDF is mostly visible - user has likely scrolled through
+          console.log('📄 Invoice PDF scrolled to completion (90%+ visible)');
+          if (typeof EventTracker !== 'undefined') {
+            EventTracker.trackInvoiceViewed(jobId, paymentNumber);
+          }
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.9 });
+
+    observer.observe(pdfViewer);
   }
 
   // Export for use in other scripts

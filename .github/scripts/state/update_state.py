@@ -140,13 +140,36 @@ def update_payment_status(job_data: dict, payment_data: dict) -> dict:
     # Check if all payments are complete
     initial_paid = job_data['state'].get('payment_1', {}).get('succeeded') is not None
     balance_paid = job_data['state'].get('payment_2', {}).get('succeeded') is not None
-    all_paid = initial_paid and balance_paid
+    
+    # Count completed payments
+    completed_payment_count = 0
+    if initial_paid:
+        completed_payment_count += 1
+    if balance_paid:
+        completed_payment_count += 1
+    
+    # Get total_payments from product
+    product = job_data.get('product', {})
+    total_payments = product.get('total_payments', 2)
+    
+    # Determine if all payments are complete
+    all_paid = completed_payment_count >= total_payments
+    
+    # Set product.active = false when all payments are complete (payment count >= total_payments)
+    # This triggers archiving/deletion in sync_catalog.py
+    if all_paid and product.get('active', True):
+        product['active'] = False
+        job_id = product.get('id', 'unknown')
+        print(f"DEBUG: All payments complete for job {job_id} (completed: {completed_payment_count}, total: {total_payments}) - setting product.active=false", file=sys.stderr)
     
     return {
         'updated': True,
         'payment_number': payment_number,
         'succeeded': succeeded_timestamp,
-        'all_paid': all_paid
+        'all_paid': all_paid,
+        'completed_payment_count': completed_payment_count,
+        'total_payments': total_payments,
+        'product_active_updated': all_paid
     }
 
 

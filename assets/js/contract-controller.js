@@ -148,20 +148,28 @@
       return;
     }
 
+    // Prevent duplicate initialization
+    if (contractSection.dataset.initStarted === 'true') {
+      return;
+    }
+    contractSection.dataset.initStarted = 'true';
+
     const jobData = await getJobData();
 
     if (!jobData) {
       if (contentDiv) {
         contentDiv.innerHTML = '<p class="error">Job data not found. Please start from the <a href="/">homepage</a>.</p>';
       }
+      contractSection.dataset.initStarted = 'false'; // Reset on error
       return;
     }
 
     const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
 
-    // Track contract loaded
-    if (jobId) {
+    // Track contract loaded (only once)
+    if (jobId && !contractSection.dataset.contractLoaded) {
       await trackContractLoaded(jobId);
+      contractSection.dataset.contractLoaded = 'true';
     }
 
     // v4 schema: Get PDF URL from docs.contract.pdf
