@@ -13,22 +13,8 @@
   <!-- Tailwind CSS -->
   <link rel="stylesheet" href="/assets/css/styles.css">
 
-  <!-- Stripe.js (needed for checkout sections) - Basil version required for ui_mode: custom -->
-  <script src="https://js.stripe.com/basil/stripe.js"></script>
-  <script>
-    // Stripe publishable key will be set by API response or can be set here
-    // The API returns it with checkout session, but we can also set it here as fallback
-    // window.STRIPE_PUBLISHABLE_KEY = 'pk_test_...'; // Uncomment and set if needed
-
-    // Verify Stripe.js loaded (for debugging)
-    window.addEventListener('load', () => {
-      if (typeof Stripe === 'undefined' && typeof window.Stripe === 'undefined') {
-        console.warn('Stripe.js may not have loaded properly');
-      } else {
-        console.log('Stripe.js loaded successfully');
-      }
-    });
-  </script>
+  <!-- Stripe.js will be loaded dynamically by checkout-controller.js -->
+  <!-- This ensures we always use the correct Basil version and avoid URL resolution issues -->
 
 
   <!-- Print styles -->
@@ -409,7 +395,7 @@
 
       const modal = document.getElementById('signature-modal');
       const form = document.getElementById('signature-form');
-      const cancelBtn = document.getElementById('modal-cancel');
+      const cancelBtn = document.gelementById('modal-cancel');
       const signBtn = document.getElementById('contract-sign-btn');
 
       // Open modal when sign button is clicked
@@ -418,7 +404,7 @@
           modal.classList.remove('hidden');
           // Set today's date as default
           const today = new Date().toISOString().split('T')[0];
-          document.getElementById('contractor-date').value = today;
+          etElementById('contractor-date').value = today;
           document.getElementById('client-date').value = today;
         });
       }
@@ -489,14 +475,13 @@
           document.getElementById('loading').innerHTML = `
             <div class="text-center">
               <h1>Error</h1>
-              <p>Job data not found. Please start from the <a href="/">homepage</a>.</p>
-            </div>
+              <p>Job data not found. Please start from the <a href="/">homepage</a>.<>
+     iv>
           `;
-          return;
-        }
+          retu            }
 
         // Hide loading, show content
-        document.getElementById('loading').classList.add('hidden');
+        document.g     mentById('loading').classList.add('hidden');
         document.getElementById('job-content').classList.remove('hidden');
         document.getElementById('job-nav').classList.remove('hidden');
 

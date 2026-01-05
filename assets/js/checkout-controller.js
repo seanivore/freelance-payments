@@ -168,40 +168,65 @@
         const stripeRelease = 'basil';
         const stripeUrl = `https://js.stripe.com/${stripeRelease}/stripe.js`;
 
-        // CRITICAL: Remove any existing Stripe.js scripts (including from HTML)
+        // CRITICAL: Remove ALL existing Stripe.js scripts (including from HTML)
         // We must use Basil version for initCheckout to work
-        const existingScripts = document.querySelectorAll(`script[src*="js.stripe.com"]`);
+        // Get the absolute URL to compare properly
+        const existingScripts = document.querySelectorAll(`script[src*="js.stripe.com"], script[src*="stripe.js"]`);
         existingScripts.forEach(script => {
-          // Only remove if it's not the Basil version
-          if (!script.src.includes(`/${stripeRelease}/`)) {
+          // Get absolute URL for comparison
+          const scriptUrl = script.src || script.getAttribute('src');
+          // Remove if it's not the exact Basil version URL
+          if (!scriptUrl || !scriptUrl.includes(`/${stripeRelease}/stripe.js`)) {
+            console.log('Removing existing Stripe.js script:', scriptUrl);
             script.remove();
             // Clear window.Stripe to force reload
             delete window.Stripe;
           }
         });
 
-        // Check if correct version already exists
-        let script = document.querySelector(`script[src*="/${stripeRelease}/"]`);
+        // Check if correct version already exists (using absolute URL check)
+        let script = null;
+        const allScripts = document.querySelectorAll('script[src]');
+        for (const s of allScripts) {
+          const src = s.src || s.getAttribute('src');
+          if (src && src.includes(`/${stripeRelease}/stripe.js`)) {
+            script = s;
+            break;
+          }
+        }
 
         if (!script) {
-          // Create new script with Basil version
+          // Create new script with Basil version - use absolute URL
+          console.log('Creating new Stripe.js script with URL:', stripeUrl);
           script = document.createElement('script');
+          // CRITICAL: Use setAttribute to ensure absolute URL is preserved
+          script.setAttribute('src', stripeUrl);
+          // Also set .src property as fallback
           script.src = stripeUrl;
           script.async = true;
           script.crossOrigin = 'anonymous';
           script.setAttribute('data-stripe-release', stripeRelease);
 
+          // Verify the URL was set correctly
+          const finalSrc = script.src || script.getAttribute('src');
+          if (finalSrc !== stripeUrl && !finalSrc.endsWith('/basil/stripe.js')) {
+            console.error('⚠️ Script src mismatch! Expected:', stripeUrl, 'Got:', finalSrc);
+          }
+
           script.onerror = () => {
+            console.error('Stripe.js script failed to load. URL was:', script.src);
             reject(new Error('Stripe.js script failed to load (network/CSP). Check Content-Security-Policy, ad/script blockers, and network.'));
           };
 
           script.onload = () => {
+            console.log('✅ Stripe.js script loaded successfully from:', script.src);
             script.dataset.loaded = 'true';
             resolve();
           };
           document.head.appendChild(script);
         } else {
           // Correct version already exists
+          console.log('Reusing existing Stripe.js script:', script.src);
           if (script.dataset.loaded === 'true') {
             resolve();
           } else {
@@ -209,7 +234,10 @@
               script.dataset.loaded = 'true';
               resolve();
             });
-            script.addEventListener('error', () => reject(new Error('Stripe.js existing script failed to load.')));
+            script.addEventListener('error', () => {
+              console.error('Existing Stripe.js script failed to load:', script.src);
+              reject(new Error('Stripe.js existing script failed to load.'));
+            });
           }
         }
       });
