@@ -158,3 +158,19 @@ The `git smart-push` script:
 - If you didn't intentionally change manifest.json, this is correct behavior
 - GitHub Actions generates it, so remote version should win
 - If you DID intentionally change it, make sure you staged it before pushing
+
+**"How do I get updated files after workflows run?"**
+- After GitHub Actions workflows complete, they commit changes to the repo
+- To get the updated files (manifest.json, JSON files with Stripe IDs, etc.):
+  ```bash
+  git pull
+  ```
+  Or use:
+  ```bash
+  git smart-push  # This will pull AND push if you have local changes
+  ```
+- The workflows automatically commit:
+  - Updated `manifest.json` (with new job entries)
+  - Updated JSON files (with Stripe product/price IDs added)
+  - Deleted JSON files (if archived)
+  - Generated PDFs (in `assets/pdf/`)
