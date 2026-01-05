@@ -168,14 +168,28 @@
         const stripeVersion = '2025-03-31.basil';
         const stripeUrl = `https://js.stripe.com/v3/?version=${stripeVersion}`;
 
-        // If script tag already present, check if it's the right version
-        let script = document.querySelector(`script[src*="js.stripe.com/v3"]`);
+        // CRITICAL: Remove any existing Stripe.js scripts (including from HTML)
+        // We must use Basil version for initCheckout to work
+        const existingScripts = document.querySelectorAll(`script[src*="js.stripe.com/v3"]`);
+        existingScripts.forEach(script => {
+          // Only remove if it doesn't have the correct version
+          if (!script.src.includes(stripeVersion)) {
+            script.remove();
+            // Clear window.Stripe to force reload
+            delete window.Stripe;
+          }
+        });
+
+        // Check if correct version already exists
+        let script = document.querySelector(`script[src*="${stripeVersion}"]`);
 
         if (!script) {
+          // Create new script with Basil version
           script = document.createElement('script');
           script.src = stripeUrl;
           script.async = true;
           script.crossOrigin = 'anonymous';
+          script.setAttribute('data-stripe-version', stripeVersion);
 
           script.onerror = () => {
             reject(new Error('Stripe.js script failed to load (network/CSP). Check Content-Security-Policy, ad/script blockers, and network.'));
@@ -187,33 +201,15 @@
           };
           document.head.appendChild(script);
         } else {
-          // If it's already in the DOM, check version
-          if (script.src.includes(stripeVersion) || script.src.includes('version=')) {
-            // Same or compatible version
-            if (script.dataset.loaded === 'true') {
-              resolve();
-            } else {
-              script.addEventListener('load', () => {
-                script.dataset.loaded = 'true';
-                resolve();
-              });
-              script.addEventListener('error', () => reject(new Error('Stripe.js existing script failed to load.')));
-            }
+          // Correct version already exists
+          if (script.dataset.loaded === 'true') {
+            resolve();
           } else {
-            // Different version - need to reload with Basil version
-            script.remove();
-            const newScript = document.createElement('script');
-            newScript.src = stripeUrl;
-            newScript.async = true;
-            newScript.crossOrigin = 'anonymous';
-            newScript.onerror = () => {
-              reject(new Error('Stripe.js script failed to load (network/CSP). Check Content-Security-Policy, ad/script blockers, and network.'));
-            };
-            newScript.onload = () => {
-              newScript.dataset.loaded = 'true';
+            script.addEventListener('load', () => {
+              script.dataset.loaded = 'true';
               resolve();
-            };
-            document.head.appendChild(newScript);
+            });
+            script.addEventListener('error', () => reject(new Error('Stripe.js existing script failed to load.')));
           }
         }
       });
@@ -227,6 +223,9 @@
         }
         await new Promise(r => setTimeout(r, 50));
       }
+
+      // Small delay to ensure Stripe.js is fully initialized
+      await new Promise(r => setTimeout(r, 100));
     }
 
     async function loadStripe({ retries = 1 } = {}) {
