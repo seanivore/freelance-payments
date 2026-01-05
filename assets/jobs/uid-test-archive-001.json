@@ -19,29 +19,29 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-uid-test-archive-001",
+      "pdf": "assets/pdf/contract/kon-uid-test-archive-001.pdf",
+      "file_id": "1yCXw4LWGB8TqCG3ryzAgpvF6H8gyFRG6rgUzC1Rq9Tw",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-uid-test-archive-001.pdf",
+      "sha256": "0ffc430a4c0abd322ae6a117266a8a025df8c1ca2cda1de1643b91ca2385ab90",
+      "created": "2026-01-05T14:30:14.721313Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-uid-test-archive-001",
+      "pdf": "assets/pdf/invoice/inv-uid-test-archive-001.pdf",
+      "file_id": "19hUlbBqsWCmZTfq5dC772GDDOtZZrddgZSHLNSzWpDs",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-uid-test-archive-001.pdf",
+      "sha256": "6f7bd1cac7e5f5538a08cd092bc4cd35f80d8f7e125fe605ce16eefbd83b491c",
+      "created": "2026-01-05T14:30:20.935257Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
+      "created": "2026-01-05T14:30:07.359524Z",
+      "product": "uid-test-archive-001",
       "price_1": null,
       "price_2": null,
-      "customer": null,
+      "customer": "cus_TjiD7IKyfLto1S",
       "coupon": null,
       "checkout_session": {
         "payment_1": null,

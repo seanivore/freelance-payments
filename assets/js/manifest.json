@@ -1,4 +1,17 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-05T14:25:30.422482Z"
+  "jobs": {
+    "testclient-archive-test": {
+      "file_path": "assets/jobs/uid-test-archive-001.json",
+      "job_id": "uid-test-archive-001",
+      "login_keyword": "archive-test",
+      "login_name": "TestClient"
+    },
+    "testclient-payment-test": {
+      "file_path": "assets/jobs/uid-test-payment-001.json",
+      "job_id": "uid-test-payment-001",
+      "login_keyword": "payment-test",
+      "login_name": "TestClient"
+    }
+  },
+  "generated_at": "2026-01-05T14:30:32.016452Z"
 }
