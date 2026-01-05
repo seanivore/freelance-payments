@@ -351,65 +351,69 @@
         console.log('Stripe API version:', stripe._apiVersion);
       }
 
-      // Create fetchClientSecret function that will be called by Stripe.js
-      // Per Stripe docs: This function is called by Stripe.js when it needs the client secret
-      const fetchClientSecret = async () => {
-        console.log('🔄 fetchClientSecret called by Stripe.js, creating checkout session...');
-        const data = await createCheckoutSession(jobData, paymentNumber);
+      // Create a Promise that resolves to the client secret
+      // Per Stripe sample code: Pass a Promise directly, not a function
+      // The Promise will be resolved by Stripe.js when it needs the client secret
+      console.log('🔄 Creating checkout session promise...');
+      const clientSecretPromise = createCheckoutSession(jobData, paymentNumber)
+        .then(data => {
+          // Store publishable key if provided
+          if (data.publishable_key) {
+            window.STRIPE_PUBLISHABLE_KEY = data.publishable_key;
+            console.log('Stripe publishable key stored from checkout session');
+          }
 
-        // Store publishable key if provided (for future use)
-        if (data.publishable_key) {
-          window.STRIPE_PUBLISHABLE_KEY = data.publishable_key;
-          console.log('Stripe publishable key stored from fetchClientSecret');
-        }
+          if (!data.client_secret) {
+            throw new Error('No client_secret returned from server');
+          }
 
-        if (!data.client_secret) {
-          throw new Error('No client_secret returned from server');
-        }
+          // Validate client secret format
+          if (!data.client_secret.startsWith('cs_')) {
+            throw new Error(`Invalid client secret format: ${data.client_secret.substring(0, 20)}...`);
+          }
 
-        // Validate client secret format
-        if (!data.client_secret.startsWith('cs_')) {
-          throw new Error(`Invalid client secret format: ${data.client_secret.substring(0, 20)}...`);
-        }
+          console.log('✅ Client secret fetched:', data.client_secret.substring(0, 20) + '...');
+          return data.client_secret;
+        });
 
-        console.log('✅ Client secret fetched:', data.client_secret.substring(0, 20) + '...');
-        return data.client_secret;
-      };
-
-      // Use fetchClientSecret function (per Stripe documentation)
+      // Use clientSecret with Promise (matches Stripe sample code pattern)
       const appearance = {
         theme: 'stripe'
       };
       const initOptions = {
-        fetchClientSecret: fetchClientSecret,
+        clientSecret: clientSecretPromise,  // Promise, not function!
         elementsOptions: { appearance }
       };
-      console.log('initCheckout options:', { fetchClientSecret: '[Function]', elementsOptions: initOptions.elementsOptions });
+      console.log('initCheckout options:', { clientSecret: '[Promise]', elementsOptions: initOptions.elementsOptions });
 
       const checkout = stripe.initCheckout(initOptions);
       console.log('✅ Stripe Checkout initialized');
       console.log('Checkout object type:', typeof checkout, 'Methods:', Object.keys(checkout || {}).slice(0, 10));
 
-      // Wait for checkout to be ready (fetchClientSecret needs to complete first)
-      // When using fetchClientSecret, Stripe.js calls it asynchronously, so we need to wait
-      console.log('⏳ Waiting for checkout to be ready (fetchClientSecret may still be running)...');
+      // 8) Load actions to get session data and confirm method
+      // With clientSecret Promise, we may need to wait for Promise to resolve before loadActions is available
+      console.log('⏳ Waiting for checkout to be ready (clientSecret Promise may need to resolve)...');
 
-      // Poll for loadActions to become available (it appears after fetchClientSecret completes)
+      // Wait a bit for the Promise to resolve and checkout to initialize
+      // The Promise resolves when Stripe.js needs the client secret
       let attempts = 0;
       const maxAttempts = 50; // 5 seconds max wait
       while (typeof checkout.loadActions !== 'function' && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
+        if (attempts % 10 === 0) {
+          console.log(`Still waiting... (${attempts * 100}ms)`);
+        }
       }
 
       if (typeof checkout.loadActions !== 'function') {
-        throw new Error('checkout.loadActions() is not available. fetchClientSecret may have failed or checkout is not ready.');
+        // Log what methods ARE available for debugging
+        const availableMethods = Object.keys(checkout || {}).filter(key => typeof checkout[key] === 'function');
+        console.error('Available checkout methods:', availableMethods);
+        throw new Error('checkout.loadActions() is not available. Available methods: ' + availableMethods.join(', '));
       }
 
       console.log('✅ Checkout is ready, loadActions() is available');
-
-      // 8) Load actions to get session data and confirm method
-      // This must be called after fetchClientSecret completes
       console.log('Loading checkout actions...');
       let loadActionsResult;
       try {
