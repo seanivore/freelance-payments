@@ -80,13 +80,15 @@
     // Check payment status
     const payment1Paid = payment1.succeeded !== null;
     const payment2Paid = payment2.succeeded !== null;
-    const totalPayments = product.total_payments || 2;
+    const totalPayments = product.total_payments || (price2?.id ? 2 : 1); // Default: 2 if price2 exists, else 1
+    const hasPrice2 = !!price2?.id; // Check if price2 actually exists
 
     // Determine completion status
     let completionMessage = '';
     let isComplete = false;
 
-    if (totalPayments === 1 && payment1Paid) {
+    // For single payment jobs (totalPayments === 1 OR no price2)
+    if (totalPayments === 1 && payment1Paid && !hasPrice2) {
       isComplete = true;
       const amount = (price1.unit_amount || 0) / 100;
       completionMessage = `
@@ -105,7 +107,7 @@
           </p>
         </div>
       `;
-    } else if (totalPayments === 2) {
+    } else if (totalPayments === 2 || hasPrice2) {
       if (payment1Paid && payment2Paid) {
         isComplete = true;
         const amount1 = (price1.unit_amount || 0) / 100;

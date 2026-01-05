@@ -456,9 +456,6 @@
         console.log('✅ Checkout event listener registered');
       }
 
-      const session = actions.getSession();
-      console.log('✅ Session retrieved:', session);
-
       // Get amount from session (handle different possible structures)
       let amount = 0;
       try {
