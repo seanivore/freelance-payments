@@ -395,7 +395,7 @@
 
       const modal = document.getElementById('signature-modal');
       const form = document.getElementById('signature-form');
-      const cancelBtn = document.gelementById('modal-cancel');
+      const cancelBtn = document.getElementById('modal-cancel');
       const signBtn = document.getElementById('contract-sign-btn');
 
       // Open modal when sign button is clicked
@@ -404,7 +404,7 @@
           modal.classList.remove('hidden');
           // Set today's date as default
           const today = new Date().toISOString().split('T')[0];
-          etElementById('contractor-date').value = today;
+          document.getElementById('contractor-date').value = today;
           document.getElementById('client-date').value = today;
         });
       }
@@ -475,13 +475,14 @@
           document.getElementById('loading').innerHTML = `
             <div class="text-center">
               <h1>Error</h1>
-              <p>Job data not found. Please start from the <a href="/">homepage</a>.<>
-     iv>
+              <p>Job data not found. Please start from the <a href="/">homepage</a>.</p>
+            </div>
           `;
-          retu            }
+          return;
+        }
 
         // Hide loading, show content
-        document.g     mentById('loading').classList.add('hidden');
+        document.getElementById('loading').classList.add('hidden');
         document.getElementById('job-content').classList.remove('hidden');
         document.getElementById('job-nav').classList.remove('hidden');
 
