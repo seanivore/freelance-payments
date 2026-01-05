@@ -44,22 +44,23 @@ if [ $REBASE_STATUS -ne 0 ] && ([ -d .git/rebase-merge ] || [ -d .git/rebase-app
     echo "$CONFLICTS" | while read -r file; do
       [ -z "$file" ] && continue
       
+      # Check if file was DELETED in our commits (most important check first!)
+      FILE_IN_DELETED=$(echo "$DELETED_FILES" | grep -Fxq "$file" && echo "yes" || echo "no")
+      
       # Check conflict type using git ls-files -u
       # Stage 0 = common ancestor, Stage 1 = ours, Stage 2 = theirs
-      STAGE_INFO=$(git ls-files -u "$file" 2>/dev/null | awk '{print $1}' | sort -u)
-      
-      # Check if file exists in our commit (was deleted)
-      FILE_IN_DELETED=$(echo "$DELETED_FILES" | grep -q "^$file$" && echo "yes" || echo "no")
+      STAGE_INFO=$(git ls-files -u "$file" 2>/dev/null | awk '{print $1}' | sort -u | tr '\n' ' ')
       
       # Check if file is in our intentional changes
-      FILE_IN_INTENTIONAL=$(echo "$ALL_INTENTIONAL" | grep -q "^$file$" && echo "yes" || echo "no")
+      FILE_IN_INTENTIONAL=$(echo "$ALL_INTENTIONAL" | grep -Fxq "$file" && echo "yes" || echo "no")
       
+      # CRITICAL: If we deleted it, ALWAYS keep the deletion (even if remote modified it)
       if [ "$FILE_IN_DELETED" = "yes" ]; then
-        # We deleted it - keep the deletion
         echo "   ✓ Keeping YOUR deletion: $file (you intentionally deleted this)"
         git rm "$file" 2>/dev/null || true
-      elif echo "$STAGE_INFO" | grep -q "^1$" && ! echo "$STAGE_INFO" | grep -q "^2$"; then
-        # Only stage 1 exists (we modified, they deleted)
+        git add "$file" 2>/dev/null || true
+      # Check if this is a modify/delete conflict (we modified, they deleted)
+      elif echo "$STAGE_INFO" | grep -q "1" && ! echo "$STAGE_INFO" | grep -q "2"; then
         if [ "$FILE_IN_INTENTIONAL" = "yes" ]; then
           echo "   ✓ Keeping YOUR version: $file (you intentionally changed this)"
           git checkout --ours "$file"
@@ -68,11 +69,16 @@ if [ $REBASE_STATUS -ne 0 ] && ([ -d .git/rebase-merge ] || [ -d .git/rebase-app
           echo "   ✓ Taking REMOTE deletion: $file (you didn't change this)"
           git rm "$file" 2>/dev/null || true
         fi
-      elif echo "$STAGE_INFO" | grep -q "^2$" && ! echo "$STAGE_INFO" | grep -q "^1$"; then
-        # Only stage 2 exists (they modified, we deleted - handled above)
-        echo "   ✓ Taking REMOTE version: $file (you didn't delete this)"
-        git checkout --theirs "$file"
-        git add "$file"
+      # Check if this is a delete/modify conflict (they modified, we deleted - should be caught above)
+      elif echo "$STAGE_INFO" | grep -q "2" && ! echo "$STAGE_INFO" | grep -q "1"; then
+        if [ "$FILE_IN_DELETED" = "yes" ]; then
+          echo "   ✓ Keeping YOUR deletion: $file (you intentionally deleted this)"
+          git rm "$file" 2>/dev/null || true
+        else
+          echo "   ✓ Taking REMOTE version: $file (you didn't delete this)"
+          git checkout --theirs "$file"
+          git add "$file"
+        fi
       else
         # Regular modify/modify conflict (both stages exist)
         if [ "$FILE_IN_INTENTIONAL" = "yes" ]; then
