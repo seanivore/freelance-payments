@@ -19,12 +19,12 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-uid-test-payment-002",
+      "pdf": "assets/pdf/contract/kon-uid-test-payment-002.pdf",
+      "file_id": "1mH8-YrEhVZ9b6KMq6hu0r6skh33yB7IjHNAv94xMAcc",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-uid-test-payment-002.pdf",
+      "sha256": "29c9ddefed7a7ce3733108599a597495e898124b25735872c2a9b9dc32c31736",
+      "created": "2026-01-05T14:39:57.652328Z"
     },
     "invoice": {
       "id": null,
@@ -37,11 +37,11 @@
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
+      "created": "2026-01-05T14:39:42.872979Z",
+      "product": "uid-test-payment-002",
+      "price_1": "price_1SmEwd9fljwH26CPIwwpKt2I",
+      "price_2": "price_1SmEwd9fljwH26CPVQPmvQ0Q",
+      "customer": "cus_TjiN5p8yZ4aWSx",
       "coupon": null,
       "checkout_session": {
         "payment_1": null,
@@ -99,7 +99,9 @@
   "coupon": {
     "amount_off": 0,
     "applies_to": {
-      "products": ["uid-test-payment-002"]
+      "products": [
+        "uid-test-payment-002"
+      ]
     },
     "currency": "usd",
     "duration": "once",
@@ -116,9 +118,11 @@
     "pay_by": "start of work",
     "nickname": "Initial Payment",
     "product": {
-      "products": ["uid-test-payment-002"]
+      "products": [
+        "uid-test-payment-002"
+      ]
     },
-    "id": null
+    "id": "price_1SmEwd9fljwH26CPIwwpKt2I"
   },
   "price2": {
     "count": 2,
@@ -131,9 +135,11 @@
     "late_fee": "$100",
     "nickname": "Final Payment",
     "product": {
-      "products": ["uid-test-payment-002"]
+      "products": [
+        "uid-test-payment-002"
+      ]
     },
-    "id": null
+    "id": "price_1SmEwd9fljwH26CPVQPmvQ0Q"
   },
   "checkout_session_1": {
     "billing_address_collection": "required",
@@ -141,7 +147,7 @@
     "discounts": null,
     "line_items": [
       {
-        "price": null,
+        "price": "price_1SmEwd9fljwH26CPIwwpKt2I",
         "quantity": 1
       }
     ],
@@ -158,7 +164,7 @@
     "discounts": null,
     "line_items": [
       {
-        "price": null,
+        "price": "price_1SmEwd9fljwH26CPVQPmvQ0Q",
         "quantity": 1
       }
     ],

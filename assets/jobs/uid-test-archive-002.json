@@ -37,11 +37,11 @@
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
+      "created": "2026-01-05T14:39:43.581061Z",
+      "product": "uid-test-archive-002",
+      "price_1": "price_1SmEwd9fljwH26CPzPedxwgZ",
       "price_2": null,
-      "customer": null,
+      "customer": "cus_TjiNZygZEOwh3u",
       "coupon": null,
       "checkout_session": {
         "payment_1": null,
@@ -99,7 +99,9 @@
   "coupon": {
     "amount_off": 0,
     "applies_to": {
-      "products": ["uid-test-archive-002"]
+      "products": [
+        "uid-test-archive-002"
+      ]
     },
     "currency": "usd",
     "duration": "once",
@@ -116,9 +118,11 @@
     "pay_by": "start of work",
     "nickname": "Initial Payment",
     "product": {
-      "products": ["uid-test-archive-002"]
+      "products": [
+        "uid-test-archive-002"
+      ]
     },
-    "id": null
+    "id": "price_1SmEwd9fljwH26CPzPedxwgZ"
   },
   "price2": null,
   "checkout_session_1": {
@@ -127,7 +131,7 @@
     "discounts": null,
     "line_items": [
       {
-        "price": null,
+        "price": "price_1SmEwd9fljwH26CPzPedxwgZ",
         "quantity": 1
       }
     ],
