@@ -58,11 +58,7 @@
     },
     "client_status": {
       "logged_in": null,
-<<<<<<< Updated upstream
-      "contract_loaded": "2026-01-05T11:30:44.277Z",
-=======
       "contract_loaded": "2026-01-05T11:30:47.093Z",
->>>>>>> Stashed changes
       "contract_scrolled_complete": null,
       "viewed_contract": true,
       "viewed_invoice": true,
