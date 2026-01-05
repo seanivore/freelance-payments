@@ -1,8 +1,8 @@
 # AI Context Primer: Freelance Payments System
 
 **Last Updated**: 2026-01-04  
-**System Version**: v4  
-**Status**: Production-ready
+**System Version**: v4.3.0
+**Status**: Testing new workflows and custom-ui Stripe integration 
 
 ---
 
@@ -21,18 +21,199 @@ A **freelance payment collection micro-site** (`payments.august.style`) that aut
 
 ---
 
-## v4 Schema Updates Summary
+## v4 Schema Basics 
 
-**For complete changelog, see:** `assets/docs/v4/v4_UPDATES.md` and `assets/docs/v4/_SCHEMA_CHANGELOG.md`
+**Project and contract basics** 
+```json 
+  "project": null,
+  "contract": {
+    "work_start": null,
+    "work_end": null,
+    "legal_jurisdiction": null,
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 15000,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": null
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  }
+``` 
 
-### Key Changes from v3 → v4
+**PDF creation artifacts for dynamic serving**
+```json
+  "docs": {
+    "contract": {
+      "id": null,
+      "pdf": null, 
+      "file_id": null,
+      "url": null, 
+      "sha256": null,
+      "created": null
+    },
+    "invoice": {
+      "id": null,
+      "pdf": null, 
+      "file_id": null,
+      "url": null, 
+      "sha256": null,
+      "created": null
+    }
+  }
+```
 
-1. **Flattened Structure**: Removed `metadata` nesting, shortened field names (`product_object` → `product`, `state_management` → `state`)
-2. **Price Objects**: `initial_price_object` → `price1`, `balance_price_object` → `price2`
-3. **State Management**: `state_management` → `state`, `state.objects.price_1` and `state.objects.price_2` (not `initial_price`/`balance_price`)
-4. **PDF Generation**: PDFs generated immediately after Stripe objects created, stored in repo (`assets/pdf/contract/kon-{job_id}.pdf`, `assets/pdf/invoice/inv-{job_id}.pdf`)
-5. **OAuth-Only**: Service Account removed, using OAuth refresh token for Google API authentication
-6. **ID Prefixes**: Contract IDs use `kon-` prefix, Invoice IDs use `inv-` prefix, Customer IDs use `cus-` prefix, Coupon IDs use `cou-` prefix
+**State Management tracking through events** 
+```json 
+  "state": {
+    "objects": {
+      "created": null,
+      "product": null,
+      "price_1": null,
+      "price_2": null,
+      "customer": null,
+      "coupon": null,
+      "checkout_session": {
+        "payment_1": null,
+        "payment_2": null
+      }
+    },
+    "client_status": {
+      "logged_in": null,
+      "contract_loaded": null,
+      "contract_scrolled_complete": null,
+      "viewed_contract": true,
+      "viewed_invoice": true,
+      "downloaded_docs": 0,
+      "signed_contract": null
+    },
+    "payment_1": {
+      "intent": null,
+      "processing": null,
+      "succeeded": null
+    },
+    "payment_2": {
+      "intent": null,
+      "processing": null,
+      "succeeded": null
+    }
+  }
+``` 
+**Stripe catalog Product Object** 
+```json 
+  "product": {
+    "name": null,
+    "active": true,
+    "description": null,
+    "id": null,
+    "login_name": null,
+    "login_keyword": null,
+    "service_usd": null,
+    "total_payments": null,
+    "discount_usd": null,
+    "type": "service", 
+    "unit_label": "Payment"
+  }
+```
+**Customer and coupon Stripe catalog product objects**
+```json 
+  "customer": {
+    "name": null,
+    "business": null,
+    "title": null,
+    "email": null,
+    "phone": null,
+    "id": null,
+    "address": {
+      "city": null,
+      "line1": null,
+      "state": null,
+      "postal_code": null,
+      "country": null
+    }
+  },
+
+  "coupon": {
+    "amount_off": 0,
+    "applies_to": {"products": [null]},
+    "currency": "usd",
+    "duration": "once",
+    "id": null,
+    "max_redemptions": 1,
+    "name": null
+  }
+```
+**Two price payment objects per Job** 
+```json 
+  "price1": {
+    "count": 1, 
+    "currency": "usd",
+    "unit_amount": 0,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
+    "product": {"products": [null]},
+    "id": null
+  },
+
+  "price2": {
+    "count": 2, 
+    "currency": "usd",
+    "unit_amount": null,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": "$100",
+    "nickname": "Final Payment",
+    "product": {"products": [null]},
+    "id": null
+  }
+```
+**Checkout session objects and scope values** 
+```json 
+  "checkout_session_1": {
+    "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
+    "billing_address_collection": "required",
+    "branding_settings": {
+      "font_family": "noto_sans",
+      "background_color": "#1f1f1f",
+      "border_style": "pill",
+      "button_color": "#9C528B",
+      "display_name": "august.style designer"
+    },
+    "client_reference_id": null,
+    "currency": "usd",
+    "customer_creation": "always",
+    "custom_text": {"after_submit": {"message": "Time to create magic 💎"}},
+    "discounts": [{"coupon": null}],
+    "line_items": [{"price": null, "quantity": 1}],
+    "mode": "payment", 
+    "redirect_on_completion": "always",
+    "return_url": "https://payments.august.style/payment-success",
+    "submit_type": "pay",
+    "ui_mode": "embedded"
+  },
+
+  "checkout_session_2": {
+    "billing_address_collection": "required",
+    "customer_creation": "always",
+    "discounts": null,
+    "line_items": [{"price": null, "quantity": 1}],
+    "mode": "payment",
+    "phone_number_collection": {"enabled": true},
+    "return_url": "https://payments.august.style/{job_id}#completion",
+    "ui_mode": "custom"
+  },
+
+"project_scope_summary": null,
+"project_scope_full": null
+```
 
 ---
 
@@ -58,7 +239,6 @@ User actions → Vercel API → GitHub Actions → JSON updates
 - Static hosting (HTML, CSS, JavaScript, PDFs)
 - SPA routing via `404.html` (serves `job.html` for job URLs)
 - Hash-based navigation (`#contract`, `#invoice`, `#payment-1`, `#completion`)
-- Cannot run server code or store secrets
 
 **2. Vercel** (`freelance-payments-neon.vercel.app`)
 - Serverless functions for secure operations:
@@ -71,12 +251,11 @@ User actions → Vercel API → GitHub Actions → JSON updates
   - `/api/google/callback` - OAuth callback (extracts refresh token)
 
 **3. GitHub Actions**
-- `orchestrate.yml` - Main orchestrator (sync_catalog → generate_pdfs → generate_manifest → git commit/push)
-- `pages-build.yml` - GitHub Pages build (skips if orchestrator commits)
-- Triggers: Push to `freelance-payments` branch, `workflow_dispatch` from Vercel
-- Updates: JSON files, PDFs, manifest.json
+- `admin-push.yml` triggered for auto-deploys on EVERY push to `freelance-payments` branch
+- `user-behavior.yml` triggered for timed batch processing of frontend user events 
+- `payments.yml` triggered for every major payment event
 
-**4. Stripe**
+**4. Stripe's Custom UI Elements**
 - Products, Prices, Customers, Coupons created via API
 - Checkout Sessions created on-demand (not stored in JSON)
 - Webhooks trigger state updates
@@ -85,7 +264,7 @@ User actions → Vercel API → GitHub Actions → JSON updates
 - Templates stored in Google Drive (`TEMPLATES=1cJUCiwrLoWvftdpYaywvZqI7QFTLcIZY`)
 - Temporary docs created in `UPDATES` folder (`GOOGLE_TEMP_FOLDER_ID=1JGRnguvUX-hZtv9UDtSZC7dIPrHE-CLE`)
 - PDFs exported and saved to repository
-- OAuth authentication (internal organization)
+- OAuth authentication 
 
 ---
 
@@ -115,35 +294,22 @@ Every job is a JSON file in `assets/jobs/{job_id}.json`. This file contains:
 
 **Initial Job Creation:**
 1. JSON file added to `assets/jobs/`
-2. Push triggers `orchestrate.yml`
-3. `sync_catalog.py` creates Stripe objects, saves IDs to JSON
-4. `generate_pdfs.py` creates PDFs from templates, saves to repo
-5. `generate_manifest.py` updates manifest.json
-6. Single git commit/push
+2. Push triggers `admin-push.yml`
+3. Identifies patterns based on JSON and Stripe product matches 
+4. Creates Stripe objects, saves IDs to JSON
+5. Creates PDFs from templates, saves to repo
+6. Updates manifest.json
+7. Single git commit/push
 
 **Payment Completion:**
 1. Stripe webhook → `/api/webhook`
 2. Vercel triggers GitHub Actions `workflow_dispatch`
-3. `update_payment.py` updates JSON payment state
+3. `Updates JSON payment state
 4. Git commit/push
 
 **Why this matters**: PDFs are generated **immediately after Stripe objects are created**, not after payment. This ensures PDFs are available before checkout.
 
-### 4. Manifest-Based Lookup
-
-`assets/js/manifest.json` is generated from job JSON files. Structure:
-```json
-{
-  "jobs": {
-    "login_keyword": {
-      "file_path": "assets/jobs/uid-xxx-xxx.json",
-      "job_id": "uid-xxx-xxx",
-      "login_keyword": "project-keyword",
-      "login_name": "ClientLastName"
-    }
-  }
-}
-```
+### 4. Stripe Catalog Lookup
 
 Login lookup matches `login_name` and `login_keyword` separately (not combined).
 
@@ -156,7 +322,6 @@ Login lookup matches `login_name` and `login_keyword` separately (not combined).
 **Reference files:**
 - `assets/docs/v4/_blank_job_schema_v4.json` - Blank template
 - `assets/docs/v4/_json_value_examples_v4.json` - Example with values
-- `assets/docs/v4/_SCHEMA_CHANGELOG.md` - Complete changelog
 
 ### Core Fields
 
@@ -167,12 +332,6 @@ Login lookup matches `login_name` and `login_keyword` separately (not combined).
 - `state.payment_1` / `state.payment_2` - Payment status (`succeeded`, `processing`, etc.)
 - `docs.contract` / `docs.invoice` - PDF metadata (`id`, `pdf`, `url`, `sha256`, `created`)
 - `price1` / `price2` - Payment details (`unit_amount`, `nickname`, `pay_by`, etc.)
-
-### Important Notes
-
-- **Price.product.products**: This field exists in JSON schema but is **not used by Stripe API**. When creating Stripe Price objects, we pass `product: product_id` directly (see `sync_catalog.py` line 142). The nested structure is for JSON consistency but Stripe only needs the product_id string. You can leave it empty or remove it - it won't affect functionality.
-
-- **Checkout Sessions**: Stored as parameters in JSON (`checkout_session_1`, `checkout_session_2`) but **sessions are created on-demand** via `/api/create-checkout-session`. The JSON parameters are defaults/templates, not actual session IDs.
 
 ---
 
@@ -320,6 +479,7 @@ freelance-payments/
 │   ├── update-payment.js
 │   ├── track-event.js
 │   ├── webhook.js
+│   ├── update-payment.js
 │   ├── google/auth.js
 │   └── google/callback.js
 ├── assets/
@@ -338,20 +498,12 @@ freelance-payments/
 │   └── css/
 │       └── styles.css             # Tailwind CSS (includes breakpoints)
 ├── .github/
-│   ├── workflows/
-│   │   ├── orchestrate.yml        # Main workflow orchestrator
-│   │   └── pages-build.yml        # GitHub Pages build
-│   └── scripts/
-│       ├── generate_manifest.py
-│       ├── orchestration/
-│       │   ├── orchestrate_workflow.py  # Umbrella orchestrator
-│       │   └── sync_catalog.py          # Stripe object sync
-│       ├── pdf/
-│       │   └── generate_pdfs.py         # PDF generation from Google Docs
-│       └── utils/
-│           └── json_io.py                # JSON file operations
+│   └── workflows/
+│       ├── admin-push.yml        # Creates objects and PDFs
+│       ├── user-behavior.yml        # Triggers from user behavior on front end 
+│       └── payment.yml        # Triggered by payment events 
 └── assets/docs/
-    └── v4/
+    └── v4/v4_3_0
         ├── AI_CONTEXT_PRIMER.md   # This file
         ├── v4_UPDATES.md          # Version changelog
         ├── TESTING_GUIDE.md       # Testing instructions
@@ -381,7 +533,7 @@ freelance-payments/
 
 ## Testing
 
-See `assets/docs/v4/TESTING_GUIDE.md` for:
+See `assets/docs/v4/v4_1_0_pdfs/TESTING_GUIDE.md` for:
 - Stripe test card numbers
 - Testing workflow
 - Common test scenarios
@@ -398,5 +550,3 @@ See `assets/docs/v4/TESTING_GUIDE.md` for:
 - [Vercel Serverless Functions](https://vercel.com/docs/functions)
 
 ---
-
-**Note**: This document is for AI context. For version changelog, see `v4_UPDATES.md`. For testing, see `TESTING_GUIDE.md`.

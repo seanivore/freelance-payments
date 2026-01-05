@@ -90,7 +90,7 @@ IntegrationError: Invalid initCheckout() parameter: options.clientSecret is not 
 | Stripe.js Version | Clover (`/clover/stripe.js`) | Basil (`/basil/stripe.js`) |
 | API Version | `2025-12-15.clover` | `2025-03-31.basil` |
 | `clientSecret` Source | Promise from fetch | Resolved string value |
-| Beta Flag | Not shown | Tried `custom_checkout_beta` (rejected) |
+| Beta Flag             | Not shown          | Tried `custom_checkout_beta` (rejected) |
 
 ---
 
