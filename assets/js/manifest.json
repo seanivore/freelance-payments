@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-05T13:44:48.206281Z"
+  "jobs": {
+    "testclient-fresh-test": {
+      "file_path": "assets/jobs/uid-test-fresh-001.json",
+      "job_id": "uid-test-fresh-001",
+      "login_keyword": "fresh-test",
+      "login_name": "TestClient"
+    }
+  },
+  "generated_at": "2026-01-05T13:50:35.194135Z"
 }
