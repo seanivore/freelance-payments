@@ -351,16 +351,20 @@
         console.log('Stripe API version:', stripe._apiVersion);
       }
 
-      // Create a Promise that resolves to the client secret
-      // Per Stripe sample code: Pass a Promise directly, not a function
-      // The Promise will be resolved by Stripe.js when it needs the client secret
-      console.log('🔄 Creating checkout session promise...');
-      const clientSecretPromise = createCheckoutSession(jobData, paymentNumber)
-        .then(data => {
+      // Create fetchClientSecret function (Basil requires this, not clientSecret)
+      // Track when it completes so we know when checkout is ready
+      let fetchClientSecretCompleted = false;
+      let fetchClientSecretError = null;
+
+      const fetchClientSecret = async () => {
+        console.log('🔄 fetchClientSecret called by Stripe.js, creating checkout session...');
+        try {
+          const data = await createCheckoutSession(jobData, paymentNumber);
+
           // Store publishable key if provided
           if (data.publishable_key) {
             window.STRIPE_PUBLISHABLE_KEY = data.publishable_key;
-            console.log('Stripe publishable key stored from checkout session');
+            console.log('Stripe publishable key stored from fetchClientSecret');
           }
 
           if (!data.client_secret) {
@@ -373,36 +377,62 @@
           }
 
           console.log('✅ Client secret fetched:', data.client_secret.substring(0, 20) + '...');
+          fetchClientSecretCompleted = true;
           return data.client_secret;
-        });
+        } catch (error) {
+          console.error('❌ Error in fetchClientSecret:', error);
+          fetchClientSecretError = error;
+          fetchClientSecretCompleted = true;
+          throw error;
+        }
+      };
 
-      // Use clientSecret with Promise (matches Stripe sample code pattern)
+      // Use fetchClientSecret function (Basil requires this pattern)
       const appearance = {
         theme: 'stripe'
       };
       const initOptions = {
-        clientSecret: clientSecretPromise,  // Promise, not function!
+        fetchClientSecret: fetchClientSecret,  // Function, as required by Basil
         elementsOptions: { appearance }
       };
-      console.log('initCheckout options:', { clientSecret: '[Promise]', elementsOptions: initOptions.elementsOptions });
+      console.log('initCheckout options:', { fetchClientSecret: '[Function]', elementsOptions: initOptions.elementsOptions });
 
       const checkout = stripe.initCheckout(initOptions);
       console.log('✅ Stripe Checkout initialized');
       console.log('Checkout object type:', typeof checkout, 'Methods:', Object.keys(checkout || {}).slice(0, 10));
 
-      // 8) Load actions to get session data and confirm method
-      // With clientSecret Promise, we may need to wait for Promise to resolve before loadActions is available
-      console.log('⏳ Waiting for checkout to be ready (clientSecret Promise may need to resolve)...');
+      // 8) Wait for fetchClientSecret to complete, then wait for loadActions to become available
+      // Basil calls fetchClientSecret asynchronously, and loadActions only appears after it completes
+      console.log('⏳ Waiting for fetchClientSecret to complete...');
 
-      // Wait a bit for the Promise to resolve and checkout to initialize
-      // The Promise resolves when Stripe.js needs the client secret
+      // First, wait for fetchClientSecret to complete
       let attempts = 0;
-      const maxAttempts = 50; // 5 seconds max wait
+      const maxAttempts = 100; // 10 seconds max wait
+      while (!fetchClientSecretCompleted && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+        if (attempts % 10 === 0) {
+          console.log(`Waiting for fetchClientSecret... (${attempts * 100}ms)`);
+        }
+      }
+
+      if (fetchClientSecretError) {
+        throw fetchClientSecretError;
+      }
+
+      if (!fetchClientSecretCompleted) {
+        throw new Error('fetchClientSecret did not complete within timeout');
+      }
+
+      console.log('✅ fetchClientSecret completed, now waiting for loadActions() to become available...');
+
+      // Now wait for loadActions to become available
+      attempts = 0;
       while (typeof checkout.loadActions !== 'function' && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
         if (attempts % 10 === 0) {
-          console.log(`Still waiting... (${attempts * 100}ms)`);
+          console.log(`Waiting for loadActions()... (${attempts * 100}ms)`);
         }
       }
 
@@ -410,7 +440,8 @@
         // Log what methods ARE available for debugging
         const availableMethods = Object.keys(checkout || {}).filter(key => typeof checkout[key] === 'function');
         console.error('Available checkout methods:', availableMethods);
-        throw new Error('checkout.loadActions() is not available. Available methods: ' + availableMethods.join(', '));
+        console.error('Checkout object:', checkout);
+        throw new Error('checkout.loadActions() is not available after fetchClientSecret completed. Available methods: ' + availableMethods.join(', '));
       }
 
       console.log('✅ Checkout is ready, loadActions() is available');
