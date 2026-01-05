@@ -60,8 +60,8 @@
       "logged_in": null,
       "contract_loaded": "2026-01-05T00:06:14.383Z",
       "contract_scrolled_complete": null,
-      "viewed_contract": null,
-      "viewed_invoice": null,
+      "viewed_contract": true,
+      "viewed_invoice": true,
       "downloaded_docs": 0,
       "signed_contract": "2026-01-04T00:00:00.000ZZ"
     },
