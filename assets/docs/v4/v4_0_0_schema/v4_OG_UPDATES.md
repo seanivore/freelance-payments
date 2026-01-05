@@ -91,7 +91,7 @@ Implement `/api/generate-pdf.js` with the code structure above, test with sample
 | {{amount_off}}                  | formatCurrency(`coupon.amount_off`)                       |
 | {{total}}                       | formatCurrency(`{{subtotal}}`–`{{discount}}`)             |
 | {{amount_paid}}                 | Variable                                                  |
-| {{today}}                       | formatDate(day-invoice-is-created)                       |
+| {{today}}                       | formatDate(day-invoice-is-created)                        |
 
   * **VARIABLE** 
 

@@ -188,11 +188,11 @@ Login lookup matches `login_name` and `login_keyword` separately (not combined).
 | {{contract.work_end}}           | formatDate(`contract.work_end`)                           |
 | {{contract.legal_jurisdiction}} | `contract.legal_jurisdiction`                             |
 | {{project}}                     | `project`                                                 |
-| {{amount_due}}                  | Variable (calculated from payment state)                   |
+| {{amount_due}}                  |  Variable                                                 |
 | {{customer.business}}           | `customer.business`                                       |
 | {{customer.name}}               | `customer.name`                                           |
 | {{customer.title}}              | `customer.title`                                          |
-| {{address.line1}}               | `customer.address.line1`                                  |
+| {{customer.address.line1}}      | `customer.address.line1`                                  |
 | {{city}}                        | `customer.address.city`                                   |
 | {{state}}                       | `customer.address.state`                                  |
 | {{postal_code}}                 | `customer.address.postal_code`                            |
@@ -213,9 +213,9 @@ Login lookup matches `login_name` and `login_keyword` separately (not combined).
 | {{project_scope_full}}          | `project_scope_full`                                      |
 | {{subtotal}}                    | formatCurrency(`price1.unit_amount`+`price2.unit_amount`) |
 | {{amount_off}}                  | formatCurrency(`coupon.amount_off`)                       |
-| {{total}}                       | formatCurrency(`{{subtotal}}`–`{{amount_off}}`)           |
-| {{amount_paid}}                 | Variable (calculated from payment state)                  |
-| {{today}}                       | formatDate(day-of-creating-invoice)                       |
+| {{total}}                       | formatCurrency(`{{subtotal}}`–`{{discount}}`)             |
+| {{amount_paid}}                 | Variable                                                  |
+| {{today}}                       | formatDate(day-invoice-is-created)                        |
 
 **Variable Placeholders:**
 - `{{amount_due}}` - Calculated from `state.payment_1` and `state.payment_2` (see `calculate_amount_due()` in `generate_pdfs.py`)

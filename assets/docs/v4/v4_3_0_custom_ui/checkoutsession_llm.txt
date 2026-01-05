@@ -2212,17 +2212,6 @@ Use the [branding settings](https://dashboard.stripe.com/settings/branding/check
 
 Use our official libraries to access the Stripe API from your application:
 
-#### Ruby
-
-```bash
-# Available as a gem
-sudo gem install stripe
-```
-
-```ruby
-# If you use bundler, you can add this line to your Gemfile
-gem 'stripe'
-```
 
 #### Python
 
@@ -2242,84 +2231,6 @@ pip3 install --upgrade stripe
 stripe>=5.0.0
 ```
 
-#### PHP
-
-```bash
-# Install the PHP library with Composer
-composer require stripe/stripe-php
-```
-
-```bash
-# Or download the source directly: https://github.com/stripe/stripe-php/releases
-```
-
-#### Java
-
-```java
-/*
-  For Gradle, add the following dependency to your build.gradle and replace with
-  the version number you want to use from:
-  - https://mvnrepository.com/artifact/com.stripe/stripe-java or
-  - https://github.com/stripe/stripe-java/releases/latest
-*/
-implementation "com.stripe:stripe-java:31.1.0"
-```
-
-```xml
-<!--
-  For Maven, add the following dependency to your POM and replace with the
-  version number you want to use from:
-  - https://mvnrepository.com/artifact/com.stripe/stripe-java or
-  - https://github.com/stripe/stripe-java/releases/latest
--->
-<dependency>
-  <groupId>com.stripe</groupId>
-  <artifactId>stripe-java</artifactId>
-  <version>31.1.0</version>
-</dependency>
-```
-
-```bash
-# For other environments, manually install the following JARs:
-# - The Stripe JAR from https://github.com/stripe/stripe-java/releases/latest
-# - Google Gson from https://github.com/google/gson
-```
-
-#### Node.js
-
-```bash
-# Install with npm
-npm install stripe --save
-```
-
-#### Go
-
-```bash
-# Make sure your project is using Go Modules
-go mod init
-# Install stripe-go
-go get -u github.com/stripe/stripe-go/v84
-```
-
-```go
-// Then import the package
-import (
-  "github.com/stripe/stripe-go/v84"
-)
-```
-
-#### .NET
-
-```bash
-# Install with dotnet
-dotnet add package Stripe.net
-dotnet restore
-```
-
-```bash
-# Or install with NuGet
-Install-Package Stripe.net
-```
 
 ## Create a Checkout Session [Server-side]
 
@@ -2333,38 +2244,6 @@ Read more about [configuring the return page](https://docs.stripe.com/payments/a
 
 After you create the Checkout Session, use the `client_secret` returned in the response to [mount Checkout](https://docs.stripe.com/payments/accept-a-payment.md#mount-checkout).
 
-#### Ruby
-
-```ruby
-# This example sets up an endpoint using the Sinatra framework.
-# To learn more about Sinatra, watch this video: https://youtu.be/8aA9Enb8NVc.
-require 'json'
-require 'sinatra'
-require 'stripe'
-
-# Set your secret key. Remember to switch to your live secret key in production.
-# See your keys here: https://dashboard.stripe.com/apikeys
-Stripe.api_key = '<<YOUR_SECRET_KEY>>'
-
-post '/create-checkout-session' do
-  session = Stripe::Checkout::Session.create({
-    line_items: [{
-      price_data: {
-        currency: 'usd',
-        product_data: {
-          name: 'T-shirt',
-        },
-        unit_amount: 2000,
-      },
-      quantity: 1,
-    }],
-    mode: 'payment',ui_mode: 'embedded',
-    return_url: 'https://example.com/checkout/return?session_id={CHECKOUT_SESSION_ID}'
-  })
-
-  {clientSecret: session.client_secret}.to_json
-end
-```
 
 #### Python
 
