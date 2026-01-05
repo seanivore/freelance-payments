@@ -322,14 +322,18 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
     all_jobs = list_all_jobs(jobs_dir)
     json_job_ids = set()
     jobs_by_id = {}
+    json_active_status = {}  # Track JSON active status for clearer logging
     for job_data in all_jobs:
         product = job_data.get('product', {})
         job_id = product.get('id')
         if job_id:
             json_job_ids.add(job_id)
             jobs_by_id[job_id] = job_data
+            json_active_status[job_id] = product.get('active', True)
     
-    print(f"[TRIGGER={trigger_category}] Step 5: Found {len(json_job_ids)} JSON file(s) in directory", file=sys.stderr)
+    json_active_count = sum(1 for active in json_active_status.values() if active)
+    json_inactive_count = len(json_job_ids) - json_active_count
+    print(f"[TRIGGER={trigger_category}] Step 5: Found {len(json_job_ids)} JSON file(s) in directory ({json_active_count} active={True}, {json_inactive_count} active={False})", file=sys.stderr)
     
     # Get Stripe catalog job_ids (products that exist in Stripe) - direct API check
     stripe_job_ids = set()
@@ -343,12 +347,19 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
     
     print(f"[TRIGGER={trigger_category}] Step 5: Checking Stripe catalog for {len(all_potential_job_ids)} potential product(s)", file=sys.stderr)
     
+    stripe_archived_job_ids = set()  # Track archived products separately
     for job_id in all_potential_job_ids:
         if check_stripe_product_exists(job_id):
-            stripe_job_ids.add(job_id)
-            stripe_active_status[job_id] = get_stripe_product_active(job_id)
+            is_active = get_stripe_product_active(job_id)
+            stripe_active_status[job_id] = is_active
+            if is_active:
+                stripe_job_ids.add(job_id)  # Only active products count as "matched" for creation logic
+            else:
+                stripe_archived_job_ids.add(job_id)  # Archived products tracked separately
     
-    print(f"[TRIGGER={trigger_category}] Step 5: Found {len(stripe_job_ids)} product(s) in Stripe catalog", file=sys.stderr)
+    stripe_active_count = len(stripe_job_ids)
+    stripe_archived_count = len(stripe_archived_job_ids)
+    print(f"[TRIGGER={trigger_category}] Step 5: Found {stripe_active_count} active product(s) and {stripe_archived_count} archived product(s) in Stripe catalog", file=sys.stderr)
     
     # Initialize action lists
     jobs_to_create = []
@@ -400,14 +411,15 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
         print(f"[TRIGGER={trigger_category}] Step 8: No orphaned active products to archive", file=sys.stderr)
     
     # Step 9: Unmatched: Catalog but no JSON, if catalog.active=false → ignore
-    print(f"[TRIGGER={trigger_category}] Step 9: Checking unmatched catalog products (no JSON) with active=false", file=sys.stderr)
-    for job_id in unmatched_catalog:
-        stripe_active = stripe_active_status.get(job_id, False)
-        if not stripe_active:
-            print(f"[TRIGGER={trigger_category}] Step 9: Ignoring {job_id} (orphaned, already inactive)", file=sys.stderr)
+    # Check archived products that aren't in JSON directory
+    unmatched_archived = stripe_archived_job_ids - json_job_ids
+    archived_count = len(unmatched_archived)
+    print(f"[TRIGGER={trigger_category}] Step 9: Found 0 JSON file(s), active=N/A and Found {archived_count} catalog product(s), active=False", file=sys.stderr)
     
-    if not unmatched_catalog:
-        print(f"[TRIGGER={trigger_category}] Step 9: No orphaned inactive products to check", file=sys.stderr)
+    if archived_count > 0:
+        print(f"[TRIGGER={trigger_category}] Step 9: RESULT - Ignoring {archived_count} orphaned archived product(s)", file=sys.stderr)
+    else:
+        print(f"[TRIGGER={trigger_category}] Step 9: RESULT - No actions needed", file=sys.stderr)
     
     # Step 10: Matched: catalog.active=false, json.active=true → delete JSON
     print(f"[TRIGGER={trigger_category}] Step 10: Checking matched products (catalog.active=false, json.active=true)", file=sys.stderr)
