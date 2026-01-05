@@ -1,0 +1,112 @@
+{
+  "project": null,
+  "contract": {
+    "work_start": null,
+    "work_end": null,
+    "legal_jurisdiction": null,
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 15000,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": null
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
+    "contract": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "invoice": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    }
+  },
+  "state": {
+    "objects": {
+      "created": null,
+      "product": null,
+      "price_1": null,
+      "price_2": null,
+      "customer": null,
+      "coupon": null,
+      "checkout_session": {
+        "payment_1": null,
+        "payment_2": null
+      }
+    },
+    "client_status": {
+      "logged_in": null,
+      "contract_loaded": null,
+      "contract_scrolled_complete": null,
+      "viewed_contract": true,
+      "viewed_invoice": true,
+      "downloaded_docs": 0,
+      "signed_contract": null
+    },
+    "payment_1": {
+      "intent": null,
+      "processing": null,
+      "succeeded": null
+    },
+    "payment_2": {
+      "intent": null,
+      "processing": null,
+      "succeeded": null
+    }
+  },
+  "product": {
+    "name": "Archive Test Project",
+    "active": true,
+    "description": "Test project for archiving workflow",
+    "id": "uid-test-archive-001",
+    "login_name": "TestClient",
+    "login_keyword": "archive-test",
+    "service_usd": 5000,
+    "total_payments": 1,
+    "discount_usd": 0,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Test Client",
+    "business": null,
+    "title": null,
+    "email": "test@example.com",
+    "phone": "424-744-7687",
+    "id": null,
+    "address": {
+      "city": "Los Angeles",
+      "line1": "123 Test St",
+      "state": "CA",
+      "postal_code": "90001",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 0,
+    "percent_off": 0,
+    "id": null,
+    "name": null
+  },
+  "price_1": {
+    "id": null,
+    "amount": 5000,
+    "currency": "usd",
+    "lookup_key": null
+  },
+  "price_2": null
+}
