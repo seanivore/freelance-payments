@@ -43,13 +43,15 @@
         throw new Error('Manifest not found. Please contact support.');
       }
 
+      // Read response text once (can't read Response body twice)
+      const manifestText = await manifestResponse.text();
+
       let manifest;
       try {
-        const manifestText = await manifestResponse.text();
         manifest = JSON.parse(manifestText);
       } catch (jsonError) {
         console.error('Error parsing manifest.json:', jsonError);
-        console.error('Manifest content (first 500 chars):', (await manifestResponse.text()).substring(0, 500));
+        console.error('Manifest content (first 500 chars):', manifestText.substring(0, 500));
         throw new Error(`Invalid manifest.json format: ${jsonError.message}. Please contact support.`);
       }
 
