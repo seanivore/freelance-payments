@@ -44,12 +44,12 @@
   },
   "state": {
     "objects": {
-      "created": "2026-01-05T13:54:56.389625Z",
-      "product": "prod_TjheVKCLmQ0ORL",
-      "price_1": "price_1SmEFI9fljwH26CPSgaaNHUH",
-      "price_2": "price_1SmEFI9fljwH26CPk6UQYzOO",
-      "customer": "cus_TjheEjn3vZIxAw",
-      "coupon": "4Wu3fI5h",
+      "created": "2026-01-05T14:09:59.336132Z",
+      "product": "uid-test-fresh-001",
+      "price_1": "price_1SmETr9fljwH26CPqkt9Z8LY",
+      "price_2": "price_1SmETr9fljwH26CPL2iCJQRg",
+      "customer": "cus_TjhtYInt99m8fN",
+      "coupon": "p4jzCs8V",
       "checkout_session": {
         "payment_1": null,
         "payment_2": null
@@ -129,7 +129,7 @@
         "uid-test-fresh-001"
       ]
     },
-    "id": "price_1SmEFI9fljwH26CPSgaaNHUH"
+    "id": "price_1SmETr9fljwH26CPqkt9Z8LY"
   },
   "price2": {
     "count": 1,
@@ -146,7 +146,7 @@
         "uid-test-fresh-001"
       ]
     },
-    "id": "price_1SmEFI9fljwH26CPk6UQYzOO"
+    "id": "price_1SmETr9fljwH26CPL2iCJQRg"
   },
   "checkout_session_1": {
     "automatic_tax": {
@@ -165,12 +165,12 @@
     },
     "discounts": [
       {
-        "coupon": "4Wu3fI5h"
+        "coupon": "p4jzCs8V"
       }
     ],
     "line_items": [
       {
-        "price": "price_1SmEFI9fljwH26CPSgaaNHUH",
+        "price": "price_1SmETr9fljwH26CPqkt9Z8LY",
         "quantity": 1
       }
     ],
@@ -200,7 +200,7 @@
     "discounts": null,
     "line_items": [
       {
-        "price": "price_1SmEFI9fljwH26CPk6UQYzOO",
+        "price": "price_1SmETr9fljwH26CPL2iCJQRg",
         "quantity": 1
       }
     ],
