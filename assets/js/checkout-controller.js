@@ -433,55 +433,27 @@
         throw new Error('fetchClientSecret did not complete within timeout');
       }
 
-      console.log('✅ fetchClientSecret completed, now waiting for loadActions() to become available...');
+      console.log('✅ fetchClientSecret completed, checkout is ready');
 
-      // Now wait for loadActions to become available
-      attempts = 0;
-      while (typeof checkout.loadActions !== 'function' && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        attempts++;
-        if (attempts % 10 === 0) {
-          console.log(`Waiting for loadActions()... (${attempts * 100}ms)`);
-        }
-      }
-
-      if (typeof checkout.loadActions !== 'function') {
-        // Log what methods ARE available for debugging
-        const availableMethods = Object.keys(checkout || {}).filter(key => typeof checkout[key] === 'function');
-        console.error('Available checkout methods:', availableMethods);
-        console.error('Checkout object:', checkout);
-        throw new Error('checkout.loadActions() is not available after fetchClientSecret completed. Available methods: ' + availableMethods.join(', '));
-      }
-
-      console.log('✅ Checkout is ready, loadActions() is available');
-      console.log('Loading checkout actions...');
-      let loadActionsResult;
+      // With fetchClientSecret, checkout methods are available directly (no loadActions needed)
+      // Get session data using checkout.session() method
+      console.log('Getting session data...');
+      let session;
       try {
-        loadActionsResult = await checkout.loadActions();
-        console.log('✅ Checkout actions loaded:', loadActionsResult.type);
-      } catch (loadError) {
-        console.error('❌ Error loading checkout actions:', loadError);
-        throw new Error(`Failed to load checkout actions: ${loadError.message || 'Unknown error'}`);
+        session = await checkout.session();
+        console.log('✅ Session retrieved:', session);
+      } catch (sessionError) {
+        console.error('❌ Error getting session:', sessionError);
+        throw new Error(`Failed to get session: ${sessionError.message || 'Unknown error'}`);
       }
 
-      if (loadActionsResult.type !== 'success') {
-        console.error('❌ Load actions failed:', loadActionsResult);
-        throw new Error(`Failed to load checkout actions: ${loadActionsResult.error?.message || 'Unknown error'}`);
-      }
-
-      const actions = loadActionsResult.actions;
-      console.log('✅ Actions object received');
-
-      // 7) Listen for Checkout events (after loadActions - checkout object is now fully initialized)
-      // Per Stripe docs: Event listeners should be set up after loadActions()
+      // Listen for Checkout events (available methods show 'on' is available)
       if (typeof checkout.on === 'function') {
         checkout.on('change', (event) => {
           // Handle checkout state changes if needed
           console.log('Checkout state changed:', event);
         });
         console.log('✅ Checkout event listener registered');
-      } else {
-        console.log('⚠️ checkout.on() not available - this may be normal for fetchClientSecret pattern');
       }
 
       const session = actions.getSession();
@@ -546,8 +518,8 @@
         paymentMessage.classList.add('hidden');
 
         try {
-          // Confirm payment using actions
-          const { error } = await actions.confirm();
+          // Confirm payment using checkout.confirm() directly (with fetchClientSecret, no loadActions needed)
+          const { error } = await checkout.confirm();
 
           if (error) {
             // Show error to user
@@ -570,8 +542,8 @@
         }
       });
 
-      // Store Checkout instance and actions for cleanup
-      elementsInstances.set(containerDiv, { checkout, actions, paymentElement, billingAddressElement });
+      // Store Checkout instance and elements for cleanup
+      elementsInstances.set(containerDiv, { checkout, paymentElement, billingAddressElement });
 
       // 13) Mark as mounted
       containerDiv.dataset.mounting = 'false';
