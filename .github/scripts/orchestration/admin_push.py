@@ -424,15 +424,15 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
         print(f"[TRIGGER={trigger_category}] Step 5: RESULT - No actions needed", file=sys.stderr)
     
     # Step 6: Matched: catalog.active=false, json.active=true → delete JSON
-    # NOTE: With our fix (only active products in stripe_job_ids), this step should rarely/never execute
-    # because matched_jobs only contains jobs with ACTIVE Stripe products
-    # However, this handles edge cases where a product was archived between checks
-    matched_jobs = json_job_ids.intersection(stripe_job_ids)  # Only active products
+    # IMPORTANT: We check stripe_active_status.get(job_id, False) even for matched_jobs
+    # because a product might have been archived during workflow execution (e.g., by payment webhook)
+    # and artifacts might not have been copied over properly
+    matched_jobs = json_job_ids.intersection(stripe_job_ids)  # Only active products (at start of sync)
     matched_json_active_stripe_inactive = []
     for job_id in matched_jobs:
         json_active = json_active_status.get(job_id, True)
-        # Double-check active status (should be True since it's in stripe_job_ids, but verify)
-        stripe_active = stripe_active_status.get(job_id, True)  # Default True since it's in matched_jobs
+        # Check actual current state (may have changed during execution)
+        stripe_active = stripe_active_status.get(job_id, False)
         if not stripe_active and json_active:
             matched_json_active_stripe_inactive.append(job_id)
     
@@ -451,7 +451,7 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
         if job_id in jobs_to_delete_mismatch:
             continue  # Already handled in Step 6
         json_active = json_active_status.get(job_id, True)
-        stripe_active = stripe_active_status.get(job_id, True)  # Should be True for matched_jobs
+        stripe_active = stripe_active_status.get(job_id, False)  # Check actual current state
         if not stripe_active and not json_active:
             matched_both_inactive.append(job_id)
     
@@ -470,7 +470,7 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
         if job_id in jobs_to_delete_mismatch:
             continue  # Already handled
         json_active = json_active_status.get(job_id, True)
-        stripe_active = stripe_active_status.get(job_id, True)  # Should be True for matched_jobs
+        stripe_active = stripe_active_status.get(job_id, False)  # Check actual current state
         if stripe_active and not json_active:
             matched_stripe_active_json_inactive.append(job_id)
     
@@ -489,7 +489,7 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
         if job_id in jobs_to_delete_mismatch or job_id in jobs_to_archive_and_delete:
             continue  # Already handled
         json_active = json_active_status.get(job_id, True)
-        stripe_active = stripe_active_status.get(job_id, True)  # Should be True for matched_jobs
+        stripe_active = stripe_active_status.get(job_id, False)  # Check actual current state
         if stripe_active and json_active:
             matched_both_active.append(job_id)
     
