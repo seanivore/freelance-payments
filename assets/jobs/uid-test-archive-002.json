@@ -19,29 +19,29 @@
   },
   "docs": {
     "contract": {
-      "id": "kon-uid-test-payment-001",
-      "pdf": "assets/pdf/contract/kon-uid-test-payment-001.pdf",
-      "file_id": "1FQsTcjsBiMNh37LpOld1veVlFLbvSUs64eCzihdE75s",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-uid-test-payment-001.pdf",
-      "sha256": "04ac6249706228d0f54a6c516f2735043d9ae69c416c2f636fdc3534de06c87a",
-      "created": "2026-01-05T14:30:26.184612Z"
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
     },
     "invoice": {
-      "id": "inv-uid-test-payment-001",
-      "pdf": "assets/pdf/invoice/inv-uid-test-payment-001.pdf",
-      "file_id": "1ygg-FIJb9e7zeKrQsiUFzk_3BEqGO8b6SY5l4hod-Ro",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-uid-test-payment-001.pdf",
-      "sha256": "8b41137d3bd3325769e8079af36a9a6c0b27d4f83f2f5b8cd0a27522e1c6b987",
-      "created": "2026-01-05T14:30:32.015291Z"
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
     }
   },
   "state": {
     "objects": {
-      "created": "2026-01-05T14:30:06.822318Z",
-      "product": "uid-test-payment-001",
+      "created": null,
+      "product": null,
       "price_1": null,
       "price_2": null,
-      "customer": "cus_TjiDS5iG0GG2u9",
+      "customer": null,
       "coupon": null,
       "checkout_session": {
         "payment_1": null,
@@ -69,14 +69,14 @@
     }
   },
   "product": {
-    "name": "Payment Flow Test Project",
+    "name": "Archive Test Project",
     "active": true,
-    "description": "Full payment flow test - contract → invoice → checkout → payment",
-    "id": "uid-test-payment-001",
+    "description": "Test project for archiving workflow",
+    "id": "uid-test-archive-002",
     "login_name": "TestClient",
-    "login_keyword": "payment-test",
-    "service_usd": 10000,
-    "total_payments": 2,
+    "login_keyword": "archive-test",
+    "service_usd": 5000,
+    "total_payments": 1,
     "discount_usd": 0,
     "type": "service",
     "unit_label": "Payment"
@@ -99,7 +99,7 @@
   "coupon": {
     "amount_off": 0,
     "applies_to": {
-      "products": ["uid-test-payment-001"]
+      "products": ["uid-test-archive-002"]
     },
     "currency": "usd",
     "duration": "once",
@@ -116,25 +116,11 @@
     "pay_by": "start of work",
     "nickname": "Initial Payment",
     "product": {
-      "products": ["uid-test-payment-001"]
+      "products": ["uid-test-archive-002"]
     },
     "id": null
   },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 5000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": "$100",
-    "nickname": "Final Payment",
-    "product": {
-      "products": ["uid-test-payment-001"]
-    },
-    "id": null
-  },
+  "price2": null,
   "checkout_session_1": {
     "billing_address_collection": "required",
     "customer_creation": "always",
@@ -149,26 +135,10 @@
     "phone_number_collection": {
       "enabled": true
     },
-    "return_url": "https://payments.august.style/uid-test-payment-001#completion",
+    "return_url": "https://payments.august.style/uid-test-archive-002#completion",
     "ui_mode": "custom"
   },
-  "checkout_session_2": {
-    "billing_address_collection": "required",
-    "customer_creation": "always",
-    "discounts": null,
-    "line_items": [
-      {
-        "price": null,
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "phone_number_collection": {
-      "enabled": true
-    },
-    "return_url": "https://payments.august.style/uid-test-payment-001#completion",
-    "ui_mode": "custom"
-  },
+  "checkout_session_2": null,
   "project_scope_summary": null,
   "project_scope_full": null
 }
