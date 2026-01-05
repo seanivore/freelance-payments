@@ -26,12 +26,14 @@ on:
         description: "JSON payload"
         required: true
 
+# Workflow-level concurrency ensures all runs queue sequentially
+concurrency:
+  group: freelance-payments-workflows-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   user-behavior:
     runs-on: ubuntu-latest
-    concurrency:
-      group: freelance-payments-workflows
-      cancel-in-progress: false
 
     steps:
       - name: Checkout repository
