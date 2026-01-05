@@ -98,15 +98,47 @@
   },
   "coupon": {
     "amount_off": 0,
-    "percent_off": 0,
+    "applies_to": {
+      "products": ["uid-test-archive-001"]
+    },
+    "currency": "usd",
+    "duration": "once",
     "id": null,
+    "max_redemptions": 1,
     "name": null
   },
-  "price_1": {
-    "id": null,
-    "amount": 5000,
+  "price1": {
+    "count": 1,
     "currency": "usd",
-    "lookup_key": null
+    "unit_amount": 5000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
+    "product": {
+      "products": ["uid-test-archive-001"]
+    },
+    "id": null
   },
-  "price_2": null
+  "price2": null,
+  "checkout_session_1": {
+    "billing_address_collection": "required",
+    "customer_creation": "always",
+    "discounts": null,
+    "line_items": [
+      {
+        "price": null,
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "phone_number_collection": {
+      "enabled": true
+    },
+    "return_url": "https://payments.august.style/uid-test-archive-001#completion",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": null,
+  "project_scope_summary": null,
+  "project_scope_full": null
 }
