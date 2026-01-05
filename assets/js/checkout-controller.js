@@ -318,6 +318,7 @@
       }
 
       // 6) Initialize Checkout with Checkout Session client secret (for ui_mode: custom)
+      console.log('Initializing Stripe Checkout with client secret...');
       const checkout = stripe.initCheckout({
         clientSecret: clientSecret,
         elementsOptions: {
@@ -326,6 +327,7 @@
           }
         }
       });
+      console.log('✅ Stripe Checkout initialized');
 
       // 7) Listen for Checkout events
       checkout.on('change', (event) => {
@@ -334,21 +336,49 @@
       });
 
       // 8) Load actions to get session data and confirm method
-      const loadActionsResult = await checkout.loadActions();
+      console.log('Loading checkout actions...');
+      let loadActionsResult;
+      try {
+        loadActionsResult = await checkout.loadActions();
+        console.log('✅ Checkout actions loaded:', loadActionsResult.type);
+      } catch (loadError) {
+        console.error('❌ Error loading checkout actions:', loadError);
+        throw new Error(`Failed to load checkout actions: ${loadError.message || 'Unknown error'}`);
+      }
+
       if (loadActionsResult.type !== 'success') {
+        console.error('❌ Load actions failed:', loadActionsResult);
         throw new Error(`Failed to load checkout actions: ${loadActionsResult.error?.message || 'Unknown error'}`);
       }
 
       const actions = loadActionsResult.actions;
+      console.log('✅ Actions object received');
+
       const session = actions.getSession();
+      console.log('✅ Session retrieved:', session);
+
+      // Get amount from session (handle different possible structures)
+      let amount = 0;
+      try {
+        if (session.total?.total?.amount) {
+          amount = session.total.total.amount / 100;
+        } else if (session.amount_total) {
+          amount = session.amount_total / 100;
+        } else if (session.total?.amount) {
+          amount = session.total.amount / 100;
+        }
+      } catch (e) {
+        console.warn('Could not extract amount from session:', e);
+      }
 
       // 9) Prepare form HTML
+      console.log('Preparing form HTML...');
       containerDiv.innerHTML = `
         <form id="payment-form">
           <div id="payment-element"></div>
           <div id="billing-address-element"></div>
           <button type="submit" id="submit-button" class="btn btn-primary mt-6 w-full">
-            <span id="button-text">Pay ${formatCurrency((session.total?.total?.amount || 0) / 100)} now</span>
+            <span id="button-text">Pay ${formatCurrency(amount)} now</span>
             <span id="spinner" class="hidden">Processing...</span>
           </button>
           <div id="payment-message" class="hidden mt-4 text-red-600"></div>
@@ -356,12 +386,18 @@
       `;
 
       // 10) Create and mount Payment Element
+      console.log('Creating Payment Element...');
       const paymentElement = checkout.createPaymentElement();
+      console.log('Mounting Payment Element...');
       paymentElement.mount('#payment-element');
+      console.log('✅ Payment Element mounted');
 
       // 11) Create and mount Billing Address Element
+      console.log('Creating Billing Address Element...');
       const billingAddressElement = checkout.createBillingAddressElement();
+      console.log('Mounting Billing Address Element...');
       billingAddressElement.mount('#billing-address-element');
+      console.log('✅ Billing Address Element mounted');
 
       // 12) Handle form submission
       const form = document.getElementById('payment-form');
@@ -534,10 +570,14 @@
 
           // For custom UI mode, use client_secret to mount Stripe Elements (Payment Element)
           if (data.client_secret) {
+            console.log('✅ Client secret received, mounting Stripe Checkout...');
             try {
               const returnUrl = `${window.location.origin}/${jobData.product?.id || sessionStorage.getItem('jobId')}#completion`;
+              console.log('Calling mountStripeElements with returnUrl:', returnUrl);
               await mountStripeElements(data.client_secret, contentDiv, returnUrl);
+              console.log('✅ mountStripeElements completed successfully');
             } catch (e) {
+              console.error('❌ Error in mountStripeElements:', e);
               // Fallback: if Elements fails (e.g., Stripe.js blocked), redirect to hosted checkout
               if (data.session_url) {
                 console.warn('Stripe Elements failed, falling back to Stripe-hosted redirect:', e.message);
