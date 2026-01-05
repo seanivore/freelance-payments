@@ -41,3 +41,6 @@ rusty-tags.vi
 .archive/
 .vercel
 .env*.local
+
+# Third-party library files (loaded from CDN)
+assets/docs/RESOURCES/stripe.js

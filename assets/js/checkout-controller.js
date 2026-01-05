@@ -388,14 +388,10 @@
 
       const checkout = stripe.initCheckout(initOptions);
       console.log('✅ Stripe Checkout initialized');
-
-      // 7) Listen for Checkout events
-      checkout.on('change', (event) => {
-        // Handle checkout state changes if needed
-        console.log('Checkout state changed:', event);
-      });
+      console.log('Checkout object type:', typeof checkout, 'Methods:', Object.keys(checkout || {}).slice(0, 10));
 
       // 8) Load actions to get session data and confirm method
+      // This must be called before using checkout methods
       console.log('Loading checkout actions...');
       let loadActionsResult;
       try {
@@ -413,6 +409,18 @@
 
       const actions = loadActionsResult.actions;
       console.log('✅ Actions object received');
+
+      // 7) Listen for Checkout events (after loadActions - checkout object is now fully initialized)
+      // Per Stripe docs: Event listeners should be set up after loadActions()
+      if (typeof checkout.on === 'function') {
+        checkout.on('change', (event) => {
+          // Handle checkout state changes if needed
+          console.log('Checkout state changed:', event);
+        });
+        console.log('✅ Checkout event listener registered');
+      } else {
+        console.log('⚠️ checkout.on() not available - this may be normal for fetchClientSecret pattern');
+      }
 
       const session = actions.getSession();
       console.log('✅ Session retrieved:', session);
