@@ -346,6 +346,7 @@
       }
 
       // 6) Initialize Checkout with Checkout Session client secret (for ui_mode: custom)
+      // Per Stripe sample code: elementsOptions with appearance is valid
       console.log('Initializing Stripe Checkout with client secret...');
       const checkout = stripe.initCheckout({
         clientSecret: clientSecret,
