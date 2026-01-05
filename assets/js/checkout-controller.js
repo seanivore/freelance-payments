@@ -390,8 +390,26 @@
       console.log('✅ Stripe Checkout initialized');
       console.log('Checkout object type:', typeof checkout, 'Methods:', Object.keys(checkout || {}).slice(0, 10));
 
+      // Wait for checkout to be ready (fetchClientSecret needs to complete first)
+      // When using fetchClientSecret, Stripe.js calls it asynchronously, so we need to wait
+      console.log('⏳ Waiting for checkout to be ready (fetchClientSecret may still be running)...');
+
+      // Poll for loadActions to become available (it appears after fetchClientSecret completes)
+      let attempts = 0;
+      const maxAttempts = 50; // 5 seconds max wait
+      while (typeof checkout.loadActions !== 'function' && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+
+      if (typeof checkout.loadActions !== 'function') {
+        throw new Error('checkout.loadActions() is not available. fetchClientSecret may have failed or checkout is not ready.');
+      }
+
+      console.log('✅ Checkout is ready, loadActions() is available');
+
       // 8) Load actions to get session data and confirm method
-      // This must be called before using checkout methods
+      // This must be called after fetchClientSecret completes
       console.log('Loading checkout actions...');
       let loadActionsResult;
       try {
