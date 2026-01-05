@@ -10,20 +10,8 @@ INTENTIONAL=$(git diff --cached --name-only 2>/dev/null || true)
 LOCAL=$(git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --name-only --pretty=format: 2>/dev/null | sort -u || true)
 ALL_INTENTIONAL=$(echo -e "$INTENTIONAL\n$LOCAL" | grep -v "^$" | sort -u)
 
-# Also track which files were DELETED in our commits
-# During rebase, check the commit being applied; otherwise check unpushed commits
-if [ -d .git/rebase-merge ]; then
-  # We're in a rebase - check the commit being applied
-  REBASE_COMMIT=$(cat .git/rebase-merge/stopped-sha 2>/dev/null || true)
-  if [ -n "$REBASE_COMMIT" ]; then
-    DELETED_FILES=$(git diff-tree --no-commit-id --name-only --diff-filter=D -r "$REBASE_COMMIT" 2>/dev/null | sort -u || true)
-  else
-    DELETED_FILES=$(git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --diff-filter=D --name-only --pretty=format: 2>/dev/null | sort -u || true)
-  fi
-else
-  # Not in rebase - check unpushed commits
-  DELETED_FILES=$(git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --diff-filter=D --name-only --pretty=format: 2>/dev/null | sort -u || true)
-fi
+# Track which files were DELETED in our commits (will be re-checked during conflicts if needed)
+DELETED_FILES=$(git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --diff-filter=D --name-only --pretty=format: 2>/dev/null | sort -u || true)
 
 if [ -n "$ALL_INTENTIONAL" ]; then
   echo "   Your files (will be preserved in conflicts):"
@@ -47,17 +35,31 @@ git pull --rebase 2>&1
 REBASE_STATUS=$?
 set -e
 
-# Step 4: Handle conflicts intelligently
-if [ $REBASE_STATUS -ne 0 ] && ([ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]); then
-  CONFLICTS=$(git diff --name-only --diff-filter=U 2>/dev/null || true)
-  if [ -n "$CONFLICTS" ]; then
-    echo ""
-    echo "⚠️  Step 4: Resolving conflicts intelligently..."
-    echo "$CONFLICTS" | while read -r file; do
-      [ -z "$file" ] && continue
+  # Step 4: Handle conflicts intelligently
+  if [ $REBASE_STATUS -ne 0 ] && ([ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]); then
+    CONFLICTS=$(git diff --name-only --diff-filter=U 2>/dev/null || true)
+    if [ -n "$CONFLICTS" ]; then
+      echo ""
+      echo "⚠️  Step 4: Resolving conflicts intelligently..."
       
-      # Check if file was DELETED in our commits (most important check first!)
-      FILE_IN_DELETED=$(echo "$DELETED_FILES" | grep -Fxq "$file" && echo "yes" || echo "no")
+      # Re-check deleted files NOW (during rebase) - check the commit being applied
+      if [ -d .git/rebase-merge ]; then
+        REBASE_COMMIT=$(cat .git/rebase-merge/stopped-sha 2>/dev/null || true)
+        if [ -n "$REBASE_COMMIT" ]; then
+          DELETED_FILES=$(git diff-tree --no-commit-id --name-only --diff-filter=D -r "$REBASE_COMMIT" 2>/dev/null | sort -u || true)
+        fi
+      elif [ -d .git/rebase-apply ]; then
+        REBASE_COMMIT=$(cat .git/rebase-apply/stopped-sha 2>/dev/null || true)
+        if [ -n "$REBASE_COMMIT" ]; then
+          DELETED_FILES=$(git diff-tree --no-commit-id --name-only --diff-filter=D -r "$REBASE_COMMIT" 2>/dev/null | sort -u || true)
+        fi
+      fi
+      
+      echo "$CONFLICTS" | while read -r file; do
+        [ -z "$file" ] && continue
+        
+        # Check if file was DELETED in our commits (most important check first!)
+        FILE_IN_DELETED=$(echo "$DELETED_FILES" | grep -Fxq "$file" && echo "yes" || echo "no")
       
       # Check conflict type using git ls-files -u
       # Stage 0 = common ancestor, Stage 1 = ours, Stage 2 = theirs
