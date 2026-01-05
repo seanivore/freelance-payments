@@ -140,8 +140,18 @@ def delete_job(job_id: str, jobs_dir: str = "assets/jobs") -> bool:
         return False
     
     try:
+        # Use relative path for cleaner logs (relative to project root)
+        utils_dir = Path(__file__).parent  # .github/scripts/utils
+        scripts_dir = utils_dir.parent     # .github/scripts
+        github_dir = scripts_dir.parent    # .github
+        project_root = github_dir.parent   # project root
+        try:
+            relative_path = job_path.relative_to(project_root)
+        except ValueError:
+            relative_path = job_path
+        
         job_path.unlink()
-        print(f"Deleted job file: {job_path}", file=sys.stderr)
+        print(f"Deleted job file: {relative_path}", file=sys.stderr)
         return True
     except OSError as e:
         print(f"Error: Cannot delete {job_path}: {e}", file=sys.stderr)

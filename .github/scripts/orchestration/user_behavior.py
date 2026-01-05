@@ -306,18 +306,19 @@ def create_stripe_objects_for_job(job_data: dict, job_id: str) -> dict:
 # ============================================================================
 
 def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str = 'user-behavior') -> dict:
-    """Execute the 8-step matching logic inline."""
+    """Execute the 8-step matching logic inline with explicit step-by-step logging.
+    For user-behavior workflow, steps are numbered 5-13 (not 1-9).
+    """
     stats = {
         'products_created': 0,
         'products_archived': 0,
         'jobs_deleted': 0
     }
     
-    # Load manifest and get job_ids
-    manifest = load_manifest(manifest_path)
-    manifest_job_ids = get_manifest_job_ids(manifest)
+    # Step 5: Compare JSONs to catalog
+    print(f"[TRIGGER={trigger_category}] Step 5: Comparing JSONs to catalog", file=sys.stderr)
     
-    # Load all JSON files
+    # Load all JSON files from directory (source of truth)
     all_jobs = list_all_jobs(jobs_dir)
     json_job_ids = set()
     jobs_by_id = {}
@@ -328,128 +329,205 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
             json_job_ids.add(job_id)
             jobs_by_id[job_id] = job_data
     
-    print(f"[TRIGGER={trigger_category}] Step 1: Found {len(json_job_ids)} JSON file(s), {len(manifest_job_ids)} manifest entry(ies)", file=sys.stderr)
+    print(f"[TRIGGER={trigger_category}] Step 5: Found {len(json_job_ids)} JSON file(s) in directory", file=sys.stderr)
     
-    # Get Stripe catalog job_ids (products that exist in Stripe)
+    # Get Stripe catalog job_ids (products that exist in Stripe) - direct API check
     stripe_job_ids = set()
-    for job_id in json_job_ids.union(manifest_job_ids):
+    stripe_active_status = {}  # Cache active status to avoid duplicate API calls
+    all_potential_job_ids = json_job_ids.copy()
+    
+    # Also check manifest for any orphaned Stripe products
+    manifest = load_manifest(manifest_path)
+    manifest_job_ids = get_manifest_job_ids(manifest)
+    all_potential_job_ids.update(manifest_job_ids)
+    
+    print(f"[TRIGGER={trigger_category}] Step 5: Checking Stripe catalog for {len(all_potential_job_ids)} potential product(s)", file=sys.stderr)
+    
+    for job_id in all_potential_job_ids:
         if check_stripe_product_exists(job_id):
             stripe_job_ids.add(job_id)
+            stripe_active_status[job_id] = get_stripe_product_active(job_id)
     
-    # Step 2: Unmatched: JSON but no catalog, if json.active=true → create catalog object
+    print(f"[TRIGGER={trigger_category}] Step 5: Found {len(stripe_job_ids)} product(s) in Stripe catalog", file=sys.stderr)
+    
+    # Initialize action lists
     jobs_to_create = []
-    for job_id in json_job_ids:
-        if job_id not in stripe_job_ids:
-            job_data = jobs_by_id[job_id]
-            product = job_data.get('product', {})
-            if product.get('active', True):
-                jobs_to_create.append(job_id)
-                print(f"[TRIGGER={trigger_category}] Step 2: Will create Stripe objects for {job_id} (new active job)", file=sys.stderr)
-    
-    # Step 3: Unmatched: JSON but no catalog, if json.active=false → delete JSON
     jobs_to_delete_no_stripe = []
-    for job_id in json_job_ids:
-        if job_id not in stripe_job_ids:
-            job_data = jobs_by_id[job_id]
-            product = job_data.get('product', {})
-            if not product.get('active', True):
-                jobs_to_delete_no_stripe.append(job_id)
-                print(f"[TRIGGER={trigger_category}] Step 3: Will delete {job_id} (inactive, no Stripe product)", file=sys.stderr)
-    
-    # Step 4: Unmatched: Catalog but no JSON, if catalog.active=true → modify catalog active=false
     jobs_to_archive_orphaned = []
-    for job_id in stripe_job_ids:
-        if job_id not in json_job_ids:
-            if get_stripe_product_active(job_id):
-                jobs_to_archive_orphaned.append(job_id)
-                print(f"[TRIGGER={trigger_category}] Step 4: Will archive {job_id} (orphaned, active in Stripe)", file=sys.stderr)
-    
-    # Step 5: Unmatched: Catalog but no JSON, if catalog.active=false → ignore
-    for job_id in stripe_job_ids:
-        if job_id not in json_job_ids:
-            if not get_stripe_product_active(job_id):
-                print(f"[TRIGGER={trigger_category}] Step 5: Ignoring {job_id} (orphaned, already inactive)", file=sys.stderr)
-    
-    # Step 6: Matched: catalog.active=false, json.active=true → delete JSON
     jobs_to_delete_mismatch = []
-    for job_id in json_job_ids.intersection(stripe_job_ids):
+    jobs_to_archive_and_delete = []
+    jobs_ignored = []
+    
+    # Step 6: Unmatched: JSON but no catalog, if json.active=true → create catalog object
+    print(f"[TRIGGER={trigger_category}] Step 6: Checking unmatched JSONs (no catalog) with active=true", file=sys.stderr)
+    unmatched_json = json_job_ids - stripe_job_ids
+    for job_id in unmatched_json:
         job_data = jobs_by_id[job_id]
         product = job_data.get('product', {})
         json_active = product.get('active', True)
-        stripe_active = get_stripe_product_active(job_id)
+        if json_active:
+            jobs_to_create.append(job_id)
+            print(f"[TRIGGER={trigger_category}] Step 6: Will create Stripe objects for {job_id} (new active job)", file=sys.stderr)
+        else:
+            print(f"[TRIGGER={trigger_category}] Step 6: Skipping {job_id} (inactive, will be handled in Step 7)", file=sys.stderr)
+    
+    if not unmatched_json:
+        print(f"[TRIGGER={trigger_category}] Step 6: No unmatched JSONs with active=true", file=sys.stderr)
+    
+    # Step 7: Unmatched: JSON but no catalog, if json.active=false → delete JSON
+    print(f"[TRIGGER={trigger_category}] Step 7: Checking unmatched JSONs (no catalog) with active=false", file=sys.stderr)
+    for job_id in unmatched_json:
+        job_data = jobs_by_id[job_id]
+        product = job_data.get('product', {})
+        json_active = product.get('active', True)
+        if not json_active:
+            jobs_to_delete_no_stripe.append(job_id)
+            print(f"[TRIGGER={trigger_category}] Step 7: Will delete {job_id} (inactive, no Stripe product)", file=sys.stderr)
+    
+    if not jobs_to_delete_no_stripe:
+        print(f"[TRIGGER={trigger_category}] Step 7: No unmatched inactive JSONs to delete", file=sys.stderr)
+    
+    # Step 8: Unmatched: Catalog but no JSON, if catalog.active=true → modify catalog active=false
+    print(f"[TRIGGER={trigger_category}] Step 8: Checking unmatched catalog products (no JSON) with active=true", file=sys.stderr)
+    unmatched_catalog = stripe_job_ids - json_job_ids
+    for job_id in unmatched_catalog:
+        stripe_active = stripe_active_status.get(job_id, False)
+        if stripe_active:
+            jobs_to_archive_orphaned.append(job_id)
+            print(f"[TRIGGER={trigger_category}] Step 8: Will archive {job_id} (orphaned, active in Stripe)", file=sys.stderr)
+    
+    if not jobs_to_archive_orphaned:
+        print(f"[TRIGGER={trigger_category}] Step 8: No orphaned active products to archive", file=sys.stderr)
+    
+    # Step 9: Unmatched: Catalog but no JSON, if catalog.active=false → ignore
+    print(f"[TRIGGER={trigger_category}] Step 9: Checking unmatched catalog products (no JSON) with active=false", file=sys.stderr)
+    for job_id in unmatched_catalog:
+        stripe_active = stripe_active_status.get(job_id, False)
+        if not stripe_active:
+            print(f"[TRIGGER={trigger_category}] Step 9: Ignoring {job_id} (orphaned, already inactive)", file=sys.stderr)
+    
+    if not unmatched_catalog:
+        print(f"[TRIGGER={trigger_category}] Step 9: No orphaned inactive products to check", file=sys.stderr)
+    
+    # Step 10: Matched: catalog.active=false, json.active=true → delete JSON
+    print(f"[TRIGGER={trigger_category}] Step 10: Checking matched products (catalog.active=false, json.active=true)", file=sys.stderr)
+    matched_jobs = json_job_ids.intersection(stripe_job_ids)
+    for job_id in matched_jobs:
+        job_data = jobs_by_id[job_id]
+        product = job_data.get('product', {})
+        json_active = product.get('active', True)
+        stripe_active = stripe_active_status.get(job_id, False)
         if not stripe_active and json_active:
             jobs_to_delete_mismatch.append(job_id)
-            print(f"[TRIGGER={trigger_category}] Step 6: Will delete {job_id} (JSON active but Stripe inactive)", file=sys.stderr)
+            print(f"[TRIGGER={trigger_category}] Step 10: Will delete {job_id} (JSON active but Stripe inactive)", file=sys.stderr)
     
-    # Step 7: Matched: catalog.active=false, json.active=false → delete JSON
-    for job_id in json_job_ids.intersection(stripe_job_ids):
+    if not jobs_to_delete_mismatch or not any(j in matched_jobs for j in jobs_to_delete_mismatch):
+        print(f"[TRIGGER={trigger_category}] Step 10: No matched jobs with catalog.active=false and json.active=true", file=sys.stderr)
+    
+    # Step 11: Matched: catalog.active=false, json.active=false → delete JSON
+    print(f"[TRIGGER={trigger_category}] Step 11: Checking matched products (catalog.active=false, json.active=false)", file=sys.stderr)
+    for job_id in matched_jobs:
+        if job_id in jobs_to_delete_mismatch:
+            continue  # Already handled in Step 10
         job_data = jobs_by_id[job_id]
         product = job_data.get('product', {})
         json_active = product.get('active', True)
-        stripe_active = get_stripe_product_active(job_id)
+        stripe_active = stripe_active_status.get(job_id, False)
         if not stripe_active and not json_active:
             jobs_to_delete_mismatch.append(job_id)
-            print(f"[TRIGGER={trigger_category}] Step 7: Will delete {job_id} (both inactive)", file=sys.stderr)
+            print(f"[TRIGGER={trigger_category}] Step 11: Will delete {job_id} (both inactive)", file=sys.stderr)
     
-    # Step 8: Matched: catalog.active=true, json.active=false → modify catalog to active=false, delete JSON
-    jobs_to_archive_and_delete = []
-    for job_id in json_job_ids.intersection(stripe_job_ids):
+    if not any(j in matched_jobs and not stripe_active_status.get(j, False) and not jobs_by_id[j].get('product', {}).get('active', True) for j in matched_jobs if j not in jobs_to_delete_mismatch):
+        print(f"[TRIGGER={trigger_category}] Step 11: No matched jobs with both inactive", file=sys.stderr)
+    
+    # Step 12: Matched: catalog.active=true, json.active=false → modify catalog to active=false, delete JSON
+    print(f"[TRIGGER={trigger_category}] Step 12: Checking matched products (catalog.active=true, json.active=false)", file=sys.stderr)
+    for job_id in matched_jobs:
+        if job_id in jobs_to_delete_mismatch:
+            continue  # Already handled
         job_data = jobs_by_id[job_id]
         product = job_data.get('product', {})
         json_active = product.get('active', True)
-        stripe_active = get_stripe_product_active(job_id)
+        stripe_active = stripe_active_status.get(job_id, False)
         if stripe_active and not json_active:
             jobs_to_archive_and_delete.append(job_id)
-            print(f"[TRIGGER={trigger_category}] Step 8: Will archive and delete {job_id} (Stripe active but JSON inactive)", file=sys.stderr)
+            print(f"[TRIGGER={trigger_category}] Step 12: Will archive and delete {job_id} (Stripe active but JSON inactive)", file=sys.stderr)
     
-    # Step 9: Matched: catalog.active=true, json.active=true → ignore
-    for job_id in json_job_ids.intersection(stripe_job_ids):
+    if not jobs_to_archive_and_delete:
+        print(f"[TRIGGER={trigger_category}] Step 12: No matched jobs with catalog.active=true and json.active=false", file=sys.stderr)
+    
+    # Step 13: Matched: catalog.active=true, json.active=true → ignore
+    print(f"[TRIGGER={trigger_category}] Step 13: Checking matched products (catalog.active=true, json.active=true)", file=sys.stderr)
+    for job_id in matched_jobs:
+        if job_id in jobs_to_delete_mismatch or job_id in jobs_to_archive_and_delete:
+            continue  # Already handled
         job_data = jobs_by_id[job_id]
         product = job_data.get('product', {})
         json_active = product.get('active', True)
-        stripe_active = get_stripe_product_active(job_id)
+        stripe_active = stripe_active_status.get(job_id, False)
         if stripe_active and json_active:
-            print(f"[TRIGGER={trigger_category}] Step 9: Ignoring {job_id} (both active, already synced)", file=sys.stderr)
+            jobs_ignored.append(job_id)
+            print(f"[TRIGGER={trigger_category}] Step 13: Ignoring {job_id} (both active, already synced)", file=sys.stderr)
+    
+    if not jobs_ignored:
+        print(f"[TRIGGER={trigger_category}] Step 13: No matched jobs with both active (or all handled in previous steps)", file=sys.stderr)
     
     # Execute actions
     
-    # Archive orphaned products (Step 4)
-    for job_id in jobs_to_archive_orphaned:
-        try:
-            archive_stripe_product(job_id)
-            stats['products_archived'] += 1
-        except Exception as e:
-            print(f"Warning: Failed to archive orphaned product {job_id}: {e}", file=sys.stderr)
+    # Archive orphaned products (Step 8)
+    if jobs_to_archive_orphaned:
+        print(f"[TRIGGER={trigger_category}] Executing Step 8 actions: Archiving {len(jobs_to_archive_orphaned)} orphaned product(s)", file=sys.stderr)
+        for job_id in jobs_to_archive_orphaned:
+            try:
+                archive_stripe_product(job_id)
+                stats['products_archived'] += 1
+            except Exception as e:
+                print(f"Warning: Failed to archive orphaned product {job_id}: {e}", file=sys.stderr)
+    else:
+        print(f"[TRIGGER={trigger_category}] Step 8: No actions to execute", file=sys.stderr)
     
-    # Archive and delete (Step 8)
-    for job_id in jobs_to_archive_and_delete:
-        try:
-            archive_stripe_product(job_id)
-            stats['products_archived'] += 1
-            if delete_job(job_id, jobs_dir=jobs_dir):
-                stats['jobs_deleted'] += 1
-        except Exception as e:
-            print(f"Warning: Failed to archive/delete {job_id}: {e}", file=sys.stderr)
+    # Archive and delete (Step 12)
+    if jobs_to_archive_and_delete:
+        print(f"[TRIGGER={trigger_category}] Executing Step 12 actions: Archiving and deleting {len(jobs_to_archive_and_delete)} job(s)", file=sys.stderr)
+        for job_id in jobs_to_archive_and_delete:
+            try:
+                archive_stripe_product(job_id)
+                stats['products_archived'] += 1
+                if delete_job(job_id, jobs_dir=jobs_dir):
+                    stats['jobs_deleted'] += 1
+            except Exception as e:
+                print(f"Warning: Failed to archive/delete {job_id}: {e}", file=sys.stderr)
+    else:
+        print(f"[TRIGGER={trigger_category}] Step 12: No actions to execute", file=sys.stderr)
     
-    # Delete JSONs (Steps 3, 6, 7)
+    # Delete JSONs (Steps 7, 10, 11)
     all_jobs_to_delete = set(jobs_to_delete_no_stripe + jobs_to_delete_mismatch)
-    for job_id in all_jobs_to_delete:
-        try:
-            if delete_job(job_id, jobs_dir=jobs_dir):
-                stats['jobs_deleted'] += 1
-        except Exception as e:
-            print(f"Warning: Failed to delete {job_id}: {e}", file=sys.stderr)
+    if all_jobs_to_delete:
+        print(f"[TRIGGER={trigger_category}] Executing Steps 7/10/11 actions: Deleting {len(all_jobs_to_delete)} job file(s)", file=sys.stderr)
+        for job_id in all_jobs_to_delete:
+            try:
+                if delete_job(job_id, jobs_dir=jobs_dir):
+                    stats['jobs_deleted'] += 1
+            except Exception as e:
+                print(f"Warning: Failed to delete {job_id}: {e}", file=sys.stderr)
+    else:
+        print(f"[TRIGGER={trigger_category}] Steps 7/10/11: No actions to execute", file=sys.stderr)
     
-    # Create Stripe objects (Step 2)
-    for job_id in jobs_to_create:
-        try:
-            job_data = jobs_by_id[job_id]
-            create_stats = create_stripe_objects_for_job(job_data, job_id)
-            stats['products_created'] += create_stats['products_created']
-            # Save JSON with updated state.objects
-            save_job(job_id, job_data, jobs_dir=jobs_dir)
-        except Exception as e:
-            print(f"Warning: Failed to create Stripe objects for {job_id}: {e}", file=sys.stderr)
+    # Create Stripe objects (Step 6)
+    if jobs_to_create:
+        print(f"[TRIGGER={trigger_category}] Executing Step 6 actions: Creating Stripe objects for {len(jobs_to_create)} job(s)", file=sys.stderr)
+        for job_id in jobs_to_create:
+            try:
+                job_data = jobs_by_id[job_id]
+                create_stats = create_stripe_objects_for_job(job_data, job_id)
+                stats['products_created'] += create_stats['products_created']
+                # Save JSON with updated state.objects
+                save_job(job_id, job_data, jobs_dir=jobs_dir)
+                print(f"[TRIGGER={trigger_category}] Step 6: Created Stripe objects for {job_id}", file=sys.stderr)
+            except Exception as e:
+                print(f"Warning: Failed to create Stripe objects for {job_id}: {e}", file=sys.stderr)
+    else:
+        print(f"[TRIGGER={trigger_category}] Step 6: No actions to execute", file=sys.stderr)
     
     return stats
 
@@ -745,10 +823,18 @@ def main():
     }
     
     try:
-        # Steps 1-3: Event queuing (handled in API)
-        print(f"[TRIGGER=user-behavior] Steps 1-3: Event queuing (handled in API)", file=sys.stderr)
+        # Step 1: Events arrive from frontend (already batched client-side: 5 min OR page unload)
+        print(f"[TRIGGER=user-behavior] Step 1: Events arrived from frontend (already batched client-side)", file=sys.stderr)
         
-        # Step 4: Update JSONs with queued events
+        # Step 2: Queue events in backend
+        print(f"[TRIGGER=user-behavior] Step 2: Queue events in backend", file=sys.stderr)
+        print(f"[TRIGGER=user-behavior] Step 2: Completed - Events queued (handled in API)", file=sys.stderr)
+        
+        # Step 3: Wait 2 minutes of no new events
+        print(f"[TRIGGER=user-behavior] Step 3: Wait 2 minutes of no new events", file=sys.stderr)
+        print(f"[TRIGGER=user-behavior] Step 3: Completed - Inactivity period passed (handled in API)", file=sys.stderr)
+        
+        # Step 4: After inactivity period → update JSONs with all queued events
         print(f"[TRIGGER=user-behavior] Step 4: Updating JSONs with queued events", file=sys.stderr)
         action = args.action
         if action == 'sign-contract':
@@ -765,40 +851,44 @@ def main():
         try:
             update_result = update_job_state(args.job_id, action, update_data, jobs_dir)
             results['steps_run'].append(f'update_state_{action}')
-            print(f"[TRIGGER=user-behavior] Step 4: JSON updated - {action} for {args.job_id}", file=sys.stderr)
+            print(f"[TRIGGER=user-behavior] Step 4: Completed - JSON updated ({action} for {args.job_id})", file=sys.stderr)
         except (ValueError, IOError) as e:
             results['errors'].append(f"update_state failed: {str(e)}")
             print(f"[TRIGGER=user-behavior] Step 4: ERROR - {str(e)}", file=sys.stderr)
         
-        # Step 5: Compare JSONs to catalog (8-step matching logic)
-        print(f"[TRIGGER=user-behavior] Step 5: Comparing JSONs to catalog", file=sys.stderr)
+        # Step 5: Compare JSONs to catalog (8-step matching logic - Steps 5-13)
         sync_stats = execute_8_step_sync(jobs_dir, manifest_path, 'user-behavior')
         results['steps_run'].append('sync_catalog')
-        print(f"[TRIGGER=user-behavior] Step 5: Sync stats: {json.dumps(sync_stats, indent=2)}", file=sys.stderr)
+        print(f"[TRIGGER=user-behavior] Step 5: Completed - Sync stats: {json.dumps(sync_stats, indent=2)}", file=sys.stderr)
         
-        # Step 14: Generate manifest
+        # Steps 6-13 are handled within execute_8_step_sync (already logged)
+        print(f"[TRIGGER=user-behavior] Steps 6-13: Completed within Step 5 sync logic", file=sys.stderr)
+        
+        # Step 14: Create new manifest that reflects resulting JSON directory
         print(f"[TRIGGER=user-behavior] Step 14: Creating manifest", file=sys.stderr)
         try:
             manifest = generate_manifest(jobs_dir, manifest_path)
             write_manifest(manifest, manifest_path)
             results['steps_run'].append('generate_manifest')
-            print(f"[TRIGGER=user-behavior] Step 14: Manifest generated", file=sys.stderr)
+            print(f"[TRIGGER=user-behavior] Step 14: Completed - Manifest generated with {len(manifest)} job(s)", file=sys.stderr)
         except Exception as e:
             results['errors'].append(f"generate_manifest failed: {str(e)}")
             print(f"[TRIGGER=user-behavior] Step 14: ERROR - {str(e)}", file=sys.stderr)
         
-        # Step 15: Build pages
+        # Step 15: Build pages (logged, actual build happens in separate workflow)
         print(f"[TRIGGER=user-behavior] Step 15: Building pages (will trigger after commit)", file=sys.stderr)
+        results['steps_run'].append('build_pages')
+        print(f"[TRIGGER=user-behavior] Step 15: Completed - Pages build will trigger after commit", file=sys.stderr)
         
         # Step 16: Deploy
-        print(f"[TRIGGER=user-behavior] Step 16: Deploying", file=sys.stderr)
+        print(f"[TRIGGER=user-behavior] Step 16: Deploying (committing and pushing changes)", file=sys.stderr)
         commit_message = f"🤖 Auto-update: Tracking event ({payload_data.get('event_type', '?')}) for {args.job_id}\n\nCo-Authored-By: GitHub Actions <action@github.com>"
         if git_commit_and_push(commit_message):
             results['committed'] = True
             results['pushed'] = True
-            print(f"[TRIGGER=user-behavior] Step 16: Changes committed and pushed", file=sys.stderr)
+            print(f"[TRIGGER=user-behavior] Step 16: Completed - Changes committed and pushed", file=sys.stderr)
         else:
-            print(f"[TRIGGER=user-behavior] Step 16: No changes detected - skipping commit", file=sys.stderr)
+            print(f"[TRIGGER=user-behavior] Step 16: Skipped - No changes detected", file=sys.stderr)
         
     except Exception as e:
         results['errors'].append(f"Orchestration error: {str(e)}")
