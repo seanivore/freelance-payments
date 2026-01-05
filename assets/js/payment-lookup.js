@@ -43,7 +43,15 @@
         throw new Error('Manifest not found. Please contact support.');
       }
 
-      const manifest = await manifestResponse.json();
+      let manifest;
+      try {
+        const manifestText = await manifestResponse.text();
+        manifest = JSON.parse(manifestText);
+      } catch (jsonError) {
+        console.error('Error parsing manifest.json:', jsonError);
+        console.error('Manifest content (first 500 chars):', (await manifestResponse.text()).substring(0, 500));
+        throw new Error(`Invalid manifest.json format: ${jsonError.message}. Please contact support.`);
+      }
 
       if (!manifest.jobs || Object.keys(manifest.jobs).length === 0) {
         throw new Error('No jobs found in system.');
@@ -87,7 +95,15 @@
         throw new Error('Job data not found. Please contact support.');
       }
 
-      const jobData = await jobResponse.json();
+      let jobData;
+      try {
+        const jobText = await jobResponse.text();
+        jobData = JSON.parse(jobText);
+      } catch (jsonError) {
+        console.error(`Error parsing job JSON (${jobPath}):`, jsonError);
+        console.error('Job content (first 500 chars):', (await jobResponse.text()).substring(0, 500));
+        throw new Error(`Invalid job data format: ${jsonError.message}. Please contact support.`);
+      }
       sessionStorage.setItem('jobData', JSON.stringify(jobData));
 
       // Redirect to job_id-based URL (404.html will route to appropriate section)
