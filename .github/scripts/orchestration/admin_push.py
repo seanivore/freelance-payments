@@ -424,67 +424,80 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
         print(f"[TRIGGER={trigger_category}] Step 5: RESULT - No actions needed", file=sys.stderr)
     
     # Step 6: Matched: catalog.active=false, json.active=true → delete JSON
-    # CRITICAL FIX: Only check jobs that have ACTIVE Stripe products as "matched"
-    # If a JSON has an archived Stripe product, it should be handled as unmatched (Step 2/3), not matched
+    # NOTE: With our fix (only active products in stripe_job_ids), this step should rarely/never execute
+    # because matched_jobs only contains jobs with ACTIVE Stripe products
+    # However, this handles edge cases where a product was archived between checks
     matched_jobs = json_job_ids.intersection(stripe_job_ids)  # Only active products
-    matched_with_json_active = [jid for jid in matched_jobs if json_active_status.get(jid, True) and not stripe_active_status.get(jid, False)]
-    
-    print(f"[TRIGGER={trigger_category}] Step 6: Found {len(matched_with_json_active)} JSON file(s), active=True and Found {len(matched_with_json_active)} catalog product(s), active=False", file=sys.stderr)
-    
+    matched_json_active_stripe_inactive = []
     for job_id in matched_jobs:
         json_active = json_active_status.get(job_id, True)
-        stripe_active = stripe_active_status.get(job_id, False)
+        # Double-check active status (should be True since it's in stripe_job_ids, but verify)
+        stripe_active = stripe_active_status.get(job_id, True)  # Default True since it's in matched_jobs
         if not stripe_active and json_active:
-            jobs_to_delete_mismatch.append(job_id)
-            print(f"[TRIGGER={trigger_category}] Step 6: RESULT - Deleting JSON {job_id} (JSON active but Stripe inactive)", file=sys.stderr)
+            matched_json_active_stripe_inactive.append(job_id)
     
-    if not matched_with_json_active:
+    print(f"[TRIGGER={trigger_category}] Step 6: Found {len(matched_json_active_stripe_inactive)} JSON file(s), active=True and Found {len(matched_json_active_stripe_inactive)} catalog product(s), active=False", file=sys.stderr)
+    
+    for job_id in matched_json_active_stripe_inactive:
+        jobs_to_delete_mismatch.append(job_id)
+        print(f"[TRIGGER={trigger_category}] Step 6: RESULT - Deleting JSON {job_id} (JSON active but Stripe inactive)", file=sys.stderr)
+    
+    if not matched_json_active_stripe_inactive:
         print(f"[TRIGGER={trigger_category}] Step 6: RESULT - No actions needed", file=sys.stderr)
     
     # Step 7: Matched: catalog.active=false, json.active=false → delete JSON
-    matched_both_inactive = [jid for jid in matched_jobs if not json_active_status.get(jid, True) and not stripe_active_status.get(jid, False)]
-    print(f"[TRIGGER={trigger_category}] Step 7: Found {len(matched_both_inactive)} JSON file(s), active=False and Found {len(matched_both_inactive)} catalog product(s), active=False", file=sys.stderr)
-    
+    matched_both_inactive = []
     for job_id in matched_jobs:
         if job_id in jobs_to_delete_mismatch:
             continue  # Already handled in Step 6
         json_active = json_active_status.get(job_id, True)
-        stripe_active = stripe_active_status.get(job_id, False)
+        stripe_active = stripe_active_status.get(job_id, True)  # Should be True for matched_jobs
         if not stripe_active and not json_active:
-            jobs_to_delete_mismatch.append(job_id)
-            print(f"[TRIGGER={trigger_category}] Step 7: RESULT - Deleting JSON {job_id} (both inactive)", file=sys.stderr)
+            matched_both_inactive.append(job_id)
+    
+    print(f"[TRIGGER={trigger_category}] Step 7: Found {len(matched_both_inactive)} JSON file(s), active=False and Found {len(matched_both_inactive)} catalog product(s), active=False", file=sys.stderr)
+    
+    for job_id in matched_both_inactive:
+        jobs_to_delete_mismatch.append(job_id)
+        print(f"[TRIGGER={trigger_category}] Step 7: RESULT - Deleting JSON {job_id} (both inactive)", file=sys.stderr)
     
     if not matched_both_inactive:
         print(f"[TRIGGER={trigger_category}] Step 7: RESULT - No actions needed", file=sys.stderr)
     
     # Step 8: Matched: catalog.active=true, json.active=false → modify catalog to active=false, delete JSON
-    matched_stripe_active_json_inactive = [jid for jid in matched_jobs if not json_active_status.get(jid, True) and stripe_active_status.get(jid, False)]
-    print(f"[TRIGGER={trigger_category}] Step 8: Found {len(matched_stripe_active_json_inactive)} JSON file(s), active=False and Found {len(matched_stripe_active_json_inactive)} catalog product(s), active=True", file=sys.stderr)
-    
+    matched_stripe_active_json_inactive = []
     for job_id in matched_jobs:
         if job_id in jobs_to_delete_mismatch:
             continue  # Already handled
         json_active = json_active_status.get(job_id, True)
-        stripe_active = stripe_active_status.get(job_id, False)
+        stripe_active = stripe_active_status.get(job_id, True)  # Should be True for matched_jobs
         if stripe_active and not json_active:
-            jobs_to_archive_and_delete.append(job_id)
-            print(f"[TRIGGER={trigger_category}] Step 8: RESULT - Archiving catalog and deleting JSON {job_id}", file=sys.stderr)
+            matched_stripe_active_json_inactive.append(job_id)
+    
+    print(f"[TRIGGER={trigger_category}] Step 8: Found {len(matched_stripe_active_json_inactive)} JSON file(s), active=False and Found {len(matched_stripe_active_json_inactive)} catalog product(s), active=True", file=sys.stderr)
+    
+    for job_id in matched_stripe_active_json_inactive:
+        jobs_to_archive_and_delete.append(job_id)
+        print(f"[TRIGGER={trigger_category}] Step 8: RESULT - Archiving catalog and deleting JSON {job_id}", file=sys.stderr)
     
     if not matched_stripe_active_json_inactive:
         print(f"[TRIGGER={trigger_category}] Step 8: RESULT - No actions needed", file=sys.stderr)
     
     # Step 9: Matched: catalog.active=true, json.active=true → ignore
-    matched_both_active = [jid for jid in matched_jobs if json_active_status.get(jid, True) and stripe_active_status.get(jid, False)]
-    print(f"[TRIGGER={trigger_category}] Step 9: Found {len(matched_both_active)} JSON file(s), active=True and Found {len(matched_both_active)} catalog product(s), active=True", file=sys.stderr)
-    
+    matched_both_active = []
     for job_id in matched_jobs:
         if job_id in jobs_to_delete_mismatch or job_id in jobs_to_archive_and_delete:
             continue  # Already handled
         json_active = json_active_status.get(job_id, True)
-        stripe_active = stripe_active_status.get(job_id, False)
+        stripe_active = stripe_active_status.get(job_id, True)  # Should be True for matched_jobs
         if stripe_active and json_active:
-            jobs_ignored.append(job_id)
-            print(f"[TRIGGER={trigger_category}] Step 9: RESULT - Ignoring {job_id} (both active, already synced)", file=sys.stderr)
+            matched_both_active.append(job_id)
+    
+    print(f"[TRIGGER={trigger_category}] Step 9: Found {len(matched_both_active)} JSON file(s), active=True and Found {len(matched_both_active)} catalog product(s), active=True", file=sys.stderr)
+    
+    for job_id in matched_both_active:
+        jobs_ignored.append(job_id)
+        print(f"[TRIGGER={trigger_category}] Step 9: RESULT - Ignoring {job_id} (both active, already synced)", file=sys.stderr)
     
     if not matched_both_active:
         print(f"[TRIGGER={trigger_category}] Step 9: RESULT - No actions needed", file=sys.stderr)
