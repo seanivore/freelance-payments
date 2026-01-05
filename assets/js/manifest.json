@@ -1,15 +1,4 @@
 {
-  "jobs": {
-    "testclient-custom-ui": {
-      "file_path": "assets/jobs/uid-test-custom-ui.json",
-      "job_id": "uid-test-custom-ui",
-      "login_keyword": "custom-ui",
-      "login_name": "TestClient"
-    }
-  },
-<<<<<<< Updated upstream
-  "generated_at": "2026-01-05T00:41:51.231772Z"
-=======
-  "generated_at": "2026-01-05T00:42:32.106505Z"
->>>>>>> Stashed changes
+  "jobs": {},
+  "generated_at": "2026-01-05T00:46:55.176613Z"
 }
