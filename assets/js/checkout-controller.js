@@ -164,16 +164,16 @@
     function injectStripeScript() {
       return new Promise((resolve, reject) => {
         // Load Stripe.js with Basil version (required for initCheckout with ui_mode: custom)
-        // Version format: ?version=YYYY-MM-DD.release-name
-        const stripeVersion = '2025-03-31.basil';
-        const stripeUrl = `https://js.stripe.com/v3/?version=${stripeVersion}`;
+        // Version format: https://js.stripe.com/{release-name}/stripe.js
+        const stripeRelease = 'basil';
+        const stripeUrl = `https://js.stripe.com/${stripeRelease}/stripe.js`;
 
         // CRITICAL: Remove any existing Stripe.js scripts (including from HTML)
         // We must use Basil version for initCheckout to work
-        const existingScripts = document.querySelectorAll(`script[src*="js.stripe.com/v3"]`);
+        const existingScripts = document.querySelectorAll(`script[src*="js.stripe.com"]`);
         existingScripts.forEach(script => {
-          // Only remove if it doesn't have the correct version
-          if (!script.src.includes(stripeVersion)) {
+          // Only remove if it's not the Basil version
+          if (!script.src.includes(`/${stripeRelease}/`)) {
             script.remove();
             // Clear window.Stripe to force reload
             delete window.Stripe;
@@ -181,7 +181,7 @@
         });
 
         // Check if correct version already exists
-        let script = document.querySelector(`script[src*="${stripeVersion}"]`);
+        let script = document.querySelector(`script[src*="/${stripeRelease}/"]`);
 
         if (!script) {
           // Create new script with Basil version
@@ -189,7 +189,7 @@
           script.src = stripeUrl;
           script.async = true;
           script.crossOrigin = 'anonymous';
-          script.setAttribute('data-stripe-version', stripeVersion);
+          script.setAttribute('data-stripe-release', stripeRelease);
 
           script.onerror = () => {
             reject(new Error('Stripe.js script failed to load (network/CSP). Check Content-Security-Policy, ad/script blockers, and network.'));
@@ -281,10 +281,18 @@
       }
 
       // 2) Clean up any existing Checkout instances
-      elementsInstances.forEach((checkout, container) => {
+      elementsInstances.forEach((instance, container) => {
         try {
-          if (checkout && typeof checkout.unmount === 'function') {
-            checkout.unmount();
+          if (instance) {
+            if (instance.paymentElement && typeof instance.paymentElement.unmount === 'function') {
+              instance.paymentElement.unmount();
+            }
+            if (instance.billingAddressElement && typeof instance.billingAddressElement.unmount === 'function') {
+              instance.billingAddressElement.unmount();
+            }
+            if (instance.checkout && typeof instance.checkout.unmount === 'function') {
+              instance.checkout.unmount();
+            }
           }
         } catch (e) {
           console.warn('Error unmounting existing Checkout:', e);
@@ -310,31 +318,96 @@
       }
 
       // 6) Initialize Checkout with Checkout Session client secret (for ui_mode: custom)
-      const checkout = await stripe.initCheckout({
-        clientSecret: clientSecret
+      const checkout = stripe.initCheckout({
+        clientSecret: clientSecret,
+        elementsOptions: {
+          appearance: {
+            theme: 'stripe'
+          }
+        }
       });
 
-      // 7) Prepare mount point (Checkout will create its own form)
-      containerDiv.innerHTML = '<div id="checkout-container"></div>';
-
-      const checkoutContainer = document.getElementById('checkout-container');
-      if (!checkoutContainer) {
-        throw new Error('Failed to create checkout container.');
-      }
-
-      // 8) Mount Checkout (this creates the payment form automatically)
-      checkout.mount(checkoutContainer);
-
-      // 9) Listen for Checkout events
+      // 7) Listen for Checkout events
       checkout.on('change', (event) => {
         // Handle checkout state changes if needed
         console.log('Checkout state changed:', event);
       });
 
-      // Store Checkout instance for cleanup
-      elementsInstances.set(containerDiv, checkout);
+      // 8) Load actions to get session data and confirm method
+      const loadActionsResult = await checkout.loadActions();
+      if (loadActionsResult.type !== 'success') {
+        throw new Error(`Failed to load checkout actions: ${loadActionsResult.error?.message || 'Unknown error'}`);
+      }
 
-      // 10) Mark as mounted
+      const actions = loadActionsResult.actions;
+      const session = actions.getSession();
+
+      // 9) Prepare form HTML
+      containerDiv.innerHTML = `
+        <form id="payment-form">
+          <div id="payment-element"></div>
+          <div id="billing-address-element"></div>
+          <button type="submit" id="submit-button" class="btn btn-primary mt-6 w-full">
+            <span id="button-text">Pay ${formatCurrency((session.total?.total?.amount || 0) / 100)} now</span>
+            <span id="spinner" class="hidden">Processing...</span>
+          </button>
+          <div id="payment-message" class="hidden mt-4 text-red-600"></div>
+        </form>
+      `;
+
+      // 10) Create and mount Payment Element
+      const paymentElement = checkout.createPaymentElement();
+      paymentElement.mount('#payment-element');
+
+      // 11) Create and mount Billing Address Element
+      const billingAddressElement = checkout.createBillingAddressElement();
+      billingAddressElement.mount('#billing-address-element');
+
+      // 12) Handle form submission
+      const form = document.getElementById('payment-form');
+      const submitButton = document.getElementById('submit-button');
+      const buttonText = document.getElementById('button-text');
+      const spinner = document.getElementById('spinner');
+      const paymentMessage = document.getElementById('payment-message');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        // Disable form during submission
+        submitButton.disabled = true;
+        buttonText.classList.add('hidden');
+        spinner.classList.remove('hidden');
+        paymentMessage.classList.add('hidden');
+
+        try {
+          // Confirm payment using actions
+          const { error } = await actions.confirm();
+
+          if (error) {
+            // Show error to user
+            paymentMessage.textContent = error.message || 'An error occurred. Please try again.';
+            paymentMessage.classList.remove('hidden');
+            submitButton.disabled = false;
+            buttonText.classList.remove('hidden');
+            spinner.classList.add('hidden');
+          } else {
+            // Payment will redirect automatically via return_url
+            console.log('Payment confirmed, redirecting...');
+          }
+        } catch (err) {
+          console.error('Error confirming payment:', err);
+          paymentMessage.textContent = err.message || 'An unexpected error occurred. Please try again.';
+          paymentMessage.classList.remove('hidden');
+          submitButton.disabled = false;
+          buttonText.classList.remove('hidden');
+          spinner.classList.add('hidden');
+        }
+      });
+
+      // Store Checkout instance and actions for cleanup
+      elementsInstances.set(containerDiv, { checkout, actions, paymentElement, billingAddressElement });
+
+      // 13) Mark as mounted
       containerDiv.dataset.mounting = 'false';
       containerDiv.dataset.mounted = 'true';
 
