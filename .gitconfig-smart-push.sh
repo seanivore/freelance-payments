@@ -11,7 +11,19 @@ LOCAL=$(git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --name-only --pr
 ALL_INTENTIONAL=$(echo -e "$INTENTIONAL\n$LOCAL" | grep -v "^$" | sort -u)
 
 # Also track which files were DELETED in our commits
-DELETED_FILES=$(git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --diff-filter=D --name-only --pretty=format: 2>/dev/null | sort -u || true)
+# During rebase, check the commit being applied; otherwise check unpushed commits
+if [ -d .git/rebase-merge ]; then
+  # We're in a rebase - check the commit being applied
+  REBASE_COMMIT=$(cat .git/rebase-merge/stopped-sha 2>/dev/null || true)
+  if [ -n "$REBASE_COMMIT" ]; then
+    DELETED_FILES=$(git diff-tree --no-commit-id --name-only --diff-filter=D -r "$REBASE_COMMIT" 2>/dev/null | sort -u || true)
+  else
+    DELETED_FILES=$(git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --diff-filter=D --name-only --pretty=format: 2>/dev/null | sort -u || true)
+  fi
+else
+  # Not in rebase - check unpushed commits
+  DELETED_FILES=$(git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --diff-filter=D --name-only --pretty=format: 2>/dev/null | sort -u || true)
+fi
 
 if [ -n "$ALL_INTENTIONAL" ]; then
   echo "   Your files (will be preserved in conflicts):"
