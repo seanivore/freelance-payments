@@ -77,11 +77,19 @@ git push
 The `git smart-push` script:
 1. Checks `git diff --cached` to see what you've staged
 2. Checks `git log` to see what you've committed locally but not pushed
-3. Before pulling, saves a list of "your files"
-4. During rebase conflicts:
-   - If file is in "your files" list → `git checkout --ours`
-   - Otherwise → `git checkout --theirs`
-5. Automatically continues the rebase
+3. Tracks which files were DELETED in your commits
+4. Before pulling, saves a list of "your files" and "deleted files"
+5. During rebase conflicts:
+   - **Modify/Delete conflicts** (you deleted, remote modified):
+     - If you deleted it → `git rm` (keeps deletion) ✅
+     - Otherwise → `git checkout --theirs` (takes remote version)
+   - **Delete/Modify conflicts** (you modified, remote deleted):
+     - If you changed it → `git checkout --ours` (keeps your version) ✅
+     - Otherwise → `git rm` (takes remote deletion)
+   - **Modify/Modify conflicts** (both changed):
+     - If file is in "your files" list → `git checkout --ours` ✅
+     - Otherwise → `git checkout --theirs`
+6. Automatically continues the rebase
 
 ## Example Scenarios
 
@@ -124,6 +132,20 @@ The `git smart-push` script:
    - Old file deletion → Takes remote version (you didn't touch it) ✅
 4. Continues rebase
 5. Pushes successfully
+
+### Scenario 4: Delete Conflicts
+
+**Before:**
+- You: Deleted `uid-test-fresh-001.json` and committed the deletion
+- Remote: GitHub Actions modified `uid-test-fresh-001.json` (added Stripe IDs)
+
+**What happens:**
+1. `git smart-push` detects you deleted `uid-test-fresh-001.json`
+2. Pulls with rebase → Modify/Delete conflict detected!
+3. Conflict resolution: Keeps YOUR deletion (because you intentionally deleted it) ✅
+   - Uses `git rm` to properly resolve the deletion
+4. Continues rebase
+5. Pushes successfully (file remains deleted)
 
 ## Troubleshooting
 
