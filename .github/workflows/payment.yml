@@ -23,7 +23,7 @@ jobs:
   payment:
     runs-on: ubuntu-latest
     concurrency:
-      group: workflow-payment
+      group: freelance-payments-workflows
       cancel-in-progress: false
 
     steps:

@@ -30,7 +30,7 @@ jobs:
   user-behavior:
     runs-on: ubuntu-latest
     concurrency:
-      group: workflow-user-behavior
+      group: freelance-payments-workflows
       cancel-in-progress: false
 
     steps:
