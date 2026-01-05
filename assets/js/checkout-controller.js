@@ -287,19 +287,15 @@
 
   /**
    * Mount Stripe Checkout with custom UI mode
-   * WHY: For ui_mode: custom, we must use initCheckout() with Checkout Session client_secret.
+   * WHY: For ui_mode: custom, we must use initCheckout() with fetchClientSecret function.
+   * Per Stripe docs: initCheckout accepts fetchClientSecret (async function) not clientSecret (string).
    * Custom UI mode allows full control over checkout flow while maintaining Stripe's optimized payment handling.
    */
-  async function mountStripeElements(clientSecret, containerDiv, returnUrl) {
+  async function mountStripeElements(jobData, paymentNumber, containerDiv, returnUrl) {
     try {
       // 1) Validate inputs early
-      if (!clientSecret || typeof clientSecret !== 'string') {
-        throw new Error('Missing client_secret for Stripe Checkout. The server must return client_secret for custom UI mode.');
-      }
-
-      // Validate client secret format (should be cs_test_xxx or cs_live_xxx for Checkout Sessions)
-      if (!clientSecret.startsWith('cs_')) {
-        throw new Error(`Invalid client secret format. Expected Checkout Session client secret (cs_xxx), got: ${clientSecret.substring(0, 20)}...`);
+      if (!jobData || !paymentNumber) {
+        throw new Error('Missing jobData or paymentNumber for Stripe Checkout.');
       }
 
       const publishableKey = window.STRIPE_PUBLISHABLE_KEY;
@@ -344,10 +340,10 @@
         throw new Error('Stripe.initCheckout is unavailable. Check Stripe.js version and ensure latest version is loaded.');
       }
 
-      // 6) Initialize Checkout with Checkout Session clientSecret (for ui_mode: custom)
-      // Per Stripe sample code: use clientSecret parameter with the client_secret value from API
-      console.log('Initializing Stripe Checkout with client secret...');
-      console.log('Client secret format:', clientSecret.substring(0, 20) + '...');
+      // 6) Initialize Checkout with fetchClientSecret function (for ui_mode: custom)
+      // Per Stripe docs: initCheckout accepts fetchClientSecret (async function), not clientSecret (string)
+      // This function will be called by Stripe.js to fetch the client secret when needed
+      console.log('Initializing Stripe Checkout with fetchClientSecret function...');
       console.log('Stripe object:', typeof stripe, 'initCheckout type:', typeof stripe.initCheckout);
 
       // Debug: Check Stripe.js version info if available
@@ -355,19 +351,40 @@
         console.log('Stripe API version:', stripe._apiVersion);
       }
 
-      // Debug: Log initCheckout function signature if possible
-      console.log('initCheckout function:', stripe.initCheckout.toString().substring(0, 200));
+      // Create fetchClientSecret function that will be called by Stripe.js
+      // Per Stripe docs: This function is called by Stripe.js when it needs the client secret
+      const fetchClientSecret = async () => {
+        console.log('🔄 fetchClientSecret called by Stripe.js, creating checkout session...');
+        const data = await createCheckoutSession(jobData, paymentNumber);
 
-      // Use clientSecret parameter (matches Stripe sample code pattern)
-      // Sample code shows both clientSecret and elementsOptions are valid
+        // Store publishable key if provided (for future use)
+        if (data.publishable_key) {
+          window.STRIPE_PUBLISHABLE_KEY = data.publishable_key;
+          console.log('Stripe publishable key stored from fetchClientSecret');
+        }
+
+        if (!data.client_secret) {
+          throw new Error('No client_secret returned from server');
+        }
+
+        // Validate client secret format
+        if (!data.client_secret.startsWith('cs_')) {
+          throw new Error(`Invalid client secret format: ${data.client_secret.substring(0, 20)}...`);
+        }
+
+        console.log('✅ Client secret fetched:', data.client_secret.substring(0, 20) + '...');
+        return data.client_secret;
+      };
+
+      // Use fetchClientSecret function (per Stripe documentation)
       const appearance = {
         theme: 'stripe'
       };
       const initOptions = {
-        clientSecret: clientSecret,
+        fetchClientSecret: fetchClientSecret,
         elementsOptions: { appearance }
       };
-      console.log('initCheckout options:', { ...initOptions, clientSecret: clientSecret.substring(0, 20) + '...' });
+      console.log('initCheckout options:', { fetchClientSecret: '[Function]', elementsOptions: initOptions.elementsOptions });
 
       const checkout = stripe.initCheckout(initOptions);
       console.log('✅ Stripe Checkout initialized');
@@ -597,52 +614,50 @@
     if (contentDiv) {
       showLoadingState(contentDiv);
 
-      // Create checkout session and embed Stripe Checkout
-      createCheckoutSession(jobData, paymentNumber)
-        .then(async data => {
-          // Store publishable key if provided by API (priority: API response > existing value)
-          if (data.publishable_key) {
-            window.STRIPE_PUBLISHABLE_KEY = data.publishable_key;
-            console.log('Stripe publishable key received from API');
-          }
-
-          // Ensure we have a publishable key before proceeding
-          if (!window.STRIPE_PUBLISHABLE_KEY) {
-            throw new Error('Stripe publishable key not available. Please ensure STRIPE_PUBLISHABLE_KEY is set in Vercel environment variables.');
-          }
-
-          // For custom UI mode, use client_secret to mount Stripe Elements (Payment Element)
-          // Per Stripe sample code: use clientSecret parameter with client_secret value
-          if (data.client_secret) {
-            console.log('✅ Client secret received, mounting Stripe Checkout...');
-            try {
-              const returnUrl = `${window.location.origin}/${jobData.product?.id || sessionStorage.getItem('jobId')}#completion`;
-              console.log('Calling mountStripeElements with returnUrl:', returnUrl);
-              await mountStripeElements(data.client_secret, contentDiv, returnUrl);
-              console.log('✅ mountStripeElements completed successfully');
-            } catch (e) {
-              console.error('❌ Error in mountStripeElements:', e);
-              // Fallback: if Elements fails (e.g., Stripe.js blocked), redirect to hosted checkout
-              if (data.session_url) {
-                console.warn('Stripe Elements failed, falling back to Stripe-hosted redirect:', e.message);
-                window.location.href = data.session_url;
-                return;
-              }
-              throw e;
+      // Ensure we have a publishable key before proceeding
+      // Try to get it from API first, otherwise use existing value
+      if (!window.STRIPE_PUBLISHABLE_KEY) {
+        // Fetch publishable key from API (create a session just to get the key)
+        createCheckoutSession(jobData, paymentNumber)
+          .then(data => {
+            if (data.publishable_key) {
+              window.STRIPE_PUBLISHABLE_KEY = data.publishable_key;
+              console.log('Stripe publishable key received from API');
             }
-          } else if (data.session_url) {
-            // Fallback: redirect if no client_secret (shouldn't happen with custom UI mode)
-            console.warn('No client_secret, falling back to redirect');
-            window.location.href = data.session_url;
-          } else {
-            throw new Error('No checkout session data received');
-          }
-        })
-        .catch(error => {
-          console.error('Checkout error:', error);
-          showErrorState(contentDiv, error.message || 'Failed to create checkout session. Please try again.');
-          section.dataset.initStarted = 'false'; // Reset on error so user can retry
-        });
+            // Now mount Stripe Elements with fetchClientSecret
+            mountStripeElementsWithFetch(jobData, paymentNumber, contentDiv);
+          })
+          .catch(error => {
+            console.error('Error fetching publishable key:', error);
+            showErrorState(contentDiv, 'Failed to initialize payment. Please try again.');
+            section.dataset.initStarted = 'false';
+          });
+      } else {
+        // Publishable key already available, mount directly
+        mountStripeElementsWithFetch(jobData, paymentNumber, contentDiv);
+      }
+    }
+  }
+
+  /**
+   * Mount Stripe Elements using fetchClientSecret pattern
+   * This is the correct way per Stripe documentation
+   */
+  async function mountStripeElementsWithFetch(jobData, paymentNumber, containerDiv) {
+    try {
+      const returnUrl = `${window.location.origin}/${jobData.product?.id || sessionStorage.getItem('jobId')}#completion`;
+      console.log('Mounting Stripe Checkout with fetchClientSecret pattern...');
+      await mountStripeElements(jobData, paymentNumber, containerDiv, returnUrl);
+      console.log('✅ mountStripeElements completed successfully');
+    } catch (e) {
+      console.error('❌ Error in mountStripeElements:', e);
+      showErrorState(containerDiv, `Failed to load payment form: ${e.message}. Please try again.`);
+      // Reset init flag so user can retry
+      const sectionId = paymentNumber === 1 ? 'payment-1' : 'payment-2';
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.dataset.initStarted = 'false';
+      }
     }
   }
 
