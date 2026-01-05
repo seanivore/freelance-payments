@@ -397,9 +397,18 @@
       };
       console.log('initCheckout options:', { fetchClientSecret: '[Function]', elementsOptions: initOptions.elementsOptions });
 
-      const checkout = stripe.initCheckout(initOptions);
+      let checkout = stripe.initCheckout(initOptions);
       console.log('✅ Stripe Checkout initialized');
-      console.log('Checkout object type:', typeof checkout, 'Methods:', Object.keys(checkout || {}).slice(0, 10));
+      console.log('Checkout object type:', typeof checkout, 'Is Promise?', checkout instanceof Promise);
+
+      // If checkout is a Promise (Basil with fetchClientSecret may return Promise), await it
+      if (checkout instanceof Promise) {
+        console.log('⏳ Checkout is a Promise, awaiting resolution...');
+        checkout = await checkout;
+        console.log('✅ Checkout Promise resolved');
+      }
+
+      console.log('Checkout object methods:', Object.keys(checkout || {}).slice(0, 10));
 
       // 8) Wait for fetchClientSecret to complete, then wait for loadActions to become available
       // Basil calls fetchClientSecret asynchronously, and loadActions only appears after it completes
