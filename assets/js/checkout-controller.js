@@ -287,21 +287,19 @@
 
   /**
    * Mount Stripe Checkout with custom UI mode
-   * WHY: For ui_mode: custom with Basil release, we must use initCheckout() with Checkout Session sessionId,
-   * NOT clientSecret (which was used in Clover). Basil uses sessionId parameter.
+   * WHY: For ui_mode: custom, we must use initCheckout() with Checkout Session client_secret.
    * Custom UI mode allows full control over checkout flow while maintaining Stripe's optimized payment handling.
    */
-  async function mountStripeElements(sessionId, containerDiv, returnUrl) {
+  async function mountStripeElements(clientSecret, containerDiv, returnUrl) {
     try {
       // 1) Validate inputs early
-      // Basil release uses sessionId, not clientSecret
-      if (!sessionId || typeof sessionId !== 'string') {
-        throw new Error('Missing session_id for Stripe Checkout. The server must return session_id for custom UI mode (Basil release).');
+      if (!clientSecret || typeof clientSecret !== 'string') {
+        throw new Error('Missing client_secret for Stripe Checkout. The server must return client_secret for custom UI mode.');
       }
 
-      // Validate session ID format (should be cs_test_xxx or cs_live_xxx for Checkout Sessions)
-      if (!sessionId.startsWith('cs_')) {
-        throw new Error(`Invalid session ID format. Expected Checkout Session ID (cs_xxx), got: ${sessionId.substring(0, 20)}...`);
+      // Validate client secret format (should be cs_test_xxx or cs_live_xxx for Checkout Sessions)
+      if (!clientSecret.startsWith('cs_')) {
+        throw new Error(`Invalid client secret format. Expected Checkout Session client secret (cs_xxx), got: ${clientSecret.substring(0, 20)}...`);
       }
 
       const publishableKey = window.STRIPE_PUBLISHABLE_KEY;
@@ -339,20 +337,17 @@
       // 4) Ensure Stripe.js is loaded exactly once
       await StripeLoader.loadStripe({ retries: 1 });
 
-      // 5) Initialize Stripe with beta flag for custom checkout (Basil release)
-      // Per Stripe docs: Basil release may require custom_checkout_beta flag
-      const stripe = window.Stripe(publishableKey, {
-        betas: ['custom_checkout_beta']
-      });
+      // 5) Initialize Stripe (Basil release - custom checkout is GA, no beta flag needed)
+      const stripe = window.Stripe(publishableKey);
 
       if (!stripe || typeof stripe.initCheckout !== 'function') {
         throw new Error('Stripe.initCheckout is unavailable. Check Stripe.js version and ensure latest version is loaded.');
       }
 
-      // 6) Initialize Checkout with Checkout Session sessionId (for ui_mode: custom with Basil release)
-      // Basil release uses sessionId parameter, not clientSecret (which was Clover)
-      console.log('Initializing Stripe Checkout with session ID (Basil release)...');
-      console.log('Session ID format:', sessionId.substring(0, 20) + '...');
+      // 6) Initialize Checkout with Checkout Session clientSecret (for ui_mode: custom)
+      // Per Stripe sample code: use clientSecret parameter with the client_secret value from API
+      console.log('Initializing Stripe Checkout with client secret...');
+      console.log('Client secret format:', clientSecret.substring(0, 20) + '...');
       console.log('Stripe object:', typeof stripe, 'initCheckout type:', typeof stripe.initCheckout);
 
       // Debug: Check Stripe.js version info if available
@@ -360,11 +355,19 @@
         console.log('Stripe API version:', stripe._apiVersion);
       }
 
-      // Basil release: use sessionId parameter
-      const initOptions = {
-        sessionId: sessionId
+      // Debug: Log initCheckout function signature if possible
+      console.log('initCheckout function:', stripe.initCheckout.toString().substring(0, 200));
+
+      // Use clientSecret parameter (matches Stripe sample code pattern)
+      // Sample code shows both clientSecret and elementsOptions are valid
+      const appearance = {
+        theme: 'stripe'
       };
-      console.log('initCheckout options:', { ...initOptions, sessionId: sessionId.substring(0, 20) + '...' });
+      const initOptions = {
+        clientSecret: clientSecret,
+        elementsOptions: { appearance }
+      };
+      console.log('initCheckout options:', { ...initOptions, clientSecret: clientSecret.substring(0, 20) + '...' });
 
       const checkout = stripe.initCheckout(initOptions);
       console.log('✅ Stripe Checkout initialized');
@@ -608,14 +611,14 @@
             throw new Error('Stripe publishable key not available. Please ensure STRIPE_PUBLISHABLE_KEY is set in Vercel environment variables.');
           }
 
-          // For custom UI mode with Basil release, use session_id to mount Stripe Elements (Payment Element)
-          // Basil uses sessionId parameter, not clientSecret (which was Clover)
-          if (data.session_id) {
-            console.log('✅ Session ID received, mounting Stripe Checkout (Basil release)...');
+          // For custom UI mode, use client_secret to mount Stripe Elements (Payment Element)
+          // Per Stripe sample code: use clientSecret parameter with client_secret value
+          if (data.client_secret) {
+            console.log('✅ Client secret received, mounting Stripe Checkout...');
             try {
               const returnUrl = `${window.location.origin}/${jobData.product?.id || sessionStorage.getItem('jobId')}#completion`;
               console.log('Calling mountStripeElements with returnUrl:', returnUrl);
-              await mountStripeElements(data.session_id, contentDiv, returnUrl);
+              await mountStripeElements(data.client_secret, contentDiv, returnUrl);
               console.log('✅ mountStripeElements completed successfully');
             } catch (e) {
               console.error('❌ Error in mountStripeElements:', e);
@@ -628,8 +631,8 @@
               throw e;
             }
           } else if (data.session_url) {
-            // Fallback: redirect if no session_id (shouldn't happen with custom UI mode)
-            console.warn('No session_id, falling back to redirect');
+            // Fallback: redirect if no client_secret (shouldn't happen with custom UI mode)
+            console.warn('No client_secret, falling back to redirect');
             window.location.href = data.session_url;
           } else {
             throw new Error('No checkout session data received');
