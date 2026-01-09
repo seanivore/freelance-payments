@@ -55,6 +55,7 @@ jobs:
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
           GOOGLE_TEMPLATE_CONTRACT_ID: ${{ secrets.GOOGLE_TEMPLATE_CONTRACT_ID }}
           GOOGLE_TEMPLATE_INVOICE_ID: ${{ secrets.GOOGLE_TEMPLATE_INVOICE_ID }}
+          GOOGLE_TEMPLATE_BALANCE_ID: ${{ secrets.GOOGLE_TEMPLATE_BALANCE_ID }}
           GOOGLE_TEMP_FOLDER_ID: ${{ secrets.GOOGLE_TEMP_FOLDER_ID }}
         run: |
           python3 .github/scripts/orchestration/admin_push.py
