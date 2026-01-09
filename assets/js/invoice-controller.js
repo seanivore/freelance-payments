@@ -256,8 +256,7 @@
       // Track the event
       if (typeof EventTracker !== 'undefined') {
           // 'downloaded_docs' is the event that sets client_status.invoice (or balance)
-          await EventTracker.track('downloaded_docs', {
-              job_id: jobId,
+          await EventTracker.track(jobId, 'downloaded_docs', {
               payment_number: paymentNumber
           });
       }
