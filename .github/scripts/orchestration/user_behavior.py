@@ -549,6 +549,94 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
 # STATE UPDATE FUNCTIONS
 # ============================================================================
 
+def update_payment_status(jobs_dir: str, job_id: str, payload: dict) -> dict:
+    """Updates payment status in job JSON."""
+    json_path = os.path.join(jobs_dir, f"{job_id}.json")
+    
+    if not os.path.exists(json_path):
+        print(f"Error: Job file {json_path} not found")
+        return {'updated': False, 'error': 'not_found'}
+        
+    try:
+        with open(json_path, 'r') as f:
+            job_data = json.load(f)
+            
+        payment_number = payload.get('payment_number')
+        succeeded_timestamp = payload.get('succeeded')
+        
+        if not payment_number:
+            return {'updated': False, 'error': 'missing_payment_number'}
+            
+        print(f"Updating payment {payment_number} for {job_id}")
+        
+        if 'state' not in job_data:
+            job_data['state'] = {}
+            
+        if 'client_status' not in job_data['state']:
+            job_data['state']['client_status'] = {}
+            
+        client_status = job_data['state']['client_status']
+        
+        # Payment 1 Logic
+        if payment_number == 1:
+            if 'payment_1' not in job_data['state']:
+                job_data['state']['payment_1'] = {}
+            
+            payment_intent = job_data['state']['payment_1']
+            # If coming from webhook, we trust it succeeded
+            if not payment_intent.get('intent'):
+                payment_intent['intent'] = succeeded_timestamp
+            payment_intent['succeeded'] = succeeded_timestamp
+            
+            # Simple State Update
+            client_status['payment_1'] = succeeded_timestamp
+
+        # Payment 2 Logic
+        elif payment_number == 2:
+            if 'payment_2' not in job_data['state']:
+                job_data['state']['payment_2'] = {}
+            
+            payment_intent = job_data['state']['payment_2']
+            if not payment_intent.get('intent'):
+                payment_intent['intent'] = succeeded_timestamp
+            payment_intent['succeeded'] = succeeded_timestamp
+
+            # Simple State Update
+            client_status['payment_2'] = succeeded_timestamp
+
+        # Check if all payments complete and deactivate product if so
+        product = job_data.get('product', {})
+        total_payments = product.get('total_payments', 1)
+        
+        # Check actual completion based on state
+        p1_done = bool(job_data['state'].get('payment_1', {}).get('succeeded'))
+        p2_done = bool(job_data['state'].get('payment_2', {}).get('succeeded'))
+        
+        all_paid = False
+        if total_payments == 1 and p1_done:
+            all_paid = True
+        elif total_payments == 2 and p1_done and p2_done:
+            all_paid = True
+            
+        if all_paid:
+            print(f"All payments complete for {job_id}, deactivating product")
+            product['active'] = False
+            
+        with open(json_path, 'w') as f:
+            json.dump(job_data, f, indent=4)
+            
+        return {
+            'updated': True,
+            'payment_number': payment_number,
+            'all_paid': all_paid
+        }
+            
+    except Exception as e:
+        print(f"Error updating payment: {e}")
+        import traceback
+        traceback.print_exc()
+        return {'updated': False, 'error': str(e)}
+
 def update_contract_signing(job_data: dict, signature_data: dict) -> dict:
     """Update contract signing status (v4 schema)."""
     contract = job_data.get('contract', {})
@@ -602,19 +690,13 @@ def update_tracking_event(job_data: dict, event_data: dict) -> dict:
     
     client_status = job_data['state']['client_status']
     
-    if event_type == 'contract_loaded':
-        client_status['contract_loaded'] = timestamp
-    elif event_type == 'contract_scrolled_complete':
-        client_status['contract_scrolled_complete'] = True
-    elif event_type == 'invoice_viewed':
-        client_status['viewed_invoice'] = True
-        if not client_status.get('viewed_contract'):
-            client_status['viewed_contract'] = True
-    elif event_type == 'document_downloaded':
-        current_count = client_status.get('downloaded_docs', 0)
-        client_status['downloaded_docs'] = current_count + 1
+    if event_type == 'logged_in':
+        client_status['logged_in'] = timestamp
     elif event_type == 'contract_signed':
         client_status['signed_contract'] = timestamp
+    elif event_type == 'downloaded_docs':
+        client_status['downloaded_docs'] = timestamp
+    # Redundant boolean flags removed to enforce single source of truth (timestamps)
     
     return {
         'updated': True,
@@ -812,7 +894,7 @@ def main():
     """TRIGGER=user-behavior: Steps 1-16"""
     parser = argparse.ArgumentParser(description="User Behavior Workflow")
     parser.add_argument('--job-id', required=True, help="Job ID")
-    parser.add_argument('--action', required=True, choices=['sign-contract', 'track-event'], help="Action type")
+    parser.add_argument('--action', required=True, choices=['track-event', 'sign-contract', 'update-payment'], help='Action to perform')
     parser.add_argument('--payload', required=True, help="JSON payload string")
     
     args = parser.parse_args()

@@ -68,8 +68,11 @@ set -e
       # Check if file is in our intentional changes
       FILE_IN_INTENTIONAL=$(echo "$ALL_INTENTIONAL" | grep -Fxq "$file" && echo "yes" || echo "no")
       
-      # SPECIAL HANDLING: Always force remote for manifest.json and PDF files
-      if [[ "$file" == *"manifest.json"* ]] || [[ "$file" == *.pdf ]]; then
+      # SPECIAL HANDLING: Always force remote for manifest.json, PDF files, and Job JSONs
+      # Logic: Local job JSONs are only created (new). Updates come from the bot (artifacts).
+      # If there is a conflict, it means we modified it locally but bot also updated it.
+      # We always want the bot's version (remote) in this case to keep artifacts.
+      if [[ "$file" == *"manifest.json"* ]] || [[ "$file" == *.pdf ]] || [[ "$file" == assets/jobs/*.json ]]; then
           echo "   ✓ Taking REMOTE version (forced): $file (always accept server-generated artifacts)"
           if git ls-files -u "$file" | grep -q "^100"; then # if remote has the file (modify or add)
              git checkout --theirs "$file" 2>/dev/null || git rm "$file" # fallback if checkout fails

@@ -288,6 +288,11 @@
     jobData.contract.signatures.client.legal_name = clientSignature;
     jobData.contract.signatures.client.signed_date = clientDate;
 
+    // v4.4.0: Optimistically update client_status for FluxGate routing
+    if (!jobData.state) jobData.state = {};
+    if (!jobData.state.client_status) jobData.state.client_status = {};
+    jobData.state.client_status.contract_signed = clientDate;
+
     // Update sessionStorage
     sessionStorage.setItem('jobData', JSON.stringify(jobData));
 

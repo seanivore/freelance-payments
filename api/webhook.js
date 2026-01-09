@@ -107,7 +107,7 @@ module.exports = async (req, res) => {
         const githubToken = process.env.GITHUB_TOKEN;
         const repoOwner = process.env.GITHUB_REPO_OWNER || 'seanivore';
         const repoName = process.env.GITHUB_REPO_NAME || 'freelance-payments';
-        const workflowId = 'orchestrate.yml';
+        const workflowId = 'user-behavior.yml';
         const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`;
 
         const payload = JSON.stringify({

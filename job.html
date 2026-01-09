@@ -2,617 +2,630 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment - Freelance Payments</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Freelance Payments</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
 
-  <!-- Tailwind CSS -->
-  <link rel="stylesheet" href="/assets/css/styles.css">
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/assets/css/styles.css">
 
-  <!-- Stripe.js will be loaded dynamically by checkout-controller.js -->
-  <!-- This ensures we always use the correct Basil version and avoid URL resolution issues -->
+    <!-- Stripe.js will be loaded dynamically by checkout-controller.js -->
+    <!-- This ensures we always use the correct Basil version and avoid URL resolution issues -->
 
 
-  <!-- Print styles -->
-  <style>
-    @media print {
-      .no-print {
-        display: none;
-      }
+    <!-- Print styles -->
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
 
-      @page {
-        margin: 1in;
-      }
+            @page {
+                margin: 1in;
+            }
 
-      body {
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-      }
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
 
-      /* Hide all sections except the one being printed */
-      .job-section:not(.print-active) {
-        display: none;
-      }
-    }
+            /* Hide all sections except the one being printed */
+            .job-section:not(.print-active) {
+                display: none;
+            }
+        }
 
-    /* Smooth scrolling for hash anchors */
-    html {
-      scroll-behavior: smooth;
-    }
+        /* Smooth scrolling for hash anchors */
+        html {
+            scroll-behavior: smooth;
+        }
 
-    /* Section spacing */
-    .job-section {
-      min-height: 100vh;
-      padding: 2rem 0;
-    }
+        /* Section spacing */
+        .job-section {
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
 
-    @media (max-width: 640px) {
-      .job-section {
-        padding: 1.5rem 0;
-      }
-    }
+        @media (max-width: 640px) {
+            .job-section {
+                padding: 1.5rem 0;
+            }
+        }
 
-    /* Navigation bar */
-    .job-nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
+        /* Navigation bar */
+        .job-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
 
-    @media (max-width: 640px) {
-      .job-nav {
-        padding: 0.75rem 1rem;
-      }
+        @media (max-width: 640px) {
+            .job-nav {
+                padding: 0.75rem 1rem;
+            }
 
-      .job-nav .flex {
-        flex-direction: column;
-        gap: 0.5rem;
-        align-items: flex-start;
-      }
-    }
+            .job-nav .flex {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+        }
 
-    /* PDF viewer styling - clean, modern, minimal */
-    .pdf-viewer-container {
-      background: transparent;
-      padding: 1rem 0;
-      margin: 1.5rem auto;
-      max-width: 850px;
-      position: relative;
-      overflow: visible;
-    }
+        /* PDF viewer styling - clean, modern, minimal */
+        .pdf-viewer-container {
+            background: transparent;
+            padding: 1rem 0;
+            margin: 1.5rem auto;
+            max-width: 850px;
+            position: relative;
+            overflow: visible;
+        }
 
-    /* Ensure sign button is above iframe */
-    #contract-sign-btn {
-      z-index: 50 !important;
-      pointer-events: auto !important;
-    }
+        /* Ensure sign button is above iframe */
+        #contract-sign-btn {
+            z-index: 50 !important;
+            pointer-events: auto !important;
+        }
 
-    /* Make sure iframe doesn't block button */
-    .pdf-viewer-container iframe {
-      pointer-events: auto;
-      position: relative;
-      z-index: 1;
-    }
+        /* Make sure iframe doesn't block button */
+        .pdf-viewer-container iframe {
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
+        }
 
-    @media (max-width: 1024px) {
-      .pdf-viewer-container {
-        padding: 0.75rem 0;
-        max-width: 100%;
-      }
-    }
+        @media (max-width: 1024px) {
+            .pdf-viewer-container {
+                padding: 0.75rem 0;
+                max-width: 100%;
+            }
+        }
 
-    @media (max-width: 640px) {
-      .pdf-viewer-container {
-        padding: 0.5rem 0;
-        margin: 1rem 0;
-      }
-    }
+        @media (max-width: 640px) {
+            .pdf-viewer-container {
+                padding: 0.5rem 0;
+                margin: 1rem 0;
+            }
+        }
 
-    /* PDF iframe styling - clean and simple */
-    .pdf-viewer-container iframe {
-      width: 100%;
-      height: 90vh;
-      min-height: 600px;
-      max-height: 90vh;
-      display: block;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      background: white;
-    }
+        /* PDF iframe styling - clean and simple */
+        .pdf-viewer-container iframe {
+            width: 100%;
+            height: 90vh;
+            min-height: 600px;
+            max-height: 90vh;
+            display: block;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
 
-    @media (max-width: 1024px) {
-      .pdf-viewer-container iframe {
-        height: 85vh;
-        border-radius: 6px;
-      }
-    }
+        @media (max-width: 1024px) {
+            .pdf-viewer-container iframe {
+                height: 85vh;
+                border-radius: 6px;
+            }
+        }
 
-    @media (max-width: 768px) {
-      .pdf-viewer-container iframe {
-        height: 80vh;
-        min-height: 500px;
-        border-radius: 4px;
-      }
-    }
+        @media (max-width: 768px) {
+            .pdf-viewer-container iframe {
+                height: 80vh;
+                min-height: 500px;
+                border-radius: 4px;
+            }
+        }
 
-    @media (max-width: 640px) {
-      .pdf-viewer-container iframe {
-        height: 75vh;
-        min-height: 400px;
-        border-radius: 4px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-      }
-    }
+        @media (max-width: 640px) {
+            .pdf-viewer-container iframe {
+                height: 75vh;
+                min-height: 400px;
+                border-radius: 4px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            }
+        }
 
-    /* Error message styling */
-    .error {
-      color: #dc2626;
-      padding: 1rem 1.25rem;
-      background: #fee2e2;
-      border-radius: 8px;
-      margin: 1.5rem 0;
-      border-left: 4px solid #dc2626;
-      font-weight: 500;
-    }
+        /* Error message styling */
+        .error {
+            color: #dc2626;
+            padding: 1rem 1.25rem;
+            background: #fee2e2;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid #dc2626;
+            font-weight: 500;
+        }
 
-    @media (max-width: 640px) {
-      .error {
-        padding: 0.875rem 1rem;
-        margin: 1rem 0;
-      }
-    }
+        @media (max-width: 640px) {
+            .error {
+                padding: 0.875rem 1rem;
+                margin: 1rem 0;
+            }
+        }
 
-    /* Signature button overlay */
-    .signature-button-overlay {
-      position: relative;
-      margin-top: 2rem;
-    }
+        /* Signature button overlay */
+        .signature-button-overlay {
+            position: relative;
+            margin-top: 2rem;
+        }
 
-    /* Active navigation link */
-    .nav-link.active {
-      color: hsl(var(--primary));
-      font-weight: 600;
-      border-bottom: 2px solid hsl(var(--primary));
-      padding-bottom: 0.25rem;
-    }
+        /* Active navigation link */
+        .nav-link.active {
+            color: hsl(var(--primary));
+            font-weight: 600;
+            border-bottom: 2px solid hsl(var(--primary));
+            padding-bottom: 0.25rem;
+        }
 
-    /* Smooth transitions */
-    .nav-link {
-      transition: all 0.2s ease;
-    }
+        /* Smooth transitions */
+        .nav-link {
+            transition: all 0.2s ease;
+        }
 
-    /* Button improvements */
-    .btn {
-      transition: all 0.2s ease;
-    }
+        /* Button improvements */
+        .btn {
+            transition: all 0.2s ease;
+        }
 
-    .btn:hover {
-      transform: translateY(-1px);
-    }
+        .btn:hover {
+            transform: translateY(-1px);
+        }
 
-    .btn:active {
-      transform: translateY(0);
-    }
+        .btn:active {
+            transform: translateY(0);
+        }
 
-    /* Loading spinner improvements */
-    #loading {
-      background: hsl(var(--background));
-    }
+        /* Loading spinner improvements */
+        #loading {
+            background: hsl(var(--background));
+        }
 
-    /* Section visibility */
-    .job-section.hidden {
-      display: none;
-    }
+        /* Section visibility */
+        .job-section.hidden {
+            display: none;
+        }
 
-    /* Print improvements */
-    @media print {
-      .pdf-viewer-container {
-        padding: 0;
-        background: transparent;
-        box-shadow: none;
-      }
+        /* Print improvements */
+        @media print {
+            .pdf-viewer-container {
+                padding: 0;
+                background: transparent;
+                box-shadow: none;
+            }
 
-      .pdf-viewer-container iframe {
-        box-shadow: none;
-        border-radius: 0;
-      }
-    }
-  </style>
+            .pdf-viewer-container iframe {
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
 </head>
 
 <body class="min-h-screen bg-background text-foreground">
-  <!-- Loading state -->
-  <div id="loading" class="min-h-screen flex items-center justify-center">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-      <p class="text-muted-foreground">Loading...</p>
+    <!-- Loading state -->
+    <div id="loading" class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p class="text-muted-foreground">Loading...</p>
+        </div>
     </div>
-  </div>
 
-  <!-- Navigation bar (shown after content loads) -->
-  <nav id="job-nav" class="job-nav hidden no-print">
-    <div class="max-w-4xl mx-auto px-4 md:px-6 py-3 md:py-4">
-      <div class="flex items-center justify-between flex-wrap gap-2">
-        <div class="flex gap-3 md:gap-4 flex-wrap">
-          <a href="#contract" class="text-sm hover:text-primary transition-colors font-medium nav-link" data-section="contract">Contract</a>
-          <a href="#invoice" class="text-sm hover:text-primary transition-colors font-medium nav-link" data-section="invoice">Invoice</a>
-          <a href="#payment-1" class="text-sm hover:text-primary transition-colors font-medium nav-link hidden" data-section="payment-1" id="nav-payment-1">Payments</a>
-          <a href="#payment-2" class="text-sm hover:text-primary transition-colors font-medium nav-link hidden" data-section="payment-2" id="nav-payment-2">Payment 2</a>
+    <!-- Navigation bar (Hidden as per v4.4.0 FluxGate design - simplified linear flow) -->
+    <nav id="job-nav" class="job-nav hidden no-print" style="display: none;">
+        <div class="max-w-4xl mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <div class="flex gap-3 md:gap-4 flex-wrap">
+                    <a href="#contract" class="text-sm hover:text-primary transition-colors font-medium nav-link"
+                        data-section="contract">Contract</a>
+                    <a href="#invoice" class="text-sm hover:text-primary transition-colors font-medium nav-link"
+                        data-section="invoice">Invoice</a>
+                    <a href="#payment-1"
+                        class="text-sm hover:text-primary transition-colors font-medium nav-link hidden"
+                        data-section="payment-1" id="nav-payment-1">Payments</a>
+                    <a href="#payment-2"
+                        class="text-sm hover:text-primary transition-colors font-medium nav-link hidden"
+                        data-section="payment-2" id="nav-payment-2">Payment 2</a>
+                </div>
+            </div>
         </div>
-      </div>
+    </nav>
+
+    <!-- Main content container -->
+    <main id="job-content" class="hidden">
+
+        <!-- Contract Section -->
+        <section id="contract" class="job-section">
+            <div class="max-w-4xl mx-auto px-6 print:p-0">
+                <!-- PDF Viewer Container -->
+                <div id="contract-pdf-viewer" class="pdf-viewer-container">
+                    <!-- PDF iframe will be inserted here by contract-controller.js -->
+                </div>
+
+                <!-- Action Buttons (below PDF, separate container) -->
+                <div id="contract-actions" class="hidden no-print mt-6 flex justify-center">
+                    <button id="contract-sign-btn" class="btn btn-primary transition-all duration-200 hover:shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                            </path>
+                        </svg>
+                        Sign Contract
+                    </button>
+                </div>
+
+                <!-- Error/Content Container -->
+                <div id="contract-content">
+                    <!-- Error messages or fallback content will be shown here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Invoice Section -->
+        <section id="invoice" class="job-section">
+            <div class="max-w-6xl mx-auto px-4 md:px-6 print:p-0">
+                <!-- PDF Viewer Container -->
+                <div id="invoice-pdf-viewer" class="pdf-viewer-container">
+                    <!-- PDF iframe will be inserted here by invoice-controller.js -->
+                </div>
+
+
+                <!-- Error/Content Container -->
+                <div id="invoice-content">
+                    <!-- Error messages or fallback content will be shown here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Checkout Section - Payment 1 -->
+        <section id="payment-1" class="job-section">
+            <div class="max-w-4xl mx-auto px-6">
+                <div class="mb-6 text-center">
+                    <h1 class="text-2xl font-semibold mb-2">Complete Payment</h1>
+                    <p class="text-muted-foreground">Secure checkout powered by Stripe</p>
+                </div>
+                <div id="checkout-content-1">
+                    <!-- Stripe Embedded Checkout will be mounted here by checkout-controller.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Checkout Section - Payment 2 -->
+        <section id="payment-2" class="job-section">
+            <div class="max-w-4xl mx-auto px-6">
+                <div class="mb-6 text-center">
+                    <h1 class="text-2xl font-semibold mb-2">Complete Payment</h1>
+                    <p class="text-muted-foreground">Secure checkout powered by Stripe</p>
+                </div>
+                <div id="checkout-content-2">
+                    <!-- Stripe Embedded Checkout will be mounted here by checkout-controller.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Completion Section -->
+        <section id="completion" class="job-section">
+            <div class="max-w-2xl mx-auto px-6 text-center">
+                <div id="completion-content">
+                    <!-- Completion message will be populated here -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Signature Modal (shadcn UI style) -->
+    <div id="signature-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-900">Sign Contract</h2>
+
+            <form id="signature-form" class="space-y-4">
+                <!-- Contractor Signature -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-900">Contractor Name</label>
+                    <input type="text" id="contractor-name" value="Sean August Horvath" readonly
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-900">Contractor Date</label>
+                    <input type="date" id="contractor-date" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
+                </div>
+
+                <!-- Client Signature -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-900">Your Full Legal Name</label>
+                    <input type="text" id="client-name" required placeholder="Enter your full legal name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white placeholder-gray-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-900">Date</label>
+                    <input type="date" id="client-date" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
+                </div>
+
+                <!-- Optional: Signature font selector -->
+                <div>
+                    <label class="block text-sm font-medium mb-2 text-gray-900">Signature Style (Optional)</label>
+                    <select id="signature-font"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
+                        <option value="cursive">Cursive</option>
+                        <option value="script">Script</option>
+                        <option value="handwriting">Handwriting</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <button type="button" id="modal-cancel" class="btn btn-outline flex-1">Cancel</button>
+                    <button type="submit" class="btn btn-primary flex-1">Sign Contract</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </nav>
 
-  <!-- Main content container -->
-  <main id="job-content" class="hidden">
+    <!-- Load controllers -->
+    <script src="/assets/js/event-tracker.js"></script>
+    <script src="/assets/js/payment-router.js"></script>
+    <script src="/assets/js/contract-controller.js"></script>
+    <script src="/assets/js/invoice-controller.js"></script>
+    <script src="/assets/js/checkout-controller.js"></script>
+    <script src="/assets/js/completion-controller.js"></script>
 
-    <!-- Contract Section -->
-    <section id="contract" class="job-section">
-      <div class="max-w-4xl mx-auto px-6 print:p-0">
-        <!-- PDF Viewer Container -->
-        <div id="contract-pdf-viewer" class="pdf-viewer-container">
-          <!-- PDF iframe will be inserted here by contract-controller.js -->
-        </div>
+    <!-- Signature Modal Handler -->
+    <script>
+        (function () {
+            'use strict';
 
-        <!-- Action Buttons (below PDF, separate container) -->
-        <div id="contract-actions" class="hidden no-print mt-6 flex justify-center">
-          <button id="contract-sign-btn" class="btn btn-primary transition-all duration-200 hover:shadow-lg">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-            </svg>
-            Sign Contract
-          </button>
-        </div>
+            const modal = document.getElementById('signature-modal');
+            const form = document.getElementById('signature-form');
+            const cancelBtn = document.getElementById('modal-cancel');
+            const signBtn = document.getElementById('contract-sign-btn');
 
-        <!-- Error/Content Container -->
-        <div id="contract-content">
-          <!-- Error messages or fallback content will be shown here -->
-        </div>
-      </div>
-    </section>
-
-    <!-- Invoice Section -->
-    <section id="invoice" class="job-section">
-      <div class="max-w-6xl mx-auto px-4 md:px-6 print:p-0">
-        <!-- PDF Viewer Container -->
-        <div id="invoice-pdf-viewer" class="pdf-viewer-container">
-          <!-- PDF iframe will be inserted here by invoice-controller.js -->
-        </div>
-
-
-        <!-- Error/Content Container -->
-        <div id="invoice-content">
-          <!-- Error messages or fallback content will be shown here -->
-        </div>
-      </div>
-    </section>
-
-    <!-- Checkout Section - Payment 1 -->
-    <section id="payment-1" class="job-section">
-      <div class="max-w-4xl mx-auto px-6">
-        <div class="mb-6 text-center">
-          <h1 class="text-2xl font-semibold mb-2">Complete Payment</h1>
-          <p class="text-muted-foreground">Secure checkout powered by Stripe</p>
-        </div>
-        <div id="checkout-content-1">
-          <!-- Stripe Embedded Checkout will be mounted here by checkout-controller.js -->
-        </div>
-      </div>
-    </section>
-
-    <!-- Checkout Section - Payment 2 -->
-    <section id="payment-2" class="job-section">
-      <div class="max-w-4xl mx-auto px-6">
-        <div class="mb-6 text-center">
-          <h1 class="text-2xl font-semibold mb-2">Complete Payment</h1>
-          <p class="text-muted-foreground">Secure checkout powered by Stripe</p>
-        </div>
-        <div id="checkout-content-2">
-          <!-- Stripe Embedded Checkout will be mounted here by checkout-controller.js -->
-        </div>
-      </div>
-    </section>
-
-    <!-- Completion Section -->
-    <section id="completion" class="job-section">
-      <div class="max-w-2xl mx-auto px-6 text-center">
-        <div id="completion-content">
-          <!-- Completion message will be populated here -->
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Signature Modal (shadcn UI style) -->
-  <div id="signature-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
-      <h2 class="text-2xl font-semibold mb-4 text-gray-900">Sign Contract</h2>
-
-      <form id="signature-form" class="space-y-4">
-        <!-- Contractor Signature -->
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-900">Contractor Name</label>
-          <input type="text" id="contractor-name" value="Sean August Horvath" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-900">Contractor Date</label>
-          <input type="date" id="contractor-date" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
-        </div>
-
-        <!-- Client Signature -->
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-900">Your Full Legal Name</label>
-          <input type="text" id="client-name" required placeholder="Enter your full legal name" class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white placeholder-gray-500">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-900">Date</label>
-          <input type="date" id="client-date" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
-        </div>
-
-        <!-- Optional: Signature font selector -->
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-900">Signature Style (Optional)</label>
-          <select id="signature-font" class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white">
-            <option value="cursive">Cursive</option>
-            <option value="script">Script</option>
-            <option value="handwriting">Handwriting</option>
-          </select>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex gap-4 pt-4">
-          <button type="button" id="modal-cancel" class="btn btn-outline flex-1">Cancel</button>
-          <button type="submit" class="btn btn-primary flex-1">Sign Contract</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Load controllers -->
-  <script src="/assets/js/event-tracker.js"></script>
-  <script src="/assets/js/payment-router.js"></script>
-  <script src="/assets/js/contract-controller.js"></script>
-  <script src="/assets/js/invoice-controller.js"></script>
-  <script src="/assets/js/checkout-controller.js"></script>
-  <script src="/assets/js/completion-controller.js"></script>
-
-  <!-- Signature Modal Handler -->
-  <script>
-    (function () {
-      'use strict';
-
-      const modal = document.getElementById('signature-modal');
-      const form = document.getElementById('signature-form');
-      const cancelBtn = document.getElementById('modal-cancel');
-      const signBtn = document.getElementById('contract-sign-btn');
-
-      // Open modal when sign button is clicked
-      if (signBtn) {
-        signBtn.addEventListener('click', () => {
-          modal.classList.remove('hidden');
-          // Set today's date as default
-          const today = new Date().toISOString().split('T')[0];
-          document.getElementById('contractor-date').value = today;
-          document.getElementById('client-date').value = today;
-        });
-      }
-
-      // Close modal
-      if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-          modal.classList.add('hidden');
-        });
-      }
-
-      // Handle form submission
-      if (form) {
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-
-          const contractorName = document.getElementById('contractor-name').value;
-          const contractorDate = document.getElementById('contractor-date').value;
-          const clientName = document.getElementById('client-name').value;
-          const clientDate = document.getElementById('client-date').value;
-
-          if (!contractorName || !contractorDate || !clientName || !clientDate) {
-            alert('Please fill in all fields.');
-            return;
-          }
-
-          // Call contract controller's signing handler
-          if (typeof ContractController !== 'undefined' && ContractController.handleContractSigning) {
-            const jobData = ContractController.getJobData() || window._currentJobData;
-            if (jobData) {
-              const signatureData = {
-                contractorName: contractorName,
-                contractorDate: new Date(contractorDate).toISOString() + 'Z',
-                clientName: clientName,
-                clientDate: new Date(clientDate).toISOString() + 'Z'
-              };
-
-              await ContractController.handleContractSigning(jobData, signatureData);
-
-              // Note: contract_signed event is tracked in handleContractSigning to avoid duplicates
-
-              // Close modal after successful signing
-              modal.classList.add('hidden');
-            } else {
-              alert('Job data not found. Please refresh the page.');
+            // Open modal when sign button is clicked
+            if (signBtn) {
+                signBtn.addEventListener('click', () => {
+                    modal.classList.remove('hidden');
+                    // Set today's date as default
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('contractor-date').value = today;
+                    document.getElementById('client-date').value = today;
+                });
             }
-          } else {
-            alert('Contract controller not loaded. Please refresh the page.');
-          }
-        });
-      }
-    })();
-  </script>
 
-  <script>
-    /**
-     * Initialize job page
-     * Determines which section to show based on state and hash anchor
-     */
-    (function () {
-      'use strict';
+            // Close modal
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                });
+            }
 
-      // Wait for DOM and controllers to be ready
-      function init() {
-        const jobDataStr = sessionStorage.getItem('jobData');
-        if (!jobDataStr) {
-          console.error('No job data found');
-          document.getElementById('loading').innerHTML = `
+            // Handle form submission
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const contractorName = document.getElementById('contractor-name').value;
+                    const contractorDate = document.getElementById('contractor-date').value;
+                    const clientName = document.getElementById('client-name').value;
+                    const clientDate = document.getElementById('client-date').value;
+
+                    if (!contractorName || !contractorDate || !clientName || !clientDate) {
+                        alert('Please fill in all fields.');
+                        return;
+                    }
+
+                    // Call contract controller's signing handler
+                    if (typeof ContractController !== 'undefined' && ContractController.handleContractSigning) {
+                        const jobData = ContractController.getJobData() || window._currentJobData;
+                        if (jobData) {
+                            const signatureData = {
+                                contractorName: contractorName,
+                                contractorDate: new Date(contractorDate).toISOString() + 'Z',
+                                clientName: clientName,
+                                clientDate: new Date(clientDate).toISOString() + 'Z'
+                            };
+
+                            await ContractController.handleContractSigning(jobData, signatureData);
+
+                            // Note: contract_signed event is tracked in handleContractSigning to avoid duplicates
+
+                            // Close modal after successful signing
+                            modal.classList.add('hidden');
+                        } else {
+                            alert('Job data not found. Please refresh the page.');
+                        }
+                    } else {
+                        alert('Contract controller not loaded. Please refresh the page.');
+                    }
+                });
+            }
+        })();
+    </script>
+
+    <script>
+        /**
+         * Initialize job page
+         * Determines which section to show based on state and hash anchor
+         */
+        (function () {
+            'use strict';
+
+            // Wait for DOM and controllers to be ready
+            function init() {
+                const jobDataStr = sessionStorage.getItem('jobData');
+                if (!jobDataStr) {
+                    console.error('No job data found');
+                    document.getElementById('loading').innerHTML = `
             <div class="text-center">
               <h1>Error</h1>
               <p>Job data not found. Please start from the <a href="/">homepage</a>.</p>
             </div>
           `;
-          return;
-        }
+                    return;
+                }
 
-        // Hide loading, show content
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('job-content').classList.remove('hidden');
-        document.getElementById('job-nav').classList.remove('hidden');
+                // Hide loading, show content
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('job-content').classList.remove('hidden');
+                document.getElementById('job-nav').classList.remove('hidden');
 
-        // Get current hash or determine from state
-        const hash = window.location.hash;
-        let targetSection = hash ? hash.substring(1) : null;
+                // Get current hash or determine from state
+                const hash = window.location.hash;
+                let targetSection = hash ? hash.substring(1) : null;
 
-        // If no hash, use payment router to determine section
-        if (!targetSection && typeof PaymentRouter !== 'undefined') {
-          try {
-            const jobData = JSON.parse(jobDataStr);
-            const routeInfo = PaymentRouter.determineRoute(jobData);
+                // If no hash, use payment router to determine section
+                if (!targetSection && typeof PaymentRouter !== 'undefined') {
+                    try {
+                        const jobData = JSON.parse(jobDataStr);
+                        const routeInfo = PaymentRouter.determineRoute(jobData);
 
-            // Map route to section ID
-            const routeToSection = {
-              'contract': 'contract',
-              'invoice': 'invoice',
-              'checkout': routeInfo.paymentNumber === 1 ? 'payment-1' :
-                routeInfo.paymentNumber === 2 ? 'payment-2' : 'payment-1',
-              'completion': 'completion'
-            };
+                        // Map route to section ID
+                        const routeToSection = {
+                            'contract': 'contract',
+                            'invoice': 'invoice',
+                            'checkout': routeInfo.paymentNumber === 1 ? 'payment-1' :
+                                routeInfo.paymentNumber === 2 ? 'payment-2' : 'payment-1',
+                            'completion': 'completion'
+                        };
 
-            targetSection = routeToSection[routeInfo.route] || 'contract';
+                        targetSection = routeToSection[routeInfo.route] || 'contract';
 
-            // Update URL hash without scrolling
-            history.replaceState(null, null, `#${targetSection}`);
-          } catch (e) {
-            console.error('Error determining route:', e);
-            targetSection = 'contract';
-          }
-        }
+                        // Update URL hash without scrolling
+                        history.replaceState(null, null, `#${targetSection}`);
+                    } catch (e) {
+                        console.error('Error determining route:', e);
+                        targetSection = 'contract';
+                    }
+                }
 
-        // Show target section, hide others
-        if (targetSection) {
-          const sections = document.querySelectorAll('.job-section');
-          sections.forEach(section => {
-            section.classList.add('hidden');
-          });
+                // Show target section, hide others
+                if (targetSection) {
+                    const sections = document.querySelectorAll('.job-section');
+                    sections.forEach(section => {
+                        section.classList.add('hidden');
+                    });
 
-          const targetElement = document.getElementById(targetSection);
-          if (targetElement) {
-            targetElement.classList.remove('hidden');
-            // Scroll to section smoothly
-            setTimeout(() => {
-              targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-          }
-        }
+                    const targetElement = document.getElementById(targetSection);
+                    if (targetElement) {
+                        targetElement.classList.remove('hidden');
+                        // Scroll to section smoothly
+                        setTimeout(() => {
+                            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                    }
+                }
 
-        // Handle hash changes (user clicks nav links)
-        // Update active nav link based on hash
-        function updateActiveNav() {
-          const hash = window.location.hash.substring(1) || 'contract';
-          document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('data-section') === hash ||
-              (hash.startsWith('payment-') && link.getAttribute('data-section') === hash)) {
-              link.classList.add('active');
+                // Handle hash changes (user clicks nav links)
+                // Update active nav link based on hash
+                function updateActiveNav() {
+                    const hash = window.location.hash.substring(1) || 'contract';
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('data-section') === hash ||
+                            (hash.startsWith('payment-') && link.getAttribute('data-section') === hash)) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+
+                // Update on hash change
+                window.addEventListener('hashchange', function () {
+                    const newHash = window.location.hash.substring(1);
+                    updateActiveNav();
+                    const sections = document.querySelectorAll('.job-section');
+                    sections.forEach(section => {
+                        section.classList.add('hidden');
+                    });
+
+                    const targetElement = document.getElementById(newHash);
+                    if (targetElement) {
+                        targetElement.classList.remove('hidden');
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    updateActiveNav();
+                });
+
+                // Update payment nav links visibility based on job state
+                function updatePaymentNavVisibility(jobData) {
+                    if (!jobData || !jobData.state) return;
+
+                    const state = jobData.state;
+                    const payment1Nav = document.getElementById('nav-payment-1');
+                    const payment2Nav = document.getElementById('nav-payment-2');
+                    const product = jobData.product || {};
+                    const totalPayments = product.total_payments || 1;
+
+                    // Show payment 1 nav if job has payments and payment 1 not completed
+                    if (payment1Nav && totalPayments >= 1) {
+                        const payment1Succeeded = state.payment_1?.succeeded;
+                        if (!payment1Succeeded) {
+                            payment1Nav.classList.remove('hidden');
+                        }
+                    }
+
+                    // Show payment 2 nav if job has 2 payments and payment 1 completed but payment 2 not completed
+                    if (payment2Nav && totalPayments >= 2) {
+                        const payment1Succeeded = state.payment_1?.succeeded;
+                        const payment2Succeeded = state.payment_2?.succeeded;
+                        if (payment1Succeeded && !payment2Succeeded) {
+                            payment2Nav.classList.remove('hidden');
+                        }
+                    }
+                }
+
+                // Update nav on initial load
+                if (targetSection) {
+                    setTimeout(() => {
+                        updateActiveNav();
+                        try {
+                            const jobData = JSON.parse(sessionStorage.getItem('jobData') || '{}');
+                            updatePaymentNavVisibility(jobData);
+                        } catch (e) {
+                            console.error('Error updating nav visibility:', e);
+                        }
+                    }, 100);
+                }
             }
-          });
-        }
 
-        // Update on hash change
-        window.addEventListener('hashchange', function () {
-          const newHash = window.location.hash.substring(1);
-          updateActiveNav();
-          const sections = document.querySelectorAll('.job-section');
-          sections.forEach(section => {
-            section.classList.add('hidden');
-          });
-
-          const targetElement = document.getElementById(newHash);
-          if (targetElement) {
-            targetElement.classList.remove('hidden');
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-
-          updateActiveNav();
-        });
-
-        // Update payment nav links visibility based on job state
-        function updatePaymentNavVisibility(jobData) {
-          if (!jobData || !jobData.state) return;
-
-          const state = jobData.state;
-          const payment1Nav = document.getElementById('nav-payment-1');
-          const payment2Nav = document.getElementById('nav-payment-2');
-          const product = jobData.product || {};
-          const totalPayments = product.total_payments || 1;
-
-          // Show payment 1 nav if job has payments and payment 1 not completed
-          if (payment1Nav && totalPayments >= 1) {
-            const payment1Succeeded = state.payment_1?.succeeded;
-            if (!payment1Succeeded) {
-              payment1Nav.classList.remove('hidden');
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
             }
-          }
-
-          // Show payment 2 nav if job has 2 payments and payment 1 completed but payment 2 not completed
-          if (payment2Nav && totalPayments >= 2) {
-            const payment1Succeeded = state.payment_1?.succeeded;
-            const payment2Succeeded = state.payment_2?.succeeded;
-            if (payment1Succeeded && !payment2Succeeded) {
-              payment2Nav.classList.remove('hidden');
-            }
-          }
-        }
-
-        // Update nav on initial load
-        if (targetSection) {
-          setTimeout(() => {
-            updateActiveNav();
-            try {
-              const jobData = JSON.parse(sessionStorage.getItem('jobData') || '{}');
-              updatePaymentNavVisibility(jobData);
-            } catch (e) {
-              console.error('Error updating nav visibility:', e);
-            }
-          }, 100);
-        }
-      }
-
-      // Initialize when DOM is ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
-    })();
-  </script>
+        })();
+    </script>
 </body>
 
 </html>

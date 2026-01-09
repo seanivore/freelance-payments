@@ -1,197 +1,154 @@
 /**
- * PAYMENT ROUTER - State Machine
- * Determines user routing based on contract signing status and payment completion
- * Routes: contract → invoice → checkout → completion
+ * PAYMENT ROUTER (Refactored "FluxGate")
+ * Central Intelligence for User Routing based strictly on ISO Timestamps.
  * 
- * Updated for v4 schema: Uses state.payment_1/payment_2, product.id
+ * Logic:
+ * 1. Check client_status.logged_in -> (Assumed true if we have jobData, but good to verify)
+ * 2. Check client_status.contract_signed -> if missing, GOTO Contract
+ * 3. Check client_status.payment_1 -> if missing, GOTO Invoice/Payment 1
+ * 4. Check client_status.payment_2 -> if missing (and required), GOTO Invoice/Payment 2
+ * 5. Else -> GOTO Completion
  */
 
 (function () {
   'use strict';
 
   /**
-   * Load job data from sessionStorage
+   * Get job data from sessionStorage
    */
   function getJobData() {
     const jobDataStr = sessionStorage.getItem('jobData');
-    if (!jobDataStr) {
-      return null;
-    }
+    if (!jobDataStr) return null;
     try {
       return JSON.parse(jobDataStr);
     } catch (e) {
-      console.error('Error parsing job data:', e);
+      console.error('FluxGate: Error parsing job data', e);
       return null;
     }
   }
 
   /**
-   * Determine route based on job state (v4 schema)
+   * Determine the current route based on strict timestamp state
    * Returns: { route: string, paymentNumber?: number, reason: string }
-   * 
-   * Routes: contract → invoice → checkout → completion
-   * Uses v4 schema: contract.signatures, state.client_status, state.payment_1/payment_2
    */
   function determineRoute(jobData) {
     if (!jobData) {
-      return {
-        route: 'error',
-        reason: 'Job data not found'
-      };
+      return { route: 'error', reason: 'No job data found' };
     }
 
-    const contract = jobData.contract || {};
     const state = jobData.state || {};
     const clientStatus = state.client_status || {};
+    const product = jobData.product || {};
+    
+    // v4.4.0: Strict Timestamp Logic
+    const hasSignedContract = !!clientStatus.contract_signed;
+    const hasPaid1 = !!clientStatus.payment_1;
+    const hasPaid2 = !!clientStatus.payment_2;
+    
+    // Total payments derived from product/prices
+    // If price2 exists and has an ID, we assume 2 payments.
+    const hasPrice2 = !!(jobData.price2 && jobData.price2.id);
+    const totalPayments = product.total_payments || (hasPrice2 ? 2 : 1);
 
-    // v4 schema: prices are in separate objects (price1, price2)
-    // Payment status is checked from state.payment_1 and state.payment_2
-    const initialPayment = state.payment_1 || {};
-    const balancePayment = state.payment_2 || {};
+    console.log('FluxGate Status:', {
+      signed: hasSignedContract,
+      paid1: hasPaid1,
+      paid2: hasPaid2,
+      totalPayments
+    });
 
-    // Check if contract is signed (v4 schema: contract.signatures.client.signed_date)
-    const isContractSigned = !!(contract.signatures &&
-      contract.signatures.client &&
-      contract.signatures.client.signed_date);
-
-    // Check payment status
-    const initialPaid = initialPayment.succeeded !== null;
-    const balancePaid = balancePayment.succeeded !== null;
-    const allPaymentsPaid = initialPaid && balancePaid;
-
-    // State machine logic
-    if (!isContractSigned) {
-      // Contract not signed → go to contract section
+    // 1. Contract Gate
+    if (!hasSignedContract) {
       return {
         route: 'contract',
-        reason: 'Contract not yet signed'
+        reason: 'Contract not signed'
       };
     }
 
-    if (allPaymentsPaid) {
-      // All payments complete → completion section
+    // 2. Payment 1 Gate
+    if (!hasPaid1) {
       return {
-        route: 'completion',
-        reason: 'All payments completed'
-      };
-    }
-
-    // Contract signed, determine which payment is pending
-    if (!initialPaid) {
-      // First payment pending → invoice then checkout for payment 1
-      return {
-        route: 'invoice',
+        route: 'invoice', // Invoice leads to Payment 1
         paymentNumber: 1,
-        reason: 'Initial payment is pending'
-      };
-    } else if (!balancePaid) {
-      // Second payment pending → invoice then checkout for payment 2
-      return {
-        route: 'invoice',
-        paymentNumber: 2,
-        reason: 'Balance payment is pending'
+        reason: 'Payment 1 pending'
       };
     }
 
-    // Fallback (shouldn't reach here)
+    // 3. Payment 2 Gate
+    if (totalPayments > 1 && !hasPaid2) {
+      return {
+        route: 'invoice', // Invoice leads to Payment 2
+        paymentNumber: 2,
+        reason: 'Payment 2 pending'
+      };
+    }
+
+    // 4. Completion
     return {
-      route: 'error',
-      reason: 'Unable to determine route'
+      route: 'completion',
+      reason: 'All steps completed'
     };
   }
 
   /**
-   * Route user to appropriate section (hash-based routing for single-page app)
-   * Maps routes to section IDs: contract, invoice, payment-1, payment-2, completion
+   * Route user and update UI
    */
   function routeUser(routeInfo) {
-    const { route, paymentNumber } = routeInfo;
-    const jobId = sessionStorage.getItem('jobId');
-
-    // Map route to section ID
-    let sectionId;
-    switch (route) {
-      case 'contract':
-        sectionId = 'contract';
-        break;
-
-      case 'invoice':
-        sectionId = 'invoice';
-        break;
-
-      case 'checkout':
-        // Map payment number to section ID
-        if (paymentNumber === 1) {
-          sectionId = 'payment-1';
-        } else if (paymentNumber === 2) {
-          sectionId = 'payment-2';
-        } else {
-          sectionId = 'payment-1'; // Default to first payment
-        }
-        break;
-
-      case 'completion':
-        sectionId = 'completion';
-        break;
-
-      case 'error':
-      default:
-        // Show error or redirect to lookup
-        alert(`Error: ${routeInfo.reason}. Redirecting to lookup.`);
-        window.location.href = '/';
-        return;
-    }
-
-    // Update URL hash to navigate to section
-    if (jobId) {
-      // We're on the job page, just update hash
-      window.location.hash = sectionId;
-
-      // Scroll to section (handled by job.html's hashchange listener)
-      const targetElement = document.getElementById(sectionId);
-      if (targetElement) {
-        // Show section, hide others
-        document.querySelectorAll('.job-section').forEach(section => {
-          section.classList.add('hidden');
-        });
-        targetElement.classList.remove('hidden');
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    } else {
-      // Not on job page yet, redirect to job page with hash
-      // This shouldn't happen if called from job.html, but handle it anyway
-      console.warn('No jobId found, cannot route to section');
-      window.location.href = '/';
-    }
-  }
-
-  /**
-   * Main execution (only runs if explicitly called, not auto-executed)
-   */
-  function init() {
-    const jobData = getJobData();
-
-    if (!jobData) {
-      // No job data → redirect to lookup
-      console.warn('No job data found, redirecting to lookup');
-      window.location.href = '/';
+    console.log('FluxGate Routing to:', routeInfo);
+    
+    if (routeInfo.route === 'error') {
+      window.location.href = '/'; // Redirect to home/lookup
       return;
     }
 
-    // Determine route
-    const routeInfo = determineRoute(jobData);
-    console.log('Routing decision:', routeInfo);
-
-    // Route user (will update hash, not redirect)
-    routeUser(routeInfo);
+    // Map internal route to hash/section ID
+    let targetHash = routeInfo.route;
+    
+    // Handle invoice vs payment page distinction if needed
+    // The previous router mapped 'invoice' to 'invoice' section, which likely has a "Pay" button
+    // moving them to '#payment-1' or '#payment-2'.
+    // FluxGate simply puts them at the start of that flow (Invoice View).
+    
+    // If we are already on a valid step for this route, don't force-reload
+    // e.g., if Route is 'invoice' (for payment 1) and user is on '#payment-1', let them be?
+    // STRICT MODE: No, force them to the correct logical step OR allow sub-steps.
+    // Let's stick to the main gates: Contract, Invoice, Completion.
+    // The 'checkout' sections (#payment-1, #payment-2) are sub-sections of the Invoice flow.
+    
+    // We will just return the routeInfo for the calling script to handle navigation
+    // or set hash directly if standalone.
+    
+    // In job.html inline script, it handles the visual switching. 
+    // This function might be called manually.
+    
+    // Logic from previous router:
+    let sectionId = targetHash;
+    if (targetHash === 'checkout') {
+         sectionId = (routeInfo.paymentNumber === 2) ? 'payment-2' : 'payment-1';
+    }
+    
+    // If pure 'invoice', we probably want to ensure the invoice controller knows which payment
+    // We can use hash params or simple state.
+    
+    window.location.hash = sectionId;
   }
 
-  // Export for use in other scripts
+  /**
+   * Initialize
+   */
+  function init() {
+    const jobData = getJobData();
+    if (!jobData) return;
+    const route = determineRoute(jobData);
+    routeUser(route);
+  }
+
+  // Export
   window.PaymentRouter = {
     determineRoute,
     routeUser,
-    getJobData,
-    init
+    init,
+    getJobData
   };
 
 })();

@@ -45,13 +45,31 @@
             "coupon": null // artifact, coupon object id added
         },
         "client_status": {
-            "logged_in": null, // artifact, ISO timestamp from user-behavior event 
-            "contract_loaded": null, // artifact, ISO timestamp from user-behavior event 
-            "contract_scrolled_complete": null, // artifact, ISO from user-behavior event 
-            "viewed_contract": true, // artifact, ISO timestamp from user-behavior event 
-            "viewed_invoice": true, // artifact, ISO timestamp from user-behavior event 
-            "downloaded_docs": 0, // artifact, ISO counter from user-behavior event 
-            "signed_contract": null // artifact, ISO timestamp from user-behavior event 
+            "description": "Simplified state tracking using ISO timestamps only.",
+            "type": "object",
+            "properties": {
+                "logged_in": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "contract_signed": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "downloaded_docs": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "payment_1": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "payment_2": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "additionalProperties": false
         },
         "payment_1": {
             "intent": null, // artifact, ISO timestamp payment event; not functional yet
