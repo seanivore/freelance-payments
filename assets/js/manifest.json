@@ -1,11 +1,11 @@
 {
   "jobs": {
     "yakamoto-shave-it": {
-      "file_path": "assets/jobs/uid-yak-909.json",
+      "file_path": "assets/jobs/uid-zoo-101.json",
       "job_id": "uid-yak-909",
       "login_keyword": "shave-it",
       "login_name": "Yakamoto"
     }
   },
-  "generated_at": "2026-01-09T21:13:11.436421Z"
+  "generated_at": "2026-01-09T21:25:15.325934Z"
 }
