@@ -503,6 +503,15 @@
                 const hash = window.location.hash;
                 let targetSection = hash ? hash.substring(1) : null;
 
+                // Handle mapped sections (completion-1/2 -> completion)
+                const sectionMap = {
+                    'completion-1': 'completion',
+                    'completion-2': 'completion'
+                };
+                if (targetSection && sectionMap[targetSection]) {
+                    targetSection = sectionMap[targetSection];
+                }
+
                 // If no hash, use payment router to determine section
                 if (!targetSection && typeof PaymentRouter !== 'undefined') {
                     try {

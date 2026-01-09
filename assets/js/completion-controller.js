@@ -113,6 +113,12 @@
         const amount1 = (price1.unit_amount || 0) / 100;
         const amount2 = (price2.unit_amount || 0) / 100;
         const total = amount1 + amount2;
+        
+        // PDF Links
+        const contractUrl = jobData.docs?.contract?.url || jobData.docs?.contract?.pdf;
+        const inv1Url = jobData.docs?.invoice_1?.url || jobData.docs?.invoice_1?.pdf;
+        const inv2Url = jobData.docs?.invoice_2?.url || jobData.docs?.invoice_2?.pdf;
+
         completionMessage = `
           <div class="card p-8 text-center">
             <div class="mb-6">
@@ -124,9 +130,15 @@
             <p class="text-lg text-muted-foreground mb-6">
               Thank you for completing both payments totaling ${formatCurrency(total)}.
             </p>
-            <p class="text-muted-foreground">
-              Your payments have been processed successfully. You will receive a confirmation email shortly.
+            <p class="text-muted-foreground mb-8">
+              Your payments have been processed successfully. You can download your documents below.
             </p>
+            
+            <div class="flex flex-col gap-3 max-w-xs mx-auto">
+                ${contractUrl ? `<a href="${contractUrl}" target="_blank" class="btn btn-outline w-full">Download Contract</a>` : ''}
+                ${inv1Url ? `<a href="${inv1Url}" target="_blank" class="btn btn-outline w-full">Download Initial Invoice</a>` : ''}
+                ${inv2Url ? `<a href="${inv2Url}" target="_blank" class="btn btn-outline w-full">Download Balance Invoice</a>` : ''}
+            </div>
           </div>
         `;
       } else if (payment1Paid && !payment2Paid) {
