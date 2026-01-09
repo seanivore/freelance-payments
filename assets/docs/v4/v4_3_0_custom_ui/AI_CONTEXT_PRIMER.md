@@ -21,7 +21,8 @@ A **freelance payment collection micro-site** (`payments.august.style`) that aut
 
 ---
 
-## v4 Schema Basics 
+## v4 Schema Basics `assets/docs/v4/_job_schema_v4.jsonc` 
+*Always check the pathway linked file for completely accurate and up-to-date schema* 
 
 **Project and contract basics** 
 ```json 
@@ -77,10 +78,6 @@ A **freelance payment collection micro-site** (`payments.august.style`) that aut
       "price_2": null,
       "customer": null,
       "coupon": null,
-      "checkout_session": {
-        "payment_1": null,
-        "payment_2": null
-      }
     },
     "client_status": {
       "logged_in": null,
@@ -169,7 +166,7 @@ A **freelance payment collection micro-site** (`payments.august.style`) that aut
     "billing_scheme": "per_unit",
     "pay_by": "before project launch",
     "pay_days": 14,
-    "late_fee": "$100",
+    "late_fee": 10000,
     "nickname": "Final Payment",
     "product": {"products": [null]},
     "id": null
@@ -178,35 +175,21 @@ A **freelance payment collection micro-site** (`payments.august.style`) that aut
 **Checkout session objects and scope values** 
 ```json 
   "checkout_session_1": {
-    "automatic_tax": {"enabled": true, "liability": {"type": "self"}},
     "billing_address_collection": "required",
-    "branding_settings": {
-      "font_family": "noto_sans",
-      "background_color": "#1f1f1f",
-      "border_style": "pill",
-      "button_color": "#9C528B",
-      "display_name": "august.style designer"
-    },
-    "client_reference_id": null,
-    "currency": "usd",
     "customer_creation": "always",
-    "custom_text": {"after_submit": {"message": "Time to create magic 💎"}},
     "discounts": [{"coupon": null}],
     "line_items": [{"price": null, "quantity": 1}],
     "mode": "payment", 
-    "redirect_on_completion": "always",
-    "return_url": "https://payments.august.style/payment-success",
-    "submit_type": "pay",
-    "ui_mode": "embedded"
+    "return_url": "https://payments.august.style/{job_id}#completion",
+    "ui_mode": "custom"
   },
 
   "checkout_session_2": {
     "billing_address_collection": "required",
     "customer_creation": "always",
-    "discounts": null,
+    "discounts": [{"coupon": null}],
     "line_items": [{"price": null, "quantity": 1}],
     "mode": "payment",
-    "phone_number_collection": {"enabled": true},
     "return_url": "https://payments.august.style/{job_id}#completion",
     "ui_mode": "custom"
   },
@@ -292,7 +275,7 @@ Every job is a JSON file in `assets/jobs/{job_id}.json`. This file contains:
 
 ### 3. Event-Driven Workflow
 
-**Initial Job Creation:**
+**Initial Job Creation**
 1. JSON file added to `assets/jobs/`
 2. Push triggers `admin-push.yml`
 3. Identifies patterns based on JSON and Stripe product matches 
@@ -301,13 +284,24 @@ Every job is a JSON file in `assets/jobs/{job_id}.json`. This file contains:
 6. Updates manifest.json
 7. Single git commit/push
 
-**Payment Completion:**
+**Why this matters**: PDFs are generated **immediately after Stripe objects are created**, not after payment. This ensures PDFs are available before checkout.
+
+**Payment Completion**
 1. Stripe webhook → `/api/webhook`
 2. Vercel triggers GitHub Actions `workflow_dispatch`
-3. `Updates JSON payment state
-4. Git commit/push
+3. Triggers workflow `payment.yml`
+4. Batches necessary JSON updates for state management 
+5. Then continues sequence followed in admin-push.yml to address any JSON/catalog match/mismatch actions 
+6. Updates manifest.json
+7. Single git commit/push
 
-**Why this matters**: PDFs are generated **immediately after Stripe objects are created**, not after payment. This ensures PDFs are available before checkout.
+**User-Behavior Event Tracking** 
+1. Github pages events tracked on front-end 
+2. Triggers workflow `user-behavior.yml`
+3. Events tracked require JSON state management updates which are batched for 2 min after inactivity 
+4. Then continues sequence followed in admin-push.yml to address any JSON/catalog match/mismatch actions 
+5. Updates manifest.json
+6. Single git commit/push
 
 ### 4. Stripe Catalog Lookup
 
@@ -320,8 +314,9 @@ Login lookup matches `login_name` and `login_keyword` separately (not combined).
 ## Data Structure: Job JSON Schema (v4)
 
 **Reference files:**
-- `assets/docs/v4/_blank_job_schema_v4.json` - Blank template
-- `assets/docs/v4/_json_value_examples_v4.json` - Example with values
+- `assets/docs/v4/_job_schema_v4.jsonc` 
+- Note that this is a .json COMMENTS file 
+- It should be used to make standard .JSON files 
 
 ### Core Fields
 
@@ -380,7 +375,8 @@ Login lookup matches `login_name` and `login_keyword` separately (not combined).
 - `{{amount_due}}` - Calculated from `state.payment_1` and `state.payment_2` (see `calculate_amount_due()` in `generate_pdfs.py`)
 - `{{amount_paid}}` - Calculated from payment state (see `calculate_amount_paid()` in `generate_pdfs.py`)
 
-**Note**: Most placeholders match JSON field names directly. Only a few require formatting (dates via `format_date()`, currency via `format_currency()`).
+**Note**: Most placeholders match mapped JSON field names directly. 
+Only a few require formatting (dates via `format_date()`, currency via `format_currency()`).
 
 **Key points:**
 - Most placeholders match JSON field names directly (e.g., `{{customer.name}}` → `customer.name`)
@@ -503,12 +499,12 @@ freelance-payments/
 │       ├── user-behavior.yml        # Triggers from user behavior on front end 
 │       └── payment.yml        # Triggered by payment events 
 └── assets/docs/
-    └── v4/v4_3_0
-        ├── AI_CONTEXT_PRIMER.md   # This file
-        ├── v4_UPDATES.md          # Version changelog
-        ├── TESTING_GUIDE.md       # Testing instructions
-        ├── _blank_job_schema_v4.json
-        └── _json_value_examples_v4.json
+    ├── _job_schema_v4.jsonc
+    └── v4
+        ├── v4_3_0
+        │   └── AI_CONTEXT_PRIMER.md   # This file
+        └── v4_3_3
+            └── LIVING_DEV_PLAN.md     # Version changes, current state
 ```
 
 ---

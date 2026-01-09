@@ -19,9 +19,95 @@
 
 Link files managing flow of actions being facilitated. Through this detailing and confirming of actions and files, create a fuller, more accurate understanding of the application, and identify gaps in the scripts and logic, or errors left over from earlier builds. 
 
+---
+
+## Big Picture Overview Planning 
+
+We're doing this to learn for my own payments site, so that we can start a client project needing similar functionality where we'll be using a very similar build. As a result, this process has been incredibly insightful, on one hand. However, on the other hand, the movement through necessary refactoring to implement more functional features, like PDF embeds, and use of Stripe custom components, has left us dealing with so many bugs for days on end now. The issue now is that, as a designer building a client-used payment website, we need to be able to get functionality clean so that we can deal with the, barely-acceptable, visual design of the payments flow pages. 
+
+### Consistent Issues Encountered
+
+  + **From refactoring: Changing schemas to v4 and shifting to 3-action-workflow-type** 
+    - There are some simple bug issues from changing schemas 
+    - Our new 3-workflow-type simplicity has not been tested enough to confidently say it is bug free 
+    - The logging of the new types has made it much easier to identify and locate the issue 
+    - Not all edge cases have been found 
+  + **Stripe checkout: especially dealing with custom components**
+    - The largest number of issues have been due to changing ui-type:embedded to ui-type:custom where we needed to use different API version 
+    - We had a successful payment flow once with the old ui-type:embedded but after realizing this wasn't the proper setup we haven't had any 
+
+### High-Level Thoughts 
+
+1. Come in with a **clean-slate to understand the functionality intentions in full**, in their current-and-final evolved-to state, including the final clean and simple logic reached for the steps in the three trigger-type workflows. 
+
+2. Then conduct an **in-depth review** of all the script files looking for bugs and errors, of course, but also opportunities for more logical build that might have been overlooked as the project evolved. 
+
+3. This can start primarily from this document `assets/docs/v4/v4_3_3/LIVING_DEV_PLAN.md` as well as our context-primer `assets/docs/v4/v4_3_0_custom_ui/AI_CONTEXT_PRIMER.md`, then by getting into the other **IMPORTANT FILES** as detailed in the project directory tree here. 
+
+4. **Make any updates needed** if issues or conflicts in logic are found when conducting in-depth review; ideally see if we can find the bugs before testing by knowing what the files should include and then thoroughly combing through them. 
+
+5. Finally, prepare new tests by placing a job JSON file, filled out, in the assets/docs/ directory so that I can move it into assets/jobs/ and we can start a new end-to-end test. Currently, the Stripe catalog has been cleared, remote and local are in sync. 
+
+```
+freelance-payments/
+├── index.html                       # Login lookup form
+├── 404.html                         # SPA routing handler (serves job.html for job URLs)
+├── job.html                         # Single-page template (contract, invoice, payment sections)
+├── .gitconfig-smart-push.sh         # Git conflict resolution script
+├── api/                             # Vercel serverless functions
+│   ├── google 
+│   │   ├── auth.js                  # OAuth consent URL for initial authentication
+│   │   └── callback.js              # OAuth callback and exchanges
+│   ├── create-checkout-session.js   # Creates Stripe Checkout Session on-demand
+│   ├── sign-contract.js             # Updates contract signed status in JSON file
+│   ├── track-event.js               # Tracks user events (loaded, scrolled, viewed, downloads)
+│   ├── update-payment.js            # Updates payment status in JSON file via GitHub Actions
+│   └── webhook.js                   # Receives payment events and updates JSON files
+├── assets/
+│   ├── jobs/                        # Job JSON files (one per client project)
+│   │   └── uid-xxx-xxx.json
+│   ├── js/
+│   │   ├── checkout-controller.js   # Stripe Checkout component element integration
+│   │   ├── completion-controller.js # Complete message after using state.payment_1 state.payment_2
+│   │   ├── contract-controller.js   # Contract signing, PDF display
+│   │   ├── event-tracker.js         # Batches behavior event activity for updates
+│   │   ├── glow-effect.js           # Dynamic UI design homepage element
+│   │   ├── invoice-controller.js    # Loads job to display embedded invoice PDF
+│   │   ├── payment-lookup.js        # Login form handler
+│   │   ├── payment-router.js        # State machine for routing
+│   │   └── manifest.json            # Lookup manifest (generated)
+│   ├── pdf/
+│   │   ├── contract/                # Contract PDFs (kon-{job_id}.pdf)
+│   │   └── invoice/                 # Invoice PDFs (inv-{job_id}.pdf)
+│   └── css/
+│       ├── input.css 
+│       └── styles.css               # Tailwind CSS (includes breakpoints)
+├── .github/
+│   ├── scripts/
+│   │   ├── orchestration/
+│   │   │   ├── admin_push.py        # Admin workflow logic
+│   │   │   ├── payments.py          # Payment workflow logic
+│   │   │   └── user_behavior.py     # User behavior workflow logic
+│   │   └── utils/
+│   │       └── json_io.py           # JSON file operations
+│   └── workflows/
+│       ├── admin-push.yml           # Admin-initiated push creates objects, PDFs
+│       ├── user-behavior.yml        # User events, contract signing, etc. triggered flow 
+│       └── payment.yml              # Triggered flow from payments webhook  
+└── assets/docs/
+    ├── _job_schema_v4.jsonc         # Comments as guide for required values 
+    └── v4
+        ├── v4_3_0
+        │   └── AI_CONTEXT_PRIMER.md # This file
+        └── v4_3_3
+            └── LIVING_DEV_PLAN.md   # Version changes, current state
+```
+
 --- 
 
 ## Updates 
+
+These are either confirmation of updates needed having been made and then clarifications or updates needed to convey that were encountered in the compiling of these documents urging specific areas of careful review. 
 
 ### Functional Blank Job v4 Schema 
 
@@ -102,10 +188,10 @@ Link files managing flow of actions being facilitated. Through this detailing an
 
 ### Stripe Integration
   - **Stripe Elements with `ui_mode: custom`** (Basil API version `2025-03-31.basil`)
-  - **Product ID = Job ID** (e.g., `uid-test-001`)
+  - **Product ID = Job ID** (e.g., `uid-test-001`) if 'job ID' means anything significant in the code, idk why it was maintained 
   - **Only active products** counted for matching logic (prevents new JSONs from being deleted)
   - **Archived products tracked separately** for orphaned product detection
-  - **8-step matching logic** correctly handles all scenarios:
+  - **8-step matching logic** to handle all scenarios:
     - Unmatched JSONs (create Stripe objects)
     - Unmatched catalog (archive orphaned products)
     - Matched with mismatched active status (archive/delete as needed)
@@ -115,7 +201,7 @@ Link files managing flow of actions being facilitated. Through this detailing an
     feels like we'd need to be across the board consistent 
 
 ### Git Workflow
-  - **`git smart-push`** handles conflicts intelligently:
+  - **`git smart-push`** handles conflicts intelligently:      <- has not shown itself to be a full proof solution yet 
     `.gitconfig-smart-push.sh` 
     Full details: `assets/docs/v4/v4_3_3/GIT_WORKFLOW.md` 
     - Preserves intentional changes (staged/committed files)
@@ -130,7 +216,6 @@ Link files managing flow of actions being facilitated. Through this detailing an
     - **Impact:** JSON parse errors prevent workflow from checking Stripe catalog
     - **Fix:** `git smart-push` should handle this, but manual cleanup may be needed
     - **Status:** Fixed in recent update (checks rebase commit for deletions)
-
 
 ### PDF Generation
   - **Google Docs template-based** PDF generation
@@ -297,27 +382,7 @@ Link files managing flow of actions being facilitated. Through this detailing an
 3. **Improve logging:** More detailed error messages for debugging
 4. **Add monitoring:** Track workflow success/failure rates
 
-## Key Files 📁
-
-### Workflows
-- `.github/workflows/admin-push.yml` - Admin-initiated pushes
-- `.github/workflows/user-behavior.yml` - User events (contract signing, etc.)
-- `.github/workflows/payment.yml` - Payment completion webhooks
-
-### Scripts
-- `.github/scripts/orchestration/admin_push.py` - Admin workflow logic
-- `.github/scripts/orchestration/user_behavior.py` - User behavior workflow logic
-- `.github/scripts/orchestration/payments.py` - Payment workflow logic
-
-### Frontend
-- `assets/js/checkout-controller.js` - Stripe Elements integration
-- `assets/js/contract-controller.js` - Contract signing
-- `assets/js/event-tracker.js` - Event tracking
-- `assets/js/completion-controller.js` - Post-payment messaging
-
-### Utilities
-- `.github/scripts/utils/json_io.py` - JSON file operations
-- `.gitconfig-smart-push.sh` - Git conflict resolution script
+---
 
 ## Testing Checklist ✅
 
@@ -332,7 +397,7 @@ Link files managing flow of actions being facilitated. Through this detailing an
 
 ## Notes 📝
 
-- **Stripe Products:** Always use job ID as product ID (e.g., `uid-test-001`)
+- **Stripe Products:** Always use job ID as product ID (e.g., `uid-test-001`)  <-- *perfect example of why it seems like we need fresh eyes on the project, because idk what JOB ID even means other than generally ... we moved to only using Stripe vocabulary in schema v2, but somehow there are notes like this where it is clear from the way it was written that, somewhere, presumably in code, job-id is emphasized heavier which seems clearly an obviously point of facture when nowhere else will you find in docs or front end the job-id used*
 - **Manifest:** Auto-generated, don't edit manually
 - **Git:** Use `git smart-push` for all pushes (handles conflicts automatically)
 - **Workflows:** Wait for each to complete before pushing again (or accept that pending runs may be canceled)
