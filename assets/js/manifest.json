@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "testing004-phase-four": {
-      "file_path": "assets/jobs/uid-tst-004.json",
-      "job_id": "uid-tst-004",
-      "login_keyword": "phase-four",
-      "login_name": "Testing004"
-    }
-  },
-  "generated_at": "2026-01-09T14:21:14.983114Z"
+  "jobs": {},
+  "generated_at": "2026-01-09T15:09:49.982925Z"
 }
