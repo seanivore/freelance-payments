@@ -931,7 +931,8 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
     stats = {
         "contracts_generated": 0,
         "invoices_generated": 0,
-        "errors": []
+        "errors": [],
+        "warnings": []
     }
     
     if not new_job_ids:
