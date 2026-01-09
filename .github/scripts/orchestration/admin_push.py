@@ -1002,67 +1002,49 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
         if 'invoice' not in job_data['docs']:
             job_data['docs']['invoice'] = {}
         
-        # Generate contract PDF
-        clean_id = job_id.replace('uid-', '')
-        pdf_filename = f'kon-{clean_id}.pdf'
-        pdf_path = contract_dir / pdf_filename
-        if not pdf_path.exists():
-            try:
-                result = generate_contract_pdf(drive_service, docs_service, job_data, contract_template_id)
-                
-                with open(pdf_path, 'wb') as f:
-                    f.write(result['pdf_bytes'])
-                
-                job_data['docs']['contract'] = {
-                    'id': f'kon-{clean_id}',
-                    'pdf': f'assets/pdf/contract/{pdf_filename}',
-                    'file_id': result['doc_id'],
-                    'url': f'https://payments.august.style/assets/pdf/contract/{pdf_filename}',
-                    'sha256': result['sha256'],
-                    'created': datetime.now(UTC).isoformat().replace('+00:00', 'Z')
-                }
-                
-                stats['contracts_generated'] += 1
-            except Exception as e:
-                stats['errors'].append(f"Contract PDF generation failed for {job_id}: {str(e)}")
+        # -------------------------------------------------------------------------
+        # GENERATE ITEMS (Contract, Invoice 1, Invoice 2)
+        # -------------------------------------------------------------------------
         
-        # Generate invoice PDF(s) based on total_payments
-
-        # Generate invoice PDF(s) based on total_payments
-        try:
-            total_payments = job_data.get('product', {}).get('total_payments', 1)
+        # 1. CONTRACT
+        if contract_template_id:
+            pdf_filename = f'kon-{clean_id}.pdf'
+            pdf_path = contract_dir / pdf_filename
             
-            # Ensure docs structure exists
+            if not pdf_path.exists():
+                try:
+                    print(f"Generating Contract for {job_id}...", file=sys.stderr)
+                    result = generate_contract_pdf(drive_service, docs_service, job_data, contract_template_id)
+                    with open(pdf_path, 'wb') as f: f.write(result['pdf_bytes'])
+                    
+                    job_data['docs']['contract'] = {
+                        'id': f'kon-{clean_id}',
+                        'pdf': f'assets/pdf/contract/{pdf_filename}',
+                        'file_id': result['doc_id'],
+                        'url': f'https://payments.august.style/assets/pdf/contract/{pdf_filename}',
+                        'sha256': result['sha256'],
+                        'created': datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+                    }
+                    stats['contracts_generated'] += 1
+                except Exception as e:
+                    stats['errors'].append(f"Contract generation failed for {job_id}: {str(e)}")
+
+        # 2. INVOICE 1
+        if invoice_template_id:
+            pdf_filename = f'inv-{clean_id}-1.pdf'
+            pdf_path = invoice_dir / pdf_filename
+            
+            # Ensure docs structure
             if 'invoice_1' not in job_data['docs']: job_data['docs']['invoice_1'] = {}
-            if 'invoice_2' not in job_data['docs']: job_data['docs']['invoice_2'] = {}
             
-            # Loop 1 to total_payments (inclusive)
-            
-            # Loop 1 to total_payments (inclusive)
-            for payment_num in range(1, total_payments + 1):
-                # Filename logic: inv-{clean_id}-{num}.pdf
-                pdf_filename = f'inv-{clean_id}-{payment_num}.pdf'
-                pdf_path = invoice_dir / pdf_filename
-                
-                # Determine correct template
-                current_template_id = invoice_template_id if payment_num == 1 else invoice_balance_template_id
-                if not current_template_id:
-                     msg = f"Missing template ID for Invoice {payment_num} (Job {job_id})"
-                     stats['warnings'].append(msg)
-                     print(f"WARNING: {msg}", file=sys.stderr)
-                     continue
-
-                if not pdf_path.exists():
-                    print(f"Generating Invoice {payment_num} for {job_id} using template {current_template_id[:5]}...")
-                    result = generate_invoice_pdf(drive_service, docs_service, job_data, current_template_id, payment_num)
+            if not pdf_path.exists():
+                try:
+                    print(f"Generating Invoice 1 for {job_id}...", file=sys.stderr)
+                    result = generate_invoice_pdf(drive_service, docs_service, job_data, invoice_template_id, 1)
+                    with open(pdf_path, 'wb') as f: f.write(result['pdf_bytes'])
                     
-                    with open(pdf_path, 'wb') as f:
-                        f.write(result['pdf_bytes'])
-                    
-                    # Save to docs.invoice_1 or docs.invoice_2
-                    invoice_key = f'invoice_{payment_num}'
-                    job_data['docs'][invoice_key] = {
-                        'id': f'inv-{job_id}',
+                    job_data['docs']['invoice_1'] = {
+                        'id': f'inv-{clean_id}-1',
                         'pdf': f'assets/pdf/invoice/{pdf_filename}',
                         'file_id': result['doc_id'],
                         'url': f'https://payments.august.style/assets/pdf/invoice/{pdf_filename}',
@@ -1070,9 +1052,42 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
                         'created': datetime.now(UTC).isoformat().replace('+00:00', 'Z')
                     }
                     stats['invoices_generated'] += 1
-                    
-        except Exception as e:
-            stats['errors'].append(f"Invoice PDF generation failed for {job_id}: {str(e)}")
+                except Exception as e:
+                    stats['errors'].append(f"Invoice 1 generation failed for {job_id}: {str(e)}")
+        else:
+            print(f"WARNING: Skipping Invoice 1 (Missing Template ID)", file=sys.stderr)
+
+        # 3. INVOICE 2 (If applicable)
+        total_payments = job_data.get('product', {}).get('total_payments', 1)
+        if total_payments >= 2:
+            if invoice_balance_template_id:
+                pdf_filename = f'inv-{clean_id}-2.pdf'
+                pdf_path = invoice_dir / pdf_filename
+                
+                # Ensure docs structure
+                if 'invoice_2' not in job_data['docs']: job_data['docs']['invoice_2'] = {}
+                
+                if not pdf_path.exists():
+                    try:
+                        print(f"Generating Invoice 2 for {job_id}...", file=sys.stderr)
+                        result = generate_invoice_pdf(drive_service, docs_service, job_data, invoice_balance_template_id, 2)
+                        with open(pdf_path, 'wb') as f: f.write(result['pdf_bytes'])
+                        
+                        job_data['docs']['invoice_2'] = {
+                            'id': f'inv-{clean_id}-2',
+                            'pdf': f'assets/pdf/invoice/{pdf_filename}',
+                            'file_id': result['doc_id'],
+                            'url': f'https://payments.august.style/assets/pdf/invoice/{pdf_filename}',
+                            'sha256': result['sha256'],
+                            'created': datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+                        }
+                        stats['invoices_generated'] += 1
+                    except Exception as e:
+                        stats['errors'].append(f"Invoice 2 generation failed for {job_id}: {str(e)}")
+            else:
+                msg = f"Skipping Invoice 2 for {job_id}: Missing GOOGLE_TEMPLATE_INVOICE_BALANCE_ID"
+                print(f"WARNING: {msg}", file=sys.stderr)
+                stats['warnings'].append(msg)
         
         # Save updated job JSON
         try:
