@@ -664,7 +664,14 @@ def update_contract_signing(job_data: dict, signature_data: dict) -> dict:
 def update_tracking_event(job_data: dict, event_data: dict) -> dict:
     """Update tracking event in client_status (v4 schema)."""
     event_type = event_data.get('event_type')
-    timestamp = event_data.get('timestamp') or event_data.get('event_data', {}).get('timestamp') or datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+    raw_timestamp = event_data.get('timestamp') or event_data.get('event_data', {}).get('timestamp')
+    # Normalize timestamp: remove potential double 'Z' or handle odd formatting
+    if raw_timestamp and isinstance(raw_timestamp, str):
+        if raw_timestamp.endswith('ZZ'):
+            raw_timestamp = raw_timestamp[:-1]
+        timestamp = raw_timestamp
+    else:
+        timestamp = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
     
     if 'state' not in job_data:
         job_data['state'] = {}

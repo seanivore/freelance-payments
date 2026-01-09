@@ -339,47 +339,27 @@
         EventTracker.trackContractSigned(jobId);
       }
 
-      alert('Contract signed! Redirecting to invoice...');
+      alert('Contract signed! Proceeding...');
 
-      // Route to next step (invoice/checkout) using hash-based routing
-      // CRITICAL: Always route to invoice after signing, never completion
-      // Completion should only be reached after actual payment via webhook
-      window.location.hash = 'invoice';
+      // Update FlowManager
+      if (window.FlowManager) {
+          window.FlowManager.updateState('contract_signed', clientDate);
+      } else {
+          // Fallback if FlowManager missing (shouldn't happen)
+          window.location.reload();
+      }
+
     } catch (error) {
       console.error('Error signing contract:', error);
       alert('Contract signed locally, but failed to update server. Please contact support.');
-      // Don't route if signing failed - user should try again
-      return;
     }
   }
 
   // Export for use in other scripts
   window.ContractController = {
     getJobData,
-    handleContractSigning
+    handleContractSigning,
+    init // FlowManager calls this
   };
-
-  // Initialize when contract section becomes visible (single-page template)
-  function checkAndInit() {
-    if (contractSection && !contractSection.classList.contains('hidden')) {
-      init();
-    }
-  }
-
-  // Watch for section visibility changes
-  const observer = new MutationObserver(checkAndInit);
-  if (contractSection) {
-    observer.observe(contractSection, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  // Also initialize on page load if section is already visible
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAndInit);
-  } else {
-    checkAndInit();
-  }
-
-  // Listen for hash changes (user navigating between sections)
-  window.addEventListener('hashchange', checkAndInit);
 
 })();

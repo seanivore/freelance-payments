@@ -158,16 +158,12 @@
     return { amountDue, amountPaid };
   }
 
-  /**
-   * Initialize invoice section (works within single-page template)
-   * v4 schema: PDF embedding only, NO HTML fallback
+   * Initialize invoice section
+   * @param {number} explicitPaymentNumber - Passed by FlowManager
    */
-  async function init() {
-    // Only initialize if we're in the invoice section
-    if (!invoiceSection || invoiceSection.classList.contains('hidden')) {
-      return;
-    }
-
+  async function init(explicitPaymentNumber) {
+    // Note: FlowManager ensures section is visible before calling init
+    
     const jobData = await getJobData();
 
     if (!jobData) {
@@ -177,29 +173,28 @@
       return;
     }
 
-    // Get payment number (v4 schema: determine from state or hash)
-    const paymentNumber = getPaymentNumber(jobData);
-    if (!paymentNumber) {
-      if (contentDiv) {
-        contentDiv.innerHTML = '<p>All payments are complete. <a href="#completion">View completion page</a>.</p>';
-      }
-      return;
-    }
+    // Use explicit number from FlowManager, or fallback (shouldn't happen)
+    const paymentNumber = explicitPaymentNumber || 1; 
 
+    // ... (rest of render logic is fine) ...
+    
     const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
 
-    // v4 schema: Get PDF URL from docs.invoice.pdf
-    const pdfPath = jobData.docs?.invoice?.pdf;
+    // v4 schema: Get PDF URL from docs.invoice (or balance)
+    // Map payment number to document key
+    // Payment 1 -> 'invoice'
+    // Payment 2 -> 'balance'
+    const docKey = paymentNumber === 1 ? 'invoice' : 'balance';
+    
+    const pdfPath = jobData.docs?.[docKey]?.pdf;
     const pdfUrl = pdfPath
       ? `https://payments.august.style/${pdfPath}`
-      : jobData.docs?.invoice?.url;
+      : jobData.docs?.[docKey]?.url;
 
     if (!pdfUrl) {
-      // v4 requirement: NO HTML fallback - show error instead
       if (contentDiv) {
-        contentDiv.innerHTML = '<p class="error">Invoice PDF not found. Please contact support.</p>';
+        contentDiv.innerHTML = `<p class="error">${docKey === 'invoice' ? 'Invoice' : 'Balance Invoice'} PDF not found. Please contact support.</p>`;
       }
-      console.error('Invoice PDF not found for job:', jobId);
       return;
     }
 
@@ -211,40 +206,35 @@
       return;
     }
 
-    // Show Action Buttons
+    // Show Action Buttons & Setup Listener
     const actionsDiv = document.getElementById('invoice-actions');
     const proceedBtn = document.getElementById('invoice-proceed-btn');
     
     if (actionsDiv) {
       actionsDiv.classList.remove('hidden');
       
-      // Update button text based on payment number
       if (proceedBtn) {
          proceedBtn.innerHTML = `Proceed to Payment ${paymentNumber} <svg class="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
          
-         // Remove old listeners (cloning)
+         // Clone to strip old listeners
          const newBtn = proceedBtn.cloneNode(true);
          proceedBtn.parentNode.replaceChild(newBtn, proceedBtn);
          
          newBtn.addEventListener('click', () => {
              handleProceed(jobId, paymentNumber, jobData);
          });
+         
+         // Reset state
+         newBtn.disabled = false;
       }
     }
 
-    // Track invoice viewed only once when user actually navigates to invoice section
-    // Use a flag to prevent duplicate tracking
-    if (jobId && !invoiceSection.dataset.invoiceTracked) {
-      trackInvoiceViewed(jobId, paymentNumber);
-      invoiceSection.dataset.invoiceTracked = 'true';
-    }
+    // Track view (once per load)
+    trackInvoiceViewed(jobId, paymentNumber);
   }
 
   /**
-   * Handle Proceed Button Click
-   * 1. Track 'downloaded_docs' event (which is the trigger for 'invoice'/'balance' timestamp)
-   * 2. Optimistically update local state
-   * 3. Route to Checkout
+   * Handle Proceed
    */
   async function handleProceed(jobId, paymentNumber, jobData) {
       const btn = document.getElementById('invoice-proceed-btn');
@@ -253,67 +243,29 @@
           btn.innerHTML = 'Processing...';
       }
 
-      // Track the event
+      // Track event
       if (typeof EventTracker !== 'undefined') {
-          // 'downloaded_docs' is the event that sets client_status.invoice (or balance)
-          await EventTracker.track(jobId, 'downloaded_docs', {
-              payment_number: paymentNumber
-          });
+          // Ensure we call generic track if available, or fallback
+          if (EventTracker.track) {
+             await EventTracker.track(jobId, 'downloaded_docs', { payment_number: paymentNumber });
+          } else {
+             // Fallback for safety
+             console.warn('EventTracker.track missing');
+          }
       }
 
-      // Optimistic update
-      const now = new Date().toISOString();
-      if (!jobData.state) jobData.state = {};
-      if (!jobData.state.client_status) jobData.state.client_status = {};
-      
-      if (paymentNumber === 1) {
-          jobData.state.client_status.invoice = now;
-      } else {
-          jobData.state.client_status.balance = now;
-      }
-      
-      sessionStorage.setItem('jobData', JSON.stringify(jobData));
-      
-      // Re-run router to move to checkout
-      if (typeof PaymentRouter !== 'undefined') {
-          PaymentRouter.init();
+      // Update FlowManager
+      const key = paymentNumber === 1 ? 'invoice' : 'balance';
+      if (window.FlowManager) {
+          window.FlowManager.updateState(key);
       } else {
           window.location.reload();
       }
   }
 
-  // Export for use in other scripts
+  // Export
   window.InvoiceController = {
-    getJobData,
-    getPaymentNumber,
-    init
+    init // Called by FlowManager
   };
-
-  // Initialize when invoice section becomes visible (single-page template)
-  // Only initialize if user actually navigated to invoice section (hash matches)
-  function checkAndInit() {
-    const hash = window.location.hash;
-    const isOnInvoice = hash === '#invoice' || hash.startsWith('#invoice');
-
-    if (invoiceSection && !invoiceSection.classList.contains('hidden') && isOnInvoice) {
-      init();
-    }
-  }
-
-  // Watch for section visibility changes
-  const observer = new MutationObserver(checkAndInit);
-  if (invoiceSection) {
-    observer.observe(invoiceSection, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  // Also initialize on page load if section is already visible
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAndInit);
-  } else {
-    checkAndInit();
-  }
-
-  // Listen for hash changes (user navigating between sections)
-  window.addEventListener('hashchange', checkAndInit);
 
 })();

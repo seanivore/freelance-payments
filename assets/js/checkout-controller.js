@@ -700,57 +700,9 @@
     }
   }
 
-  /**
-   * Initialize checkout sections when they become visible
-   * Only initializes if the hash matches the payment section (user navigated there)
-   */
-  function checkAndInit() {
-    const jobData = getJobData();
-    if (!jobData) return;
-
-    // Determine which payment is pending
-    const paymentNumber = getPaymentNumber(jobData);
-    if (!paymentNumber) return;
-
-    // Check if user actually navigated to this payment section (hash matches)
-    const hash = window.location.hash;
-    const isOnPayment1 = hash === '#payment-1' || hash.startsWith('#payment-1');
-    const isOnPayment2 = hash === '#payment-2' || hash.startsWith('#payment-2');
-
-    // Only initialize if section is visible AND hash matches (user navigated there)
-    if (paymentNumber === 1 && paymentSection1 && !paymentSection1.classList.contains('hidden') && isOnPayment1) {
-      init(1);
-    } else if (paymentNumber === 2 && paymentSection2 && !paymentSection2.classList.contains('hidden') && isOnPayment2) {
-      init(2);
-    }
-  }
-
-  // Watch for section visibility changes
-  const observer1 = paymentSection1 ? new MutationObserver(checkAndInit) : null;
-  const observer2 = paymentSection2 ? new MutationObserver(checkAndInit) : null;
-
-  if (paymentSection1 && observer1) {
-    observer1.observe(paymentSection1, { attributes: true, attributeFilter: ['class'] });
-  }
-  if (paymentSection2 && observer2) {
-    observer2.observe(paymentSection2, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  // Also initialize on page load if section is already visible
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAndInit);
-  } else {
-    checkAndInit();
-  }
-
-  // Listen for hash changes (user navigating between sections)
-  window.addEventListener('hashchange', checkAndInit);
-
-  // Export for use in other scripts
+  // Export for use in FlowManager
   window.CheckoutController = {
-    getJobData,
-    getPaymentNumber,
-    init
+    init // Called by FlowManager
   };
 
 })();
