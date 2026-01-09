@@ -1,8 +1,8 @@
 {
     "project": "Golden Record Job Test Three",
     "contract": {
-        "work_start": "2026-02-01",
-        "work_end": "2026-03-01",
+        "work_start": "2026-02-09",
+        "work_end": "2026-03-09",
         "legal_jurisdiction": "Massachusetts",
         "maintenance_period_months": 3,
         "maintenance_monthly_fee": 15000,
@@ -19,29 +19,29 @@
     },
     "docs": {
         "contract": {
-            "id": "kon-uid-test-golden-001",
-            "pdf": "assets/pdf/contract/kon-uid-test-golden-001.pdf",
-            "file_id": "1V0r1mlLI2PszC5Msh3bke-QiXPLwltgLrejrZxVqfaQ",
-            "url": "https://payments.august.style/assets/pdf/contract/kon-uid-test-golden-001.pdf",
-            "sha256": "7bc7b7b8224120f238b3de11ddec49e7c0d60bcf9c8eb9698b96c70d29b9ed13",
-            "created": "2026-01-09T09:11:41.764489Z"
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
         },
         "invoice": {
-            "id": "inv-uid-test-golden-001",
-            "pdf": "assets/pdf/invoice/inv-uid-test-golden-001.pdf",
-            "file_id": "1KEfAjRVwZ8HadfiOPv6sKoo2Q0wQqw0cewcReJl-A-A",
-            "url": "https://payments.august.style/assets/pdf/invoice/inv-uid-test-golden-001.pdf",
-            "sha256": "7c17b6c673cdea92def829508c18687a57bd5ed8fa1ef3e77c741a4fc9c86771",
-            "created": "2026-01-09T09:11:47.179999Z"
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
         }
     },
     "state": {
         "objects": {
-            "created": "2026-01-09T09:11:34.908666Z",
-            "product": "uid-test-golden-001",
-            "price_1": "price_1SnbjH9fljwH26CPU0hlpqrU",
-            "price_2": "price_1SnbjH9fljwH26CP2kMFF9EY",
-            "customer": "cus-test-golden-001",
+            "created": null,
+            "product": null,
+            "price_1": null,
+            "price_2": null,
+            "customer": null,
             "coupon": null
         },
         "client_status": {
@@ -65,65 +65,65 @@
         }
     },
     "product": {
-        "name": "Golden Integrity Test",
+        "name": "Golden Testing Phase Three",
         "active": true,
-        "description": "A test product to verify data integrity and PDF generation.",
-        "id": "uid-test-golden-001",
-        "login_name": "Golden",
-        "login_keyword": "Integrity",
-        "service_usd": 10000,
+        "description": "We have stripe object generation and PDF generation, now we need proper workflow of payments.",
+        "id": "uid-tst-003",
+        "login_name": "Testing",
+        "login_keyword": "phase-three",
+        "service_usd": 150000,
         "total_payments": 2,
-        "discount_usd": 0,
+        "discount_usd": 50000,
         "type": "service",
         "unit_label": "Payment"
     },
     "customer": {
-        "name": "Test Client",
-        "business": "Golden Standards Inc.",
-        "title": "Director of Testing",
-        "email": "test@example.com",
-        "phone": "555-0123",
-        "id": "cus-test-golden-001",
+        "name": "John Gold",
+        "business": "Gold's Testing LLC",
+        "title": "Managing Owner",
+        "email": "john@goldstest.com",
+        "phone": "555-555-5555",
+        "id": "cus-tst-003",
         "address": {
-            "city": "Boston",
-            "line1": "123 Test Street",
+            "city": "Springfield",
+            "line1": "123 Main St",
             "state": "MA",
-            "postal_code": "02108",
+            "postal_code": "01101",
             "country": "US"
         }
     },
     "coupon": {
-        "amount_off": 0,
+        "amount_off": 50000,
         "applies_to": {
             "products": [
-                "uid-test-golden-001"
+                "uid-tst-003"
             ]
         },
         "currency": "usd",
         "duration": "once",
-        "id": null,
+        "id": "cou-tst-003",
         "max_redemptions": 1,
-        "name": null
+        "name": "BEST-OFFER"
     },
     "price1": {
         "count": 1,
         "currency": "usd",
-        "unit_amount": 5000,
+        "unit_amount": 75000,
         "active": true,
         "billing_scheme": "per_unit",
         "pay_by": "start of work",
         "nickname": "Initial Payment",
         "product": {
             "products": [
-                "uid-test-golden-001"
+                "uid-tst-003"
             ]
         },
-        "id": "price_1SnbjH9fljwH26CPU0hlpqrU"
+        "id": null
     },
     "price2": {
         "count": 2,
         "currency": "usd",
-        "unit_amount": 5000,
+        "unit_amount": 25000,
         "active": true,
         "billing_scheme": "per_unit",
         "pay_by": "before project launch",
@@ -132,22 +132,22 @@
         "nickname": "Final Payment",
         "product": {
             "products": [
-                "uid-test-golden-001"
+                "uid-tst-003"
             ]
         },
-        "id": "price_1SnbjH9fljwH26CP2kMFF9EY"
+        "id": null
     },
     "checkout_session_1": {
         "billing_address_collection": "required",
         "customer_creation": "always",
         "discounts": [
             {
-                "coupon": null
+                "coupon": "cou-tst-003"
             }
         ],
         "line_items": [
             {
-                "price": "price_1SnbjH9fljwH26CPU0hlpqrU",
+                "price": null,
                 "quantity": 1
             }
         ],
@@ -155,7 +155,7 @@
         "phone_number_collection": {
             "enabled": true
         },
-        "return_url": "https://payments.august.style/uid-test-golden-001#completion",
+        "return_url": "https://payments.august.style/uid-tst-003#completion",
         "ui_mode": "custom"
     },
     "checkout_session_2": {
@@ -168,7 +168,7 @@
         ],
         "line_items": [
             {
-                "price": "price_1SnbjH9fljwH26CP2kMFF9EY",
+                "price": null,
                 "quantity": 1
             }
         ],
@@ -176,9 +176,9 @@
         "phone_number_collection": {
             "enabled": true
         },
-        "return_url": "https://payments.august.style/uid-test-golden-001#completion",
+        "return_url": "https://payments.august.style/uid-tst-003#completion",
         "ui_mode": "custom"
     },
-    "project_scope_summary": "Full endpoint verification test.",
-    "project_scope_full": "This is a comprehensive test of the v4.4.0 recovery plan.\\n\\n1. Stripe Object Creation\\n2. PDF Generation\\n3. JSON Artifact Injection"
+    "project_scope_summary": "This is a short form version of a project scope for a client job on the JSON object. It could be up to three sentences long. Likely will be shorter but you never know.",
+    "project_scope_full": "Project Scope Full for this project has a lot of different details to include. It talks about basically all the same information that are in the contract and invoice about payments and expectations. More importantly, it discusses what exactly will be done in the project. This could be anything form a website resign to an app development project. There would be dates for milestones, check-ins and deliverables. This barely covers the true extent of what would be in a project scope."
 }

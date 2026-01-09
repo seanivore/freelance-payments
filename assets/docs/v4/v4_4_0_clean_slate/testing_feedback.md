@@ -1,6 +1,10 @@
 # Testing Feedback 
 
-## Test 03 Feedback: Commit "Adding 
+## Test 03 Feedback: Commit "Adding uid-tst-003 JSON file for next test"
+
+### Filling Out JSON Simplification 
+
+  + I wonder if we can put "TK" instead of leaving `null` for the fields that we expect to be filled out from artifact injection 
 
 ---
 
