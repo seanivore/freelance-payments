@@ -648,23 +648,23 @@ def calculate_amount_due(job_data: dict) -> str:
     return '$0.00'
 
 
-def calculate_amount_paid(job_data: dict) -> str:
-    """Calculate amount paid based on payment state"""
-    state = job_data.get('state', {})
-    payment_1 = state.get('payment_1', {})
-    payment_2 = state.get('payment_2', {})
-    price1 = job_data.get('price1', {})
-    price2 = job_data.get('price2', {})
-    
-    total = 0
-    if payment_1.get('succeeded'):
-        amount = price1.get('unit_amount')
-        total += amount if amount is not None else 0
-    if payment_2.get('succeeded'):
-        amount = price2.get('unit_amount')
-        total += amount if amount is not None else 0
-    
-    return format_currency(total)
+def calculate_subtotal(job_data: dict) -> str:
+    """Calculate subtotal (price1 + price2)."""
+    price1 = job_data.get('price1', {}).get('unit_amount', 0)
+    price2 = job_data.get('price2', {}).get('unit_amount', 0)
+    return format_currency(price1 + price2)
+
+def calculate_payment_due(job_data: dict, payment_number: int) -> str:
+    """Calculate amount due for a specific payment."""
+    if payment_number == 1:
+        unit_amount = job_data.get('price1', {}).get('unit_amount', 0)
+        # Coupon applies to first payment usually
+        coupon_amount = job_data.get('coupon', {}).get('amount_off', 0)
+        return format_currency(max(0, unit_amount - coupon_amount))
+    elif payment_number == 2:
+        unit_amount = job_data.get('price2', {}).get('unit_amount', 0)
+        return format_currency(unit_amount)
+    return "$0.00"
 
 
 def calculate_sha256(pdf_bytes: bytes) -> str:
@@ -801,15 +801,16 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
             pass
 
 
-def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_id: str) -> dict:
-    """Generate invoice PDF from template"""
+def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_id: str, payment_number: int) -> dict:
+    """Generate invoice PDF from template for specific payment"""
     job_id = job_data.get('product', {}).get('id', 'unknown')
     
     template_display = f"{template_id[:10]}...{template_id[-10:]}" if len(template_id) > 20 else template_id
-    print(f"DEBUG: Attempting to copy invoice template (ID: {template_display})", file=sys.stderr)
+    print(f"DEBUG: Attempting to copy invoice template (ID: {template_display}) for Payment {payment_number}", file=sys.stderr)
     
     temp_folder_id = os.getenv('GOOGLE_TEMP_FOLDER_ID', '').strip()
-    copy_body = {'name': f'Invoice-{job_id}-{int(datetime.now(UTC).timestamp())}'}
+    # Unique name for this specific payment invoice
+    copy_body = {'name': f'Invoice-{payment_number}-{job_id}-{int(datetime.now(UTC).timestamp())}'}
     if temp_folder_id:
         copy_body['parents'] = [temp_folder_id]
     
@@ -838,6 +839,12 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
         customer = job_data.get('customer', {})
         price1 = job_data.get('price1', {})
         price2 = job_data.get('price2', {})
+        coupon = job_data.get('coupon', {})  # Added coupon
+        
+        # Calculate subtotal and total using helper (or inline, but let's be explicit per doc)
+        subtotal_cents = price1.get('unit_amount', 0) + price2.get('unit_amount', 0)
+        coupon_cents = coupon.get('amount_off', 0)
+        total_cents = subtotal_cents - coupon_cents
         
         replacements = {
             '{{docs.invoice.id}}': f'inv-{job_id}',
@@ -847,7 +854,22 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
             '{{contract.signatures.contractor.signed_date}}': format_date(job_data.get('contract', {}).get('signatures', {}).get('contractor', {}).get('signed_date')),
             '{{contract.legal_jurisdiction}}': job_data.get('contract', {}).get('legal_jurisdiction', ''),
             '{{project}}': job_data.get('project', ''),
-            '{{amount_due}}': calculate_amount_due(job_data),
+            
+            # DEFUNCT but map to something safe/empty logic handled by template usually or removed
+            '{{amount_due}}': "$0.00", 
+            '{{amount_paid}}': "$0.00",
+
+            # New Mapped Values from BALANCE_INVOICE_PDF.md
+            '{{subtotal}}': format_currency(subtotal_cents),
+            '{{amount_off}}': format_currency(coupon_cents),
+            '{{total}}': format_currency(total_cents),
+            '{{price1.count}}': str(price1.get('count', 1)),
+            '{{price2.count}}': str(price2.get('count', 2)),
+            '{{product.total_payments}}': str(product.get('total_payments', 1)),
+            '{{payment1_due}}': format_currency(max(0, price1.get('unit_amount', 0) - coupon_cents)),
+            '{{payment2_due}}': format_currency(price2.get('unit_amount', 0)),
+
+            # Standard Fields
             '{{customer.business}}': customer.get('business', ''),
             '{{customer.name}}': customer.get('name', ''),
             '{{customer.title}}': customer.get('title', ''),
@@ -864,19 +886,14 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
             '{{price1.nickname}}': price1.get('nickname', 'Initial Payment'),
             '{{price2.nickname}}': price2.get('nickname', 'Final Payment'),
             '{{price2.pay_days}}': str(price2.get('pay_days', '')),
-            '{{price2.late_fee}}': price2.get('late_fee', ''),
+            '{{price2.late_fee}}': str(price2.get('late_fee', '')),
             '{{price1.pay_by}}': price1.get('pay_by', 'start of work'),
             '{{price2.pay_by}}': price2.get('pay_by', 'before project launch'),
             '{{price1.unit_amount}}': format_currency(price1.get('unit_amount', 0)),
-            '{{today}}': format_date(datetime.now(UTC).isoformat()),
             '{{price2.unit_amount}}': format_currency(price2.get('unit_amount', 0)),
+            '{{today}}': format_date(datetime.now(UTC).isoformat()),
             '{{project_scope_summary}}': job_data.get('project_scope_summary', ''),
-            '{{project_scope_full}}': job_data.get('project_scope_full', ''),
-            '{{subtotal}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0))),
-            '{{amount_off}}': format_currency(job_data.get('coupon', {}).get('amount_off', 0)),
-            '{{total}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0)) - job_data.get('coupon', {}).get('amount_off', 0)),
-            '{{amount_paid}}': calculate_amount_paid(job_data),
-            '{{today}}': format_date(datetime.now(UTC).isoformat())
+            '{{project_scope_full}}': job_data.get('project_scope_full', '')
         }
         
         replace_placeholders(docs_service, new_doc_id, replacements)
@@ -1006,28 +1023,41 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
             except Exception as e:
                 stats['errors'].append(f"Contract PDF generation failed for {job_id}: {str(e)}")
         
-        # Generate invoice PDF
-        pdf_filename = f'inv-{job_id}.pdf'
-        pdf_path = invoice_dir / pdf_filename
-        if not pdf_path.exists():
-            try:
-                result = generate_invoice_pdf(drive_service, docs_service, job_data, invoice_template_id)
+        # Generate invoice PDF(s) based on total_payments
+        try:
+            total_payments = job_data.get('product', {}).get('total_payments', 1)
+            
+            # Ensure docs structure exists
+            if 'invoice_1' not in job_data['docs']: job_data['docs']['invoice_1'] = {}
+            if 'invoice_2' not in job_data['docs']: job_data['docs']['invoice_2'] = {}
+            
+            # Loop 1 to total_payments (inclusive)
+            for payment_num in range(1, total_payments + 1):
+                # Filename logic: inv-{job_id}-{num}.pdf
+                pdf_filename = f'inv-{job_id}-{payment_num}.pdf'
+                pdf_path = invoice_dir / pdf_filename
                 
-                with open(pdf_path, 'wb') as f:
-                    f.write(result['pdf_bytes'])
-                
-                job_data['docs']['invoice'] = {
-                    'id': f'inv-{job_id}',
-                    'pdf': f'assets/pdf/invoice/{pdf_filename}',
-                    'file_id': result['doc_id'],
-                    'url': f'https://payments.august.style/assets/pdf/invoice/{pdf_filename}',
-                    'sha256': result['sha256'],
-                    'created': datetime.now(UTC).isoformat().replace('+00:00', 'Z')
-                }
-                
-                stats['invoices_generated'] += 1
-            except Exception as e:
-                stats['errors'].append(f"Invoice PDF generation failed for {job_id}: {str(e)}")
+                if not pdf_path.exists():
+                    print(f"Generating Invoice {payment_num} for {job_id}...")
+                    result = generate_invoice_pdf(drive_service, docs_service, job_data, invoice_template_id, payment_num)
+                    
+                    with open(pdf_path, 'wb') as f:
+                        f.write(result['pdf_bytes'])
+                    
+                    # Save to docs.invoice_1 or docs.invoice_2
+                    invoice_key = f'invoice_{payment_num}'
+                    job_data['docs'][invoice_key] = {
+                        'id': f'inv-{job_id}',
+                        'pdf': f'assets/pdf/invoice/{pdf_filename}',
+                        'file_id': result['doc_id'],
+                        'url': f'https://payments.august.style/assets/pdf/invoice/{pdf_filename}',
+                        'sha256': result['sha256'],
+                        'created': datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+                    }
+                    stats['invoices_generated'] += 1
+                    
+        except Exception as e:
+            stats['errors'].append(f"Invoice PDF generation failed for {job_id}: {str(e)}")
         
         # Save updated job JSON
         try:

@@ -24,6 +24,12 @@ User-behavior events trigger updates to a job's JSON values with artifacts in th
 
 ### JSON Schema Values 
 
+Basically "downloaded_docs" has been split into two values to account for the two possible instances. While there is some logic built in throughout the system to account for single payment jobs, that is not my main concern and we should focus on getting everything working for the two payment job scenario first and foremost. When the time comes, it should be simple to provide the other logic needed for single payment jobs. I don't want to do it right now because I have a job with two payments on my mind that I'd like to use this for, with makes planning the logic without worrying I'm missing anything much easier. 
+
+ **NEW SCHEMA ADJUSTMENT** 
+ - Note the adjustment in order of the values 
+ - The order reflects the user journey 
+
 ```json
 {
     "state": {
@@ -33,6 +39,22 @@ User-behavior events trigger updates to a job's JSON values with artifacts in th
             "invoice_1": null,
             "payment_1": null,
             "invoice_2": null,
+            "payment_2": null
+        }
+    }
+}
+```
+
+  **OLD SCHEMA FOR REFERENCE** 
+
+```json
+{
+    "state": {
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "downloaded_docs": null,
+            "payment_1": null,
             "payment_2": null
         }
     }
@@ -83,11 +105,18 @@ User-behavior events trigger updates to a job's JSON values with artifacts in th
 
 ## Creating Balance or Invoice-2 PDF
 
-### Templates Created & Updated  
+### Templates Created & Updated 
 
-  - File ID has been added to all necessary environment variables 
-  - Payment_1 invoice has been updated as needed 
-  - Payment_2 invoice has been created 
+  + Filenames 
+    - `inv-xxx-xxx-1.pdf`
+    - `inv-xxx-xxx-2.pdf`
+
+  + Both to be placed in the same directory at `assets/pdf/invoices/...`
+
+  + Setup 
+    - File ID has been added to all necessary environment variables 
+    - Payment_1 invoice has been updated as needed 
+    - Payment_2 invoice has been created 
 
 ### New Placeholders -> Mapped JSON Values 
 

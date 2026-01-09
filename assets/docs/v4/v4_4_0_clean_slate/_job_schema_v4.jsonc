@@ -26,13 +26,21 @@
             "sha256": null, // artifact, PDF creation added string
             "created": null // artifact, ISO timestamp added confirming PDF flow complete 
         },
-        "invoice": {
-            "id": null, // artifact, added inv-xxx-xxx (uid-xxx-xxx but change uid to inv) confirming PDF workflow completion  
-            "pdf": null, // artifact, "assets/pdf/invoice/inv-xxx-xxx.pdf" added 
-            "file_id": null, // artifact, string added PDF creation completion 
-            "url": null, // artifact, "https:// ... docs.google ... /preview" added  
-            "sha256": null, // artifact, PDF creation added string
-            "created": null // artifact, ISO timestamp added confirming PDF flow complete
+        "invoice_1": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "invoice_2": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
         }
     },
     "state": {
@@ -56,11 +64,15 @@
                     "type": "string",
                     "format": "date-time"
                 },
-                "downloaded_docs": {
+                "invoice_1": {
                     "type": "string",
                     "format": "date-time"
                 },
                 "payment_1": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "invoice_2": {
                     "type": "string",
                     "format": "date-time"
                 },
@@ -70,7 +82,7 @@
                 }
             },
             "additionalProperties": false
-        },
+        }
     },
     "product": {
         "name": null, // required, customer-friendly name for contract, invoice

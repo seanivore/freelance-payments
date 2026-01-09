@@ -59,33 +59,35 @@
 
     // 1. Contract Gate
     if (!hasSignedContract) {
-      return {
-        route: 'contract',
-        reason: 'Contract not signed'
-      };
+      return { route: 'contract', reason: 'Contract not signed' };
     }
 
-    // 2. Payment 1 Gate
+    // 2. Invoice 1 Gate (Download/View Step)
+    const hasInvoice1 = !!clientStatus.invoice_1;
+    if (!hasInvoice1) {
+      return { route: 'invoice', paymentNumber: 1, reason: 'Invoice 1 not viewed' };
+    }
+
+    // 3. Payment 1 Gate (Checkout)
     if (!hasPaid1) {
-      return {
-        route: 'invoice', // Invoice leads to Payment 1
-        paymentNumber: 1,
-        reason: 'Payment 1 pending'
-      };
+      return { route: 'checkout', paymentNumber: 1, reason: 'Payment 1 pending' };
     }
 
-    // 3. Payment 2 Gate
+    // 4. Invoice 2 Gate (Download/View Step) - Only if 2 payments
+    const hasInvoice2 = !!clientStatus.invoice_2;
+    if (totalPayments > 1 && !hasInvoice2) {
+      return { route: 'invoice', paymentNumber: 2, reason: 'Invoice 2 not viewed' };
+    }
+
+    // 5. Payment 2 Gate (Checkout)
     if (totalPayments > 1 && !hasPaid2) {
-      return {
-        route: 'invoice', // Invoice leads to Payment 2
-        paymentNumber: 2,
-        reason: 'Payment 2 pending'
-      };
+      return { route: 'checkout', paymentNumber: 2, reason: 'Payment 2 pending' };
     }
 
-    // 4. Completion
+    // 6. Completion
     return {
       route: 'completion',
+      paymentNumber: totalPayments, // 2 if 2 payments, 1 if 1
       reason: 'All steps completed'
     };
   }
