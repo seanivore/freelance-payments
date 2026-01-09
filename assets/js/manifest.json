@@ -1,5 +1,11 @@
 {
   "jobs": {
+    "elk-antlers": {
+      "file_path": "assets/jobs/uid-elk-202.json",
+      "job_id": "uid-elk-202",
+      "login_keyword": "antlers",
+      "login_name": "Elk"
+    },
     "zebra-stripes": {
       "file_path": "assets/jobs/uid-zoo-101.json",
       "job_id": "uid-zoo-101",
@@ -7,5 +13,5 @@
       "login_name": "Zebra"
     }
   },
-  "generated_at": "2026-01-09T21:26:20.632972Z"
+  "generated_at": "2026-01-09T21:41:20.985350Z"
 }
