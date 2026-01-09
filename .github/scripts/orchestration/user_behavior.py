@@ -783,8 +783,10 @@ def git_commit_and_push(message: str) -> bool:
             stash_pop_result = subprocess.run(['git', 'stash', 'pop'], check=False, capture_output=True, text=True)
             if stash_pop_result.returncode != 0:
                 if 'No stash entries' not in stash_pop_result.stderr:
-                    print(f"Warning: git stash pop had conflicts: {stash_pop_result.stderr}", file=sys.stderr)
-                    subprocess.run(['git', 'stash', 'drop'], check=False)
+                    print(f"❌ Critical Error: git stash pop caused conflicts: {stash_pop_result.stderr}", file=sys.stderr)
+                    print("⚠️  Aborting commit to prevent corruption.", file=sys.stderr)
+                    # Abort: Do NOT commit conflict markers
+                    return False
         else:
             subprocess.run(['git', 'pull', '--rebase'], check=False)
         
