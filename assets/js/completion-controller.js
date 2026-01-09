@@ -196,37 +196,9 @@
     }
   }
 
-  // Export for use in other scripts
+  // Export for use in FlowManager
   window.CompletionController = {
-    getJobData,
-    init
+    init // Called by FlowManager
   };
-
-  // Initialize when completion section becomes visible
-  // Only initialize if user actually navigated to completion section (hash matches)
-  function checkAndInit() {
-    const hash = window.location.hash;
-    const isOnCompletion = hash === '#completion' || hash.includes('#completion');
-
-    if (completionSection && !completionSection.classList.contains('hidden') && isOnCompletion) {
-      init();
-    }
-  }
-
-  // Watch for section visibility changes
-  const observer = new MutationObserver(checkAndInit);
-  if (completionSection) {
-    observer.observe(completionSection, { attributes: true, attributeFilter: ['class'] });
-  }
-
-  // Also initialize on page load if section is already visible
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAndInit);
-  } else {
-    checkAndInit();
-  }
-
-  // Listen for hash changes (user navigating between sections)
-  window.addEventListener('hashchange', checkAndInit);
 
 })();
