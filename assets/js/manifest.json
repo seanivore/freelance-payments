@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-09T10:44:54.139006Z"
+  "jobs": {
+    "testing-phase-three": {
+      "file_path": "assets/jobs/uid-tst-003.json",
+      "job_id": "uid-tst-003",
+      "login_keyword": "phase-three",
+      "login_name": "Testing"
+    }
+  },
+  "generated_at": "2026-01-09T11:10:16.704952Z"
 }
