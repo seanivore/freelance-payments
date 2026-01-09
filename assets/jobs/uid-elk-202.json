@@ -9,11 +9,11 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-09T21:41:02.795491Z"
+        "signed_date": "2026-01-09T00:00:00.000ZZ"
       },
       "client": {
-        "legal_name": null,
-        "signed_date": null
+        "legal_name": "Eldk",
+        "signed_date": "2026-01-09T00:00:00.000ZZ"
       }
     }
   },
@@ -58,7 +58,8 @@
       "invoice": null,
       "payment_1": null,
       "balance": null,
-      "payment_2": null
+      "payment_2": null,
+      "signed_contract": "2026-01-09T00:00:00.000ZZ"
     }
   },
   "product": {
