@@ -1,0 +1,219 @@
+﻿INVOICE
+	
+
+	
+
+	
+
+	
+
+	
+
+	# {{docs.invoice.id}}-{{price1.count}}
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Date
+	{{docs.invoice.created}}
+	
+
+	
+
+	Project
+	{{project}}
+	
+
+	
+
+	Starting
+	{{contract.work_start}}
+	
+
+	
+
+	Ending
+	{{contract.work_end}}
+	
+
+	
+
+	Payment
+	{{price1.count}} of {{product.total_payments}} payments 
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Amount Due
+	{{payment1_due}}
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Sean August Horvath
+	Billed to
+	
+
+	
+
+	Contact
+	
+
+	Digital Business Consultant
+	{{customer.business}}
+	{{customer.name}}
+	102 Lunenburg Ave
+West Townsend, MA 01474
+	{{customer.address.line1}}
+{{city}}, {{state}} {{postal_code}}
+	{{customer.title}}
+	sean@august.style
+424-744-7687
+	{{customer.email}}
+{{customer.phone}}
+	
+
+	
+
+	
+
+	
+
+	Item
+	Term
+	
+
+	Amount
+	{{price1.nickname}}
+	{{price1.pay_by}}
+	{{price1.unit_amount}}
+	{{price2.nickname}}
+	{{price2.pay_by}}
+	{{price2.unit_amount}}
+	
+
+	
+
+	
+
+	
+
+	Terms
+	
+
+	
+
+	
+
+	Please submit your first payment to start work. 
+	
+
+	
+
+	
+
+	When the project is reaching completion, you will be notified to make your final payment. 
+
+
+Late payments are subject to fees stipulated in the service agreement. 
+	
+
+	Subtotal
+	{{subtotal}}
+	Discount
+	{{amount_off}}
+	Total
+	{{total}}
+	Amount Paid
+	$0.00
+	Amount Due
+	{{payment1_due}}
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Pay at https://payments.august.style
+	
+
+	
+
+	Payments are processed on the next page 
+of our payments portal by Stripe. They can 
+be made via Credit, debit, ACH, PayPal, 
+and other popular services. 
+	
+
+	
+
+	
+
+If you have any questions regarding this invoice, please contact Sean August Horvath at sean@august.style.
+	
+
+Thank you for your business.

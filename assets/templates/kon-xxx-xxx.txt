@@ -1,0 +1,335 @@
+﻿INDEPENDENT CONTRACTOR AGREEMENT
+  
+This independent contractor freelance project agreement (“AGREEMENT” or “kon”), dated {{today}} (the “EFFECTIVE DATE”) is made between {{customer.name}}, {{customer.title}} of {{customer.business}}, {{customer.address.line1}}, {{city}}, {{state}} {{postal_code}}, {{country}} (the “COMPANY”) and Sean August Horvath, Digital Business Consultant, 102 Lunenburg Ave, West Townsend, MA 01474, US (the “FREELANCER”), to delineate the exclusive terms and conditions encompassing and circumscribing a legally binding exchange of monetary compensation for hired professional digital web services. 
+
+
+Roles and expectations define the mutual obligations establishing the Company’s specifications, project scope, and requirements for the Freelancer to expedite service-developed deliverables. 
+
+
+        The parties agree as follows:
+
+
+1.        SERVICES AND COMPENSATION
+
+
+The Company retained the Freelancer. This Agreement ascribes the Freelancer’s orchestration of services that produce the Company’s digital product (the “DELIVERABLES): 
+
+
+                1.1 Deliverables 
+                The Freelancer was hired by the Company to create: 
+
+
+                {{project_scope_summary}}. 
+
+
+                A more detailed project scope is attached to this document. 
+
+
+                1.2 Term 
+                The Freelancer begins work upon receipt of the Company’s first project payment for services rendered, slated to start {{contract.work_start}}. 
+
+
+                All work to be completed and delivered to the Company, including any training and deliverable usage educational tutorials by {{contract.work_end}}. 
+
+
+                1.3 Payment
+                The Company and the Freelancer determined and documented in this Agreement all services to be rendered. 
+
+
+                The Freelancer to fulfill all requests for development and design. 
+
+
+                The Company to compensate the Freelancer the flat rate of {{total}} according to the following payment schedule (the “PAYMENTS”). 
+                        
+                                (i) Payment 1: {{price1.unit_amount}} 
+                                The {{price1.nickname}} owed {{price1.pay_by}}
+                                {{contract.work_start}}
+
+
+                                (ii) Payment 2: {{price2.unit_amount}} 
+                                The {{price2.nickname}} owed {{price2.pay_by}}
+                                {{contract.work_end}}
+
+
+                Except as otherwise required by law, the Company shall not withhold any sums or payments made to the Freelancer for social security or federal, state, and local tax, nor liabilities or contributions. 
+
+
+                Withholdings, liabilities, and contribution financial responsibilities are solely the Freelancer’s to complete. 
+
+
+                Further, the Freelancer hereby acknowledges their understanding that services rendered are not covered by unemployment compensation laws, nor are they intended to be covered by workers’ compensation laws. 
+
+
+                1.4 Expenses 
+                Development expenses may include costs related to and serving for production of Deliverables according to agreed-upon Company-defined Deliverable requirements. These are included but not limited to costs of Deliverable digital and online architecture, website, domain, and digital media hosting, user-interface, graphic, system and motion design, integrated frontend and backend automation, artificial intelligence services, and other service obligations as defined in the project scope for which this Agreement is formed. 
+
+
+                Please refer to your project scope and/or project implementation documentation to review the expense details discussed at initiation and onboarding. All expenses arising from production of the Deliverable have been identified, extensively researched, then calculated. These expenditures were detailed and presented to the Company during planning. 
+
+
+                The Freelancer will initiate any digital service architecture needed for these expenses, and then notify the Company, providing any necessary details needed for the Company to complete payments of these services. This intention is to keep billing logins and Company credit card details with Company only, unless otherwise discussed. 
+
+
+                Please note that if the Company should become unresponsive during these phases of development, the Freelancer will keep development moving and on schedule by covering expenses as necessary. 
+
+
+                These expenses do not require any further, additional pre-approval by the Company on a specific, per cost basis. The Company will reimburse the Freelancer any and all of these expenses directly or else have them added to their final payment invoice. 
+
+
+                1.5 Payment System  
+                Payments outlined in the Agreement section 1.3 will be requested by the Freelancer of the Company to be paid through the Freelancer’s client payments online portal, the same system that supplied and coordinated signing of this Agreement. Accessing the portal to make a payment requires login information provided via email to the Company, each time the Company logs in to the portal. Those provided details are as follows. 
+
+
+                Payments Site: https://payments.august.style 
+                Last Name: {{product.login_name}} 
+                Project Keyword: {{product.login_keyword}}
+
+
+                Upon signing and downloading this Agreement, you will advance to an invoice you may download for your records. Payments will be taken on the following page of the payment portal. This payment system will include an itemized list alongside requests for billing details needed for taxation purposes. The system was developed using Stripe, Inc. embedded interfaces and provides the Company with a large number of popular payment methods to choose from. 
+
+
+         In addition to the outlined Payments in this Agreement, the Company agrees to pay the Freelancer within {{price2.pay_days}} days of receiving access to download each invoice, one for the first initial payment to start work, and one for the final payment to complete work and push the Deliverables live. 
+
+
+                Work is slated to begin {{contract.work_start}} and will continue regardless of unexpected delay in payment. After those {{price2.pay_days}} days, the Company will incur a late fee of {{price2.late_fee}}. This late fee repeats for every {{price2.pay_days}} days without payment. 
+
+
+                Second payment will be due approximately on {{contract.work_end}}, as near to {{price2.pay_by}} as possible. You will receive an email as we reach {{price2.pay_by}}. Please pay promptly after receiving payment request emails. The send date of that email is when the pay-by {{price2.pay_days}} days count will begin. 
+
+
+                1.6 Revisions   
+                The Company will incur additional fees for revisions requested which are outside of the documented Deliverable project scope as laid out in this Agreement. 
+
+
+                This work will be charged at the Freelancer’s standard rates. Rates for revisions are charged at a day rate of $435/day. Smaller revisional work may qualify for payment at an hourly rate of $88/hour only if the work required is estimated to take three (3) or fewer consecutive hours in any twenty-four (24) hour period. More consequential work that takes over three (3) hours a session is charged at the day rate. 
+
+
+
+
+
+
+
+
+2.        OWNERSHIP AND AUTHORSHIP
+
+
+The Freelancer releases any and all ownership of product or service that results from their work along with Deliverables when fully compensated.
+
+
+                2.1 Ownership
+                The Company will own all service rendered Deliverables from the Freelancer as outlined in this Agreement’s project scope details. 
+
+
+                This is included but not limited to intellectual property rights. 
+
+
+                Ownership is contingent on the Company fulfilling all compensation obligations, paying the Freelancer according to the Agreement Payments. 
+
+
+                2.2 Authorship & Showcase Rights 
+                The Company is fully aware and agrees to permit the Freelancer to showcase any and all Deliverables and related work from this development project. 
+
+
+                This includes permitting the Freelancer to produce visual materials such as images and videos highlighting the development project in full. This will be showcased online, including but not limited to the Freelancer’s portfolio at https://august.style — as well as personal websites, networking platforms, social media, as well as offline in print literature. 
+
+
+                The Company can attribute their service cost discount as thanks for understanding. The Freelancer’s intention and the purpose of sharing Deliverables in this way is for personal brand recognition and marketing of the Freelancer’s digital products and various services. 
+
+
+                In addition, the Company acknowledges and understands that there will be a development attribute to ‘Sean August Horvath’ hyperlinked the personal digital footprint resources of the Freelancer’s choice. The Freelancer acknowledges that this attribution will not be ‘loud’ or overly bold on their product. Rather it will be very out of the way, and, if applicable, mentioned in an About or Bio type section of the online platform or digital application. 
+
+
+                These Authorship and Showcase Rights clauses stand unless discussed and agreed upon in writing or if the Company requires the Freelancer to sign a non-disclosure agreement; this may also influence attribution. If the Company is looking to alter this Authorship and Showcase Rights clause, it must be discussed with the Freelancer and then documented before signing this Agreement. 
+
+
+                2.3 Exclusivity Maintenance Period 
+                After completion of the project, the Freelancer will maintain exclusive rights for any maintenance of the digital Deliverables might need. The exclusivity period lasts for three (3) months, starting the day the final Payment is made to the Freelancer, the Deliverables are live online, and everything in the scope or outlined in this Agreement is complete. 
+
+
+                The Company understands the meaning of this and agrees to the Exclusivity Period. This means the Company agrees to hire the Freelancer’s services for any update and maintenance the Deliverables may require that are outside of the standard Product Catalog updates. 
+
+
+                For example, adding a product to the online store is expected to be handled by the Company. If the Company needs additional tutorials for adding products beyond those that had already been provided, that would qualify as hired services and payment to the Freelancer would be required. A more likely example is comprehensive altering of the Product JSON schema if a new product needs an element on the product page that does not exist and was not defined in the current Deliverable project scope build. I.e., another section for text, or functionality to embed podcasts or audio readings of blogs. The blog site is also not in this scope, however that would be new development and not maintenance. 
+
+
+                If the Company does not need any maintenance for three (3) months, then the exclusivity period simply expires. After the three (3) month period Company may hire any outside service to work on the Freelancer-produced Deliverables. 
+
+
+                Company understands that this clause protects the Freelancer’s reputation during the critical post-launch period while Deliverables are highlighted in the Freelancer’s portfolio showcase and networking materials, while accommodating for flexibility for the Company. 
+
+
+
+
+
+
+
+
+3.        CONFIDENTIALITY AND NON-DISCLOSURE
+
+
+The Freelancer and the Company recognize that a productive business relationship may result in exposure of trade secrets, business, proprietary and/or technical information including without limitation, information concerning strategy, customers, financial details. These trade secrets include any improvements and enhancements that were created or developed under this Agreement for the Deliverables. 
+
+
+The Freelancer and the Company both agree and confirm in signing this Agreement that they will not share information marked confidential, nonpublic or otherwise, with a third party. 
+
+
+If exposure of any internal information becomes necessary for the Freelancer or the Company, the disclosing party must first provide written explanation first; the exposed party must then provide written permission in response. 
+
+
+Each party must continue to follow the obligations within this Confidentiality and Non-Disclosure clause even after conclusion of this Agreement and completion of required Deliverables, including after all payments have been made to the Freelancer and even if months have passed. 
+
+
+
+
+
+
+
+
+4.        NON-SOLICITATION
+
+
+Under this Agreement, and until this Agreement ends with final payment to the Freelancer, the Company and the Freelancer will not discuss or in any way encourage the other party’s employees, service providers, clients, etc. to stop working for the other party for any reason. 
+
+
+
+
+
+
+
+
+5.        REPRESENTATIONS
+
+
+The Company and the Freelancer acknowledge they understand that signing this Agreement represents an affirmative, confirming that both the Company and the Freelancer have the authority and ability to enter into and perform all obligations, services, communications, and commitments required of the Freelancer and the Company according to the outlined contents of this Agreement. 
+
+
+
+
+
+
+
+
+6.        TERM AND TERMINATION 
+
+
+As a signatory of this Agreement, both the Freelancer and the Company understand and acknowledge that they are permitted to end this Agreement at any time and for any reason, as long as they provide seven (7) days written notice. 
+
+
+The Company maintains an obligation to pay the Freelancer for all work completed when the Agreement ends, and will reimburse the Freelancer for any prior expenses as outlined earlier in this Agreement. 
+
+
+
+
+
+
+
+
+7.        LIMITATION OF LIABILITY  
+
+
+The Freelancer is solely responsible for directing and controlling the performance of the services, including the time, place, and manner in which the Services are performed. The Freelancer uses their best effort, energy, and skill in their own name and in whatever manner as they see fit. 
+
+
+The Company understands and acknowledges that the Freelancer’s Deliverables are sold ‘as is’. 
+
+
+The Company’s maximum liability is the total sum paid by the Company to the Freelancer under this Agreement in the Payments section. 
+
+
+
+
+
+
+
+
+8.        INDEMNITY 
+
+
+The Company will, under this Agreement, save and hold harmless the Freelancer from any and all damages, liabilities, costs, losses, or expenses arising out of any claim, demand, or action by a third party as a result of the work outlined in the project scope of this Agreement that the Freelancer produced and delivered under this Agreement.  
+
+
+
+
+
+
+
+
+9.        GENERAL
+
+
+The Company and the Freelancer understand and agree expressly that the Freelancer is an independent contractor and nothing in this agreement shall be construed in any way or manner to create between them a relationship of employer and employee, principal and agent, partners or any other relationship other than that of two independent parties contracting each other solely for the purpose of carrying out the provisions of this specific project scope and Agreement.  
+
+
+
+
+                9.1 Governing Law and Dispute Resolution
+                The Company and the Freelancer understand that the laws of the Commonwealth of {{contract.legal_jurisdiction}} governs the rights and obligations of the Freelancer and the Company under this Agreement without regard to conflict of law provisions of the state.  
+
+
+                9.2 Notices
+                Both the Freelancer and the Company acknowledge and understand that all notices, messages, feedback, or requests sent to the other party shall always exist in writing and delivered by email or registered mail. Notices must be delivered to the party’s address listed in this Agreement as well as on the Invoice. 
+
+
+                9.3 Severability 
+                The Company and the Freelancer understand that if any one section or part of this Agreement is changed, disregarded, or otherwise in some way deemed unenforceable, the rest of the Agreement, in its entirety, remains enforceable. A flaw or loophole in one clause does not negate all clauses. 
+
+
+                9.4 Entire Agreement  
+                Both the Freelancer and the Company acknowledge and understand that this Agreement supersedes all other Agreements, both written and oral, between the Freelancer and the Company. 
+
+
+
+
+
+
+________________
+
+
+The undersigned agree to and accept the terms of this Agreement as of the dates below. 
+
+
+
+
+FREELANCER 
+
+
+Full Name: Sean August Horvath 
+Title: Digital Business Consultant
+Company: Sean August Horvath 
+Address: 102 Lunenburg Ave, West Townsend, MA 01474 US 
+Email: sean@august.style
+Phone: 424-744-7687
+  
+
+
+
+                        SIGNED
+
+
+                        DATED         {{today}}
+
+
+
+
+
+
+COMPANY 
+
+
+Full Name: {{customer.name}} 
+Title: {{customer.title}} 
+Company: {{customer.business}} 
+Address: {{customer.address.line1}}, {{city}}, {{state}} {{postal_code}}, {{country}} 
+Email: {{customer.email}}
+Phone: {{customer.phone}} 
+
+
+
+
+                        SIGNED
+
+
+                        DATED 
+________________
+{{project_scope_full}}
+Independent Contractor Freelance Agreement

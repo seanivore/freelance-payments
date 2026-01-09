@@ -1031,15 +1031,34 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
             if 'invoice_1' not in job_data['docs']: job_data['docs']['invoice_1'] = {}
             if 'invoice_2' not in job_data['docs']: job_data['docs']['invoice_2'] = {}
             
+        invoice_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_ID', '').strip()
+        invoice_balance_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_BALANCE_ID', '').strip()
+
+        # ... (contract generation) ...
+
+        # Generate invoice PDF(s) based on total_payments
+        try:
+            total_payments = job_data.get('product', {}).get('total_payments', 1)
+            
+            # Ensure docs structure exists
+            if 'invoice_1' not in job_data['docs']: job_data['docs']['invoice_1'] = {}
+            if 'invoice_2' not in job_data['docs']: job_data['docs']['invoice_2'] = {}
+            
             # Loop 1 to total_payments (inclusive)
             for payment_num in range(1, total_payments + 1):
                 # Filename logic: inv-{job_id}-{num}.pdf
                 pdf_filename = f'inv-{job_id}-{payment_num}.pdf'
                 pdf_path = invoice_dir / pdf_filename
                 
+                # Determine correct template
+                current_template_id = invoice_template_id if payment_num == 1 else invoice_balance_template_id
+                if not current_template_id:
+                     stats['warnings'].append(f"Missing template ID for Invoice {payment_num} (Job {job_id})")
+                     continue
+
                 if not pdf_path.exists():
-                    print(f"Generating Invoice {payment_num} for {job_id}...")
-                    result = generate_invoice_pdf(drive_service, docs_service, job_data, invoice_template_id, payment_num)
+                    print(f"Generating Invoice {payment_num} for {job_id} using template {current_template_id[:5]}...")
+                    result = generate_invoice_pdf(drive_service, docs_service, job_data, current_template_id, payment_num)
                     
                     with open(pdf_path, 'wb') as f:
                         f.write(result['pdf_bytes'])
