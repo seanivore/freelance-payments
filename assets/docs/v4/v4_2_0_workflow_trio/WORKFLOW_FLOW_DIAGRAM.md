@@ -170,11 +170,13 @@ Like this isn't even as simple as it seems like it could be but why not just:
 **Behavior**: Starts immediately when admin pushes
 
 **Flow:**
-1. Compare JSONs to catalog
-2. Unmatched: JSON but no catalog, if `json.active=true` → create catalog object
-   - (2a) Add all artifacts to JSON from new objects
-   - (2b) Create and move PDF for these new active JSON with objects
-   - (2c) Add all artifacts to JSON from new PDFs
+1. Compare JSONs to catalog 
+   - 'Unmatched' = a product.id in either location but not both 
+   - 'Matched' = a product.id in both locations 
+   - For each situation, the secondary parameter `active=true/false` defines the action 
+2. Unmatched: JSON but no catalog, if `json.active=true` → create catalog object, create PDF contract and invoice 
+   - Add new Stripe Catalog object artifacts to JSON 
+   - Add new Contract and Invoice PDF artifacts to JSON 
 3. Unmatched: JSON but no catalog, if `json.active=false` → delete JSON
 4. Unmatched: Catalog but no JSON, if `catalog.active=true` → modify catalog `active=false`
 5. Unmatched: Catalog but no JSON, if `catalog.active=false` → ignore

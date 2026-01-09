@@ -1,0 +1,184 @@
+{
+  "project": null, // required, customer-facing simple contract, invoice project name
+  "contract": {
+    "work_start": null, // required, "YYYY-MM-DD"
+    "work_end": null, // required, "YYYY-MM-DD"
+    "legal_jurisdiction": "Massachusetts", // required, leave as is unless indicated
+    "maintenance_period_months": 3, // required, rarely changed
+    "maintenance_monthly_fee": 15000, // required, rarely changed 
+    "signatures": {
+      "contractor": {
+        "legal_name": null, // "Sean August Horvath" left empty until signed 
+        "signed_date": null // ISO timestamped artifact from user-behavior event 
+      },
+      "client": {
+        "legal_name": null, // artifact from user-behavior contract signing event 
+        "signed_date": null // ISO timestamped artifact from user-behavior event 
+      }
+    }
+  },
+  "docs": {
+    "contract": {
+      "id": null, // artifact, added kon-xxx-xxx (uid-xxx-xxx but change uid to kon) confirming PDF workflow completion 
+      "pdf": null, // artifact, "assets/pdf/contract/kon-xxx-xxx.pdf" added 
+      "file_id": null, // artifact, string added PDF creation completion 
+      "url": null, // artifact, "https:// ... docs.google ... /preview" added  
+      "sha256": null, // artifact, PDF creation added string
+      "created": null // artifact, ISO timestamp added confirming PDF flow complete 
+    },
+    "invoice": {
+      "id": null, // artifact, added inv-xxx-xxx (uid-xxx-xxx but change uid to inv) confirming PDF workflow completion  
+      "pdf": null, // artifact, "assets/pdf/invoice/inv-xxx-xxx.pdf" added 
+      "file_id": null, // artifact, string added PDF creation completion 
+      "url": null, // artifact, "https:// ... docs.google ... /preview" added  
+      "sha256": null, // artifact, PDF creation added string
+      "created": null // artifact, ISO timestamp added confirming PDF flow complete
+    }
+  },
+  "state": {
+    "objects": {
+      "created": null, // artifact, ISO timestamp confirming Stripe object creation 
+      "product": null, // artifact, product.id added here
+      "price_1": null, // artifact, price object id added
+      "price_2": null, // artifact, price object id added
+      "customer": null, // artifact, customer object id added 
+      "coupon": null // artifact, coupon object id added
+    },
+    "client_status": {
+      "logged_in": null, // artifact, ISO timestamp from user-behavior event 
+      "contract_loaded": null, // artifact, ISO timestamp from user-behavior event 
+      "contract_scrolled_complete": null, // artifact, ISO from user-behavior event 
+      "viewed_contract": true, // artifact, ISO timestamp from user-behavior event 
+      "viewed_invoice": true, // artifact, ISO timestamp from user-behavior event 
+      "downloaded_docs": 0, // artifact, ISO counter from user-behavior event 
+      "signed_contract": null // artifact, ISO timestamp from user-behavior event 
+    },
+    "payment_1": {
+      "intent": null, // artifact, ISO timestamp payment event; not functional yet
+      "processing": null, // artifact, ISO timestamp payment event; not functional yet
+      "succeeded": null // artifact, ISO timestamp payment event 
+    },
+    "payment_2": {
+      "intent": null, // artifact, ISO timestamp payment event; not functional yet
+      "processing": null, // artifact, ISO timestamp payment event; not functional yet
+      "succeeded": null // artifact, ISO timestamp payment event 
+    }
+  },
+  "product": {
+    "name": null, // required, customer-friendly name for contract, invoice
+    "active": true, // required, leave as default "true" 
+    "description": null, // required, sentence or phrase to understand product better 
+    "id": null, // required, admin created uid-xxx-xxx format before submitting job JSON 
+    "login_name": null, // required, last name of client for payment site login 
+    "login_keyword": null, // required, keyword or key-phrase for site login 
+    "service_usd": 0, // required, total cost of service entered as pennies
+    "total_payments": 2, // required 1 or 2, usually two payments 
+    "discount_usd": 0, // required, amount discount in pennies or 0
+    "type": "service", // require, always leave as "service" 
+    "unit_label": "Payment" // required, always leave as "Payment" 
+  },
+  "customer": {
+    "name": null, // required, client First Last Name for contract, invoice 
+    "business": null, // required, client's legal, taxable business name, could be same as client name if sole proprietor 
+    "title": null, // required, title of your contact client at their business or job role 
+    "email": null, // required, properly formatted email@example.com  
+    "phone": null, // required, formatted as 111-222-3333 
+    "id": null, // required, admin provided change uid to cus like cus-xxx-xxx 
+    "address": {
+      "city": null, // required, client legal billing address city 
+      "line1": null, // required, client legal billing address first line only 
+      "state": null, // required, client legal billing 2-character abbreviation 
+      "postal_code": null, // required, client legal 5-digit billing zip 
+      "country": "US" // required, client legal billing address two letter country code 
+    }
+  },
+  "coupon": {
+    "amount_off": 0, // required, amount off in pennies 
+    "applies_to": {
+      "products": [
+        "uid-xxx-xxx" // required, should match the product id above 
+      ]
+    },
+    "currency": "usd", // required, leave as "usd" 
+    "duration": "once", // required, leave as "once" 
+    "id": null, // required if amount_off > 0, change uid to cou like cou-xxx-xxx
+    "max_redemptions": 1, // required, always "1"
+    "name": null // required if amount_off > 0, one-word, shown on invoice line items 
+  },
+  "price1": {
+    "count": 1, // required, leave as "1"
+    "currency": "usd", // required, leave as "usd" 
+    "unit_amount": 5000, // required, first payment amount in pennies before discount 
+    "active": true, // required, always "true" until paid 
+    "billing_scheme": "per_unit", // required, leave as "per_unit" 
+    "pay_by": "start of work", // required, generally leave as "start of work" 
+    "nickname": "Initial Payment", // required, generally leave as "Initial Payment" 
+    "product": {
+      "products": [
+        "uid-test-payment-002" // required, should be same as product.id above 
+      ]
+    },
+    "id": null // artifact, leave blank and will be added upon creation of price object 
+  },
+  "price2": {
+    "count": 2, // required, leave as "2" for section of two payments 
+    "currency": "usd", // required, leave as "usd" 
+    "unit_amount": 5000, // required, second payment amount in pennies before discount 
+    "active": true, // required, always "true" until paid 
+    "billing_scheme": "per_unit", // required, leave as "per_unit" 
+    "pay_by": "before project launch", // required, generally leave "before project launch" 
+    "pay_days": 14, // required, generally leave as "14" 
+    "late_fee": 10000, // required, leave as $100 in pennies unless otherwise noted 
+    "nickname": "Final Payment", // required, generally leave as is 
+    "product": {
+      "products": [
+        "uid-test-payment-002" // required, should be same as product.id above 
+      ]
+    },
+    "id": null // artifact, leave blank and will be added upon creation of price object 
+  },
+  "checkout_session_1": {
+    "billing_address_collection": "required", // required, leave as is 
+    "customer_creation": "always", // required, leave as is 
+    "discounts": [
+      {
+        "coupon": null // required, add coupon.id cou-xxx-xxx or as null for no discount 
+      }
+    ],
+    "line_items": [
+      {
+        "price": null, // required, add price.id provided by stripe for price1 
+        "quantity": 1
+      }
+    ],
+    "mode": "payment", // required, leave as is 
+    "phone_number_collection": {
+      "enabled": true // required, leave as is
+    },
+    "return_url": "https://payments.august.style/[uid-xxx-xxx]#completion", // required, updated "[uid-xxx-xxx]" with the product.id, no quotes, in the URL 
+    "ui_mode": "custom" // required, leave as is 
+  },
+  "checkout_session_2": {
+    "billing_address_collection": "required", // required, leave as is 
+    "customer_creation": "always", // required, leave as is 
+    "discounts": [
+      {
+        "coupon": null // required, add coupon.id cou-xxx-xxx or as null for no discount on *THIS PAYMENT* do not add discount to multiple payments 
+      }
+    ],
+    "line_items": [
+      {
+        "price": null, // required, add price.id provided by stripe for price2
+        "quantity": 1
+      }
+    ],
+    "mode": "payment", // required, leave as is 
+    "phone_number_collection": {
+      "enabled": true // required, leave as is 
+    },
+    "return_url": "https://payments.august.style/[uid-xxx-xxx]#completion", // required, updated "[uid-xxx-xxx]" with the product.id, no quotes, in the URL 
+    "ui_mode": "custom" // required, leave as is 
+  },
+  "project_scope_summary": null, // required, add a summary of the full, detailed project scope document 
+  "project_scope_full": null // required, paste the contents of the full detailed project scope, this will be on a page directly following the contract's last page 
+}

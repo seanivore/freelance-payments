@@ -6,41 +6,6 @@
 
 ## What's Working ✅
 
-### Workflow Orchestration
-- **Three separate workflow files** (admin-push, user-behavior, payment) - each self-contained
-- **Sequential execution** with concurrency groups (`freelance-payments-workflows-${{ github.ref }}`)
-- **Workflow-level concurrency** prevents cancellation of in-progress runs
-- **Explicit step-by-step logging** for all 12/16/14 steps respectively
-- **Clear RESULT and ARTIFACTS logging** for transparency
-
-### Stripe Integration
-- **Stripe Elements with `ui_mode: custom`** (Basil API version `2025-03-31.basil`)
-- **Product ID = Job ID** (e.g., `uid-test-001`)
-- **Only active products** counted for matching logic (prevents new JSONs from being deleted)
-- **Archived products tracked separately** for orphaned product detection
-- **8-step matching logic** correctly handles all scenarios:
-  - Unmatched JSONs (create Stripe objects)
-  - Unmatched catalog (archive orphaned products)
-  - Matched with mismatched active status (archive/delete as needed)
-
-### Git Workflow
-- **`git smart-push`** handles conflicts intelligently:
-  - Preserves intentional changes (staged/committed files)
-  - Accepts auto-generated updates (manifest.json, etc.)
-  - Properly handles modify/delete conflicts (uses `git rm` for deletions)
-  - Checks rebase commit for deleted files during conflict resolution
-
-### PDF Generation
-- **Google Docs template-based** PDF generation
-- **OAuth refresh token flow** (no service account needed)
-- **PDFs generated immediately** after Stripe objects created
-- **Stored only in repository** (temporary Google Docs deleted)
-
-### Frontend
-- **Stripe Elements** properly initialized with `fetchClientSecret`
-- **Event tracking** (contract_loaded, contract_scrolled_complete, contract_signed, invoice_viewed)
-- **Completion page** messaging for single vs multi-payment jobs
-- **Homepage UI** improvements (glow effects, updated copy)
 
 ## Known Issues 🔧
 
