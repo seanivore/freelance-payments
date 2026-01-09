@@ -128,7 +128,7 @@ These placeholders are used to create the the combination of both payment_1 and 
 | {{amount_paid}}                 | **DEFUNCT**                                               |
 | {{subtotal}}                    | formatCurrency(`price1.unit_amount`+`price2.unit_amount`) |
 | {{amount_off}}                  | formatCurrency(`coupon.amount_off`)                       |
-| {{total}}                       | formatCurrency(`{{subtotal}}`–`{{discount}}`)             |
+| {{total}}                       | formatCurrency(`{{subtotal}}`–`{{amount_off}}`)           |
 | {{price1.count}}                | `price1.count`                                            |
 | {{price2.count}}                | `price2.count`                                            |
 | {{product.total_payments}}      | `product.total_payments`                                  |

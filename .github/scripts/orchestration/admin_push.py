@@ -768,7 +768,7 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
             '{{subtotal}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0))),
             '{{amount_off}}': format_currency(job_data.get('coupon', {}).get('amount_off', 0)),
             '{{total}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0)) - job_data.get('coupon', {}).get('amount_off', 0)),
-            '{{amount_paid}}': calculate_amount_paid(job_data)
+            '{{amount_paid}}': "$0.00"
         }
         
         replace_placeholders(docs_service, new_doc_id, replacements)
