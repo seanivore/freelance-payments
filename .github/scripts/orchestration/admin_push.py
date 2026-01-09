@@ -961,7 +961,8 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
     # Get template IDs
     contract_template_id = os.getenv('GOOGLE_TEMPLATE_CONTRACT_ID', '').strip()
     invoice_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_ID', '').strip()
-    invoice_balance_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_BALANCE_ID', '').strip()
+    # Prioritize the new cleaner name, fallback to legacy if needed
+    invoice_balance_template_id = os.getenv('GOOGLE_TEMPLATE_BALANCE_ID', '').strip() or os.getenv('GOOGLE_TEMPLATE_INVOICE_BALANCE_ID', '').strip()
     
     if not contract_template_id or not invoice_template_id:
         stats['errors'].append("GOOGLE_TEMPLATE_CONTRACT_ID or GOOGLE_TEMPLATE_INVOICE_ID not set")
@@ -1101,25 +1102,7 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
                     except Exception as e:
                         stats['errors'].append(f"Balance Invoice generation failed for {job_id}: {str(e)}")
             else:
-                msg = f"Skipping Balance Invoice for {job_id}: Missing GOOGLE_TEMPLATE_BALANCE_ID keys" # Updated name in plan, user called it GOOGLE_TEMPLATE_BALANCE_ID in prompt but code calls it INVOICE_BALANCE. 
-                # User Prompt: "GOOGLE_TEMPLATE_BALANCE_ID ... 1fuohk..."
-                # My code reads: invoice_balance_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_BALANCE_ID', '').strip()
-                # I should double check what I called it in line 964.
-                # In Step 732/736 I added `GOOGLE_TEMPLATE_INVOICE_BALANCE_ID`.
-                # The user in Step 783 listed `GOOGLE_TEMPLATE_BALANCE_ID`.
-                # I must stick to ONE. I will stick to what the code has (INVOICE_BALANCE) or change it.
-                # I will stick to existing code (`invoice_balance_template_id`).
-                
-                # Wait, the prompt says "GOOGLE_TEMPLATE_BALANCE_ID".
-                # I should probably update the Env Var retrieval to match the user's latest spec if they changed it.
-                # But they said "confirmed the name of the label in env locations"
-                # Let's assume they might have updated it to match what I wrote, or what they wrote.
-                # I will assume `GOOGLE_TEMPLATE_INVOICE_BALANCE_ID` for now as that is what is in the code unless I change line 964.
-                # Actually, I'll update line 964 to match the user's explicit new list if I can.
-                # But this Replace block is for lines 1005+.
-                # I will stick to the variable `invoice_balance_template_id` which is already loaded.
-                
-                msg = f"Skipping Balance Invoice for {job_id}: Missing Template ID"
+                msg = f"Skipping Balance Invoice for {job_id}: Missing GOOGLE_TEMPLATE_BALANCE_ID"
                 print(f"WARNING: {msg}", file=sys.stderr)
                 stats['warnings'].append(msg)
         
