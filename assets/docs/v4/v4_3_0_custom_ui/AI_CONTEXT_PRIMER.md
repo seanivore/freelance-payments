@@ -342,7 +342,6 @@ Login lookup matches `login_name` and `login_keyword` separately (not combined).
 | {{contract.work_end}}           | formatDate(`contract.work_end`)                           |
 | {{contract.legal_jurisdiction}} | `contract.legal_jurisdiction`                             |
 | {{project}}                     | `project`                                                 |
-| {{amount_due}}                  |  Variable                                                 |
 | {{customer.business}}           | `customer.business`                                       |
 | {{customer.name}}               | `customer.name`                                           |
 | {{customer.title}}              | `customer.title`                                          |
@@ -365,11 +364,19 @@ Login lookup matches `login_name` and `login_keyword` separately (not combined).
 | {{price2.unit_amount}}          | `price2.unit_amount`                                      |
 | {{project_scope_summary}}       | `project_scope_summary`                                   |
 | {{project_scope_full}}          | `project_scope_full`                                      |
+| {{today}}                       | formatDate(day-invoice-is-created)                        |
+
+---
+| {{amount_due}}                  | **DEFUNCT**                                               |
+| {{amount_paid}}                 | **DEFUNCT**                                               |
 | {{subtotal}}                    | formatCurrency(`price1.unit_amount`+`price2.unit_amount`) |
 | {{amount_off}}                  | formatCurrency(`coupon.amount_off`)                       |
 | {{total}}                       | formatCurrency(`{{subtotal}}`–`{{discount}}`)             |
-| {{amount_paid}}                 | Variable                                                  |
-| {{today}}                       | formatDate(day-invoice-is-created)                        |
+| {{price1.count}}                | `price1.count`                                            |
+| {{price2.count}}                | `price2.count`                                            |
+| {{product.total_payments}}      | `product.total_payments`                                  |
+| {{payment1_due}}                | formatCurrency(`price1.unit_amount`–`coupon.amount_off`)  |
+| {{payment2_due}}                | formatCurrency(`price2.unit_amount`)                      |
 
 **Variable Placeholders:**
 - `{{amount_due}}` - Calculated from `state.payment_1` and `state.payment_2` (see `calculate_amount_due()` in `generate_pdfs.py`)

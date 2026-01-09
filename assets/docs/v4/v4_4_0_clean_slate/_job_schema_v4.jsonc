@@ -71,16 +71,6 @@
             },
             "additionalProperties": false
         },
-        "payment_1": {
-            "intent": null, // artifact, ISO timestamp payment event; not functional yet
-            "processing": null, // artifact, ISO timestamp payment event; not functional yet
-            "succeeded": null // artifact, ISO timestamp payment event 
-        },
-        "payment_2": {
-            "intent": null, // artifact, ISO timestamp payment event; not functional yet
-            "processing": null, // artifact, ISO timestamp payment event; not functional yet
-            "succeeded": null // artifact, ISO timestamp payment event 
-        }
     },
     "product": {
         "name": null, // required, customer-friendly name for contract, invoice

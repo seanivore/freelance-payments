@@ -579,28 +579,11 @@ def update_payment_status(jobs_dir: str, job_id: str, payload: dict) -> dict:
         
         # Payment 1 Logic
         if payment_number == 1:
-            if 'payment_1' not in job_data['state']:
-                job_data['state']['payment_1'] = {}
-            
-            payment_intent = job_data['state']['payment_1']
-            # If coming from webhook, we trust it succeeded
-            if not payment_intent.get('intent'):
-                payment_intent['intent'] = succeeded_timestamp
-            payment_intent['succeeded'] = succeeded_timestamp
-            
             # Simple State Update
             client_status['payment_1'] = succeeded_timestamp
 
         # Payment 2 Logic
         elif payment_number == 2:
-            if 'payment_2' not in job_data['state']:
-                job_data['state']['payment_2'] = {}
-            
-            payment_intent = job_data['state']['payment_2']
-            if not payment_intent.get('intent'):
-                payment_intent['intent'] = succeeded_timestamp
-            payment_intent['succeeded'] = succeeded_timestamp
-
             # Simple State Update
             client_status['payment_2'] = succeeded_timestamp
 
@@ -609,8 +592,8 @@ def update_payment_status(jobs_dir: str, job_id: str, payload: dict) -> dict:
         total_payments = product.get('total_payments', 1)
         
         # Check actual completion based on state
-        p1_done = bool(job_data['state'].get('payment_1', {}).get('succeeded'))
-        p2_done = bool(job_data['state'].get('payment_2', {}).get('succeeded'))
+        p1_done = bool(client_status.get('payment_1'))
+        p2_done = bool(client_status.get('payment_2'))
         
         all_paid = False
         if total_payments == 1 and p1_done:
