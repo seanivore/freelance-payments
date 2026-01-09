@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "parker-fat-cat": {
-      "file_path": "assets/jobs/uid-owl-808.json",
-      "job_id": "uid-owl-808",
-      "login_keyword": "fat-cat",
-      "login_name": "Parker"
+    "yakamoto-shave-it": {
+      "file_path": "assets/jobs/uid-yak-909.json",
+      "job_id": "uid-yak-909",
+      "login_keyword": "shave-it",
+      "login_name": "Yakamoto"
     }
   },
-  "generated_at": "2026-01-09T21:00:22.043909Z"
+  "generated_at": "2026-01-09T21:13:11.436421Z"
 }
