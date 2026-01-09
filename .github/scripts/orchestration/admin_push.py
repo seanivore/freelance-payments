@@ -1023,19 +1023,9 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
             except Exception as e:
                 stats['errors'].append(f"Contract PDF generation failed for {job_id}: {str(e)}")
         
-        # Generate invoice PDF(s) based on total_payments
-        try:
-            total_payments = job_data.get('product', {}).get('total_payments', 1)
-            
-            # Ensure docs structure exists
-            if 'invoice_1' not in job_data['docs']: job_data['docs']['invoice_1'] = {}
-            if 'invoice_2' not in job_data['docs']: job_data['docs']['invoice_2'] = {}
-            
         invoice_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_ID', '').strip()
         invoice_balance_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_BALANCE_ID', '').strip()
 
-        # ... (contract generation) ...
-
         # Generate invoice PDF(s) based on total_payments
         try:
             total_payments = job_data.get('product', {}).get('total_payments', 1)
@@ -1043,6 +1033,8 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
             # Ensure docs structure exists
             if 'invoice_1' not in job_data['docs']: job_data['docs']['invoice_1'] = {}
             if 'invoice_2' not in job_data['docs']: job_data['docs']['invoice_2'] = {}
+            
+            # Loop 1 to total_payments (inclusive)
             
             # Loop 1 to total_payments (inclusive)
             for payment_num in range(1, total_payments + 1):

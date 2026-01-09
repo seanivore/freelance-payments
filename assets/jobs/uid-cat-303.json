@@ -57,7 +57,7 @@
         "name": "Support Group Networking Platform",
         "active": true,
         "description": "Building the digital platform for My Fat Cat support group to come together.",
-        "id": "uid-cat-202",
+        "id": "uid-cat-303",
         "login_name": "Parker",
         "login_keyword": "fat-cat",
         "service_usd": 3000000,
@@ -72,7 +72,7 @@
         "title": "CEO",
         "email": "j.parker@fatcat.support.com",
         "phone": "424-732-0198",
-        "id": "cus-cat-202",
+        "id": "cus-cat-303",
         "address": {
             "city": "Los Angeles",
             "line1": "1920 S. Figueroa St",
@@ -85,12 +85,12 @@
         "amount_off": 500000,
         "applies_to": {
             "products": [
-                "uid-cat-202"
+                "uid-cat-303"
             ]
         },
         "currency": "usd",
         "duration": "once",
-        "id": "cou-cat-202",
+        "id": "cou-cat-303",
         "max_redemptions": 1,
         "name": "chubby-cat"
     },
@@ -104,7 +104,7 @@
         "nickname": "Initial Payment",
         "product": {
             "products": [
-                "uid-cat-202"
+                "uid-cat-303"
             ]
         },
         "id": ""
@@ -121,7 +121,7 @@
         "nickname": "Final Payment",
         "product": {
             "products": [
-                "uid-cat-202"
+                "uid-cat-303"
             ]
         },
         "id": ""
@@ -129,7 +129,7 @@
     "checkout_session_1": {
         "discounts": [
             {
-                "coupon": "cou-cat-202"
+                "coupon": "cou-cat-303"
             }
         ],
         "line_items": [
@@ -139,7 +139,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/uid-cat-202#completion-1",
+        "return_url": "https://payments.august.style/uid-cat-303#completion-1",
         "ui_mode": "custom"
     },
     "checkout_session_2": {
@@ -155,7 +155,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/uid-cat-202#completion-2",
+        "return_url": "https://payments.august.style/uid-cat-303#completion-2",
         "ui_mode": "custom"
     },
     "project_scope_summary": "Jessika Parker is a modern dog trainer based in Los Angeles, California. She is the founder of My Fat Cat Support Group, a community of cat owners who share their experiences with their furry friends. She is looking to build a digital platform to connect with other cat owners and share their experiences. The platform will allow cat owners to connect with other cat owners and share their experiences with their furry friends.",
