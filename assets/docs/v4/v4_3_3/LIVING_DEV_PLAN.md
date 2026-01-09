@@ -123,12 +123,12 @@ These are either confirmation of updates needed having been made and then clarif
 
 ### Webhooks 
 
-  **Active Stripe Webhook Events** 
+  **Active Stripe Webhook Events** ✅ fixed; updated 
   1. `checkout.session.completed`
   2. `checkout.session.async_payment_succeeded` (for bank transfers)
   3. `checkout.session.async_payment_failed` (for failed async payments)
 
-  **Removed Old Webhook Events** 
+  **Removed Old Webhook Events** ✅ fixed; removed 
   - `payment_intent.succeeded` (not sent for Checkout Sessions)
   - `payment_intent.payment_failed` (not sent for Checkout Sessions)
 
@@ -141,14 +141,14 @@ These are either confirmation of updates needed having been made and then clarif
     - The checkout_session is tied to the price object by ID, the price object ID references the Product Object; missing one element breaks the chain 
     - Check that the following logic, stipulations, and artifact creation confirmation JSON updates are completed accurately to cover all bases 
 
-  **During Stripe object creation flow, `price1` and `price2` objects are created**
+  **During Stripe object creation flow, `price1` and `price2` objects are created as artifacts**
   + Artifacts returned to JSON must include: 
     - `price1.id` or `price2.id` filled out to replace 'null' (must be completed for possible future flow functions referencing this id via this location)
     - `checkout_session_1.line_items` array must include adding the `price1.id` to `price` in the array next to the `quantity: 1` value (must be added so that upon checkout the Stripe catalog accuracy is maintained)
     - `checkout_session_2.line_items` array must include adding the `price2.id` to `price` in the array next to the `quantity: 1` value (must be added so that upon checkout of this item the Stripe catalog accuracy is maintained by knowing the product object now has no active price objects)
     - Add the `price1.id` or `price2.id` respectively to `state.objects.price_1` or `state.objects.price_2`
   
-  **Confirm accuracy of other `state.object` values created** 
+  **Confirm accuracy of `state.object` values created from artifacts** 
   + The following fields are updated upon creation of Stripe objects for confirmation 
     - `state.objects.created` = timestamp confirming creation 
     - `state.objects.product` = add `product.id` to confirm creation 
@@ -365,8 +365,8 @@ These are either confirmation of updates needed having been made and then clarif
 ## Next Steps 🎯
 
 ### Immediate (After Vercel Rate Limit Expires)
-1. **Test archiving:** Push `uid-test-archive-001.json`, then delete it
-2. **Test payment flow:** Push `uid-test-payment-001.json`, walk through full flow
+1. **Test archiving:** Create then push `uid-test-archive-001.json`, then delete it
+2. **Test payment flow:** Create then push `uid-test-payment-001.json`, walk through full flow
 3. **Verify Stripe objects:** Check dashboard for correct product/price IDs
 4. **Verify manifest:** Ensure manifest.json updates correctly
 

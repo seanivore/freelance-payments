@@ -1,0 +1,184 @@
+{
+    "project": "Golden Record Test Project",
+    "contract": {
+        "work_start": "2026-02-01",
+        "work_end": "2026-03-01",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 15000,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": null
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
+    },
+    "docs": {
+        "contract": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "invoice": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        }
+    },
+    "state": {
+        "objects": {
+            "created": null,
+            "product": null,
+            "price_1": null,
+            "price_2": null,
+            "customer": null,
+            "coupon": null
+        },
+        "client_status": {
+            "logged_in": null,
+            "contract_loaded": null,
+            "contract_scrolled_complete": null,
+            "viewed_contract": true,
+            "viewed_invoice": true,
+            "downloaded_docs": 0,
+            "signed_contract": null
+        },
+        "payment_1": {
+            "intent": null,
+            "processing": null,
+            "succeeded": null
+        },
+        "payment_2": {
+            "intent": null,
+            "processing": null,
+            "succeeded": null
+        }
+    },
+    "product": {
+        "name": "Golden Integrity Test",
+        "active": true,
+        "description": "A test product to verify data integrity and PDF generation.",
+        "id": "uid-test-golden-001",
+        "login_name": "Golden",
+        "login_keyword": "Integrity",
+        "service_usd": 10000,
+        "total_payments": 2,
+        "discount_usd": 0,
+        "type": "service",
+        "unit_label": "Payment"
+    },
+    "customer": {
+        "name": "Test Client",
+        "business": "Golden Standards Inc.",
+        "title": "Director of Testing",
+        "email": "test@example.com",
+        "phone": "555-0123",
+        "id": "cus-test-golden-001",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Test Street",
+            "state": "MA",
+            "postal_code": "02108",
+            "country": "US"
+        }
+    },
+    "coupon": {
+        "amount_off": 0,
+        "applies_to": {
+            "products": [
+                "uid-test-golden-001"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": null,
+        "max_redemptions": 1,
+        "name": null
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 5000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-test-golden-001"
+            ]
+        },
+        "id": null
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 5000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-test-golden-001"
+            ]
+        },
+        "id": null
+    },
+    "checkout_session_1": {
+        "billing_address_collection": "required",
+        "customer_creation": "always",
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": null,
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "phone_number_collection": {
+            "enabled": true
+        },
+        "return_url": "https://payments.august.style/uid-test-golden-001#completion",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "billing_address_collection": "required",
+        "customer_creation": "always",
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": null,
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "phone_number_collection": {
+            "enabled": true
+        },
+        "return_url": "https://payments.august.style/uid-test-golden-001#completion",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Full endpoint verification test.",
+    "project_scope_full": "This is a comprehensive test of the v4.4.0 recovery plan.\\n\\n1. Stripe Object Creation\\n2. PDF Generation\\n3. JSON Artifact Injection"
+}
