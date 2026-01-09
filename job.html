@@ -296,6 +296,21 @@
                     <!-- PDF iframe will be inserted here by invoice-controller.js -->
                 </div>
 
+                <!-- Action Buttons (below PDF, separate container) -->
+                <div id="invoice-actions" class="hidden no-print mt-6 flex justify-center gap-4">
+                    <div class="text-center">
+                        <p class="mb-4 text-sm text-gray-600">Please review your invoice before proceeding.</p>
+                        <button id="invoice-proceed-btn"
+                            class="btn btn-primary transition-all duration-200 hover:shadow-lg px-8">
+                            Proceed to Payment
+                            <svg class="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
 
                 <!-- Error/Content Container -->
                 <div id="invoice-content">

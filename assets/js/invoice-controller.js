@@ -211,12 +211,76 @@
       return;
     }
 
+    // Show Action Buttons
+    const actionsDiv = document.getElementById('invoice-actions');
+    const proceedBtn = document.getElementById('invoice-proceed-btn');
+    
+    if (actionsDiv) {
+      actionsDiv.classList.remove('hidden');
+      
+      // Update button text based on payment number
+      if (proceedBtn) {
+         proceedBtn.innerHTML = `Proceed to Payment ${paymentNumber} <svg class="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+         
+         // Remove old listeners (cloning)
+         const newBtn = proceedBtn.cloneNode(true);
+         proceedBtn.parentNode.replaceChild(newBtn, proceedBtn);
+         
+         newBtn.addEventListener('click', () => {
+             handleProceed(jobId, paymentNumber, jobData);
+         });
+      }
+    }
+
     // Track invoice viewed only once when user actually navigates to invoice section
     // Use a flag to prevent duplicate tracking
     if (jobId && !invoiceSection.dataset.invoiceTracked) {
       trackInvoiceViewed(jobId, paymentNumber);
       invoiceSection.dataset.invoiceTracked = 'true';
     }
+  }
+
+  /**
+   * Handle Proceed Button Click
+   * 1. Track 'downloaded_docs' event (which is the trigger for 'invoice'/'balance' timestamp)
+   * 2. Optimistically update local state
+   * 3. Route to Checkout
+   */
+  async function handleProceed(jobId, paymentNumber, jobData) {
+      const btn = document.getElementById('invoice-proceed-btn');
+      if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = 'Processing...';
+      }
+
+      // Track the event
+      if (typeof EventTracker !== 'undefined') {
+          // 'downloaded_docs' is the event that sets client_status.invoice (or balance)
+          await EventTracker.track('downloaded_docs', {
+              job_id: jobId,
+              payment_number: paymentNumber
+          });
+      }
+
+      // Optimistic update
+      const now = new Date().toISOString();
+      if (!jobData.state) jobData.state = {};
+      if (!jobData.state.client_status) jobData.state.client_status = {};
+      
+      if (paymentNumber === 1) {
+          jobData.state.client_status.invoice = now;
+      } else {
+          jobData.state.client_status.balance = now;
+      }
+      
+      sessionStorage.setItem('jobData', JSON.stringify(jobData));
+      
+      // Re-run router to move to checkout
+      if (typeof PaymentRouter !== 'undefined') {
+          PaymentRouter.init();
+      } else {
+          window.location.reload();
+      }
   }
 
   // Export for use in other scripts
