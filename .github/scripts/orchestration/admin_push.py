@@ -251,6 +251,11 @@ def create_stripe_objects_for_job(job_data: dict, job_id: str) -> dict:
     state_objects['product'] = product_id
     state_objects['created'] = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
     
+    # Auto-sign contractor date using created timestamp
+    if job_data.get('contract') and 'signatures' in job_data['contract']:
+        if 'contractor' in job_data['contract']['signatures']:
+            job_data['contract']['signatures']['contractor']['signed_date'] = state_objects['created']
+    
     # Create customer
     customer = job_data.get('customer')
     if customer:
@@ -678,7 +683,7 @@ def replace_placeholders(docs_service, document_id: str, replacements: dict):
                     'text': placeholder,
                     'matchCase': False
                 },
-                'replaceText': str(value) if value is not None else ''
+                'replaceText': (str(value).replace('\\n', '\n') if value is not None else '')
             }
         })
     
@@ -839,6 +844,7 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
             '{{docs.invoice.created}}': format_date(datetime.now(UTC).isoformat()),
             '{{contract.work_start}}': format_date(job_data.get('contract', {}).get('work_start')),
             '{{contract.work_end}}': format_date(job_data.get('contract', {}).get('work_end')),
+            '{{contract.signatures.contractor.signed_date}}': format_date(job_data.get('contract', {}).get('signatures', {}).get('contractor', {}).get('signed_date')),
             '{{contract.legal_jurisdiction}}': job_data.get('contract', {}).get('legal_jurisdiction', ''),
             '{{project}}': job_data.get('project', ''),
             '{{amount_due}}': calculate_amount_due(job_data),
