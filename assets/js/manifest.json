@@ -5,7 +5,13 @@
       "job_id": "uid-tst-003",
       "login_keyword": "phase-three",
       "login_name": "Testing"
+    },
+    "testing004-phase-four": {
+      "file_path": "assets/jobs/uid-tst-004.json",
+      "job_id": "uid-tst-004",
+      "login_keyword": "phase-four",
+      "login_name": "Testing004"
     }
   },
-  "generated_at": "2026-01-09T11:22:26.440672Z"
+  "generated_at": "2026-01-09T12:00:52.286038Z"
 }
