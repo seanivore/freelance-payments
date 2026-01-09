@@ -41,9 +41,7 @@ module.exports = async (req, res) => {
     const validEventTypes = [
       'logged_in',
       'contract_loaded',
-      'contract_scrolled_complete', // Kept for legacy compatibility if needed, but primary is signed
       'contract_signed',
-      'invoice_viewed', // Kept for legacy
       'downloaded_docs',
       'payment_1', // Can be tracked if client side wants to log it, though webhook is source of truth
       'payment_2'

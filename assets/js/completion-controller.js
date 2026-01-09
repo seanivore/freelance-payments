@@ -116,8 +116,8 @@
         
         // PDF Links
         const contractUrl = jobData.docs?.contract?.url || jobData.docs?.contract?.pdf;
-        const inv1Url = jobData.docs?.invoice_1?.url || jobData.docs?.invoice_1?.pdf;
-        const inv2Url = jobData.docs?.invoice_2?.url || jobData.docs?.invoice_2?.pdf;
+        const inv1Url = jobData.docs?.invoice?.url || jobData.docs?.invoice?.pdf;
+        const inv2Url = jobData.docs?.balance?.url || jobData.docs?.balance?.pdf;
 
         completionMessage = `
           <div class="card p-8 text-center">

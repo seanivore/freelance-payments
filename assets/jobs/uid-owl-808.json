@@ -65,7 +65,7 @@
         "name": "Support Group Networking Platform",
         "active": true,
         "description": "Building the digital platform for My Fat Cat support group to come together.",
-        "id": "uid-cat-202",
+        "id": "uid-owl-808",
         "login_name": "Parker",
         "login_keyword": "fat-cat",
         "service_usd": 3000000,
@@ -80,7 +80,7 @@
         "title": "CEO",
         "email": "j.parker@fatcat.support.com",
         "phone": "424-732-0198",
-        "id": "cus-cat-202",
+        "id": "cus-owl-808",
         "address": {
             "city": "Los Angeles",
             "line1": "1920 S. Figueroa St",
@@ -93,12 +93,12 @@
         "amount_off": 500000,
         "applies_to": {
             "products": [
-                "uid-cat-202"
+                "uid-owl-808"
             ]
         },
         "currency": "usd",
         "duration": "once",
-        "id": "cou-cat-202",
+        "id": "cou-owl-808",
         "max_redemptions": 1,
         "name": "chubby-cat"
     },
@@ -112,7 +112,7 @@
         "nickname": "Initial Payment",
         "product": {
             "products": [
-                "uid-cat-202"
+                "uid-owl-808"
             ]
         },
         "id": ""
@@ -129,7 +129,7 @@
         "nickname": "Final Payment",
         "product": {
             "products": [
-                "uid-cat-202"
+                "uid-owl-808"
             ]
         },
         "id": ""
@@ -137,7 +137,7 @@
     "checkout_session_1": {
         "discounts": [
             {
-                "coupon": "cou-cat-202"
+                "coupon": "cou-owl-808"
             }
         ],
         "line_items": [
@@ -147,7 +147,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/uid-cat-202#completion-1",
+        "return_url": "https://payments.august.style/uid-owl-808#completion-1",
         "ui_mode": "custom"
     },
     "checkout_session_2": {
@@ -163,9 +163,9 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/uid-cat-202#completion-2",
+        "return_url": "https://payments.august.style/uid-owl-808#completion-2",
         "ui_mode": "custom"
     },
-    "project_scope_summary": "Jessika Parker is a modern dog trainer based in Los Angeles, California. She is the founder of My Fat Cat Support Group, a community of cat owners who share their experiences with their furry friends. She is looking to build a digital platform to connect with other cat owners and share their experiences. The platform will allow cat owners to connect with other cat owners and share their experiences with their furry friends.",
-    "project_scope_full": "Jessika Parker is a modern dog trainer based in Los Angeles, California. She is the founder of My Fat Cat Support Group, a community of cat owners who share their experiences with their furry friends. She is looking to build a digital platform to connect with other cat owners and share their experiences. The platform will allow cat owners to connect with other cat owners and share their experiences with their furry friends. For the project we will be using a React.js frontend and a Node.js backend and will be creating a few different digital products including an app and a website that will help to facilitate the support group and on the backend, we will be using a database to store the data for the support group. The app will have a fun swipe-able interface like popular dating apps, but instead of swiping yes or no for something like cute or not, you swipe if you support their new cat workout and diet planning. This functionality flags the account for internal AI agents to analyze and provide feedback on the cat workout and diet planning. Over time, these guides are collected and then, after a number have been collected, or if the cat owner requests help, or after a certain period of time to keep engagement up, another AI agent will be used to review all of the different plans and come up with a detailed questionnaire for the cat owner to fill out. This questionnaire will be used to provide personalized recommendations for the cat owner to help them achieve their goals, integrating the responses into the original plans and adapting them accordingly. To bring the digital platform full circle, when a owner approves a new plan as suggested by our internal team (of AI agents), the information will be blasted out on marketing on the website seeking support and validation from other cubby cat owners. This will help to build a community of cat owners who are committed to helping each other achieve their goals for their pets, keeping everyone happy, healthy, and motivated to continue their journey to a healthier lifestyle for their furry friends."
+    "project_scope_summary": "Jessika Parker is a modern dog trainer.",
+    "project_scope_full": "Jessika Parker is a modern dog trainer."
 }

@@ -678,11 +678,11 @@ def update_tracking_event(job_data: dict, event_data: dict) -> dict:
     elif event_type == 'contract_signed':
         client_status['signed_contract'] = timestamp
     elif event_type == 'downloaded_docs':
-        # Logic: If payment_1 is already made, this is the second invoice
+        # Logic: If payment_1 is already made, this is the balance invoice
         if client_status.get('payment_1'):
-            client_status['invoice_2'] = timestamp
+            client_status['balance'] = timestamp
         else:
-            client_status['invoice_1'] = timestamp
+            client_status['invoice'] = timestamp
     # Redundant boolean flags removed to enforce single source of truth (timestamps)
     
     return {

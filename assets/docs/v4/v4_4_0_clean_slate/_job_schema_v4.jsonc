@@ -26,7 +26,7 @@
             "sha256": null, // artifact, PDF creation added string
             "created": null // artifact, ISO timestamp added confirming PDF flow complete 
         },
-        "invoice_1": {
+        "invoice": {
             "id": null,
             "pdf": null,
             "file_id": null,
@@ -34,7 +34,7 @@
             "sha256": null,
             "created": null
         },
-        "invoice_2": {
+        "balance": {
             "id": null,
             "pdf": null,
             "file_id": null,
@@ -64,7 +64,7 @@
                     "type": "string",
                     "format": "date-time"
                 },
-                "invoice_1": {
+                "invoice": {
                     "type": "string",
                     "format": "date-time"
                 },
@@ -72,7 +72,7 @@
                     "type": "string",
                     "format": "date-time"
                 },
-                "invoice_2": {
+                "balance": {
                     "type": "string",
                     "format": "date-time"
                 },
