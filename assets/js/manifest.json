@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-09T10:23:17.110940Z"
+  "jobs": {
+    "golden002-integrity": {
+      "file_path": "assets/jobs/uid-test-golden-002.json",
+      "job_id": "uid-test-golden-002",
+      "login_keyword": "Integrity",
+      "login_name": "Golden002"
+    }
+  },
+  "generated_at": "2026-01-09T10:24:18.698257Z"
 }
