@@ -961,6 +961,7 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
     # Get template IDs
     contract_template_id = os.getenv('GOOGLE_TEMPLATE_CONTRACT_ID', '').strip()
     invoice_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_ID', '').strip()
+    invoice_balance_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_BALANCE_ID', '').strip()
     
     if not contract_template_id or not invoice_template_id:
         stats['errors'].append("GOOGLE_TEMPLATE_CONTRACT_ID or GOOGLE_TEMPLATE_INVOICE_ID not set")
@@ -1002,7 +1003,8 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
             job_data['docs']['invoice'] = {}
         
         # Generate contract PDF
-        pdf_filename = f'kon-{job_id}.pdf'
+        clean_id = job_id.replace('uid-', '')
+        pdf_filename = f'kon-{clean_id}.pdf'
         pdf_path = contract_dir / pdf_filename
         if not pdf_path.exists():
             try:
@@ -1012,7 +1014,7 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
                     f.write(result['pdf_bytes'])
                 
                 job_data['docs']['contract'] = {
-                    'id': f'kon-{job_id}',
+                    'id': f'kon-{clean_id}',
                     'pdf': f'assets/pdf/contract/{pdf_filename}',
                     'file_id': result['doc_id'],
                     'url': f'https://payments.august.style/assets/pdf/contract/{pdf_filename}',
@@ -1024,8 +1026,7 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
             except Exception as e:
                 stats['errors'].append(f"Contract PDF generation failed for {job_id}: {str(e)}")
         
-        invoice_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_ID', '').strip()
-        invoice_balance_template_id = os.getenv('GOOGLE_TEMPLATE_INVOICE_BALANCE_ID', '').strip()
+        # Generate invoice PDF(s) based on total_payments
 
         # Generate invoice PDF(s) based on total_payments
         try:
@@ -1039,14 +1040,16 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
             
             # Loop 1 to total_payments (inclusive)
             for payment_num in range(1, total_payments + 1):
-                # Filename logic: inv-{job_id}-{num}.pdf
-                pdf_filename = f'inv-{job_id}-{payment_num}.pdf'
+                # Filename logic: inv-{clean_id}-{num}.pdf
+                pdf_filename = f'inv-{clean_id}-{payment_num}.pdf'
                 pdf_path = invoice_dir / pdf_filename
                 
                 # Determine correct template
                 current_template_id = invoice_template_id if payment_num == 1 else invoice_balance_template_id
                 if not current_template_id:
-                     stats['warnings'].append(f"Missing template ID for Invoice {payment_num} (Job {job_id})")
+                     msg = f"Missing template ID for Invoice {payment_num} (Job {job_id})"
+                     stats['warnings'].append(msg)
+                     print(f"WARNING: {msg}", file=sys.stderr)
                      continue
 
                 if not pdf_path.exists():
