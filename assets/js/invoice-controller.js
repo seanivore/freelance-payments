@@ -113,11 +113,12 @@
     // Create iframe for PDF embedding
     const iframe = document.createElement('iframe');
     iframe.src = pdfUrl;
+    iframe.className = 'glass-frame';
     iframe.style.width = '100%';
     iframe.style.height = '800px';
-    iframe.style.border = 'none';
-    iframe.style.borderRadius = '8px';
-    iframe.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+    // iframe.style.border = 'none'; // Handled by class
+    // iframe.style.borderRadius = '8px'; // Handled by class
+    // iframe.style.boxShadow = '...'; // Handled by class
     iframe.setAttribute('title', 'Invoice PDF');
     iframe.setAttribute('loading', 'lazy');
 

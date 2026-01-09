@@ -301,4 +301,24 @@
     background-color: hsl(var(--color-mauve));
     width: 70%;
   }
+
+  /* Foggy Glass Aesthetic for PDF Containers */
+  .glass-panel {
+    @apply rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl;
+    box-shadow: 
+      0 4px 30px rgba(0, 0, 0, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  /* Clean Iframe Styling - removes "Ugly Iframe" look */
+  .glass-frame {
+    @apply w-full h-full rounded-lg border-0 bg-transparent;
+    mix-blend-mode: multiply; /* Helps PDF blend if white background matches */
+  }
+
+  /* Dark mode specific blend */
+  .dark .glass-frame {
+     mix-blend-mode: normal;
+     opacity: 0.9;
+  }
 }
