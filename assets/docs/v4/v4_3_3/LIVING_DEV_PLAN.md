@@ -98,18 +98,7 @@ Link files managing flow of actions being facilitated. Through this detailing an
 
 ---
 
-## Current State & Next Steps
-
-  **Version:** v4.3.3  
-  **Date:** 2026-01-05  
-  **Status:** Testing & Refinement Phase
-
-### Workflow Orchestration
-  - **Three separate workflow files** (admin-push, user-behavior, payment) - each self-contained
-  - **Sequential execution** with concurrency groups (`freelance-payments-workflows-${{ github.ref }}`)
-  - **Workflow-level concurrency** prevents cancellation of in-progress runs
-  - **Explicit step-by-step logging** for all 12/16/14 steps respectively
-  - **Clear RESULT and ARTIFACTS logging** for transparency
+## Technical Details & Difficulties 
 
 ### Stripe Integration
   - **Stripe Elements with `ui_mode: custom`** (Basil API version `2025-03-31.basil`)
@@ -120,13 +109,28 @@ Link files managing flow of actions being facilitated. Through this detailing an
     - Unmatched JSONs (create Stripe objects)
     - Unmatched catalog (archive orphaned products)
     - Matched with mismatched active status (archive/delete as needed)
+  + Stripe API Version
+    - **Required:** `2025-03-31.basil` (for `ui_mode: custom`)
+    - **Used in:** `checkout-controller.js` (Stripe.js script URL) <- not sure what this means but 
+    feels like we'd need to be across the board consistent 
 
 ### Git Workflow
   - **`git smart-push`** handles conflicts intelligently:
+    `.gitconfig-smart-push.sh` 
+    Full details: `assets/docs/v4/v4_3_3/GIT_WORKFLOW.md` 
     - Preserves intentional changes (staged/committed files)
     - Accepts auto-generated updates (manifest.json, etc.)
     - Properly handles modify/delete conflicts (uses `git rm` for deletions)
     - Checks rebase commit for deleted files during conflict resolution
+  - Not sure on this file `.gitattributes` or `assets/jobs/.gitkeep` 
+    - Depending on when attributes were added it makes me curious if they might be the cause of the merge errors 
+    - Also we have that keeps file in jobs directory, but 'contracts' and 'pdf' keep getting deleted as well at `assets/pdf/...` which typically happens when I need to manually deleted the PDFs in those files, then run the "smart-push" it gets a conflict, wants to put them back and/or updates with the actual containing directory of the deleted PDF removed, but it isn't consistent in its error (both were not deleted the same time even though both were emptied of PDFs and, separately, both have had their directory removed)
+  + Regarding "Manifest Conflict Markers" and .gitattributes 
+    - **Issue:** Git conflict markers can appear in manifest.json during rebase
+    - **Impact:** JSON parse errors prevent workflow from checking Stripe catalog
+    - **Fix:** `git smart-push` should handle this, but manual cleanup may be needed
+    - **Status:** Fixed in recent update (checks rebase commit for deletions)
+
 
 ### PDF Generation
   - **Google Docs template-based** PDF generation
@@ -140,22 +144,22 @@ Link files managing flow of actions being facilitated. Through this detailing an
   - **Completion page** messaging for single vs multi-payment jobs
   - **Homepage UI** improvements (glow effects, updated copy)
 
----
+### Workflow Orchestration
+  - **Three separate workflow files** (admin-push, user-behavior, payment) - each self-contained
+  - **Sequential execution** with concurrency groups (`freelance-payments-workflows-${{ github.ref }}`)
+  - **Workflow-level concurrency** prevents cancellation of in-progress runs
+  + Concurrency Groups
+    - **All workflows:** `freelance-payments-workflows-${{ github.ref }}`
+    - **Cancel in progress:** `false` (protects running workflows)
+    - **Note:** Pending runs may still be canceled by GitHub Actions (intended behavior)
+  - **Explicit step-by-step logging** for all 12/16/14 steps respectively
+  - **Clear RESULT and ARTIFACTS logging** for transparency
+  + Steps listed below 
+    - Though each workflow has a handful of identical steps, every workflow is created to be wholly independent 
+    - If we find a bug and error that we correct in one of the .yml workflows 
+    - We will very likely need to make similar updates to the other .yml workflows 
 
-## Technical Details 
-
-### Stripe API Version
-- **Required:** `2025-03-31.basil` (for `ui_mode: custom`)
-- **Used in:** `checkout-controller.js` (Stripe.js script URL)
-
-### Concurrency Groups
-- **All workflows:** `freelance-payments-workflows-${{ github.ref }}`
-- **Cancel in progress:** `false` (protects running workflows)
-- **Note:** Pending runs may still be canceled by GitHub Actions (intended behavior)
-
-### Three Workflow Steps 
-
-**1. ADMIN STARTED: `.github/workflows/admin-push.yml`** 
+  **1. ADMIN STARTED: `.github/workflows/admin-push.yml`** 
   + TRIGGER=admin-push
   + When: Admin pushes JSON files to repo 
   + Behavior: Starts immediately when admin pushes
@@ -178,7 +182,7 @@ Link files managing flow of actions being facilitated. Through this detailing an
     11. Build pages
     12. Deploy
 
-**2. USER-BEHAVIOR NON-PAYMENT EVENTS STARTED: `.github/workflows/user-behavior.yml`**
+  **2. USER-BEHAVIOR NON-PAYMENT EVENTS STARTED: `.github/workflows/user-behavior.yml`**
   + TRIGGER=user-behavior
   + When: User behavior events (contract loaded, scrolled, signed, etc.)  
   + Behavior: Waits for 2 minutes of inactivity, then processes
@@ -206,7 +210,7 @@ Link files managing flow of actions being facilitated. Through this detailing an
     15. Build pages
     16. Deploy
 
-**3. STRIPE WEBHOOK PAYMENT EVENT STARTED: `.github/workflows/payment.yml`**
+  **3. STRIPE WEBHOOK PAYMENT EVENT STARTED: `.github/workflows/payment.yml`**
   + TRIGGER=payment
   + When: Payment completes (Stripe webhook) 
   + Behavior: Processes within 1 minute (doesn't need to interrupt, but fast)
@@ -215,7 +219,7 @@ Link files managing flow of actions being facilitated. Through this detailing an
     2. Queue events in backend 
     3. Wait 1 minute (allows user to wrap up their session)
     4. After 1 minute period → update payment status in JSON 
-      - `state.payment_1.succeeded` or `state_payment_2.succeeded` add timestamp value 
+      - `state.payment_1.succeeded` or `state.payment_2.succeeded` add timestamp value 
       - If `price1` paid, then update `price1.active= true` to `price1.active= false`
       - If `price2` paid, then update `price2.active= true` to `price2.active= false` 
       - If `price1.count` <= `product.total_payments` then change `product.active= true` to `product.active= false`
@@ -241,23 +245,94 @@ Link files managing flow of actions being facilitated. Through this detailing an
 
 --- 
 
-## Known Issues 
+## User Flow by File 
 
-### Vercel Rate Limits
-- **Issue:** Vercel deployment rate limits (currently 3 hours)
-- **Impact:** Blocks testing when multiple workflows run quickly
-- **Workaround:** Wait for rate limit to expire before next test
-- **Future:** May need to batch deployments or use different deployment strategy
-
-### Manifest Conflict Markers
-- **Issue:** Git conflict markers can appear in manifest.json during rebase
-- **Impact:** JSON parse errors prevent workflow from checking Stripe catalog
-- **Fix:** `git smart-push` should handle this, but manual cleanup may be needed
-- **Status:** Fixed in recent update (checks rebase commit for deletions)
-
-### Workflow Logic Edge Cases
-- **Issue:** When JSON deleted but Stripe product exists, workflow should archive it
-- **Status:** Logic exists (Step 4: orphaned products), but needs verification
-- **Test:** `uid-test-archive-001.json` will be deleted to test this
+  1. `assets/js/glow-effect.js` 
+     - User interaction design on homepage of payment site at `index.html` 
+     - Creates dynamic light source through frosted glass that follows cursor  
+  2. `assets/js/payment-lookup.js` 
+      - Homepage user form submission 
+      - Finds job via `assets/js/manifests.json` for dynamic elements 
+     + shadcn/ui "inspired" — `assets/js/components/button.js` button handled with tailwind classes in `assets/css/styles.css` 
+     + shadcn/ui "inspired" — `assets/js/components/card.js` card component 
+     + shadcn/ui "inspired" — `assets/js/components/input.js` input component 
+  3. `assets/js/payment-router.js` 
+    - Uses state management to determine where in process flow to place user 
+    - Works for their first visit versus returning after making one payment or even returning after reading but not signing contract  
+  4. `assets/js/event-tracker.js` 
+    - Batches recorded user-behavior event activity for updates on job JSON state management  
+    - Includes: `contract_loaded`, `contract_scrolled_complete`, `invoice_viewed`, `document_downloaded`, `signed_contract`
+  5. `assets/js/contract-controller.js` 
+    - Loads job to display embedded contract PDF 
+    - Uses `job.html` template with #contract which adds to user's URL 
+  6. `assets/js/invoice-controller.js` 
+    - Loads job to display embedded invoice PDF 
+    - Uses `job.html` template with #invoice in URL 
+  7. `assets/js/checkout-controller.js` 
+    - Creates checkout_session on-demand 
+    - Works within `job.html` template with #payment-1, #payment-2 sections 
+  8. `assets/js/completion-controller.js` 
+    - Complete message after using `state.payment_1`/`state.payment_2` 
+    - Works within `job.html` template with #completion 
 
 ---
+
+## Next Steps 🎯
+
+### Immediate (After Vercel Rate Limit Expires)
+1. **Test archiving:** Push `uid-test-archive-001.json`, then delete it
+2. **Test payment flow:** Push `uid-test-payment-001.json`, walk through full flow
+3. **Verify Stripe objects:** Check dashboard for correct product/price IDs
+4. **Verify manifest:** Ensure manifest.json updates correctly
+
+### Short-term
+1. **Fix event tracking:** Prevent early triggers (contract_scrolled_complete firing before scroll)
+2. **Improve completion messaging:** Better differentiation between payment 1 and final payment
+3. **Test multi-payment flow:** Ensure Payment 2 routing works correctly
+4. **Document Stripe webhook setup:** Ensure payment workflow triggers correctly
+
+### Long-term
+1. **Optimize deployment strategy:** Reduce Vercel rate limit issues
+2. **Add error recovery:** Better handling of workflow failures
+3. **Improve logging:** More detailed error messages for debugging
+4. **Add monitoring:** Track workflow success/failure rates
+
+## Key Files 📁
+
+### Workflows
+- `.github/workflows/admin-push.yml` - Admin-initiated pushes
+- `.github/workflows/user-behavior.yml` - User events (contract signing, etc.)
+- `.github/workflows/payment.yml` - Payment completion webhooks
+
+### Scripts
+- `.github/scripts/orchestration/admin_push.py` - Admin workflow logic
+- `.github/scripts/orchestration/user_behavior.py` - User behavior workflow logic
+- `.github/scripts/orchestration/payments.py` - Payment workflow logic
+
+### Frontend
+- `assets/js/checkout-controller.js` - Stripe Elements integration
+- `assets/js/contract-controller.js` - Contract signing
+- `assets/js/event-tracker.js` - Event tracking
+- `assets/js/completion-controller.js` - Post-payment messaging
+
+### Utilities
+- `.github/scripts/utils/json_io.py` - JSON file operations
+- `.gitconfig-smart-push.sh` - Git conflict resolution script
+
+## Testing Checklist ✅
+
+- [ ] Archive workflow (delete JSON → archive Stripe product)
+- [ ] Payment flow (contract → invoice → checkout → payment)
+- [ ] Multi-payment jobs (Payment 1 → Payment 2 → archive)
+- [ ] Manifest updates correctly
+- [ ] PDF generation works
+- [ ] Event tracking accurate
+- [ ] Completion page messaging correct
+- [ ] Git workflow handles conflicts properly
+
+## Notes 📝
+
+- **Stripe Products:** Always use job ID as product ID (e.g., `uid-test-001`)
+- **Manifest:** Auto-generated, don't edit manually
+- **Git:** Use `git smart-push` for all pushes (handles conflicts automatically)
+- **Workflows:** Wait for each to complete before pushing again (or accept that pending runs may be canceled)
