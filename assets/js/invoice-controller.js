@@ -158,6 +158,7 @@
     return { amountDue, amountPaid };
   }
 
+  /**
    * Initialize invoice section
    * @param {number} explicitPaymentNumber - Passed by FlowManager
    */
