@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-09T18:18:45.125923Z"
+  "jobs": {
+    "parker-fat-dog": {
+      "file_path": "assets/jobs/uid-fat-101.json",
+      "job_id": "uid-fat-101",
+      "login_keyword": "fat-dog",
+      "login_name": "Parker"
+    }
+  },
+  "generated_at": "2026-01-09T18:29:56.788380Z"
 }
