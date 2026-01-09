@@ -326,19 +326,13 @@
         throw new Error('Failed to update contract');
       }
 
-      // Reload job data from server to get fresh state before routing
-      // This ensures we have the latest payment status, not stale sessionStorage
-      try {
-        const jobPath = sessionStorage.getItem('jobPath') || `assets/jobs/${jobId}.json`;
-        const freshResponse = await fetch(`/${jobPath}?t=${Date.now()}`); // Cache bust
-        if (freshResponse.ok) {
-          const freshJobData = await freshResponse.json();
-          sessionStorage.setItem('jobData', JSON.stringify(freshJobData));
-          jobData = freshJobData; // Use fresh data for routing
-        }
-      } catch (e) {
-        console.warn('Could not reload fresh job data, using local:', e);
-      }
+      /* 
+       * OPTIMISTIC UI: Do NOT reload from server here.
+       * The GitHub Action takes time (~30s-1m) to update the JSON.
+       * If we fetch now, we get stale data and overwrite our optimistic `client_status`.
+       * 
+       * We rely on the `jobData` we updated in memory/sessionStorage above.
+       */
 
       // Track contract signed event (only once, per person)
       if (typeof EventTracker !== 'undefined') {
