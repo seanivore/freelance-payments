@@ -140,7 +140,8 @@
     trackInvoiceViewed,
     trackDocumentDownloaded,
     trackContractSigned,
-    flushBatch
+    flushBatch,
+    track: queueEvent // Expose generic track method
   };
 
 })();
