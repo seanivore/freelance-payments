@@ -1006,6 +1006,8 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
         # GENERATE ITEMS (Contract, Invoice 1, Invoice 2)
         # -------------------------------------------------------------------------
         
+        clean_id = job_id.replace('uid-', '')
+        
         # 1. CONTRACT
         if contract_template_id:
             pdf_filename = f'kon-{clean_id}.pdf'

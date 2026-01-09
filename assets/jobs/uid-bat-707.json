@@ -73,7 +73,7 @@
         "name": "Support Group Networking Platform",
         "active": true,
         "description": "Building the digital platform for My Fat Cat support group to come together.",
-        "id": "uid-rat-606",
+        "id": "uid-bat-707",
         "login_name": "Parker",
         "login_keyword": "fat-cat",
         "service_usd": 3000000,
@@ -88,7 +88,7 @@
         "title": "CEO",
         "email": "j.parker@fatcat.support.com",
         "phone": "424-732-0198",
-        "id": "cus-rat-606",
+        "id": "cus-bat-707",
         "address": {
             "city": "Los Angeles",
             "line1": "1920 S. Figueroa St",
@@ -101,12 +101,12 @@
         "amount_off": 500000,
         "applies_to": {
             "products": [
-                "uid-rat-606"
+                "uid-bat-707"
             ]
         },
         "currency": "usd",
         "duration": "once",
-        "id": "cou-rat-606",
+        "id": "cou-bat-707",
         "max_redemptions": 1,
         "name": "chubby-cat"
     },
@@ -120,7 +120,7 @@
         "nickname": "Initial Payment",
         "product": {
             "products": [
-                "uid-rat-606"
+                "uid-bat-707"
             ]
         },
         "id": ""
@@ -137,7 +137,7 @@
         "nickname": "Final Payment",
         "product": {
             "products": [
-                "uid-rat-606"
+                "uid-bat-707"
             ]
         },
         "id": ""
@@ -145,7 +145,7 @@
     "checkout_session_1": {
         "discounts": [
             {
-                "coupon": "cou-rat-606"
+                "coupon": "cou-bat-707"
             }
         ],
         "line_items": [
@@ -155,7 +155,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/uid-rat-606#completion-1",
+        "return_url": "https://payments.august.style/uid-bat-707#completion-1",
         "ui_mode": "custom"
     },
     "checkout_session_2": {
@@ -171,7 +171,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/uid-rat-606#completion-2",
+        "return_url": "https://payments.august.style/uid-bat-707#completion-2",
         "ui_mode": "custom"
     },
     "project_scope_summary": "Jessika Parker is a modern dog trainer.",
