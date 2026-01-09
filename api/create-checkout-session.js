@@ -70,36 +70,20 @@ module.exports = async (req, res) => {
         payment_number: payment_number.toString(),
         created_via: 'freelance-payments-api'
       }
-      // Note: after_expiration is not supported with ui_mode: 'custom'
-      // Sessions still expire after expires_at (24 hours), but recovery must be handled differently
     };
 
     // Add customer if provided (v4 schema: customer_id from request body)
+    // CRITICAL: We DO NOT set 'customer_creation', 'billing_address_collection', or 'phone_number_collection'
+    // to avoid redundancy and conflicts (Stripe 500 errors). We rely on the established customer object 
+    // and Stripe Elements defaults.
     if (customer_id) {
       sessionParams.customer = customer_id;
-      sessionParams.customer_creation = 'always';
-    } else {
-      sessionParams.customer_creation = 'always';
     }
 
     // Add discounts if any
     if (discounts.length > 0) {
       sessionParams.discounts = discounts;
     }
-
-    // Add billing address collection
-    sessionParams.billing_address_collection = 'required';
-
-    // Add phone number collection (supported with ui_mode: custom)
-    sessionParams.phone_number_collection = { enabled: true };
-
-    // Note: name_collection is NOT supported with ui_mode: 'custom'
-    // Name collection is handled via Stripe Elements Payment Element UI
-
-    // Note: redirect_on_completion is NOT supported with ui_mode: 'custom'
-    // Redirect is handled via return_url and frontend confirmPayment() redirect
-    // Note: branding_settings is NOT supported with ui_mode: 'custom'
-    // Custom UI mode uses Stripe Elements which handles styling client-side
 
     // Create session
     const session = await stripe.checkout.sessions.create(sessionParams);

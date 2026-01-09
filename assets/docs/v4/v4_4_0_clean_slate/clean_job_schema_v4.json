@@ -138,8 +138,6 @@
         "id": null
     },
     "checkout_session_1": {
-        "billing_address_collection": "required",
-        "customer_creation": "always",
         "discounts": [
             {
                 "coupon": null
@@ -152,15 +150,10 @@
             }
         ],
         "mode": "payment",
-        "phone_number_collection": {
-            "enabled": true
-        },
         "return_url": "https://payments.august.style/[product_id_here]#completion",
         "ui_mode": "custom"
     },
     "checkout_session_2": {
-        "billing_address_collection": "required",
-        "customer_creation": "always",
         "discounts": [
             {
                 "coupon": null
@@ -173,9 +166,6 @@
             }
         ],
         "mode": "payment",
-        "phone_number_collection": {
-            "enabled": true
-        },
         "return_url": "https://payments.august.style/[product_id_here]#completion",
         "ui_mode": "custom"
     },

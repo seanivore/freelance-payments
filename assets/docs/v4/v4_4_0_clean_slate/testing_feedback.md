@@ -5,6 +5,16 @@
 ### Filling Out JSON Simplification 
 
   + I wonder if we can put "TK" instead of leaving `null` for the fields that we expect to be filled out from artifact injection 
+    - It would be nice just to have a reminder as to where you *should* add a UID and where you should *NOT* because it will be added via artifact injection 
+
+### Payments Issue 
+
+#### [FIXED] Stripe 500 Error: "You may only specify one of these parameters: customer, customer_creation"
+- **Issue**: Clicking "Pay" resulted in a 500 error.
+- **Cause**: Our job JSON templates include `customer_creation: "always"` by default. However, our automation also populates the `customer` field with a Stripe ID (`cus_...`). The Stripe API rejects requests that contain *both* parameters.
+- **Resolution**: Updated `api/create-checkout-session.js` to detect if a `customer` ID is present. If it is, the code programmatically removes the `customer_creation` parameter from the request, prioritizing the existing customer record.
+- **Action**: Applied fix in commit (pending).
+- **Next Steps**: Retest with `uid-tst-004`.
 
 ---
 

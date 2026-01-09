@@ -68,6 +68,18 @@ set -e
       # Check if file is in our intentional changes
       FILE_IN_INTENTIONAL=$(echo "$ALL_INTENTIONAL" | grep -Fxq "$file" && echo "yes" || echo "no")
       
+      # SPECIAL HANDLING: Always force remote for manifest.json and PDF files
+      if [[ "$file" == *"manifest.json"* ]] || [[ "$file" == *.pdf ]]; then
+          echo "   ✓ Taking REMOTE version (forced): $file (always accept server-generated artifacts)"
+          if git ls-files -u "$file" | grep -q "^100"; then # if remote has the file (modify or add)
+             git checkout --theirs "$file" 2>/dev/null || git rm "$file" # fallback if checkout fails
+             git add "$file"
+          else # remote deleted it
+             git rm "$file" 2>/dev/null || true
+          fi
+          continue
+      fi
+
       # CRITICAL: If we deleted it, ALWAYS keep the deletion (even if remote modified it)
       if [ "$FILE_IN_DELETED" = "yes" ]; then
         echo "   ✓ Keeping YOUR deletion: $file (you intentionally deleted this)"
