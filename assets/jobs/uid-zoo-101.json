@@ -1,163 +1,163 @@
 {
-    "project": "Zoe's Zoo Keeping Services",
+  "project": "Zoe's Zoo Keeping Services",
+  "contract": {
+    "work_start": "2026-05-01",
+    "work_end": "2026-05-30",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 200,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": "2026-01-09T21:26:09.139579Z"
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
     "contract": {
-        "work_start": "2026-05-01",
-        "work_end": "2026-05-30",
-        "legal_jurisdiction": "Massachusetts",
-        "maintenance_period_months": 3,
-        "maintenance_monthly_fee": 200,
-        "signatures": {
-            "contractor": {
-                "legal_name": "Sean August Horvath",
-                "signed_date": null
-            },
-            "client": {
-                "legal_name": null,
-                "signed_date": null
-            }
-        }
+      "id": "kon-zoo-101",
+      "pdf": "assets/pdf/contract/kon-zoo-101.pdf",
+      "file_id": "1xAtD_NwfZjpbEm-5jKgpVFq3Pc9AR0rxTCFeDqh0KbQ",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-zoo-101.pdf",
+      "sha256": "ecc3740a1b5dc022cb6ade6753aee3b2943eb7926319250f46aa75d9c626a625",
+      "created": "2026-01-09T21:26:15.572643Z"
     },
-    "docs": {
-        "contract": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "invoice": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "balance": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        }
+    "invoice": {
+      "id": "inv-zoo-101",
+      "pdf": "assets/pdf/invoice/inv-zoo-101.pdf",
+      "file_id": "1MBT2_gbMLl4s9fgYqFdzCF_BXPC2pMwD4htXZ2mxbl8",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-zoo-101.pdf",
+      "sha256": "30326c9338a19d400b5477489600210158e304522d8ccc9832883c2917934843",
+      "created": "2026-01-09T21:26:20.631766Z"
     },
-    "state": {
-        "objects": {
-            "created": null,
-            "product": null,
-            "price_1": null,
-            "price_2": null,
-            "customer": null,
-            "coupon": null
-        },
-        "client_status": {
-            "logged_in": null,
-            "contract_signed": null,
-            "invoice": null,
-            "payment_1": null,
-            "balance": null,
-            "payment_2": null
-        }
+    "balance": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    }
+  },
+  "state": {
+    "objects": {
+      "created": "2026-01-09T21:26:09.139579Z",
+      "product": "uid-zoo-101",
+      "price_1": "price_1SnnC99fljwH26CPeBo0ngL0",
+      "price_2": "price_1SnnC99fljwH26CP8YGdoBXn",
+      "customer": "cus-zoo-101",
+      "coupon": null
     },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "Zoo Management System",
+    "active": true,
+    "description": "Comprehensive digital management for modern zoos.",
+    "id": "uid-zoo-101",
+    "login_name": "Zebra",
+    "login_keyword": "stripes",
+    "service_usd": 5000000,
+    "total_payments": 2,
+    "discount_usd": 0,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Zoe Zebra",
+    "business": "City Zoo Inc",
+    "title": "Director",
+    "email": "z.zebra@city.zoo",
+    "phone": "555-0101",
+    "id": "cus-zoo-101",
+    "address": {
+      "city": "San Diego",
+      "line1": "101 Zoo Lane",
+      "state": "CA",
+      "postal_code": "92101",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 0,
+    "applies_to": {
+      "products": [
+        "uid-zoo-101"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-zoo-101",
+    "max_redemptions": 1,
+    "name": "zoo-friend"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 2500000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
     "product": {
-        "name": "Zoo Management System",
-        "active": true,
-        "description": "Comprehensive digital management for modern zoos.",
-        "id": "uid-zoo-101",
-        "login_name": "Zebra",
-        "login_keyword": "stripes",
-        "service_usd": 5000000,
-        "total_payments": 2,
-        "discount_usd": 0,
-        "type": "service",
-        "unit_label": "Payment"
+      "products": [
+        "uid-zoo-101"
+      ]
     },
-    "customer": {
-        "name": "Zoe Zebra",
-        "business": "City Zoo Inc",
-        "title": "Director",
-        "email": "z.zebra@city.zoo",
-        "phone": "555-0101",
-        "id": "cus-zoo-101",
-        "address": {
-            "city": "San Diego",
-            "line1": "101 Zoo Lane",
-            "state": "CA",
-            "postal_code": "92101",
-            "country": "US"
-        }
+    "id": "price_1SnnC99fljwH26CPeBo0ngL0"
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 2500000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "end of work",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-zoo-101"
+      ]
     },
-    "coupon": {
-        "amount_off": 0,
-        "applies_to": {
-            "products": [
-                "uid-zoo-101"
-            ]
-        },
-        "currency": "usd",
-        "duration": "once",
-        "id": "cou-zoo-101",
-        "max_redemptions": 1,
-        "name": "zoo-friend"
-    },
-    "price1": {
-        "count": 1,
-        "currency": "usd",
-        "unit_amount": 2500000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "start of work",
-        "nickname": "Initial Payment",
-        "product": {
-            "products": [
-                "uid-zoo-101"
-            ]
-        },
-        "id": ""
-    },
-    "price2": {
-        "count": 2,
-        "currency": "usd",
-        "unit_amount": 2500000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "end of work",
-        "pay_days": 14,
-        "late_fee": 10000,
-        "nickname": "Final Payment",
-        "product": {
-            "products": [
-                "uid-zoo-101"
-            ]
-        },
-        "id": ""
-    },
-    "checkout_session_1": {
-        "discounts": [],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-zoo-101#completion-1",
-        "ui_mode": "custom"
-    },
-    "checkout_session_2": {
-        "discounts": [],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-zoo-101#completion-2",
-        "ui_mode": "custom"
-    },
-    "project_scope_summary": "Zoe needs a system to track zebras.",
-    "project_scope_full": "Zoe needs a comprehensive system to track zebras and other animals."
+    "id": "price_1SnnC99fljwH26CP8YGdoBXn"
+  },
+  "checkout_session_1": {
+    "discounts": [],
+    "line_items": [
+      {
+        "price": "price_1SnnC99fljwH26CPeBo0ngL0",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-zoo-101#completion-1",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [],
+    "line_items": [
+      {
+        "price": "price_1SnnC99fljwH26CP8YGdoBXn",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-zoo-101#completion-2",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Zoe needs a system to track zebras.",
+  "project_scope_full": "Zoe needs a comprehensive system to track zebras and other animals."
 }

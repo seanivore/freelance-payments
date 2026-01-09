@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "yakamoto-shave-it": {
+    "zebra-stripes": {
       "file_path": "assets/jobs/uid-zoo-101.json",
-      "job_id": "uid-yak-909",
-      "login_keyword": "shave-it",
-      "login_name": "Yakamoto"
+      "job_id": "uid-zoo-101",
+      "login_keyword": "stripes",
+      "login_name": "Zebra"
     }
   },
-  "generated_at": "2026-01-09T21:25:15.325934Z"
+  "generated_at": "2026-01-09T21:26:20.632972Z"
 }
