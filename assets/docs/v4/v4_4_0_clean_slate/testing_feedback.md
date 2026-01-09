@@ -1,19 +1,36 @@
-# Test 01 Feedback: Admin-Push of `test_job_golden_v4.json` 
+# Testing Feedback 
 
-## Workflow `admin-push.yml` 
+## Test 03 Feedback: Commit "Adding 
+
+---
+
+## Test 02 Feedback: Commit "Deleted JSON test 002" 2166de3
+
+### Workflow `admin-push.yml` 
+
+  + Only change to be found by the workflow was a mismatch: 
+    - No JSON file 
+    - Stripe catalog product ID exists with active=true 
+    --> Stripe catalog product ID was archived (changed to active=false) which is the appropriate action 
+
+---
+
+## Test 01 Feedback: Admin-Push of `test_job_golden_v4.json` 
+
+### Workflow `admin-push.yml` 
 
   - Stripe objects created successfully
     - All artifacts returned accurately on the JSON file 
   - PDFs generated successfully
   - JSON artifact injected successfully
 
-### Workflow Logs Note on JSON Artifact Filename
+#### Workflow Logs Note on JSON Artifact Filename
 
   + Workflow logs mentioned noticing that the filename of the JSON artifact was not the same as the product.id (or "job id") 
     - This doesn't seem to have effected anything negatively at this point
     - It is notable that the information on `assets/js/manifest.json` might be unexpected compared to what is searched for when dynamically loading the job after login 
 
-### Room for Improvement Update 
+#### Room for Improvement Update 
 
   + Providing actual "Signed date" on the Contract under my signature 
     - The timestamp for `contract.signatures.contractor.signed_date` can be added as created date ISO 
@@ -29,7 +46,7 @@
     - Just want to be 100% sure that these artifacts, including this one, are added to the JSON before PDF creation 
     - I'm almost 100% sure they are, but mentioning to be sure 
 
-### Phone Number Formatting 
+#### Phone Number Formatting 
 
   + The test JSON provided the phone number "555-0123" 
     - Since this isn't a valid phone number, I don't know that this *specifically* will be an issue (invalid value) 
@@ -38,10 +55,11 @@
     - Also ideally the formatting should adjust it for front end, allowing flexibility in filling out the JSON 
     - However this does bring up validation questions to address in the future -- please make a note of this validation aspect of the issue to be handled after we have the workflow functional 
 
-### Scope of Work Formatting 
+#### Scope of Work Formatting 
 
   + The longer scope provided on the test JSON 
     - "This is a comprehensive test of the v4.4.0 recovery plan.\\n\\n1. Stripe Object Creation\\n2. PDF Generation\\n3. JSON Artifact Injection"
   + Displayed on the front end in contract 
     - This is a comprehensive test of the v4.4.0 recovery plan.\n\n1. Stripe Object Creation\n2. PDF Generation\n3. JSON Artifact Injection
     - It was added just like above with no natural line breaks visually in the contract
+
