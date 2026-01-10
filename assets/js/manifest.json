@@ -5,7 +5,13 @@
       "job_id": "uid-elk-202",
       "login_keyword": "antlers",
       "login_name": "Elk"
+    },
+    "hoff-everlastings": {
+      "file_path": "assets/jobs/uid-jqf-256.json",
+      "job_id": "uid-jqf-256",
+      "login_keyword": "everlastings",
+      "login_name": "Hoff"
     }
   },
-  "generated_at": "2026-01-09T22:22:31.744359Z"
+  "generated_at": "2026-01-10T04:41:05.295950Z"
 }
