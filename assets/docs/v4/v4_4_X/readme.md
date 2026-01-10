@@ -36,8 +36,9 @@ Simplify the project's state management, consolidate backend workflows, and ensu
   "client_status": {
       "logged_in": "ISO-TIMESTAMP",
       "contract_signed": "ISO-TIMESTAMP",
-      "downloaded_docs": "ISO-TIMESTAMP",
+      "invoice": "ISO-TIMESTAMP",
       "payment_1": "ISO-TIMESTAMP",
+      "balance": "ISO-TIMESTAMP",
       "payment_2": "ISO-TIMESTAMP"
   }
   ```

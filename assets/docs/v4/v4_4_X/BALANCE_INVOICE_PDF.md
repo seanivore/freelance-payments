@@ -36,9 +36,9 @@ Basically "downloaded_docs" has been split into two values to account for the tw
         "client_status": {
             "logged_in": null,
             "contract_signed": null,
-            "invoice_1": null,
+            "invoice": null,
             "payment_1": null,
-            "invoice_2": null,
+            "balance": null,
             "payment_2": null
         }
     }
