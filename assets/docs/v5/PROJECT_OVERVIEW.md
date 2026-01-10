@@ -28,11 +28,14 @@
 ## Simple Steps To Take 
 
   1. Come in with clean-slate to understand platform in every way 
-  2. Conduct in-depth review of all script files 
-  3. Simplify, consolidate, and otherwise clean up bugs and errors in scripts 
-  4. Ensure that the clear, defined logic is equally clearly implemented 
+  2. Review the provided update to PDF viewing functionality provided by Dia 
+  3. Review updates for the deletion of `user-behavior.yml` for creation of `user-exit-events.yml` 
+  4. Conduct in-depth review of ALL script files 
+  5. Simplify and consolidate where possible, particularly the events 
+  6. Cleanup code looking for bugs or errors 
+  7. Ensure that the clear, defined logic of workflows and frontend event flow is equally clearly implemented in script 
 
-### Main Goals Coming To Mind 
+### Main Goals On Our Mind (Details Follow Below) 
 
   1. First, understand the "Process" section commentary 
     - This is the head-space to work from 
@@ -40,7 +43,10 @@
     - Do *NOT* presume the code written was written the best way possible, it was edited along the way over weeks 
     - In general, help us find perfect medium of finishing this build but sort of rebuilding, without actually scrapping it all 
     - Use what we learned and the confidence that comes from knowing we are done making logic and refactoring changes  
-  2. Understand current count of events, actions, triggers, and their various files and SIMPLIFY 
+  2. Understand and implement the Dia provided new PDF viewing and UI interactive functionality including new files 
+    - Details directly from Dia are below 
+    - All files provided created in structure provided within new `src/` directory 
+  3. Understand current count of events, actions, triggers, and their various files and SIMPLIFY 
     - Eliminate irrational delay in writing events to JSONs via triggered `user-behavior.yml` workflow 
     - Batching is okay, but also things should be grouped and number of files minimized 
     - The logic instead should be that all events are gathered during the user session
@@ -49,21 +55,21 @@
     - A better name might even be `user-exit-events.yml` 
     - Check for any other files involved in batching or events to update or consolidate them 
     - After events are written to JSON, then the same flow of matching JSON to catalog, etc. as `admin-push.yml` runs 
-  3. Then use strong frontend user flow understanding in updating code to make full checkout flow functional
+  4. Then use strong frontend user flow understanding in updating code to make full checkout flow functional
     - Review console logs at each step of the frontend user flow to confirm simplest logic was implemented 
     - Run end-to-end tests to confirm full checkout flow is functional 
-  4. Pause to request or take screenshots of front end 
+  5. Pause to request or take screenshots of front end 
     - Remember that this site must be a VERY HIGH BAR for design because that's what clients come to me for 
     - The PDF embed right now uses iFrame and is horrible 
     - The frontend flow action/gate buttons were not all implemented 
     - The "Sign" contract modal is a mess 
-  5. What else does the "Process" section commentary call to you to update and clean up or simplify? 
+  6. What else does the "Process" section commentary call to you to update and clean up or simplify? 
     - We have custom Stripe components to put anywhere on page so lets use them 
     - Homepage invoice.html is good, maybe some touch ups 
     - Use PDF display and action/gate buttons on job.html 
     - Do we need a checkout.html page to fully take advantage of our build 
     - Return URL thank you pages, we need custom messages post payment_1 and payment_2 
-  6. Make sure the payment_1 and payment_2 UX are both handled well 
+  7. Make sure the payment_1 and payment_2 UX are both handled well 
 
 ### Development Philosophy & Our Current State  
 
@@ -83,12 +89,12 @@
 
 ```
 freelance-payments/
-├── index.html                       # Login lookup form
-├── 404.html                         # SPA routing handler (serves job.html for job URLs)
-├── job.html                         # Single-page template (contract, invoice, payment sections)
-├── .gitconfig-smart-push.sh         # Git conflict resolution script
+├── index.html                       # User login form
+├── 404.html                         # SPA routing handler gives job.html proper URL
+├── job.html                         # Currently only template for contract, invoice, payment sections
+├── .gitconfig-smart-push.sh         # Git conflict resolution script 
 ├── api/                             # Vercel serverless functions
-│   ├── google 
+│   ├── google/                      # Google OAuth
 │   │   ├── auth.js                  # OAuth consent URL for initial authentication
 │   │   └── callback.js              # OAuth callback and exchanges
 │   ├── create-checkout-session.js   # Creates Stripe Checkout Session on-demand
@@ -97,39 +103,49 @@ freelance-payments/
 │   └── webhook.js                   # Receives payment events and updates JSON files
 ├── assets/
 │   ├── jobs/                        # Job JSON files (one per client project)
-│   │   └── uid-xxx-xxx.json
+│   │   └── uid-xxx-xxx.json         # Example job JSON filename 
 │   ├── js/
 │   │   ├── components/
-│   │   │   ├── button.js            # 
-│   │   │   ├── card.js              # 
-│   │   │   └── input.js             # 
+│   │   │   ├── button.js            # shadcn/ui-"inspired" Button Component **WE DON'T WANT "INSPIRED" WE WANT REAL**
+│   │   │   ├── card.js              # shadcn/ui-"inspired" Card Component **WE DON'T WANT "INSPIRED" WE WANT REAL**
+│   │   │   └── input.js             # shadcn/ui-"inspired" Input Component **WE DON'T WANT "INSPIRED" WE WANT REAL**
 │   │   ├── checkout-controller.js   # Stripe Checkout component element integration
 │   │   ├── completion-controller.js # Complete message after using state.payment_1 state.payment_2
 │   │   ├── contract-controller.js   # Contract signing, PDF display
 │   │   ├── event-tracker.js         # Batches behavior event activity for updates
-│   │   ├── flow-manager.js          # 
+│   │   ├── flow-manager.js          # Manages user frontend flow and gating logic 
 │   │   ├── glow-effect.js           # Dynamic UI design homepage element
 │   │   ├── invoice-controller.js    # Loads job to display embedded invoice PDF
-│   │   ├── payment-lookup.js        # Login form handler
+│   │   ├── payment-lookup.js        # Login form handler **OF ALL JS FILES, THIS IS THE ONLY ONE THAT ABSOLUTELY WORKS PERFECTLY**
 │   │   └── manifest.json            # Lookup manifest (generated)
 │   ├── pdf/
 │   │   ├── contract/                # Contract PDFs (kon-{job_id}.pdf)
 │   │   ├── invoice/                 # Invoice PDFs (inv-{job_id}.pdf)
 │   │   └── balance/                 # Balance PDFs (bal-{job_id}.pdf)
-│   ├── templates/
-│   │   ├── inv-xxx-xxx.pdf          #
-│   │   ├── inv-xxx-xxx.txt          #
-│   │   └── bal-xxx-xxx.pdf          #
-│   │   ├── bal-xxx-xxx.txt          #
-│   │   ├── kon-xxx-xxx.pdf          #
-│   │   └── kon-xxx-xxx.txt          #
+│   ├── templates/                   # Preview template if you want to understand or double-check {{placeholders}}
+│   │   ├── inv-xxx-xxx.pdf          # Invoice PDF template 
+│   │   ├── inv-xxx-xxx.txt          # Invoice TXT template
+│   │   └── bal-xxx-xxx.pdf          # Balance PDF template
+│   │   ├── bal-xxx-xxx.txt          # Balance TXT template
+│   │   ├── kon-xxx-xxx.pdf          # Contract PDF template
+│   │   └── kon-xxx-xxx.txt          # Contract TXT template
 │   └── css/
 │       ├── input.css 
 │       └── styles.css               # Tailwind CSS (includes breakpoints)
+├── src/                             # PDF.js implementation code
+│   ├── components/
+│   │   ├── DatePicker.tsx           # Date picker for signing contract 
+│   │   ├── GateBar.tsx              # User frontend flow gate button management 
+│   │   ├── PdfViewer.tsx            # PDF viewer
+│   │   └── Toolbar.tsx              # Toolbar for PDF viewer 
+│   ├── config/
+│   │   └── pdfViewer.config.json    # PDF viewer configuration
+│   └── lib/
+│       └── pdf-utils.ts             # PDF viewer utilities
 ├── .github/
 │   ├── scripts/
 │   │   ├── orchestration/
-│   │   │   ├── admin_push.py        # Admin workflow logic
+│   │   │   ├── admin_push.py        # Admin workflow logic **FUNCTIONING PROPERLY**
 │   │   │   └── user_behavior.py     # User behavior workflow logic
 │   │   └── utils/
 │   │       └── json_io.py           # JSON file operations
@@ -137,7 +153,7 @@ freelance-payments/
 │       ├── admin-push.yml           # Admin-initiated push creates objects, PDFs
 │       └── user-behavior.yml        # User events, contract signing, etc. triggered flow 
 └── assets/docs/
-    ├── uid-xxx-xxx.json             # Template  
+    ├── uid-xxx-xxx.json             # Template JSON file to copy when creating new job JSON files 
     └── v5/v5_1_0
         └── PROJECT_OVERVIEW.md      # This file 
 ```
@@ -218,45 +234,48 @@ freelance-payments/
     - Use the prefix `bal-` replacing `uid-` 
     - For filename `assets/pdf/balance/bal-xxx-xxx.pdf`
 
+### Committing to Git 
 
+  **Pushes to GitHub while resolving any conflicts intelligently**
 
-
-
+  + Use `git add .` 
+  + Add message with `git commit -m "Your commit message"` 
+  + Then use special command `git smart-push` 
 
 ---
 
 ## Workflow Logic 
 
-### Workflow Orchestration
-  - **Three separate workflow files** (admin-push, user-behavior, payment) - each self-contained
-  - **Sequential execution** with concurrency groups (`freelance-payments-workflows-${{ github.ref }}`)
-  - **Workflow-level concurrency** prevents cancellation of in-progress runs
-  + Concurrency Groups
-    - **All workflows:** `freelance-payments-workflows-${{ github.ref }}`
+  + There are two workflows based on the trigger source 
+
+    1. `admin-push` full logic sequence of updates after any push 
+    2. `user-behavior` collection of events as they work through frontend 
+
+  + Sequential execution **ONLY**
+    - Concurrency groups (`freelance-payments-workflows-${{ github.ref }}`)
     - **Cancel in progress:** `false` (protects running workflows)
     - **Note:** Pending runs may still be canceled by GitHub Actions (intended behavior)
-  - **Explicit step-by-step logging** for all 12/16/14 steps respectively
-  - **Clear RESULT and ARTIFACTS logging** for transparency
-  + Steps listed below 
-    - Though each workflow has a handful of identical steps, every workflow is created to be wholly independent 
-    - If we find a bug and error that we correct in one of the .yml workflows 
-    - We will very likely need to make similar updates to the other .yml workflows 
 
+  + Workflows have explicit step-by-step logging for transparency so anyone looking can understand 
+    - Clear RESULT and ARTIFACTS logging
+    - Full steps for each listed below 
+    - Though each workflow has a handful of identical steps, every workflow is created to be wholly independent
+    - If we find a bug and error that we correct in one of the .yml workflows, we will need to fix the other in most cases 
 
-### ACTION: Syncing JSONs with Stripe via `admin-push.yml` Workflow 
+### ACTION: Admin Uses Smart-Push Commit **FUNCTIONING PROPERLY**
 
-  **ADMIN STARTED: `.github/workflows/admin-push.yml`** 
+  **WORKFLOW ACTIVATED: `.github/workflows/admin-push.yml`** 
   + TRIGGER=admin-push
-  + When: Admin pushes JSON files to repo 
-  + Behavior: Starts immediately when admin pushes
+  + When: Admin pushes **ANY CHANGE** because logic handles every possible change 
+  + Behavior: Starts immediately when admin pushes, unless there is a workflow running to wait to finish 
   + Flow:
     1. Compare JSONs to catalog 
       - 'Unmatched' = a product.id in either location but not both 
       - 'Matched' = a product.id in both locations 
       - For each situation, the secondary parameter `active=true/false` defines the action 
-    2. Unmatched: JSON but no catalog, if `json.active=true` → create catalog object, create PDF contract and invoice 
+    2. Unmatched: JSON but no catalog, if `json.active=true` → create catalog object, create PDF contract, invoice, balance
       - Add new Stripe Catalog object artifacts to JSON 
-      - Add new Contract and Invoice PDF artifacts to JSON 
+      - Add new Contract, Invoice, Balance PDF artifacts to JSON 
     3. Unmatched: JSON but no catalog, if `json.active=false` → delete JSON file 
     4. Unmatched: Catalog but no JSON, if `catalog.active=true` → modify catalog `active=false`
     5. Unmatched: Catalog but no JSON, if `catalog.active=false` → ignore (this is good, accurate completed job)
@@ -266,110 +285,296 @@ freelance-payments/
     9. Matched: `catalog.active=true`, `json.active=true` → ignore (this is good, accurate, active job)
     10. Create new manifest that reflects resulting JSON directory
     11. Build pages
-    12. Deploy
+    12. Deploy 
 
-### ACTION: Frontend States with Gates 
+### ACTION: User-Behavior Frontend Event Triggers 
+
+  **NEEDS UPDATE** 
+
+  + OLD flawed logic: 
+    - This workflow currently gathers and batches updates to JSON every X minutes 
+    - Does not make functionality of site in the moment simple and there is a more logical solution 
+  + NEW logic: 
+    - User-behavior events collect throughout the user's interaction with the site's frontend 
+    - Do not process updates to JSON files until there has been inactivity of any frontend events for X minutes 
+    - This should denote that the user reached the natural conclusion of their interaction this session 
+    - Leave it open to the User as to where to stop 
+    - Action/button/gate progress permits user to next state of frontend flow in-the-moment 
+    - All ISO timestamps can be added to JSON file using the same timestamp 
 
   **DELETE** `user-behavior.yml` 
   **CREATE** `user-exit-events.yml`
 
+  + From the old flow logic to be removed or otherwise updated and integrated 
+    - `assets/js/event-tracker.js`
 
+### ACTION: Frontend State Event Collection Inactive for 10 Minutes 
 
-
-
-
-  **2. USER-BEHAVIOR NON-PAYMENT EVENTS STARTED: `.github/workflows/user-behavior.yml`**
-  + TRIGGER=user-behavior
-  + When: User behavior events (contract loaded, scrolled, signed, etc.)  
-  + Behavior: Waits for 2 minutes of inactivity, then processes
-  + Flow: 
-    1. Events arrive from frontend (already batched client-side: 5 min OR page unload)
-    2. Queue events in backend
-    3. Wait 2 minutes of no new events (allows user to wrap up their session)
-    4. After inactivity period → update JSONs with all queued event artifacts to monitor state 
-    5. Compare JSONs to catalog 
-      - Same flow as `admin-push` workflow
-      - 'Unmatched' = a product.id in either location but not both 
-      - 'Matched' = a product.id in both locations 
-      - For each situation, the secondary parameter `active=true/false` defines the action 
-    6. Unmatched: JSON but no catalog, if `json.active=true` → create catalog object, create PDF contract and invoice
-      - Add new Stripe Catalog object artifacts to JSON 
-      - Add new Contract and Invoice PDF artifacts to JSON 
-    7. Unmatched: JSON but no catalog, if `json.active=false` → delete JSON file 
-    8. Unmatched: Catalog but no JSON, if `catalog.active=true` → modify catalog `active=false`
-    9. Unmatched: Catalog but no JSON, if `catalog.active=false` → ignore (this is good, accurate completed job)
-    10. Matched: `catalog.active=false`, `json.active=true` → delete JSON
-    11. Matched: `catalog.active=false`, `json.active=false` → delete JSON
-    12. Matched: `catalog.active=true`, `json.active=false` → modify catalog to `active=false`, delete JSON
-    13. Matched: `catalog.active=true`, `json.active=true` → ignore (this is good, accurate, active job)
-    14. Create new manifest that reflects resulting JSON directory
-    15. Build pages
-    16. Deploy
-
-  **3. STRIPE WEBHOOK PAYMENT EVENT STARTED: `.github/workflows/payment.yml`**
-  + TRIGGER=payment
-  + When: Payment completes (Stripe webhook) 
-  + Behavior: Processes within 1 minute (doesn't need to interrupt, but fast)
+  **WORKFLOW ACTIVATED: `.github/workflows/user-exit-events.yml`** 
+  + TRIGGER=user-exit-events
+  + When: Complete inactivity of frontend events for 10 minutes, after **ANY** activity 
+  + Behavior: Starts at 10 minute inactivity mark, unless there is a workflow running to wait to finish
   + Flow:
-    1. Webhook event arrives (payment succeeded)
-    2. Queue events in backend 
-    3. Wait 1 minute (allows user to wrap up their session)
-    4. After 1 minute period → update payment status in JSON 
-      - `state.payment_1.succeeded` or `state.payment_2.succeeded` add timestamp value 
-      - If `price1` paid, then update `price1.active= true` to `price1.active= false`
-      - If `price2` paid, then update `price2.active= true` to `price2.active= false` 
-      - If `price1.count` <= `product.total_payments` then change `product.active= true` to `product.active= false`
-      - If `price1.count` > `product.total_payments` then leave `product.active= true` as is 
-    5. Compare JSONs to catalog
-      - Same flow as `admin-push` workflow
+    1. User login, collect confirmation for `state.client_status.logged_in` value 
+      - Continue collecting events in the following steps as they are triggered 
+      - Only collect one event trigger for each `state.client_status` value 
+      - At any point if no new events are triggered for 10 minutes, complete workflow with only collected events at that point 
+    2. User contract sign, add confirmation to collection, including for `state.client_status.contract_signed` value 
+    3. User invoice download/acknowledge, add confirmation to collection, including for `state.client_status.invoice` value 
+    4. User payment_1, add confirmation to collection, including for `state.client_status.payment_1` value 
+    5. User balance download/acknowledge, add confirmation to collection, including for `state.client_status.balance` value 
+    6. User payment_2, add confirmation to collection, including for `state.client_status.payment_2` value 
+    7. Update JSON file with ISO timestamp for all `state.client_status` values 
+      - If all events are collected, complete workflow and add ISO timestamp to all `state.client_status` values 
+      - If after at least one event trigger, 10 minutes of inactivity pass, complete workflow and add ISO timestamp to ONLY collected events 
+    8. Update other JSON value based on if event collected includes `state.client_status.contract_signed` 
+      - Give ISO timestamp to `contract.signatures.client.signed_date` 
+      - Give ISO timestamp to `contract.signatures.contractor.signed_date` 
+    9. Additional payment completion JSON values if event collected for `state.client_status.payment_1`
+      - When event not collected for `state.client_status.payment_2` then change `price1.active= true` to `price1.active= false` 
+      - When `price1.count` <= `product.total_payments` then change `product.active= true` to `product.active= false`
+      - When `price1.count` > `product.total_payments` then leave `product.active= true` as is  
+    10. Additional payment completion JSON values if event collection for `state.client_status.payment_2`
+      - Change `price2.active= true` to `price2.active= false`
+      - Change `product.active= true` to `product.active= false`
+    11. Compare JSONs to catalog 
       - 'Unmatched' = a product.id in either location but not both 
       - 'Matched' = a product.id in both locations 
       - For each situation, the secondary parameter `active=true/false` defines the action 
-    6. Unmatched: JSON but no catalog, if `json.active=true` → create catalog object, create PDF contract and invoice
+    12. Unmatched: JSON but no catalog, if `json.active=true` → create catalog object, create PDF contract and invoice 
       - Add new Stripe Catalog object artifacts to JSON 
       - Add new Contract and Invoice PDF artifacts to JSON 
-    7. Unmatched: JSON but no catalog, if `json.active=false` → delete JSON
-    8. Unmatched: Catalog but no JSON, if `catalog.active=true` → modify catalog `active=false`
-    9. Unmatched: Catalog but no JSON, if `catalog.active=false` → ignore
-    10. Matched: `catalog.active=false`, `json.active=true` → delete JSON
-    11. Matched: `catalog.active=false`, `json.active=false` → delete JSON
-    12. Matched: `catalog.active=true`, `json.active=false` → modify catalog to `active=false`, delete JSON
-    13. Matched: `catalog.active=true`, `json.active=true` → ignore
-    14. Create new manifest that reflects resulting JSON directory
-    15. Build pages
-    16. Deploy
+    13. Unmatched: JSON but no catalog, if `json.active=false` → delete JSON file 
+    14. Unmatched: Catalog but no JSON, if `catalog.active=true` → modify catalog `active=false`
+    15. Unmatched: Catalog but no JSON, if `catalog.active=false` → ignore (this is good, accurate completed job)
+    16. Matched: `catalog.active=false`, `json.active=true` → delete JSON
+    17. Matched: `catalog.active=false`, `json.active=false` → delete JSON
+    18. Matched: `catalog.active=true`, `json.active=false` → modify catalog to `active=false`, delete JSON
+    19. Matched: `catalog.active=true`, `json.active=true` → ignore (this is good, accurate, active job)
+    20. Create new manifest that reflects resulting JSON directory
+    21. Build pages
+    22. Deploy 
 
---- 
+---
 
-## User Flow by File 
+## User-Behavior Frontend Event Trigger Flow 
 
-  1. `assets/js/glow-effect.js` 
-     - User interaction design on homepage of payment site at `index.html` 
-     - Creates dynamic light source through frosted glass that follows cursor  
-  2. `assets/js/payment-lookup.js` 
-      - Homepage user form submission 
-      - Finds job via `assets/js/manifests.json` for dynamic elements 
-     + shadcn/ui "inspired" — `assets/js/components/button.js` button handled with tailwind classes in `assets/css/styles.css` 
-     + shadcn/ui "inspired" — `assets/js/components/card.js` card component 
-     + shadcn/ui "inspired" — `assets/js/components/input.js` input component 
-  3. `assets/js/payment-router.js` 
-    - Uses state management to determine where in process flow to place user 
-    - Works for their first visit versus returning after making one payment or even returning after reading but not signing contract  
-  4. `assets/js/event-tracker.js` 
-    - Batches recorded user-behavior event activity for updates on job JSON state management  
-    - Includes: `contract_loaded`, `contract_scrolled_complete`, `invoice_viewed`, `document_downloaded`, `signed_contract`
-  5. `assets/js/contract-controller.js` 
-    - Loads job to display embedded contract PDF 
-    - Uses `job.html` template with #contract which adds to user's URL 
-  6. `assets/js/invoice-controller.js` 
-    - Loads job to display embedded invoice PDF 
-    - Uses `job.html` template with #invoice in URL 
-  7. `assets/js/checkout-controller.js` 
-    - Creates checkout_session on-demand 
-    - Works within `job.html` template with #payment-1, #payment-2 sections 
-  8. `assets/js/completion-controller.js` 
-    - Complete message after using `state.payment_1`/`state.payment_2` 
-    - Works within `job.html` template with #completion 
+### "FluxGate" Frontend Routing **THIS LOOKS LIKE IT NEEDS TO BE CAREFULLY REVIEWED AND GIVEN SOME MINOR UPDATES** `assets/js/flow-manager.js`
+- **New Architecture**: `PaymentRouter` (aka FluxGate) determines user location strictly based on the presence of timestamps in `client_status`.
+- **Flow**: Contract -> Invoice (Payment 1) -> Invoice (Payment 2) -> Completion.
+- **UI**: Hidden redundant navigation bar to enforce the gated flow.
+
+### Events, Meaning, And Action Gate Progression 
+
+  **Simply put, these are the events collected, once each** 
+
+  + When collected during active user flow, automatic progression follows each phases action event button --> to next phase 
+
+  1. `state.client_status.logged_in` = USER LOGGED IN THE FIRST TIME 
+    --> continues to contract automatically 
+  2. `state.client_status.contract_signed` = USER SIGNED CONTRACT PDF 
+    --> continues to invoice automatically after signing 
+  3. `state.client_status.invoice` = USER DOWNLOADED OR ACKNOWLEDGED INVOICE PDF 
+    --> continues to payment 1 automatically after downloading/instantly acknowledging 
+  4. `state.client_status.payment_1` = USER PAYMENT 1 CHECKOUT SESSION IS SUCCESSFULLY COMPLETED 
+    --> continues to `checkout_session_1.return_url= https://payments.august.style/uid-cat-202#completion-1` automatically on payment completion 
+    --> URL shows small buttons to continue to balance and final payment 
+  5. `state.client_status.balance` = USER DOWNLOADED OR ACKNOWLEDGED BALANCE PDF 
+    --> continues to payment 2 automatically after downloading/instantly acknowledging 
+  6. `state.client_status.payment_2` = USER PAYMENT 2 CHECKOUT SESSION IS SUCCESSFULLY COMPLETED 
+    --> continues to `checkout_session_2.return_url= https://payments.august.style/uid-cat-202#completion-2` automatically on payment completion 
+    --> URL shows clear buttons to download previous PDFs and no other page is ever loaded 
+
+### ISO Timestamp Values In JSON Schema 
+
+  + Each value would receive an ISO timestamp when triggered or when collected events are dispatched 
+
+```json 
+    "state": {
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
+    }
+```
+
+### Use Of Event Triggers For Two Purposes 
+
+  **Used in GitHub workflow and in user return placement likely managed by flow-manager.js** 
+
+  + This logic is used when **collecting events during** the `user-exit-events.yml` workflow 
+    - Count trigger events only one, only in sequential order, never skipping any events 
+    - User clicks "action gate button" during flow, confirming movement to next step
+    - As indicated in workflow above, timeout of 10 minutes after last event triggers completion of workflow 
+    - Or workflow is completed when all events are collected and they reached the #completion-2 URL 
+    - Event timestamps are not referenced for passing to next state of flow ever 
+
+  + This logic is used to determine **where to place a user** that is returning to the site, partially managed by `assets/js/flow-manager.js`
+    - Event timestamps are only used to determine where the user jumps back into the flow 
+    - Event timestamps are not referenced for passing to next state of flow ever 
+    - These events are only skipped because they have complete indication from ISO timestamp value added 
+    - Wherever the user jumps back into the flow, the above logic flow is used, where events are collected live in the moment, until timeout 
+  
+  + We have not yet been able to successfully move from payment 1 through to payment 2 completion 
+    - These old files should be altered, updated, integrated, or deleted after careful review 
+    - `assets/js/checkout-controller.js`
+
+  + Not clear if this file manages the return URL for both completion-1 and completion-2 
+    - Again we have yet to be able to see them successfully complete, when first payment does complete successfully, it is not displayed 
+    - Altered, updated, deleted an integrated elsewhere -- any way they need to be improved based on newly provided logic details 
+    - `assets/js/completion-controller.js` 
+
+  + Inaccurate "bainaid" logic applied and needs to be removed, altered, or deleted and integrated elsewhere 
+    - Instead of using the actual simple flow logic described above, never referencing the timestamp values for passing along in flow 
+    - `assets/js/contract-controller.js` 
+
+  + This event tracker is dated based on the new logic 
+    - Should be deleted and integrated elsewhere in more comprehensively concise way for full flow and events 
+    - `assets/js/event-tracker.js`
+
+  + Included checkout initialization logic that has not worked properly in any tests yet 
+    - Review thoroughly and then update, change, or delete and integrate logic elsewhere 
+    - `assets/js/invoice-controller.js` 
+
+### User Flow Progression With Gates And Progression Phase 
+
+  1. User login, all `state.client_status` objects are null 
+    - User is directed to the **CONTRACT** 
+    - Action gate button is **SIGN** 
+    - After signing user directed to **INVOICE**  
+  2. User login, `state.client_status.logged_in` has timestamp, other objects null 
+    - Timestamp reflects their first login 
+    - All null objects mean the user has not yet signed the contract 
+    - User is directed to the **CONTRACT** 
+    - Action gate button is **SIGN** 
+    - After signing user directed to **INVOICE**  
+  3. User login, `state.client_status.contract_signed` has timestamp, and previous values, following objects null 
+    - Timestamp reflects their first contract signature 
+    - User is directed to the **INVOICE** 
+    - Action gate button is **Download your documents: Yes | No** 
+    - After clicking either button, the `checkout_session_1` is initialized 
+    - Then user is directed to **CHECKOUT** page for payment_1  
+  4. User login, `state.client_status.invoice` has timestamp, and previous values, following objects null 
+    - Timestamp reflects acknowledging and/or downloading INVOICE  
+    - The `checkout_session_1` is initialized 
+    - User is directed to **CHECKOUT** page for payment_1 
+    - Action gate button is **PAY** 
+    - After paying user is directed to the **#completion-1** thank you page 
+    - This completion-1 page is never show again 
+    - The **#completion-1** page depicts soft call to action gate button to continue to **BALANCE** and `checkout_session_2` 
+    - This is not something we are requesting they do, but it should be available if a user wants to pay the for service in full 
+  5. User login, `state.client_status.payment_1` has timestamp, and previous values, follow objects null 
+    - Timestamp reflects paying payment_1 and having loaded completion-1 page 
+    - User is directed to the **BALANCE** 
+    - Action gate button is **Download your documents: Yes | No** 
+    - After clicking either button, the `checkout_session_2` is initialized 
+    - Then user is directed to **CHECKOUT** page for payment_2 
+  6. User login, `state.client_status.balance` has timestamp, and previous values, following objects null 
+    - Timestamp reflects acknowledging and/or downloading BALANCE 
+    - The `checkout_session_2` is initialized 
+    - User is directed to **CHECKOUT** page for payment_2 
+    - Action gate button is **PAY** 
+    - After paying user is directed to the **#completion-2** thank you page 
+    - This is the final page in the flow and will be shown every time they visit in the future
+    - The **#completion-2** thank you page should include hyperlinks to download the contract, invoice, and balance PDFs 
+    - These are merely provided for future reference if needed before project launches 
+  7. User login, `state.client_status.payment_2` has timestamp, and previous values (all values)
+    - Timestamp reflects paying payment_2 and having loaded completion-2 page 
+    - User is directed to the **#completion-2** thank you page again 
+    - There are no further steps for the user to take 
+    - All values are now present and timestamped
+
+---
+
+## Update PDF Embedding Methodology
+
+### Using PDF.js Plan Created By Dia  
+
+  + PDF.js is an open-source JavaScript PDF viewer with edit UI 
+    - `https://github.com/mozilla/pdf.js`
+
+  + Dia: "Got it. Let’s reset and ship a clean, fully working React + shadcn/ui PDF viewer with pen, date picker, and “action/gate” buttons that fit your SPA flow. This replaces the previous “mimic shadcn” approach with real shadcn/ui components, Tailwind, and lucide icons." 
+
+  **PLAN** 
+
+  1. Files: PdfViewer (viewer), PenCanvas (drawing), Toolbar (actions), GateBar (per-section actions), DatePicker (sign date), utils, config JSON. 
+  2. Real shadcn/ui: button, input, slider, dialog/sheet, calendar date picker, and Lucide icons. 
+  3. PDF.js render + pen overlay; flatten strokes into PDF via pdf-lib; download. 
+  4. SPA flow hooks: emit events for contract/invoice gates, ready to connect to your existing controllers. 
+  5. Clean Tailwind styles; no CDN for PDF.js—you’ll import modules cleanly.
+
+  **INSTALL** 
+
+  + Run in your Vite React + TS project (you already have Tailwind).
+  + Install deps:
+    - shadcn/ui core + calendar + utilities
+    - lucide-react
+    - pdf.js
+    - pdf-lib
+    - date-fns
+
+  **COMMANDS**
+
+```bash
+npm install pdfjs-dist pdf-lib lucide-react date-fns
+```
+
+  + If you don’t have shadcn/ui set up yet:
+
+```bash 
+npm install tailwindcss postcss autoprefixer
+npm install -D @types/node
+``` 
+
+  + Ensure your Tailwind is working (you already have tailwind.config.js and postcss.config.js). If needed, I can add those next.
+
+  **FILES**
+
+  + `src/config/pdfViewer.config.json` 
+  + `src/lib/pdf-utils.ts` 
+  + `src/components/ui.tsx` 
+  + `src/lib/utils.ts` 
+  + `src/components/PenCanvas.tsx` 
+  + `src/components/GateBar.tsx` 
+
+  + Dia: "Great—yes, I’ll drop updated, full ESM versions for PdfViewer.tsx and Toolbar.tsx that compile cleanly with Vite + TS + Tailwind, using proper pdfjs-dist ESM imports (no globals), and pdf-lib. They match your src/components paths." 
+
+  **PLAN** 
+
+  1. PdfViewer.tsx: ESM PDF.js worker import, render, pen overlay integration, flatten + download, gate emit hooks, date picker slot.
+  2. Toolbar.tsx: real component with Tailwind styling and lucide-react icons.
+  3. Notes: tsconfig hints + worker import details.
+
+  **FILES** 
+
+  + `src/components/Toolbar.tsx` 
+  + `src/components/PdfViewer.tsx` 
+
+  + "Notes to keep TypeScript happy and Vite bundling correct" 
+    - tsconfig.json: set “module”: “esnext”, “moduleResolution”: “bundler”.
+    - Ensure you have “strict”: true or at least JSX/TSX config correct.
+    - The line import ‘pdfjs-dist/build/pdf.worker.mjs’ must be present exactly once in your app bundle (PdfViewer.tsx is fine). It allows Vite to include the worker ESM. The GlobalWorkerOptions.workerSrc override is harmless but not required when using the ESM import.
+    - No window globals for PDF.js or pdf-lib are used; all imports are ESM.
+
+  + "Wire emitEvent to your SPA/Vercel" 
+    - For example, pass emitEvent={(name, payload) => fetch(’/api/track-event’,{method:‘POST’,headers:{‘Content-Type’:‘application/json’},body:JSON.stringify({name,payload})})}
+    - Use gate identifiers aligned to your new schema (invoice_1, invoice_2 steps) or map Gate to your desired event keys.
+
+  + "If you want, I can add an optional prop to PdfViewer to accept a Uint8Array for the initial PDF and a function to return the flattened Uint8Array to your contract/invoice controllers. Also happy to add a “Sign” button that packages the signDate + current page strokes into a single payload for /api/sign-contract." 
+
+  **SHARED CSS FILES WITH DIA** 
+
+  + Your CSS foundation looks solid and won’t conflict with the React components I sent. Keep the breakpoints and theme tokens as-is. The PdfViewer/Toolbar/GateBar/DatePicker will adopt your Tailwind utilities without needing breakpoint edits. If you later want responsive tweaks, add md/lg classes directly to those components; nothing in pdfjs-dist or pdf-lib is breakpoint-sensitive.
+  
+  + Key compatibility notes:
+    - Your CSS defines variables and component classes that complement Tailwind; the React files rely on utility classes, so they’ll blend cleanly.
+    - The ESM worker import for PDF.js is independent of CSS, so the viewer will render identically across breakpoints.
+    - Gate actions and date picker styling inherit your base theme; their layout is already responsive via flex and gap.
+  + I’ll proceed with this setup and only touch breakpoints if you want specific layout shifts (e.g., toolbar condenses on small screens, gate bar stacks on mobile). Otherwise, you’re good.
 
 ---
 
@@ -385,42 +590,34 @@ freelance-payments/
     - Assuming the assets/jobs/ JSON file you're using passed the backend tests 
     - You can just hard-reload the payments page and then start the user flow again from login after pushing bug fixes 
 
-## Next Steps 🎯
+### Stripe Products 
 
-### Immediate (After Vercel Rate Limit Expires)
-1. **Test archiving:** Create then push `uid-test-archive-001.json`, then delete it
-2. **Test payment flow:** Create then push `uid-test-payment-001.json`, walk through full flow
-3. **Verify Stripe objects:** Check dashboard for correct product/price IDs
-4. **Verify manifest:** Ensure manifest.json updates correctly
+  + Always use job ID as product ID (e.g., `uid-test-001`) 
 
-### Short-term
-1. **Fix event tracking:** Prevent early triggers (contract_scrolled_complete firing before scroll)
-2. **Improve completion messaging:** Better differentiation between payment 1 and final payment
-3. **Test multi-payment flow:** Ensure Payment 2 routing works correctly
-4. **Document Stripe webhook setup:** Ensure payment workflow triggers correctly
+### Manifest 
 
-### Long-term
-1. **Optimize deployment strategy:** Reduce Vercel rate limit issues
-2. **Add error recovery:** Better handling of workflow failures
-3. **Improve logging:** More detailed error messages for debugging
-4. **Add monitoring:** Track workflow success/failure rates
+  + Auto-generated, don't edit manually 
+
+### Git 
+
+  + Use `git smart-push` for all pushes (handles conflicts automatically) 
+
+## Next Steps 
+
+  + **SHOULD BE CLEARLY PLANNED** 
 
 ---
 
-## Testing Checklist ✅
+## Testing Checklist **ADD ANY NEW ITEMS WITH UPDATE** 
 
-- [ ] Archive workflow (delete JSON → archive Stripe product)
-- [ ] Payment flow (contract → invoice → checkout → payment)
-- [ ] Multi-payment jobs (Payment 1 → Payment 2 → archive)
-- [ ] Manifest updates correctly
-- [ ] PDF generation works
-- [ ] Event tracking accurate
-- [ ] Completion page messaging correct
-- [ ] Git workflow handles conflicts properly
+- [X] Archive workflow (delete JSON → archive Stripe product)
+- [ ] Payment flow (contract → invoice → checkout → payment) **DOES NOT WORK**
+- [ ] Multi-payment jobs (Payment 1 → Payment 2 → archive) **FLOW EXAMPLE NOT ACCURATE OR DETAILED ENOUGH**
+- [X] Manifest updates correctly
+- [X] PDF generation works
+- [ ] Event tracking accurate **NEEDS NEW LOGIC AND FILES**
+- [ ] Completion page messaging correct **SHOULD HAVE TWO AND DETAILED COPY EXPLANATION IS ABOVE**
+- [X] Git smart-push workflow handles conflicts properly
 
-## Notes 📝
-
-- **Stripe Products:** Always use job ID as product ID (e.g., `uid-test-001`)  <-- *perfect example of why it seems like we need fresh eyes on the project, because idk what JOB ID even means other than generally ... we moved to only using Stripe vocabulary in schema v2, but somehow there are notes like this where it is clear from the way it was written that, somewhere, presumably in code, job-id is emphasized heavier which seems clearly an obviously point of facture when nowhere else will you find in docs or front end the job-id used*
-- **Manifest:** Auto-generated, don't edit manually
-- **Git:** Use `git smart-push` for all pushes (handles conflicts automatically)
-- **Workflows:** Wait for each to complete before pushing again (or accept that pending runs may be canceled)
+--- 
+*Updated by Sean August Horvath on 2026-01-10 with as best as I can tell, our current state and all detailed functionality logic*

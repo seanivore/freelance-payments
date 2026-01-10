@@ -1,0 +1,510 @@
+<!-- filename: pdf-viewer-with-pen.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Pretty PDF Viewer + Pen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Minimal, clean UI styles -->
+    <style>
+        :root {
+            --bg: #0f1115;
+            --card: #161922;
+            --accent: #6ee7b7;
+            --accent-2: #93c5fd;
+            --text: #e6e8ee;
+            --muted: #9aa3af;
+            --danger: #fca5a5;
+            --border: #242938;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #0b0d12, var(--bg));
+            color: var(--text);
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Apple Color Emoji, Segoe UI Emoji;
+        }
+
+        .app {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: radial-gradient(1200px 400px at 20% -200px, rgba(155, 135, 245, 0.12), transparent 60%), var(--card);
+            backdrop-filter: blur(6px);
+        }
+
+        .toolbar .group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            border-right: 1px solid var(--border);
+            padding-right: 12px;
+        }
+
+        .toolbar .group:last-child {
+            border-right: none;
+        }
+
+        button,
+        label.button {
+            appearance: none;
+            border: 1px solid var(--border);
+            background: #111422;
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.05s ease, border-color 0.2s ease, background 0.2s ease;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        button:hover,
+        label.button:hover {
+            border-color: #2e3650;
+            background: #121528;
+        }
+
+        button:active,
+        label.button:active {
+            transform: translateY(1px);
+        }
+
+        .primary {
+            background: linear-gradient(90deg, #1f2937, #111422);
+            border-color: #2a3146;
+        }
+
+        .accent {
+            background: linear-gradient(90deg, rgba(110, 231, 183, 0.15), rgba(147, 197, 253, 0.15));
+            border-color: rgba(110, 231, 183, 0.35);
+        }
+
+        .danger {
+            background: linear-gradient(90deg, rgba(252, 165, 165, 0.15), rgba(244, 114, 182, 0.12));
+            border-color: rgba(252, 165, 165, 0.35);
+        }
+
+        input[type="color"],
+        input[type="range"],
+        input[type="file"] {
+            background: #0d1018;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            padding: 6px 10px;
+        }
+
+        .viewer {
+            position: relative;
+            margin-top: 16px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            background: #0b0d12;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .page {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background:
+                radial-gradient(600px 200px at 20% -50px, rgba(110, 231, 183, 0.08), transparent 60%),
+                radial-gradient(600px 200px at 80% -50px, rgba(147, 197, 253, 0.08), transparent 60%),
+                #0c0f16;
+        }
+
+        canvas#pdfCanvas,
+        canvas#penCanvas {
+            display: block;
+            max-width: 100%;
+        }
+
+        .status {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        .badge {
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            color: var(--muted);
+            background: #0d1018;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="toolbar">
+            <div class="group">
+                <label class="button accent">
+                    Load PDF
+                    <input id="fileInput" type="file" accept="application/pdf" style="display:none" />
+                </label>
+                <button id="prevBtn" class="primary">Prev</button>
+                <button id="nextBtn" class="primary">Next</button>
+                <span id="pageInfo" class="badge">Page 0 / 0</span>
+                <div class="hint">Use your own PDF for best results</div>
+            </div>
+            <div class="group">
+                <button id="penToggle" class="accent">Pen: Off</button>
+                <label>Color <input id="penColor" type="color" value="#13f6a0" /></label>
+                <label>Width <input id="penWidth" type="range" min="1" max="16" value="3" /></label>
+                <button id="clearPen" class="danger">Clear Strokes</button>
+            </div>
+            <div class="group">
+                <button id="flattenBtn" class="accent">Flatten to PDF</button>
+                <button id="downloadBtn" class="primary">Download</button>
+            </div>
+            <div class="spacer"></div>
+            <div class="group">
+                <span class="badge">PDF.js + pdf-lib</span>
+            </div>
+        </div>
+
+        <div class="viewer">
+            <div class="page">
+                <canvas id="pdfCanvas"></canvas>
+                <canvas id="penCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="status" id="status">Load a PDF to begin.</div>
+    </div>
+
+    <!-- PDF.js from unpkg (MIT). For production, pin versions. -->
+    <script src="https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.worker.min.js"></script>
+    <!-- pdf-lib for client-side PDF modification -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+    <script>
+        // WHY: Keep state modular and explicit for AI-friendly iteration
+        const state = {
+            pdfDoc: null,
+            pdfData: null,        // ArrayBuffer of original PDF
+            currentPage: 1,
+            totalPages: 0,
+            scale: 1.5,           // default viewer scale
+            pen: {
+                active: false,
+                color: '#13f6a0',
+                width: 3,
+                drawing: false,
+                strokes: []         // [{points: [{x,y}], color, width, page, scale}]
+            },
+            flattenedPdfBytes: null
+        };
+
+        const els = {
+            fileInput: document.getElementById('fileInput'),
+            pdfCanvas: document.getElementById('pdfCanvas'),
+            penCanvas: document.getElementById('penCanvas'),
+            status: document.getElementById('status'),
+            prevBtn: document.getElementById('prevBtn'),
+            nextBtn: document.getElementById('nextBtn'),
+            pageInfo: document.getElementById('pageInfo'),
+            penToggle: document.getElementById('penToggle'),
+            penColor: document.getElementById('penColor'),
+            penWidth: document.getElementById('penWidth'),
+            clearPen: document.getElementById('clearPen'),
+            flattenBtn: document.getElementById('flattenBtn'),
+            downloadBtn: document.getElementById('downloadBtn')
+        };
+
+        // Configure PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.6.82/build/pdf.worker.min.js';
+
+        // Utils
+        const setStatus = (msg) => { els.status.textContent = msg; };
+        const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+        // Render a given page number
+        async function renderPage(pageNum) {
+            if (!state.pdfDoc) return;
+            const page = await state.pdfDoc.getPage(pageNum);
+
+            const viewport = page.getViewport({ scale: state.scale });
+            const pdfCtx = els.pdfCanvas.getContext('2d', { alpha: false });
+
+            // Set canvas sizes
+            els.pdfCanvas.width = viewport.width;
+            els.pdfCanvas.height = viewport.height;
+            els.penCanvas.width = viewport.width;
+            els.penCanvas.height = viewport.height;
+
+            // Render PDF page to canvas
+            await page.render({ canvasContext: pdfCtx, viewport }).promise;
+
+            // Update page info
+            els.pageInfo.textContent = `Page ${state.currentPage} / ${state.totalPages}`;
+
+            // Redraw strokes for this page at current scale
+            redrawStrokesForPage(state.currentPage, viewport);
+        }
+
+        // Load PDF from file input
+        els.fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setStatus('Loading PDF…');
+
+            state.pdfData = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: state.pdfData });
+            state.pdfDoc = await loadingTask.promise;
+            state.totalPages = state.pdfDoc.numPages;
+            state.currentPage = 1;
+
+            await renderPage(state.currentPage);
+            setStatus('PDF loaded. Use the pen to draw, then Flatten to embed.');
+        });
+
+        // Navigation
+        els.prevBtn.addEventListener('click', async () => {
+            if (!state.pdfDoc) return;
+            state.currentPage = clamp(state.currentPage - 1, 1, state.totalPages);
+            await renderPage(state.currentPage);
+        });
+
+        els.nextBtn.addEventListener('click', async () => {
+            if (!state.pdfDoc) return;
+            state.currentPage = clamp(state.currentPage + 1, 1, state.totalPages);
+            await renderPage(state.currentPage);
+        });
+
+        // Pen controls
+        els.penToggle.addEventListener('click', () => {
+            state.pen.active = !state.pen.active;
+            els.penToggle.textContent = `Pen: ${state.pen.active ? 'On' : 'Off'}`;
+            // Toggle pointer events on pen canvas
+            els.penCanvas.style.pointerEvents = state.pen.active ? 'auto' : 'none';
+            if (!state.pen.active) {
+                state.pen.drawing = false;
+            }
+        });
+
+        els.penColor.addEventListener('input', (e) => {
+            state.pen.color = e.target.value;
+        });
+
+        els.penWidth.addEventListener('input', (e) => {
+            state.pen.width = parseFloat(e.target.value);
+        });
+
+        els.clearPen.addEventListener('click', () => {
+            // Remove strokes only for current page
+            state.pen.strokes = state.pen.strokes.filter(s => s.page !== state.currentPage);
+            const penCtx = els.penCanvas.getContext('2d');
+            penCtx.clearRect(0, 0, els.penCanvas.width, els.penCanvas.height);
+            setStatus('Cleared strokes for this page.');
+        });
+
+        // Pen drawing events
+        const penCtx = els.penCanvas.getContext('2d');
+        function getCanvasPoint(evt) {
+            const rect = els.penCanvas.getBoundingClientRect();
+            const x = evt.clientX - rect.left;
+            const y = evt.clientY - rect.top;
+            return { x, y };
+        }
+
+        els.penCanvas.addEventListener('mousedown', (evt) => {
+            if (!state.pen.active) return;
+            state.pen.drawing = true;
+            const start = getCanvasPoint(evt);
+            const stroke = {
+                page: state.currentPage,
+                color: state.pen.color,
+                width: state.pen.width,
+                scale: state.scale,
+                points: [start]
+            };
+            state.pen.strokes.push(stroke);
+        });
+
+        els.penCanvas.addEventListener('mousemove', (evt) => {
+            if (!state.pen.active || !state.pen.drawing) return;
+            const pt = getCanvasPoint(evt);
+            const stroke = state.pen.strokes[state.pen.strokes.length - 1];
+            const last = stroke.points[stroke.points.length - 1];
+
+            // Draw incremental segment
+            penCtx.strokeStyle = stroke.color;
+            penCtx.lineWidth = stroke.width;
+            penCtx.lineCap = 'round';
+            penCtx.lineJoin = 'round';
+            penCtx.beginPath();
+            penCtx.moveTo(last.x, last.y);
+            penCtx.lineTo(pt.x, pt.y);
+            penCtx.stroke();
+
+            stroke.points.push(pt);
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (state.pen.drawing) {
+                state.pen.drawing = false;
+            }
+        });
+
+        // Redraw strokes for current page (e.g., on re-render / scale changes)
+        function redrawStrokesForPage(pageNum, viewport) {
+            const penCtx = els.penCanvas.getContext('2d');
+            penCtx.clearRect(0, 0, els.penCanvas.width, els.penCanvas.height);
+
+            const strokes = state.pen.strokes.filter(s => s.page === pageNum);
+            for (const s of strokes) {
+                // Adjust stroke width if scale changed since drawing
+                const scaleFactor = state.scale / (s.scale || state.scale);
+                penCtx.strokeStyle = s.color;
+                penCtx.lineWidth = s.width * scaleFactor;
+                penCtx.lineCap = 'round';
+                penCtx.lineJoin = 'round';
+
+                for (let i = 1; i < s.points.length; i++) {
+                    penCtx.beginPath();
+                    penCtx.moveTo(s.points[i - 1].x, s.points[i - 1].y);
+                    penCtx.lineTo(s.points[i].x, s.points[i].y);
+                    penCtx.stroke();
+                }
+            }
+        }
+
+        // Flatten strokes: embed as images into PDF pages using pdf-lib
+        els.flattenBtn.addEventListener('click', async () => {
+            if (!state.pdfData) return setStatus('Please load a PDF first.');
+            setStatus('Flattening strokes into PDF…');
+
+            const { PDFDocument } = PDFLib;
+            const pdfDoc = await PDFDocument.load(state.pdfData);
+
+            // Group strokes by page
+            const byPage = new Map();
+            for (const s of state.pen.strokes) {
+                if (!byPage.has(s.page)) byPage.set(s.page, []);
+                byPage.get(s.page).push(s);
+            }
+
+            // For each page with strokes: render strokes to an offscreen canvas and embed
+            for (const [pageNum, strokes] of byPage.entries()) {
+                const page = pdfDoc.getPage(pageNum - 1);
+                const { width, height } = page.getSize();
+
+                // Build an offscreen canvas at current viewer pixel size
+                const off = document.createElement('canvas');
+                off.width = els.penCanvas.width;
+                off.height = els.penCanvas.height;
+                const offCtx = off.getContext('2d');
+
+                // Redraw only strokes for this page
+                for (const s of strokes) {
+                    const scaleFactor = state.scale / (s.scale || state.scale);
+                    offCtx.strokeStyle = s.color;
+                    offCtx.lineWidth = s.width * scaleFactor;
+                    offCtx.lineCap = 'round';
+                    offCtx.lineJoin = 'round';
+                    for (let i = 1; i < s.points.length; i++) {
+                        offCtx.beginPath();
+                        offCtx.moveTo(s.points[i - 1].x, s.points[i - 1].y);
+                        offCtx.lineTo(s.points[i].x, s.points[i].y);
+                        offCtx.stroke();
+                    }
+                }
+
+                // Convert to PNG bytes
+                const dataUrl = off.toDataURL('image/png');
+                const pngBytes = dataURLToUint8Array(dataUrl);
+
+                // Embed image into PDF at full page, mapping canvas pixel space to PDF space.
+                // We map using the current PDF canvas size relative to page size.
+                const img = await pdfDoc.embedPng(pngBytes);
+
+                // Compute scale factor: PDF canvas (pixels) -> PDF points (page size)
+                const canvasW = els.pdfCanvas.width;
+                const canvasH = els.pdfCanvas.height;
+
+                // Position at bottom-left; PDF-lib's origin is bottom-left.
+                const scaleX = width / canvasW;
+                const scaleY = height / canvasH;
+
+                // Draw image stretched to page
+                page.drawImage(img, {
+                    x: 0,
+                    y: 0,
+                    width: width,
+                    height: height
+                });
+            }
+
+            const bytes = await pdfDoc.save();
+            state.flattenedPdfBytes = bytes;
+            setStatus('Flattened. Click Download to save the new PDF.');
+        });
+
+        // Download flattened PDF
+        els.downloadBtn.addEventListener('click', () => {
+            const bytes = state.flattenedPdfBytes || state.pdfData;
+            if (!bytes) return setStatus('No PDF to download. Load a file first.');
+            const blob = new Blob([bytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document-with-signature.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Helper: convert dataURL (PNG) to Uint8Array
+        function dataURLToUint8Array(dataUrl) {
+            const base64 = dataUrl.split(',')[1];
+            const raw = atob(base64);
+            const u8 = new Uint8Array(raw.length);
+            for (let i = 0; i < raw.length; i++) u8[i] = raw.charCodeAt(i);
+            return u8;
+        }
+
+        // Optional: allow pinch-zoom / wheel-zoom by changing state.scale and re-render
+        // Keep it simple: CTRL/CMD + wheel changes scale
+        window.addEventListener('wheel', async (e) => {
+            if (!state.pdfDoc) return;
+            if (!e.ctrlKey && !e.metaKey) return;
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            state.scale = clamp(state.scale + delta, 0.5, 3);
+            await renderPage(state.currentPage);
+            setStatus(`Scale: ${state.scale.toFixed(2)}`);
+        }, { passive: false });
+    </script>
+</body>
+
+</html>
