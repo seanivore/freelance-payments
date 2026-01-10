@@ -1,8 +1,9 @@
 # Comprehensive Project Overview 
+*Testing is done live:* `https://payments.august.style`
 
 ## Objective 
 
-  + To convey fullest possible understanding of our Freelance Client Contracts and Invoices payments platform application, including big picture expectations, as well as details on the most recent refactoring changes, logic updates, and some of the current issues and recurring troublesome functionality areas of the application, that you may be able to apply your development expertise in helping us to round out the final stretch of the development process and testing, helping make the payments platform application production-ready 
+  + To convey fullest possible understanding of our application platform for Freelance Client Contract and Invoices Payments, including big picture expectations, as well as details on the most recent refactoring changes, logic updates and specifics, and some of the current issues or recurring troublesome functionality areas encountered throughout the build process, so that you can apply your development, engineering, and design expertise to help us round out the final stretch of development and testing, aiming to make the payments platform production-ready for client use 
 
 ### Technical Overview 
 
@@ -29,7 +30,7 @@
   1. Come in with clean-slate to understand platform in every way 
   2. Conduct in-depth review of all script files 
   3. Simplify, consolidate, and otherwise clean up bugs and errors in scripts 
-  4. Ensure that the clear, defined logic of the states are equally clearly implemented 
+  4. Ensure that the clear, defined logic is equally clearly implemented 
 
 ### Main Goals Coming To Mind 
 
@@ -143,20 +144,84 @@ freelance-payments/
 
 --- 
 
-## PDF Creation 
+## JSON File Details & Artifact Creation 
+
+  + Only add new JSON files, never expect any updates made locally to do anything 
+  + If the JSON has an error, delete that file and create a new one with new UID 
+
+### Stripe Objects 
+
+  **Creates our Stripe "Objects" needed for payment processing**
+
+  + Created on initial push of new `assets/jobs/uid-xxx-xxx.json` file 
+    - Updated based on `admin-push.yml` workflow logic every push 
+    - Simply delete the JSON file and the Stripe Product Object will be archived and other objects ignored 
+
+  + All JSON file objects are interconnected 
+    - JSON Schema is organized to provide exactly the values required to create the necessary Stripe Objects 
+    - Will always create a product object, two price objects, and a customer object 
+    - Will create a coupon object if a discount is provided 
+
+### PDF Creation 
+
+  **Three PDF types** 
+
+  1. We need our official freelance independent contractor agreement contract PDF; `kon-{job_id}.pdf`
+  2. Then because all jobs currently have two payments, the invoice PDF for payment_1 is created; `inv-{job_id}.pdf`
+  3. The final payment invoice is called the balance PDF for payment_2; `bal-{job_id}.pdf`
+
+  **Creates our Contract & Invoices as designed PDFs for download by Clients**
+
+  + Everything needed to create these PDFs are in the JSON file values 
+    - Fill out all required values and PDFs will be created 
+    - PDFs will be created in the `assets/pdf/` directory 
+
+  + Always runs during `admin-push.yml` workflow 
+    - Directly follows creation of Stripe objects and recording their artifacts in JSON 
+    - Immediately after creation of PDFs their artifacts are recorded in JSON 
+
+  **PDF generation flow details** 
+  
+  + Google Docs template-based PDF generation 
+    - All placeholders are already mapped to JSON file mapped values 
+    - PDF templates have their file ID saved in the environment variables
+  + PDFs generated immediately with new JSON job files 
+    - PDFs stored only in repository with temporary Google Docs deleted 
+    - OAuth refresh token flow is used, not a service account 
+
+### Object ID And File Naming Conventions 
+
+  **Match `product.id` by just changing the prefix to define the object or filetype**
+
+  + `product.id` provided in JSON when creating object is in `uid-xxx-xxx` format 
+    - The file name of the JSON should be the same string `assets/jobs/uid-xxx-xxx.json`
+    - There is a custom script with the command `uid` you can use to produce the strings `assets/scripts/workflow_id.py` 
+  + `customer.id` provided by user in JSON when creating object 
+    - Change UID to CUS 
+    - `cus-xxx-xxx` 
+  + `coupon.id` provided by user in JSON when creating object 
+    - Change UID to COU 
+    - `cou-xxx-xxx` 
+  + `price1.id` and `price2.id` 
+    - These are the only two Object IDs that Stripe will create for us 
+    - After object creation the JSON is automatically updated where needed with the price IDs 
+
+  **The PDF filenames follow the same pattern as the Object IDs** 
+
+  + `docs.contract.id` 
+    - Use the prefix `kon-` replacing `uid-` 
+    - For filename `assets/pdf/contract/kon-xxx-xxx.pdf`
+  + `docs.invoice.id` 
+    - Use the prefix `inv-` replacing `uid-` 
+    - For filename `assets/pdf/invoice/inv-xxx-xxx.pdf`
+  + `docs.balance.id` 
+    - Use the prefix `bal-` replacing `uid-` 
+    - For filename `assets/pdf/balance/bal-xxx-xxx.pdf`
 
 
-### PDF Generation
-  - **Google Docs template-based** PDF generation
-  - **OAuth refresh token flow** (no service account needed)
-  - **PDFs generated immediately** after Stripe objects created
-  - **Stored only in repository** (temporary Google Docs deleted)
 
---- 
 
-## File Naming Conventions 
 
-### Match `product.id`, Change Prefix 
 
 ---
 
@@ -307,6 +372,18 @@ freelance-payments/
     - Works within `job.html` template with #completion 
 
 ---
+
+## Note
+
+### When Testing 
+
+  + If testing the backend production of objects, PDFs, and adding of artifacts back to the JSON
+    - Delete the previous assets/jobs/ JSON file after each update fixing bugs -> make sure the Stripe object archives as a result 
+    - Create a new test in assets/jobs/ that has a new UID and keywords for login -> avoid conflicts in manifest 
+    - When testing this functionality, there are too many things created and JSON updates done to use the JSON again after bug updates 
+  + If testing the frontend user flow and payments process 
+    - Assuming the assets/jobs/ JSON file you're using passed the backend tests 
+    - You can just hard-reload the payments page and then start the user flow again from login after pushing bug fixes 
 
 ## Next Steps 🎯
 
