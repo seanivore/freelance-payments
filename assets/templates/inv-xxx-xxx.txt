@@ -109,12 +109,12 @@
 	
 
 	Sean August Horvath
-	Billed to
+	Billing
 	
 
 	
 
-	Contact
+	Client
 	
 
 	Digital Business Consultant
@@ -125,12 +125,9 @@ West Townsend, MA 01474
 	{{customer.address.line1}}
 {{city}}, {{state}} {{postal_code}}
 	{{customer.title}}
-	sean@august.style
-424-744-7687
+	424-744-7687
+	{{customer.phone}}
 	{{customer.email}}
-{{customer.phone}}
-	
-
 	
 
 	
@@ -213,7 +210,7 @@ and other popular services.
 
 	
 
-If you have any questions regarding this invoice, please contact Sean August Horvath at sean@august.style.
+If you have any questions regarding this invoice, please contact Sean August Horvath at sean@august.style
 	
 
 Thank you for your business.

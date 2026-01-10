@@ -39,7 +39,7 @@ The Company retained the Freelancer. This Agreement ascribes the Freelancer’s 
                 The Freelancer to fulfill all requests for development and design. 
 
 
-                The Company to compensate the Freelancer the flat rate of {{total}} according to the following payment schedule (the “PAYMENTS”). 
+                The Company to compensate the Freelancer the flat rate of {{subtotal}}. The Freelancer has granted the Company a discount rate of {{amount_off}} leaving the full balance due as {{total}} according to the following payment schedule (the “PAYMENTS”). 
                         
                                 (i) Payment 1: {{price1.unit_amount}} 
                                 The {{price1.nickname}} owed {{price1.pay_by}}
@@ -49,6 +49,9 @@ The Company retained the Freelancer. This Agreement ascribes the Freelancer’s 
                                 (ii) Payment 2: {{price2.unit_amount}} 
                                 The {{price2.nickname}} owed {{price2.pay_by}}
                                 {{contract.work_end}}
+
+
+                                (iii) Discount, if applicable: {{amount_off}}
 
 
                 Except as otherwise required by law, the Company shall not withhold any sums or payments made to the Freelancer for social security or federal, state, and local tax, nor liabilities or contributions. 
