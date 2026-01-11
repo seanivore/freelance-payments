@@ -1,7 +1,7 @@
 export type JobData = {
   id: string;
-  client: { name: string; email: string };
-  project: { name: string; total_amount: number };
+  customer: { name: string; email: string };
+  project: string;
   state: {
     client_status: {
       logged_in: string | null;

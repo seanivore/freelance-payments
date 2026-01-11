@@ -226,7 +226,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30">
       <header className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur-sm fixed top-0 w-full z-10">
         <div className="font-bold text-lg tracking-tight">Freepay <span className="text-emerald-400">Secure</span></div>
-        <div className="text-sm text-slate-400">{data.client.name} • {data.project.name}</div>
+        <div className="text-sm text-slate-400">{data.customer.name} • {data.project}</div>
       </header>
       
       <main className="pt-20 pb-10">
