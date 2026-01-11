@@ -197,6 +197,41 @@ def create_stripe_coupon(coupon: dict) -> str:
     return coupon.id
 
 
+def create_stripe_payment_link(price_id: str, job_id: str, payment_number: int, coupon_id: str = None) -> str:
+    """Create a persistent Stripe Payment Link."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    
+    # Construct base URL for redirection (GitHub Pages or Vercel)
+    # Ideally checking an ENV var, otherwise defaulting to the known URL structure
+    base_url = os.getenv('SITE_URL', 'https://seanivore.github.io/freelance-payments')
+    return_url = f"{base_url}/{job_id}#completion"
+
+    params = {
+        'line_items': [{'price': price_id, 'quantity': 1}],
+        'metadata': {
+            'job_id': job_id,
+            'payment_number': str(payment_number)
+        },
+        'after_completion': {
+            'type': 'redirect',
+            'redirect': {'url': return_url}
+        },
+        'allow_promotion_codes': True
+    }
+    
+    if coupon_id and payment_number == 1:
+        # Pre-apply coupon for the first payment if exists
+        params['discounts'] = [{'coupon': coupon_id}]
+        
+    # We create a new link every time? Or idemptotency?
+    # Stripe Payment Links don't have lookup_keys easily. 
+    # For now, we create one. If we wanted to be cleaner, we'd list existing links for this price.
+    # But prices are unique per job usually.
+    
+    link = stripe.PaymentLink.create(**params)
+    return link.url
+
+
 def load_manifest(manifest_path: str) -> dict:
     """Load manifest.json and return jobs dict."""
     manifest_file = Path(manifest_path)
@@ -279,6 +314,7 @@ def create_stripe_objects_for_job(job_data: dict, job_id: str) -> dict:
         state_objects['price_2'] = price_2_id
         price2['id'] = price_2_id
     
+    
     # Create coupon
     coupon = job_data.get('coupon')
     if coupon and coupon.get('amount_off', 0) > 0:
@@ -286,20 +322,29 @@ def create_stripe_objects_for_job(job_data: dict, job_id: str) -> dict:
         stats['coupons_created'] = 1
         state_objects['coupon'] = coupon_id
     
-    # Update checkout session parameters
-    if job_data.get('checkout_session_1') and state_objects.get('price_1'):
-        checkout_session_1 = job_data['checkout_session_1']
-        if 'line_items' in checkout_session_1 and len(checkout_session_1['line_items']) > 0:
-            checkout_session_1['line_items'][0]['price'] = state_objects['price_1']
-        if state_objects.get('coupon') and 'discounts' in checkout_session_1 and checkout_session_1['discounts']:
-            if len(checkout_session_1['discounts']) > 0:
-                checkout_session_1['discounts'][0]['coupon'] = state_objects['coupon']
-    
-    if job_data.get('checkout_session_2') and state_objects.get('price_2'):
-        checkout_session_2 = job_data['checkout_session_2']
-        if 'line_items' in checkout_session_2 and len(checkout_session_2['line_items']) > 0:
-            checkout_session_2['line_items'][0]['price'] = state_objects['price_2']
-    
+    # --- Generate Payment Links (New V5 Standard) ---
+    if 'links' not in job_data:
+        job_data['links'] = {}
+        
+    # Payment 1 Link
+    if state_objects.get('price_1'):
+        link1 = create_stripe_payment_link(
+            price_id=state_objects['price_1'], 
+            job_id=job_id, 
+            payment_number=1,
+            coupon_id=state_objects.get('coupon')
+        )
+        job_data['links']['payment_1'] = link1
+        
+    # Payment 2 Link
+    if state_objects.get('price_2'):
+        link2 = create_stripe_payment_link(
+            price_id=state_objects['price_2'], 
+            job_id=job_id, 
+            payment_number=2
+        )
+        job_data['links']['payment_2'] = link2
+
     return stats
 
 

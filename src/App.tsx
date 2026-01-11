@@ -349,32 +349,12 @@ export default function App() {
                     <button 
                         className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2"
                         onClick={() => {
-                            // Create session
-                            const btn = document.activeElement as HTMLButtonElement;
-                            if(btn) btn.disabled = true;
-                            
-                            fetch('/api/create-checkout-session', {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({
-                                    job_id: window.location.pathname.substring(1),
-                                    price_id: initialSection === 'payment1' ? data.product.price1.id : data.product.price2.id,
-                                    payment_number: initialSection === 'payment1' ? 1 : 2
-                                })
-                            })
-                            .then(r => r.json())
-                            .then(session => {
-                                if(session.url) window.location.href = session.url;
-                                else {
-                                    alert("Error creating payment session");
-                                    if(btn) btn.disabled = false;
-                                }
-                            })
-                            .catch(e => {
-                                console.error(e);
-                                alert("Connection error");
-                                if(btn) btn.disabled = false;
-                            });
+                            const link = initialSection === 'payment1' ? data.links?.payment_1 : data.links?.payment_2;
+                            if (link) {
+                                window.location.href = link;
+                            } else {
+                                alert("Payment link not ready. Please contact support.");
+                            }
                         }}
                     >
                         Process Secure Payment
