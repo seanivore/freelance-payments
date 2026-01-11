@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import configJson from '../config/pdfViewer.config.json';
-import { clamp, dataURLToUint8Array } from '../lib/pdf-utils';
-import { Toolbar } from './Toolbar';
+import { dataURLToUint8Array } from '../lib/pdf-utils';
 import { GateBar } from './GateBar';
 import { format } from 'date-fns';
 
@@ -37,10 +36,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
 
   const [pdfData] = useState<ArrayBuffer | null>(initialPdfBytes);
   const [pdfDoc, setPdfDoc] = useState<any | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const [scale, setScale] = useState<number>(configJson.viewer.initialScale);
-  const [flattenedPdfBytes, setFlattenedPdfBytes] = useState<Uint8Array | null>(null);
+  const [scale] = useState<number>(configJson.viewer.initialScale);
   const [section, setSection] = useState<Section>(initialSection);
   const [isSignModalOpen, setIsSignModalOpen] = useState(false);
 
@@ -66,26 +62,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     const docTask = getDocument({ data: bytes });
     const doc = await docTask.promise;
     setPdfDoc(doc);
-    setTotalPages(doc.numPages);
-    setCurrentPage(1);
     await renderPage(1);
     emitEvent?.('contract_loaded', { page: 1, totalPages: doc.numPages });
-  }
-
-  async function gotoPrev() {
-    if (!pdfDoc) return;
-    const next = clamp(currentPage - 1, 1, totalPages);
-    setCurrentPage(next);
-    await renderPage(next);
-    emitEvent?.('page_changed', { page: next });
-  }
-
-  async function gotoNext() {
-    if (!pdfDoc) return;
-    const next = clamp(currentPage + 1, 1, totalPages);
-    setCurrentPage(next);
-    await renderPage(next);
-    emitEvent?.('page_changed', { page: next });
   }
 
   // Stamp signature at bottom of last page
@@ -121,13 +99,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         });
 
         const bytes = await loaded.save();
-        setFlattenedPdfBytes(bytes);
         
         // Update view with signed PDF
         await openPdfFromBytes(bytes.buffer as any);
         
         // Emit success
         emitEvent?.('contract_signed', { date: format(new Date(), 'yyyy-MM-dd') });
+        // NOTE: App.tsx will handle the navigation via optimistic update.
         setSection('invoice');
         
     } catch (e) {
@@ -136,37 +114,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }
   }
 
-  function downloadPdf() {
-    const bytes = flattenedPdfBytes || pdfData;
-    if (!bytes) return;
-    const blob = new Blob([bytes as any], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = configJson.ui.defaultDownloadName;
-    a.click();
-    URL.revokeObjectURL(url);
-    emitEvent?.('document_downloaded');
-  }
-
-  // Zoom (Cmd/Ctrl + wheel)
-  useEffect(() => {
-    function onWheel(e: WheelEvent) {
-      if (!pdfDoc) return;
-      if (!e.ctrlKey && !e.metaKey) return;
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      const next = clamp(scale + delta, configJson.viewer.minScale, configJson.viewer.maxScale);
-      setScale(next);
-      renderPage(currentPage);
-      emitEvent?.('scale_changed', { scale: next });
-    }
-    window.addEventListener('wheel', onWheel, { passive: false });
-    return () => window.removeEventListener('wheel', onWheel);
-  }, [pdfDoc, scale, currentPage]);
-
-  const pageInfo = `Page ${currentPage} / ${totalPages}`;
-
+  // Gate handlers
   // Gate handlers
   function handleSignContract() {
     setIsSignModalOpen(true);
@@ -202,16 +150,14 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
-      <Toolbar
-        pageInfo={pageInfo}
-        onPrev={gotoPrev}
-        onNext={gotoNext}
-        onDownload={downloadPdf}
-      />
-
-      <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden">
-        <div className="relative flex items-center justify-center bg-slate-950 p-4">
-          <canvas id="pdfCanvas" ref={pdfCanvasRef} className="shadow-lg" />
+      <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[600px]">
+        <div className="relative flex items-center justify-center bg-slate-950 p-4 min-h-[600px]">
+          <canvas 
+            id="pdfCanvas" 
+            ref={pdfCanvasRef} 
+            className="shadow-lg max-w-full h-auto" 
+            style={{ width: '100%', height: 'auto' }}
+          />
         </div>
       </div>
 

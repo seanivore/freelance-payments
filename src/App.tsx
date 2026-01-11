@@ -204,18 +204,38 @@ export default function App() {
                 console.log('Event:', name, payload);
                 trackEvent(name === 'sign' ? 'contract_signed' : name, payload);
                 
-                // UX: If signed, ideally we reload or update state to show Invoice.
-                // Since this is a static site + JSON DB, the DB update is async (Github Action).
-                // We MUST rely on local optimistic UI updates if we want instant feedback.
-                // But for now, user might have to refresh after a while.
-                // OR we accept that the "Next Step" is unlocked locally in memory?
-                if (name === 'sign') {
-                     alert("Contract Signed! Please wait a moment for the system to process or refresh the page.");
-                     window.location.reload(); 
-                     // Reloading will re-fetch JSON. If Github Action hasn't run, it will still show Contract.
-                     // This is the downside of the architecture.
-                     // FluxGate *requires* the JSON to change.
-                     // We can mock the change locally in 'data'.
+                if (name === 'contract_signed') {
+                     // Optimistic Update: Unlock next stage locally
+                     setData(prev => {
+                         if (!prev) return null;
+                         return {
+                             ...prev,
+                             state: {
+                                 ...prev.state,
+                                 client_status: {
+                                     ...prev.state.client_status,
+                                     contract_signed: new Date().toISOString()
+                                 }
+                             }
+                         };
+                     });
+                     // Force re-render will pick up new initialSection and fetch new PDF
+                }
+                
+                if (name === 'invoice_acknowledged') {
+                     setData(prev => {
+                         if (!prev) return null;
+                         return {
+                             ...prev,
+                             state: {
+                                 ...prev.state,
+                                 client_status: {
+                                     ...prev.state.client_status,
+                                     invoice: new Date().toISOString()
+                                 }
+                             }
+                         };
+                     });
                 }
             }}
         />
