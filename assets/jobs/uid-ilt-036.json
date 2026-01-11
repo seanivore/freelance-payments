@@ -1,0 +1,171 @@
+{
+    "project": "New Build Object & PDF Flow Test",
+    "contract": {
+        "work_start": "2026-01-11",
+        "work_end": "2026-01-12",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": null
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
+    },
+    "docs": {
+        "contract": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "invoice": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "balance": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        }
+    },
+    "state": {
+        "objects": {
+            "created": null,
+            "product": null,
+            "price_1": null,
+            "price_2": null,
+            "customer": null,
+            "coupon": null
+        },
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
+    },
+    "product": {
+        "name": "Really Great Test Job",
+        "active": true,
+        "description": "A job that is mostly to test the artifact production workflow but then if all is well to be able to continue testing the life frontend flow",
+        "id": "uid-ilt-036",
+        "login_name": "Great",
+        "login_keyword": "tester-job",
+        "service_usd": 1000,
+        "total_payments": 2,
+        "discount_usd": 200,
+        "type": "service",
+        "unit_label": "Payment"
+    },
+    "customer": {
+        "name": "Frank Great",
+        "business": "Frank's Great Job Workflow Tests, Inc.",
+        "title": "Founder/CFO",
+        "email": "great.f@testerjob.com",
+        "phone": "123-456-7890",
+        "id": "cus-ilt-036",
+        "address": {
+            "city": "Fitchburg",
+            "line1": "123 Green St",
+            "state": "MA",
+            "postal_code": "01440",
+            "country": "US"
+        }
+    },
+    "coupon": {
+        "amount_off": 200,
+        "applies_to": {
+            "products": [
+                "uid-ilt-036"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-ilt-036",
+        "max_redemptions": 1,
+        "name": "TWO-DOLLAHS"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 500,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-ilt-036"
+            ]
+        },
+        "id": ""
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 500,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-ilt-036"
+            ]
+        },
+        "id": ""
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-ilt-036"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-ilt-036#completion-1",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-ilt-036#completion-2",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": null,
+    "project_scope_full": null
+}
