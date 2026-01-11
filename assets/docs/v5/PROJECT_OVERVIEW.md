@@ -5,6 +5,8 @@
 
   + To convey fullest possible understanding of our application platform for Freelance Client Contract and Invoices Payments, including big picture expectations, as well as details on the most recent refactoring changes, logic updates and specifics, and some of the current issues or recurring troublesome functionality areas encountered throughout the build process, so that you can apply your development, engineering, and design expertise to help us round out the final stretch of development and testing, aiming to make the payments platform production-ready for client use 
 
+  + Please keep clear planing, bug fixing, refactoring updates, and testing details in organized files within our new `docs/v5` directory, so that we can track progress and understand the full scope of the project as it evolves 
+
 ### High Level Conceptual Approach To Take 
 
   **BASIC CONCEPT** 
@@ -150,7 +152,7 @@ freelance-payments/
 │   └── webhook.js                   # Receives payment events and updates JSON files
 ├── assets/
 │   ├── jobs/                        # Job JSON files (one per client project)
-│   │   └── uid-xxx-xxx.json         # Example job JSON filename that is current and up-to-date
+│   │   └── uid-xxx-xxx.json         # Example job JSON filename 
 │   ├── js/
 │   │   ├── components/
 │   │   │   ├── button.js            # shadcn/ui-"inspired" Button Component **WE DON'T WANT "INSPIRED" WE WANT REAL**
