@@ -5,6 +5,81 @@
 
   + To convey fullest possible understanding of our application platform for Freelance Client Contract and Invoices Payments, including big picture expectations, as well as details on the most recent refactoring changes, logic updates and specifics, and some of the current issues or recurring troublesome functionality areas encountered throughout the build process, so that you can apply your development, engineering, and design expertise to help us round out the final stretch of development and testing, aiming to make the payments platform production-ready for client use 
 
+### High Level Conceptual Approach To Take 
+
+  **BASIC CONCEPT** 
+
+  + Payments site for freelance clients. Login, get contract PDF, sign it, get invoice PDFs, then make payments 
+
+  **CONCEPTUAL THINKING FIRST** 
+
+  1. Try to review and understand from this document the building blocks of the system and how they work together
+  2. And then sketch out an ideal implementation of what we're working with 
+
+  + 404-redirection SPA architecture on static GitHub Pages host 
+    - Template HTML pages that 404 provides URL build for 
+    - JavaScript that dynamically populates pages with data from JSON files 
+    - PDF viewer, signed, downloaded on initial pages 
+    - Then Stripe ui-type: custom components build for payment processing 
+  + JSON files for data output and input 
+    - The only thing that is managed ongoing that influences all needs 
+    - Feeds out data to all automations to create Stripe needs, contracts, invoices PDFs 
+    - Pulls in data from object creation artifacts and user-behavior event tracking for state management 
+  + Automations and connections 
+    - Stripe API and webhooks 
+    - Vercel serverless functions and specific custom API needs 
+    - GitHub Actions to maintain file updates and all legwork for production 
+
+  3. Pay particular attention to the very carefully, foolproof process of elimination logic for user events on front end and github action workflows 
+  4. Understand that logic is sound, all it needs is in JSON, all everything needs is in JSON 
+  5. Know that it can all be done without paying for any services 
+
+  + What is the most logical, sensible, clean, effective implementation look like? 
+  + Understand and have a mental map of that before digging into the current state 
+  + Current state was initially simple
+    - Required many schema updates, countless refactoring 
+    - The good is that you know that we have baked down to the core logic and simplified functions that are all foolproof 
+    - The bad is that this kind of patchwork building is just not how one would ever go about building something well 
+    - We basically said "oh this needs to be like this" and then figured out how to make it work, then debugged forever 
+
+  **CURRENT STATE COMPREHENSION SECOND** 
+
+  6. Now you should really thoroughly review this entire document 
+  7. Explore important files that are referenced and in the project directory tree 
+  8. See critiques on certain files and final perfected logic to be implemented 
+
+  - More files than needed, redundant code in places 
+  - Final payments not fully bug free because of the convoluted building 
+  - Need to implement more designer friendly PDF viewer, plan supplied 
+  - Need to update the user-behavior frontend event tracking workflow for logical planning 
+
+  **PLANNING PAYMENT PLATFORM FINAL ADJUSTMENTS AND TESTING** 
+
+  9. Ideally you'll be able to come at this with a better, fresh perspective 
+  10. Avoid just pushing things along the way they are just because they were started that way 
+
+  + Consider the modern era of development and coding 
+    - You can write over 20 files in minutes 
+    - Most times you do this with full understanding it results in bug free code 
+    - We're in an age where rewriting a script in full as a way to debug isn't nonsense 
+  + The old methods of patchwork finding bugs and patching them is ingrained in training data 
+    - But do they really fit how our tools work today? 
+    - Consider this when putting together our final build for final testing and then deployment 
+
+### Development Philosophy & Our Current State  
+
+**UNDERSTAND THE CURRENT PROJECT STATE**
+  - Review important files to understand management of workflow actions facilitated, presentation of information, specific functionality logic, and more. Create a full, accurate understanding of the application to identify gaps in the scripts and logic or errors left over from earlier refactoring. 
+
+**CONSIDER WHAT THIS BUILD REPRESENTS**
+  - In short, we have refactored and updated or simplified logic of functionality more than five times. This results in a constant "band-aid"-style of development, where we're always adjusting thing and then fixing things that break, constantly finding bugs. This is not idea. 
+
+**WHAT DOES WHAT WE'VE LEARNED REALLY MEAN?**
+  - Consider that through the process of getting to this point we have more than climbed necessary learning curves, uncovered essential functionality logic to apply, and discovered simplifications that needed to be made. Now, imagine building the system with what we know now; no refactoring and fixing breaks. Just clean code written in full knowledge of the final system. 
+
+**THINK MODERN INSTEAD** 
+  - If the code has a bug? Rewrite it in full. You can do this more than a few times before switching to a specific debugging focus. The "write once, then debug" approach is ingrained in training data because of historic limitations of human-only development. Now that we have agents that can write 5-10 files of code in a minute, and with an understanding of how LLMs work and their limitations, it makes much more logical sense today to write clean code more than a few times instead of once. There are so many instances where countless pages of code in a project are written by AI without error. 
+
 ### Technical Overview 
 
   1. We use a unique SPA architecture that provides dynamic website functionality on a static GitHub Pages host using a 404-redirect method. 
@@ -25,65 +100,37 @@
 
 ---
 
-## Simple Steps To Take 
+## Generalized Goals And Flow For Approach (many details and specifics to follow)
 
-  1. Come in with clean-slate to understand platform in every way 
-  2. Review the provided update to PDF viewing functionality provided by Dia 
-  3. Review updates for the deletion of `user-behavior.yml` for creation of `user-exit-events.yml` 
-  4. Conduct in-depth review of ALL script files 
-  5. Simplify and consolidate where possible, particularly the events 
-  6. Cleanup code looking for bugs or errors 
-  7. Ensure that the clear, defined logic of workflows and frontend event flow is equally clearly implemented in script 
-
-### Main Goals On Our Mind (Details Follow Below) 
-
-  1. First, understand the "Process" section commentary 
-    - This is the head-space to work from 
-    - Opt for writing new files instead of copying various files 
-    - Do *NOT* presume the code written was written the best way possible, it was edited along the way over weeks 
-    - In general, help us find perfect medium of finishing this build but sort of rebuilding, without actually scrapping it all 
+  1. Get your head space right 
+    - Opt for writing new files instead of copying various old files 
+    - Don't presume the code written was written the best way possible, it was edited along the way over weeks 
+    - Find the perfect medium of finishing this build VERSUS rebuild from scratch 
     - Use what we learned and the confidence that comes from knowing we are done making logic and refactoring changes  
-  2. Understand and implement the Dia provided new PDF viewing and UI interactive functionality including new files 
-    - Details directly from Dia are below 
-    - All files provided created in structure provided within new `src/` directory 
-  3. Understand current count of events, actions, triggers, and their various files and SIMPLIFY 
-    - Eliminate irrational delay in writing events to JSONs via triggered `user-behavior.yml` workflow 
-    - Batching is okay, but also things should be grouped and number of files minimized 
-    - The logic instead should be that all events are gathered during the user session
-    - After no more user events are triggered for X amount of time, then update JSONs
-    - The `user-behavior.yml` workflow needs to be updated to reflect this logic
-    - A better name might even be `user-exit-events.yml` 
-    - Check for any other files involved in batching or events to update or consolidate them 
-    - After events are written to JSON, then the same flow of matching JSON to catalog, etc. as `admin-push.yml` runs 
-  4. Then use strong frontend user flow understanding in updating code to make full checkout flow functional
-    - Review console logs at each step of the frontend user flow to confirm simplest logic was implemented 
-    - Run end-to-end tests to confirm full checkout flow is functional 
-  5. Pause to request or take screenshots of front end 
-    - Remember that this site must be a VERY HIGH BAR for design because that's what clients come to me for 
-    - The PDF embed right now uses iFrame and is horrible 
-    - The frontend flow action/gate buttons were not all implemented 
-    - The "Sign" contract modal is a mess 
-  6. What else does the "Process" section commentary call to you to update and clean up or simplify? 
-    - We have custom Stripe components to put anywhere on page so lets use them 
-    - Homepage invoice.html is good, maybe some touch ups 
-    - Use PDF display and action/gate buttons on job.html 
-    - Do we need a checkout.html page to fully take advantage of our build 
-    - Return URL thank you pages, we need custom messages post payment_1 and payment_2 
-  7. Make sure the payment_1 and payment_2 UX are both handled well 
-
-### Development Philosophy & Our Current State  
-
-**UNDERSTAND THE CURRENT PROJECT STATE**
-  - Review important files to understand management of workflow actions facilitated, presentation of information, specific functionality logic, and more. Create a full, accurate understanding of the application to identify gaps in the scripts and logic or errors left over from earlier refactoring. 
-
-**CONSIDER WHAT THIS BUILD REPRESENTS**
-  - In short, we have refactored and updated or simplified logic of functionality more than five times. This results in a constant "band-aid"-style of development, where we're always adjusting thing and then fixing things that break, constantly finding bugs. This is not idea. 
-
-**WHAT DOES WHAT WE'VE LEARNED REALLY MEAN?**
-  - Consider that through the process of getting to this point we have more than climbed necessary learning curves, uncovered essential functionality logic to apply, and discovered simplifications that needed to be made. Now, imagine building the system with what we know now; no refactoring and fixing breaks. Just clean code written in full knowledge of the final system. 
-
-**THINK MODERN INSTEAD** 
-  - If the code has a bug? Rewrite it in full. You can do this more than a few times before switching to a specific debugging focus. The "write once, then debug" approach is ingrained in training data because of historic limitations of human-only development. Now that we have agents that can write 5-10 files of code in a minute, and with an understanding of how LLMs work and their limitations, it makes much more logical sense today to write clean code more than a few times instead of once. There are so many instances where countless pages of code in a project are written by AI without error. 
+  2. Understand current system with all its flaws 
+    - Conduct in-depth review of ALL script files
+    - Eliminate irrational delay in writing events to JSONs triggered by `user-behavior.yml` workflow 
+    - Instead apply logic of collecting those events and then updating the JSON with them when User leaves naturally  
+    - Simplify and consolidate where possible, particularly the events 
+  3. Understand current system or newly provided ROCK SOLID logic for flows 
+    - Really make sure that the logic in the file is as explicit and defined as it is in writing 
+    - Were do files overlap or even conflict, not matching the cleanliness of the flow logic 
+    - Review updates for the deletion of `user-behavior.yml` for creation of `user-exit-events.yml`
+    - Cleanup code looking for bugs or errors 
+  4. Use strong frontend user flow understanding in updating code to make full checkout flow functional
+    - Review console logs at each step of the frontend user flow to confirm simplest logic was implemented
+    - Run end-to-end tests to confirm full checkout flow is functional
+    - Make sure the payment_1 and payment_2 UX are both handled well
+    - Return URL thank you pages, we need custom messages post payment_1 and payment_2
+  5. Review the provided update to PDF viewing functionality provided by Dia 
+    - Implementation details are below and have been triple checked against this document 
+    - All files provided created in structure provided within new `src/` directory
+    - Remember that this site must be a VERY HIGH BAR for design because that's what clients come to me for
+  6. What else does PROCESS section above commentary call to you to update and clean up or simplify 
+    - Pause to request or take screenshots of front end; the sign contract modal is gross 
+    - We have custom Stripe components to put anywhere on page so lets use them
+    - Homepage invoice.html is good, maybe some touch ups
+    - Do we need a checkout.html page to fully take advantage of our build
 
 ### Current Project Directory Important Files 
 
@@ -103,7 +150,7 @@ freelance-payments/
 │   └── webhook.js                   # Receives payment events and updates JSON files
 ├── assets/
 │   ├── jobs/                        # Job JSON files (one per client project)
-│   │   └── uid-xxx-xxx.json         # Example job JSON filename 
+│   │   └── uid-xxx-xxx.json         # Example job JSON filename that is current and up-to-date
 │   ├── js/
 │   │   ├── components/
 │   │   │   ├── button.js            # shadcn/ui-"inspired" Button Component **WE DON'T WANT "INSPIRED" WE WANT REAL**
@@ -363,6 +410,13 @@ freelance-payments/
 - **New Architecture**: `PaymentRouter` (aka FluxGate) determines user location strictly based on the presence of timestamps in `client_status`.
 - **Flow**: Contract -> Invoice (Payment 1) -> Invoice (Payment 2) -> Completion.
 - **UI**: Hidden redundant navigation bar to enforce the gated flow.
+
+  **CURRENT STATE CHECKED** -- login seems to work but nothing loads on next page after login; here is the console output
+
+    ```
+    uid-jqf-256:1  GET https://payments.august.style/uid-jqf-256 404 (Not Found)
+    flow-manager.js:94 FlowManager: Active Step contract
+    ```
 
 ### Events, Meaning, And Action Gate Progression 
 
