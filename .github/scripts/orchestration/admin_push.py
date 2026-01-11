@@ -315,6 +315,7 @@ def create_stripe_objects_for_job(job_data: dict, job_id: str) -> dict:
         price2['id'] = price_2_id
     
     
+    
     # Create coupon
     coupon = job_data.get('coupon')
     if coupon and coupon.get('amount_off', 0) > 0:
@@ -322,29 +323,20 @@ def create_stripe_objects_for_job(job_data: dict, job_id: str) -> dict:
         stats['coupons_created'] = 1
         state_objects['coupon'] = coupon_id
     
-    # --- Generate Payment Links (New V5 Standard) ---
-    if 'links' not in job_data:
-        job_data['links'] = {}
-        
-    # Payment 1 Link
-    if state_objects.get('price_1'):
-        link1 = create_stripe_payment_link(
-            price_id=state_objects['price_1'], 
-            job_id=job_id, 
-            payment_number=1,
-            coupon_id=state_objects.get('coupon')
-        )
-        job_data['links']['payment_1'] = link1
-        
-    # Payment 2 Link
-    if state_objects.get('price_2'):
-        link2 = create_stripe_payment_link(
-            price_id=state_objects['price_2'], 
-            job_id=job_id, 
-            payment_number=2
-        )
-        job_data['links']['payment_2'] = link2
-
+    # Update checkout session parameters
+    if job_data.get('checkout_session_1') and state_objects.get('price_1'):
+        checkout_session_1 = job_data['checkout_session_1']
+        if 'line_items' in checkout_session_1 and len(checkout_session_1['line_items']) > 0:
+            checkout_session_1['line_items'][0]['price'] = state_objects['price_1']
+        if state_objects.get('coupon') and 'discounts' in checkout_session_1 and checkout_session_1['discounts']:
+            if len(checkout_session_1['discounts']) > 0:
+                checkout_session_1['discounts'][0]['coupon'] = state_objects['coupon']
+    
+    if job_data.get('checkout_session_2') and state_objects.get('price_2'):
+        checkout_session_2 = job_data['checkout_session_2']
+        if 'line_items' in checkout_session_2 and len(checkout_session_2['line_items']) > 0:
+            checkout_session_2['line_items'][0]['price'] = state_objects['price_2']
+    
     return stats
 
 

@@ -24,10 +24,6 @@ export type JobData = {
     price1: { id: string; amount: number; active: boolean };
     price2: { id: string; amount: number; active: boolean };
   };
-  links?: {
-    payment_1?: string;
-    payment_2?: string;
-  };
 };
 
 export async function fetchJobData(): Promise<JobData | null> {
