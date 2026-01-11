@@ -1,10 +1,10 @@
 {
   "jobs": {
-    "elk-antlers": {
-      "file_path": "assets/jobs/uid-elk-202.json",
-      "job_id": "uid-elk-202",
-      "login_keyword": "antlers",
-      "login_name": "Elk"
+    "great-tester-job": {
+      "file_path": "assets/jobs/uid-ilt-036.json",
+      "job_id": "uid-ilt-036",
+      "login_keyword": "tester-job",
+      "login_name": "Great"
     },
     "hoff-everlastings": {
       "file_path": "assets/jobs/uid-jqf-256.json",
@@ -13,5 +13,5 @@
       "login_name": "Hoff"
     }
   },
-  "generated_at": "2026-01-11T17:06:29.382714Z"
+  "generated_at": "2026-01-11T17:43:11.633315Z"
 }
