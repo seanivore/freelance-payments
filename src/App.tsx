@@ -48,7 +48,18 @@ export default function App() {
         event_type: 'batch',
         event_data: currentBuffer
       })
-    }).catch(console.error);
+    })
+    .then(response => {
+        if (!response.ok) {
+            // If 405 or 404, we are likely on a static host without API support.
+            if (response.status === 405 || response.status === 404) {
+                console.warn("Event tracking skipped: Backend API not available on static host.");
+            } else {
+                console.error("Event tracking failed:", response.statusText);
+            }
+        }
+    })
+    .catch(console.error);
 
     setEventBuffer([]); // clear state
     eventBufferRef.current = []; // clear ref immediate
@@ -85,16 +96,15 @@ export default function App() {
                  event_type: 'batch',
                  event_data: eventBufferRef.current
              });
-             if (navigator.sendBeacon) {
-                 navigator.sendBeacon('/api/track-event', payload);
-             } else {
-                 fetch('/api/track-event', {
-                     method: 'POST',
-                     headers: { 'Content-Type': 'application/json' },
-                     body: payload,
-                     keepalive: true
-                 }).catch(console.error);
-             }
+             // Use fetch with keepalive as beacon fallback or primary
+             fetch('/api/track-event', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: payload,
+                 keepalive: true
+             }).catch(() => {
+                 // Ignore unload errors
+             });
          }
     };
     
