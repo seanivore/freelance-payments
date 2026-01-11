@@ -2,6 +2,7 @@
     "name": "freelance-payments",
     "version": "1.0.0",
     "description": "Freelance payment micro-site with Stripe integration",
+    "type": "module",
     "engines": {
         "node": ">=18.x"
     },
