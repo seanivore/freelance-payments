@@ -161,7 +161,7 @@ export default function App() {
   }
 
   const { client_status } = data.state;
-  let initialSection: 'contract' | 'invoice' | 'payment1' | 'balance' | 'payment2' | 'completion2' = 'contract';
+  let initialSection: 'contract' | 'invoice' | 'payment1' | 'completion1' | 'balance' | 'payment2' | 'completion2' = 'contract';
   let initialPdfUrl = data.docs.contract.url;
 
   if (client_status.contract_signed) {
@@ -182,6 +182,70 @@ export default function App() {
   if (client_status.payment_2) {
     initialSection = 'completion2';
     initialPdfUrl = data.docs.balance.url;
+  }
+
+  // --- Handle Stripe Return (Optimistic) ---
+  useEffect(() => {
+      if (window.location.hash === '#completion') {
+          // Determine which payment was made based on current loaded state
+          // If we have invoice but no payment_1 -> Payment 1 completed
+          // If we have balance but no payment_2 -> Payment 2 completed
+          // We update local state to show the success message immediately.
+
+          setData(prev => {
+             if (!prev) return null;
+             const s = prev.state.client_status;
+             let updates = {};
+             
+             if (s.invoice && !s.payment_1) {
+                 updates = { payment_1: new Date().toISOString() };
+                 // Move to balance
+                 initialSection = 'balance'; // This local var won't trigger re-render of this component's logic flow directly unless we force it, 
+                 // but changing 'data' triggers re-render.
+             } else if (s.balance && !s.payment_2) {
+                 updates = { payment_2: new Date().toISOString() };
+             }
+             
+             if (Object.keys(updates).length > 0) {
+                 return {
+                     ...prev,
+                     state: {
+                         ...prev.state,
+                         client_status: {
+                             ...prev.state.client_status,
+                             ...updates
+                         }
+                     }
+                 };
+             }
+             return prev;
+          });
+          
+          // Clear hash to prevent reloading loop issues? 
+          // Actually keeping it is fine, or replaceState.
+          window.history.replaceState(null, '', window.location.pathname);
+          alert("Payment successfully processed! Updating view...");
+      }
+  }, [data?.state.client_status]); // Depend on loaded data to know where we are
+
+  // Re-calculate derived section after potential optimistic update
+  if (data?.state.client_status.payment_1 && !data.state.client_status.balance) {
+       // Logic hole: If payment 1 is done, we usually wait for admin to send Balance? 
+       // Or does system auto-generate?
+       // user-exit-events says "batch processing".
+       // If we just mock Payment 1, do we show "Balance" section or "Completion1"?
+       // GateBar says: if section === 'completion1'
+       initialSection = 'completion1';
+       // We don't have balance doc yet if it's manual.
+       initialPdfUrl = data.docs.invoice.url; // Fallback
+  }
+  if (data?.state.client_status.payment_1 && data.state.client_status.balance) {
+      initialSection = 'balance';
+      initialPdfUrl = data.docs.balance.url;
+  }
+  if (data?.state.client_status.payment_2) {
+      initialSection = 'completion2';
+      initialPdfUrl = data.docs.balance.url;
   }
 
   const isPaymentSection = initialSection === 'payment1' || initialSection === 'payment2';
