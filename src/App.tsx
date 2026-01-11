@@ -135,28 +135,43 @@ export default function App() {
     );
   }
 
+  // Safety check for schema
+  if (!data.docs || !data.state) {
+      return (
+          <div className="flex items-center justify-center min-h-screen bg-slate-950 text-slate-100">
+             <div className="text-center p-8 bg-slate-900 rounded-lg border border-red-900/50">
+                <h1 className="text-xl font-bold text-red-500 mb-2">Invalid Job Data</h1>
+                <p className="text-slate-400 text-sm">The job data appears to be corrupted or incomplete.</p>
+                <div className="mt-4 text-xs font-mono text-slate-500 text-left bg-black/50 p-2 rounded">
+                    Missing: {!data.docs ? 'docs ' : ''} {!data.state ? 'state' : ''}
+                </div>
+             </div>
+          </div>
+      );
+  }
+
   const { client_status } = data.state;
   let initialSection: 'contract' | 'invoice' | 'payment1' | 'balance' | 'payment2' | 'completion2' = 'contract';
-  let initialPdfUrl = data.files.contract;
+  let initialPdfUrl = data.docs.contract.url;
 
   if (client_status.contract_signed) {
     initialSection = 'invoice';
-    initialPdfUrl = data.files.invoice;
+    initialPdfUrl = data.docs.invoice.url;
   }
   if (client_status.invoice) {
     initialSection = 'payment1';
   }
   if (client_status.payment_1) {
     initialSection = 'balance';
-    initialPdfUrl = data.files.balance;
+    initialPdfUrl = data.docs.balance.url;
   }
   if (client_status.balance) {
     initialSection = 'payment2';
-    initialPdfUrl = data.files.balance; 
+    initialPdfUrl = data.docs.balance.url;
   }
   if (client_status.payment_2) {
     initialSection = 'completion2';
-    initialPdfUrl = data.files.balance; 
+    initialPdfUrl = data.docs.balance.url;
   }
 
   const isPaymentSection = initialSection === 'payment1' || initialSection === 'payment2';
@@ -227,7 +242,7 @@ export default function App() {
                     <div className="mb-8 space-y-4">
                         <div className="flex justify-between border-b border-slate-700 pb-2">
                             <span className="text-slate-400">Invoice</span>
-                            <span className="font-mono">{initialSection === 'payment1' ? data.files.invoice.split('/').pop() : data.files.balance.split('/').pop()}</span>
+                            <span className="font-mono">{initialSection === 'payment1' ? data.docs.invoice.url.split('/').pop() : data.docs.balance.url.split('/').pop()}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-slate-400">Amount Due</span>

@@ -12,10 +12,10 @@ export type JobData = {
       payment_2: string | null;
     };
   };
-  files: {
-    contract: string;
-    invoice: string;
-    balance: string;
+  docs: {
+    contract: { url: string };
+    invoice: { url: string };
+    balance: { url: string };
   };
   product: {
     id: string;
