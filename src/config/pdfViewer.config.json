@@ -1,18 +1,16 @@
 {
-    "ui": {
-        "brandingBadge": "august.style — PDF.js + pdf-lib",
-        "defaultDownloadName": "document-with-signature.pdf"
-    },
     "viewer": {
-        "initialScale": 1.25,
         "minScale": 0.5,
-        "maxScale": 3.0
+        "maxScale": 3.0,
+        "initialScale": 1.0
     },
     "pen": {
         "enabledByDefault": false,
-        "defaultColor": "#13f6a0",
-        "defaultWidth": 3,
-        "minWidth": 1,
-        "maxWidth": 16
+        "defaultColor": "#000000",
+        "defaultWidth": 2
+    },
+    "ui": {
+        "brandingBadge": "Freepay",
+        "defaultDownloadName": "document_signed.pdf"
     }
 }

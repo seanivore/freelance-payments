@@ -1,21 +1,43 @@
 {
-  "name": "freelance-payments",
-  "version": "1.0.0",
-  "description": "Freelance payment micro-site with Stripe integration",
-  "engines": {
-    "node": ">=18.x"
-  },
-  "scripts": {
-    "build:css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify",
-    "watch:css": "tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --watch",
-    "dev": "npm run watch:css",
-    "build": "npm run build:css"
-  },
-  "devDependencies": {
-    "tailwindcss": "^3.4.1"
-  },
-  "dependencies": {
-    "stripe": "^14.21.0",
-    "googleapis": "^144.0.0"
-  }
+    "name": "freelance-payments",
+    "version": "1.0.0",
+    "description": "Freelance payment micro-site with Stripe integration",
+    "engines": {
+        "node": ">=18.x"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    },
+    "devDependencies": {
+        "@types/node": "^25.0.6",
+        "@types/react": "^19.2.8",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^5.1.2",
+        "autoprefixer": "^10.4.23",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "date-fns": "^4.1.0",
+        "lucide-react": "^0.562.0",
+        "pdf-lib": "^1.17.1",
+        "pdfjs-dist": "^5.4.530",
+        "postcss": "^8.5.6",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3",
+        "tailwind-merge": "^3.4.0",
+        "tailwindcss": "^3.4.19",
+        "typescript": "^5.9.3",
+        "vite": "^7.3.1",
+        "vite-plugin-static-copy": "^3.1.4"
+    },
+    "dependencies": {
+        "@radix-ui/react-popover": "^1.1.15",
+        "@radix-ui/react-slot": "^1.2.4",
+        "googleapis": "^144.0.0",
+        "react-day-picker": "^9.13.0",
+        "stripe": "^14.21.0",
+        "tailwindcss-animate": "^1.0.7"
+    }
 }

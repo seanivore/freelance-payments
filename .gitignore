@@ -44,3 +44,5 @@ rusty-tags.vi
 
 # Third-party library files (loaded from CDN)
 assets/docs/RESOURCES/stripe.js
+dist/
+

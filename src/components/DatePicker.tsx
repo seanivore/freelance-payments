@@ -1,5 +1,5 @@
 // filename: src/components/DatePicker.tsx
-import * as React from 'react';
+
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -27,7 +27,7 @@ export function DatePicker({ date, onChange, label = 'Sign Date' }: DatePickerPr
           <Calendar
             mode="single"
             selected={date ?? undefined}
-            onSelect={(d) => onChange(d ?? null)}
+            onSelect={(d: Date | undefined) => onChange(d ?? null)}
             initialFocus
           />
         </PopoverContent>

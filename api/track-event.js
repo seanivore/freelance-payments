@@ -44,7 +44,8 @@ module.exports = async (req, res) => {
       'contract_signed',
       'downloaded_docs',
       'payment_1', // Can be tracked if client side wants to log it, though webhook is source of truth
-      'payment_2'
+      'payment_2',
+      'batch'
     ];
 
     if (!validEventTypes.includes(event_type)) {
@@ -55,8 +56,9 @@ module.exports = async (req, res) => {
     // This queues the update for batch processing
     const githubToken = process.env.GITHUB_TOKEN;
     const repo = process.env.GITHUB_REPO || 'seanivore/freelance-payments';
-    // Note: GitHub API uses the workflow filename
-    const workflowId = 'user-behavior.yml';
+    
+    // UPDATED: Use the new exit-events workflow
+    const workflowId = 'user-exit-events.yml';
 
     if (githubToken) {
       try {
@@ -72,12 +74,15 @@ module.exports = async (req, res) => {
             body: JSON.stringify({
               ref: 'freelance-payments',
               inputs: {
-                action: 'track-event',
+                // We pass the raw payload for the python script to parse
+                // The API can accept a single event or a batch (array)
+                // If single, we wrap it
                 job_id: job_id,
-                payload: JSON.stringify({
-                  event_type: event_type,
-                  event_data: event_data || {}
-                })
+                payload_json: JSON.stringify(Array.isArray(event_data) ? event_data : [{
+                    type: event_type,
+                    timestamp: new Date().toISOString(),
+                    data: event_data
+                }])
               }
             })
           }

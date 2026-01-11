@@ -1,39 +1,47 @@
-export function clamp(v: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, v));
-}
 
-export function dataURLToUint8Array(dataUrl: string): Uint8Array {
-  const base64 = dataUrl.split(',')[1];
-  const raw = atob(base64);
-  const u8 = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) u8[i] = raw.charCodeAt(i);
-  return u8;
-}
 
-export type StrokePoint = { x: number; y: number };
 export type Stroke = {
   page: number;
+  points: { x: number; y: number }[];
   color: string;
   width: number;
-  scale: number;
-  points: StrokePoint[];
 };
+
+export function clamp(val: number, min: number, max: number) {
+  return Math.min(Math.max(val, min), max);
+}
+
+export function dataURLToUint8Array(dataURL: string): Uint8Array {
+  const base64 = dataURL.split(',')[1];
+  const binary = atob(base64);
+  const len = binary.length;
+  const buffer = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    buffer[i] = binary.charCodeAt(i);
+  }
+  return buffer;
+}
 
 export function renderStrokes(
   ctx: CanvasRenderingContext2D,
   strokes: Stroke[],
-  scaleFactor = 1
+  scale: number
 ) {
-  for (const s of strokes) {
-    ctx.strokeStyle = s.color;
-    ctx.lineWidth = s.width * scaleFactor;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    for (let i = 1; i < s.points.length; i++) {
-      ctx.beginPath();
-      ctx.moveTo(s.points[i - 1].x, s.points[i - 1].y);
-      ctx.lineTo(s.points[i].x, s.points[i].y);
-      ctx.stroke();
+  ctx.save();
+  ctx.scale(scale, scale);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  for (const stroke of strokes) {
+    if (stroke.points.length < 2) continue;
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = stroke.width;
+    ctx.beginPath();
+    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+    for (let i = 1; i < stroke.points.length; i++) {
+      ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
     }
+    ctx.stroke();
   }
+  ctx.restore();
 }
