@@ -93,7 +93,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     if (!pdfData) return;
 
     try {
-        const loaded = await PDFDocument.load(pdfData);
+        const loaded = await PDFDocument.load(pdfData as any);
         const pngBytes = dataURLToUint8Array(signatureDataUrl);
         const img = await loaded.embedPng(pngBytes);
         
@@ -124,7 +124,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         setFlattenedPdfBytes(bytes);
         
         // Update view with signed PDF
-        await openPdfFromBytes(bytes.buffer);
+        await openPdfFromBytes(bytes.buffer as any);
         
         // Emit success
         emitEvent?.('contract_signed', { date: format(new Date(), 'yyyy-MM-dd') });
