@@ -20,7 +20,9 @@ Details tracking what is and isn't working end-to-end, after the addition of a n
 
 ### **PHASE 2:** Frontend Functionality 
 
-  1. Login, Contract page load, Workflow `user-exit-events.yml` triggered event collection 
+  1. User login, `user-exit-events.yml` event collection, 
+
+.... 
   2. User exit 10-min delayed JSON updated `state.client_status.logged_in` event 
   3. User login, GitHub `user-exit-events.yml` Workflow Triggered, User signs contract page and directed to invoice page 
   4. User exit 10-min delayed JSON updated `state.client_status.contract_signed` event 
@@ -108,4 +110,52 @@ Details tracking what is and isn't working end-to-end, after the addition of a n
 
 ## Test Phase 2: Frontend Functionality
 
-### Step 1 — 
+### Step 1 — Login for Job `assets/jobs/uid-ilt-036.json`
+
+  1. Load index.html at `payments.august.style` with login form
+  2. Successful login using `uid-ilt-036.json`'s `product.login_name` = 'Great' and `product.login_keyword` = 'tester-job' 
+  3. Login searches `assets/js/manifest.json` using 'great tester job' finding `job.great-tester-job.job_id` to load `uid-ilt-036` data 
+
+### Step 2 — Loads `job.great-tester-job.job_id` Contract
+
+  1. Normal `GET https://payments.august.style/uid-ilt-036 404 (Not Found)` calls `assets/js/payment-lookup.js` to handle form submission and job lookup via manifest — **NOTE: this was old architecture flow**
+
+**CONSOLE LOG ERROR** 
+
+```plaintext 
+  GET https://payments.august.style/uid-ilt-036 404 (Not Found)
+j @ assets/main-Bp3rihTn.js:1
+await in j
+pv @ assets/index-B6Js_b1r.js:8
+(anonymous) @ assets/index-B6Js_b1r.js:8
+Bi @ assets/index-B6Js_b1r.js:8
+Qc @ assets/index-B6Js_b1r.js:8
+Pc @ assets/index-B6Js_b1r.js:9
+Z1 @ assets/index-B6Js_b1r.js:9
+job-D0UhcQRj.js:100 Vite: job.tsx loaded
+index-B6Js_b1r.js:8 Uncaught Error: Minified React error #310; visit https://react.dev/errors/310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at gl (index-B6Js_b1r.js:8:49133)
+    at an (index-B6Js_b1r.js:8:55626)
+    at Object.kf [as useEffect] (index-B6Js_b1r.js:8:55850)
+    at P1.B.useEffect (index-B6Js_b1r.js:1:12303)
+    at iO (job-D0UhcQRj.js:100:71655)
+    at Vf (index-B6Js_b1r.js:8:47863)
+    at ic (index-B6Js_b1r.js:8:70601)
+    at Yy (index-B6Js_b1r.js:8:80928)
+    at mv (index-B6Js_b1r.js:8:116580)
+    at t1 (index-B6Js_b1r.js:8:115643)
+gl @ index-B6Js_b1r.js:8
+an @ index-B6Js_b1r.js:8
+kf @ index-B6Js_b1r.js:8
+P1.B.useEffect @ index-B6Js_b1r.js:1
+iO @ job-D0UhcQRj.js:100
+Vf @ index-B6Js_b1r.js:8
+ic @ index-B6Js_b1r.js:8
+Yy @ index-B6Js_b1r.js:8
+mv @ index-B6Js_b1r.js:8
+t1 @ index-B6Js_b1r.js:8
+Hc @ index-B6Js_b1r.js:8
+fv @ index-B6Js_b1r.js:8
+Ov @ index-B6Js_b1r.js:8
+At @ index-B6Js_b1r.js:1
+```

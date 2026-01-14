@@ -1,13 +1,6 @@
 # Comprehensive Project Overview 
 *Testing is completed on the liv site:* `https://payments.august.style`
 
-  + Initial points to discuss with User 
-    - Why is this created when it is just a mirror of the rest of the directory 
-    - And does the fact that it is a mirror of the directory have anything to do with the notifications about react/ts memory max
-    - `dist` in project root 
-    - It is also grayed out 
-    - I'm assuming it is for react but when the files are the same what is the point of duplicating them in the directory 
-
 ## Summary 
 
   + Payments site for freelance clients. Login, get contract PDF, sign it, get invoice PDFs, then make payments
@@ -185,7 +178,7 @@ freelance-payments/
 
 ### All Necessary Data Accounted For 
 
-  **Both are created on `admin-push.yml` workflow** 
+  **Both Stripe objects and PDFs are created on `admin-push.yml` workflow** 
 
   + JSON values have everything needed to create all Stripe Objects 
   + Values have all required to create Contract, Invoice, Balance PDFs from Templates 
