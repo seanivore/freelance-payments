@@ -1,31 +1,33 @@
-# Necessary Context 
+# Required Reading to Move Forward Smoothly 
 
-  + Necessary context for understanding the current project's build state includes a quick overview and then a breakdown of the build history meant to go further than showing how we got to where we are, by explaining why certain directional shifts were taken. 
-  + A recent build session created a new architecture for the project that wasn't completed and could have possibly had better grounding. 
-  + These details will help you better understand the various files in the project repository so that you know which are necessary, which might have been neglected in the architecture change, and which are no longer relevant. 
+  + Below you'll find *why* certain directional choices were taken during development. This is *necessary context* for understanding the current state of the project build, so that you know how to plan the remaining tasks required. Please review thoroughly so that we can execute our final stretch of development smoothly. 
 
-## Project Dual Purpose
+    - **HOW**: Quick project architectural overview followed by a breakdown of the development history to see how we needed to adapt this build over time. 
+    - **WHAT**: A recent build session created a new architecture for the project that wasn't completed and could be given better grounding. 
+    - **WHY**: Understand what in the project directory is necessary, what might have been neglected in the transition, and what is not longer relevant. 
 
-  1. A micro-site SPA that allows my freelance clients to login, view their contract and sign it, view their invoice/balances, download those documents as PDFs, and then make payments through Stripe Custom UI integration. 
-  2. Learn how to repurpose an architecture currently understood and used for my portfolio to be used for a client's online art store website build by getting experience integrating Stripe Custom UI Components and expanding the automations to manage JSON data flow between tools. 
+## Project's Dual Purpose
 
-## Architecture Plan
+  1. A micro-site SPA for my freelance clients to login, view and sign their contract, download their invoices, and pay for my services.
+  2. A project where we can learn how to repurpose my portfolio website architecture to be used in a client's online art store website. 
+
+### The Architecture Plan
 
   + Portfolio base architecture 
-    - Simple HTML/CSS/JS build with 2 HTML template pages that loaded data from 30+ JSON entries with data for each project
-    - SPA-style routing via 404 redirect trick to host dynamic site on static GitHub Pages host 
-    - Manifest.json informed the page builds; GitHub Actions Workflow recreated manifest.json each update push 
-    - Understand base portfolio architecture: `assets/docs/RESOURCES/OG_JSON_ARCH_PORTFOLIO.md`
+    - Simple HTML/CSS/JS build with 2 HTML template pages that load data from a directory of 30+ JSON files, each representing a project
+    - SPA-style routing using a 404-redirect trick to host a dynamic site on our free, static, GitHub Pages host 
+    - GitHub Action Workflow auto-builds an `assets/js/manifest.json` file to inform what a page build's content and URL are
+    - **PLEASE READ TO UNDERSTAND OUR ORIGINAL BASE ARCHITECTURE**: `assets/docs/RESOURCES/OG_JSON_ARCH_PORTFOLIO.md`
 
-  + New payment site requirements 
-    - Stripe payments with data informed from job's JSON, facilitating checkout for two payments per project 
-    - Contract and invoice templates completed from job's JSON data and turned into PDFs available to client for download 
-    - Automations update JSON entry with new data managing state of payment progress, and storing produced document PDFs to serve 
+  + New payment site requirements
+    - Integrate payments using Stripe Custom UI Components, built from and facilitated by a single JSON file data per job 
+    - Produce, store artifacts for display and download, job Contract/Invoice PDFs using G.Docs Template and data from job JSON file
+    - Automations expanded to facilitate Stripe and PDF assets, while recording state and user-behavior events on job JSON file 
 
-  + Relation to client's art store website learning needs 
-    - Increased automations to handle backend inventory updates and facilitate payments, keeping frontend accurate 
-    - Using Stripe's Custom UI Components for fully expanded understanding to fulfill any client payment needs 
-    - State management tracking of user flow through events mirror online store frontend event to backend connection needs 
+  + How payment site fulfills learning needs for client's art store website 
+    - Increased automations to manage backend, facilitating payments and keeping inventory details up-to-date for frontend dynamic display
+    - Learning to implement Stripe Payments using their Custom UI Components to fulfill any possible client payment needs 
+    - Updates from frontend user-behavior stored as backend data to fulfill any custom analytics needs, or dynamic personalized page updates 
 
 ---
 
@@ -33,164 +35,95 @@
 
 ### Putting It All Together 
 
-  **ORIGINAL BUILD RESEMBLED ORIGINAL SYSTEM** 
+  **ORIGINAL BUILD RESEMBLED PORTFOLIO SYSTEM** 
 
-  + Same general structure as portfolio with minimal changes 
-    - New data types for new uses on same single-JSON per job method 
-    - Only one JSON data to display at a time, so manifest identified JSON to inform all pages in flow 
-    - Actions used JSON data to create new needs, then recorded data to reference as needed 
-  + JSON files in directory `assets/jobs/...` provided data 
-    - Information to create Stripe objects, then save object artifacts needed to build checkout session 
-    - Information to product contract and invoice documents, then save PDF artifacts needed to serve on front end 
-    - Client details and login keywords needed for manifest.json update job tracking 
-  + Pages built from JSON data onto HTML page templates as needed 
-    - `404.html` redirect triggered identification of JSON data to serve on HTML template pages 
-    - `index.html` and `job.html` provided structure regardless of JSON job selected 
-    - JavaScript files `assets/js/...` managed process 
-  + Setup workflow managed by expanded GitHub Action workflow `.github/actions/workflow/admin-push.yml`
-    - JSON data provided to Stripe API creating product and price objects 
-    - Stripe object IDs created saved on JSON file for later reference 
-    - JSON data provided to Google Drive/Docs API to fill in template placeholders 
-    - Completed Google Doc template saved as PDF and location in repository added to JSON for reference 
+  + Portfolio structure with minimal changes, JSON files in directory `assets/jobs/...` provided data
+    - Same single-JSON per job, new types of data and different data use-case purposes 
+    - Manifest identifies client's job JSON using login information; only one JSON data to display at a time, JSON updated with user state progress 
+    - GitHub Action Workflows use JSON data to create Stripe, PDF assets; record object artifacts needed to build checkout user session 
+  + Same `404.html` redirect, using HTML templates, `index.html` and `job.html` build from JSON, coordinated by `assets/js/...` files 
 
-  **ADAPTIVE LEARNING OUTPACED DEVELOPMENT OF CODE** 
+  **ADAPTIVE LEARNING OUTPACED CODING IN DEVELOPMENT** 
 
-  + Under-anticipated new functionality implementation iterative revisions 
-    - Learning new architectural elements resulted in improvement cycles 
-    - Simplifying logic until perfected and foolproof 
-  + Workflows for automations required full logical layout understanding to make completely efficient 
-    - High number of JSON schema changes needed to accommodate flow of iterative learning process 
-    - Code updated so many times to adapt as we did, learning as we were developing 
-  + Form stopped following function in the code 
-    - Eventually seemed more like "patching" together code, rather than writing best code for the purpose 
-    - Original code written from planning done with different understanding 
-  + Poorly kept documentation from under-anticipated adaptive development process 
-    - From a high-level, the build is conceptually simple and managing changes as needed started out simple 
-    - Complexity built, changes in code made intention less recognizable, doubling back to document was near impossible 
+  + Under-anticipated necessary iterative revisions of new functionality 
+    - Refactoring repeatedly for continuously simplified and eventual foolproof logic to be identified 
+    - Increased GitHub Action Workflow Complexity required full map understanding to find more efficient logic 
+    - These iterative changes required numerous JSON schema changes, requiring all code to be updated 
+  + This eventually resulted in form no longer following function of code and system design 
+    - Original code was written with different planning intentions and understanding of system design 
+    - Eventually resulted in "patching" together code that would be very different if written for best, final purpose and system design understanding 
+  + Unexpected changes of a build that is conceptually simple from a high-level meant documentation was not adequate until complexity was recognized 
 
-  **THE BUGGY RESULT OF BUILDING LIKE AN ARTIST** 
+  **BUGGY RESULTS OF DEVELOPMENT BUILDING LIKE AN ARTIST** 
 
-  + Unending wall of bugs that took days to get through one-by-one, in every single function 
-  + AI stopped following bug patch best practices 
-    - Discover of one bug illustrated reason for issue 
-    - Conceptual reason for issue should then be applied in looking through scripts for similar issues 
-    - Instead of this proactive patching, we'd patch one issue, then test again 
-  + Created versioning sub-directories late 
-    - Only v4 and now v5 have been accurate representations of update process 
-    - Earlier versions are just estimates to have place to store old documentation 
+  + Unending wall of bugs, each fully stopped other testing, took days to handle one-by-one for every function 
+    - AI stopped implementing patches in pragmatic way by looking for conceptually similar bugs proactively 
+    - When complexity was recognized we set up versioning, but only v4 and (current) v5 are anywhere near helpful for storing old documentation 
 
 ### Identifying New Path Forward 
 
   **CAPITALIZING ON RECOGNIZABLE PATTERNS** 
 
-  + Troublesome larger functionality issues better repaired with new 'set of eyes' or 'perspective'
-    - Created current state document and AI context primer documents 
-    - Then starting a new agent instance with this knowledge often resulted in faster repair if done right 
-  + Historic 'development' then 'debug and patch' process ingrained but outdated 
-    - Today's AI-pair coding tools make decisions from training data that solved problems using different tools 
-    - Old process valued keeping written code INCREDIBLY HIGH due to how resource intense producing functional code was 
-    - Old process therefore greatly valued spotting single bug and patching single area over whole code rewrites 
-  + LLM limitations from design encourage retrying over fixing on some level 
-    - LLM output can "go down the wrong path" 
-    - Repeating the same prompt can get different output that is most accurate 50% of the time 
-  + Significant new tool abilities have implications that need to be applied to process 
-    - The fact that an AI with all necessary information can write bug-free code on the first try is new 
-    - Being able to write 20+ files of code creating an entire projects repository is completely new 
-  + Full understanding of project variables and an exclusively executable implementation plan that isn't adaptive 
-    - This can result in phenomena of "one shotting" an entire website or app that is function on the first try 
-    - We've done this many time with website builds, and some simple apps 
+  + Creating proper context primer and tapping in new agent solved larger, more troublesome functionality issues more effectively 
+    - Getting a 'new perspective' or 'set of eyes' resulted in faster repair but only with proper documentation 
+  + Modern tools and process do not match historic 'development' and then 'debug and patch' process that is so ingrained in training data 
+    - Old processes valued maintaining written code INCREDIBLY HIGH compared to today, as it was resource intensive to produce any code 
+    - Old process therefor greatly valued the 'spotting single bug' and 'patching together until it works' mess we found ourselves in 
+  + Contrary to this process, LLM limitations where output can 'go down the wrong path' encourage retrying same prompt over fixing singular output 
+    - Impact of this compounds when you consider writing 20+ files in an entire directory, in minutes, can sometimes turn out bug-free 
+  + Significant tool capability shift has significant implications for applied process 
+    - We learned as we built, but when AI has full understanding and final function logic, they can quickly create error-free work 
+    - Exclusively executable implementation plans that aren't adaptive should logically result in faster completion with AI retrying full rewrites 
+  + This has been seen in 'one-shotting' websites and apps; we should adapt our process accordingly instead of hammering away at outdated methodology
 
-  **APPLYING IMPLICATIONS OF MODERN TOOLS TO PROCESS** 
+  **APPLYING THESE IMPLICATIONS TO OUR PROCESS** 
 
-  + Taking inventory of where we were in development 
-    - All new features had been iterated to simplified logic perfection 
-    - Unexpected variables and resulting necessary changes had all been identified 
-    - New learning curves had been climbed 
-  + Implications of this status when considering modern tools and historic process 
-    - Stop over-valuing current code and making patchwork attempts at debugging 
-    - Looking at what know, the constants we have, ask if an implementation plan would look the same 
-  + Reconsidering historic process worth 
-    - Imagine a function that pulls from 3 different scripts 
-    - Test is set up, encounters one bug, further testing is blocked 
-    - Considerable amount of time is spend finding bug cause and then solution 
-    - Rebuilding and then deploying the application 
-    - Setting up the testing again, only to repeat the cycle 
-    - Imagine that each script has at least 5 bugs 
-  + Now consider new process worth 
-    - Examine and understand necessary data flow for function 
-    - What pieces come together, to do what 
-    - Imagine instead taking this understanding and rewriting the full 3 scripts of code 
-    - Each rewrite of all 3 takes 1 minute 
-    - How many rewrites might it be worth retrying before switching to a specific 1-bug-at-a-time approach 
+  + Imagine function that uses 3 scripts, each with 5 blocking bugs 
+    - Instead of spending upwards of 15 hours fixing this one function, step back and take a big picture review 
+    - Examine and understand necessary data flow for functions, consider how they work together and to do what, then rewrite the script 
+    - Doesn't even need to result in 3 scripts again; if it functions, then fitting it into your overall design will still be quicker than the debugging 
+  + Take inventory of development state, all finalized, simplified function logic, and perfected flow sequence for processes 
+    - Recognize when process of climbing new learning curves is complete 
+    - Stop over-valuing current code, over-extending time spent making patchwork debugging attempts 
+  + Take these discovered constants and create an exclusively executable implementation plan 
 
 ### Rebuilding From Ground Up 
 
-  **SETTING NEW AGENT UP FOR THIS NEW, MODERN APPROACH** 
+  **SETTING UP A NEW AGENT, FOR THIS NEW APPROACH** 
 
-  + Rationale for modern tool needing modernized process conveyed in simplified manner 
-  + Agent asked to take in the constants and avoid overthinking current approach 
-    - All flow logic needed regardless of architecture or because it was already in its simplest, most efficient form 
-    - All tools and API calls needed to facilitate creation of objects and recording of their artifacts 
-    - Understand what we have, what logic is in final form, and what we need to get to 
-  + Agent then asked to come up with implementation plan based on that information alone 
-  + Agent then asked to compare that plan with current state of project and make assessment 
-    - What way forward made the most sense for the best quality end product 
-    - How much time would it likely take to proceed in either method 
-    - Can a hybrid method be created and what would that look like 
+  + Above rationale and logic for new process explained, though not nearly as effectively and concise as above 
+    - Agent asked to do what the 3-scripts-5-bugs-each example conceptually did by taking in entire project's constants and logic 
+    - Asked to then create new implementation plan, though again, unfortunately before coining 'exclusively executable' 
+    - Agent asked to then finish reading all context priming documents about current state, compare to their new plan, come up with path forward 
   
-  **RESULTING CURRENT BUILD STATE** 
+  **RESULT OF THIS FIRST ATTEMPT** 
 
-  + Process wasn't perfect 
-    - There were definitely some things the agent didn't quite fully understand enough before implementing new architecture 
-    - This caused some gaps in the rebuild from being completed and working 
-  + Still needed to work through some specifics  
-    - Building checkout_session still not fully understood for custom UI Stripe components 
-    - Discovered a plan in Stripe docs that requires human and AI to walk through process 
-  + Agent kept forgetting some aspects of the build 
-    - Repeatedly forgot we were already using Vercel stateless functions 
-    - Seemed to get very confused about how some of the unchanged functionality worked when it came to planning remaining functionality 
-  + Unexpectedly large shift in architecture languages 
-    - Expected that we would stay with the same portfolio-learned architecture 
-    - Seemed like we had no need to change things like working in HTML/CSS/JS 
-  + New architecture languages  
-    - React and typescript for a payment system or shop make sense 
-    - Though I have less understanding and experience in these languages 
-    - Things have progressed rather quickly 
-    - Got to same testing spot we left with previous build 
-    - New build from start to finish took less than an hour 
+  + Didn't have a proper process for identifying and compiling all the constants, final function logic, workflow sequence perfections 
+    - They sort of winged it, which inevitably resulted in an incomplete solution; the solution might still be logical, but needs completion 
+    - In future will need emphasis on language for creating an 'exclusively executable implementation plan' 
+    - Instead of creating a plan to create solutions, all solutions should be completed for the plan; front-loading the work in more complete way 
+  + Current state details will show how frontend user flow implementation was not as complete as the fully detailed documentation 
+    - Agent kept forgetting that we were already deployed on and using Vercel stateless functions 
+    - Agent made a large shift in architecture language, which is much more literal than the conceptual rebuild we wanted 
+    - It might make sense to keep with react and typescript; it makes sense for payments platform and the backend setup flow is done 
+
+### Final Session Work Starts To Show Itself 
+
+  + Hopefully this already illustrates, conceptually, what the starting point will be for our final session: We need to fully understand and then detail all of the frontend user-behavior flow functionality, logic, and flow sequence to create a fully exclusively executable implementation plan. 
+  + We're almost there in the documentation, but will need to carefully work together creating `checkout_session_1` and `checkout_session_2` collection of script files which we'll complete using an interactive Stripe guide specifically for choosing things like language, and other variables, and then going step-by-step to get actual completed code for our use-case. 
+  + The other main functionality needing repair is the PDF viewer. However, the actual movement from phase to phase, as of the last test, is not functional beyond user login. All of this will become much more clear and actionable when reading the context priming and project overview and current state documents to follow this one. 
 
 ---
 
-## Core Lessons
+## Core Lesson of Late-Stage Development Audit & Rebuild 
 
-### Late-Stage Development Architectural Review Requests 
+  + When development is adaptive, involves learning, and results in iterative perfection as part of the process, a well planned late-stage audit of application functionality and fresh code rewrite should be extremely valuable and eliminate a lot of debugging. 
 
-  + When development is adaptive and involves learning and perfecting as process, late state audit makes sense to help avoid excessive bugs and need to patch up code written initially with a different understanding, but should be done with clearer directives and an absolutely thorough project context priming that is comprehensive 
-  + For example, not that we're going to backtrack now, but perhaps "new architecture" wasn't exactly what should have been communicated, when what was really necessary was probably much smaller, involving no language changes, but re-writing of many main files, evaluating how the files work together to consolidate and improve where possible 
+  + Wording used in directing this process will be extremely important and should be conveyed as carefully as was detailed above. For example "new architecture" is probably much larger than what is actually needed; what is needed is an evaluation of how the functions work together and how the data flows through the system, so that current code files can be rewritten either in their current system design, or with a new repository structure that makes more sense.
 
-### **BIG-PICTURE PROBLEM:** Communication wasn't part of the process
-  
-  + Working agentically does not mean working independently 
-    - Unknowns and variables should be discussed and figured out together 
-    - Specifics of the plan, if request was open ended, must be decided upon and understood by all parties 
-  + Results of a lack of communication 
-    - Architectural shift wasn't done in an expected way 
-    - Changes to build were not complete or as precise as they should have been 
-    - Agent did not pause to chat and make sure they understood the old architecture 
-    - Agent made assumptions about the architecture and the needs, creating issues that took time to resolve that would have otherwise taken no time 
-  + Amount of work increases because of an expectation of later communication that is never planned 
-    - Agent used placeholders, which is unacceptable because they're created with expectation of secondary script review that is never planned 
-    - Code must be written as final, production ready, code and if not possible, then agent should stop to discuss unknown variables 
+  + Planning phase must be communication heavy and be continued until understanding is complete and any question marks are identified and solutions for them are found then detailed. Plans should require only execution. All details should be completely sorted out; all variables discussed and any areas not understood discussed in advance rather than expecting things will come together accurately in the moment. 
 
-### **SOLVE-ALL SOLUTION:** Create plans that require only execution 
-
-  + Plan should have all details completely sorted out 
-    - Discuss variables and question-marks, areas not fully understood; be pragmatic from the start 
-    - Research developmental unknowns or troublesome areas 
-    - Plans are where placeholders would go, then discussed until filled in 
-  + Often prompts and spec plans ask for solutions 
-    - Don't presume to come up with this solution as part of the developmental process 
-    - Presume that coming up with the solution is required for the plan 
+  + When prompts or spec plans ask for solutions, don't presume to come up with solutions as part of the development process; instead presume that coming up with the solution is required for the development plan, before development even starts. Conceptually, it just means that the 'production ready' version of the product should be the development plan, before development even starts. 
 
 ---
 
@@ -219,6 +152,7 @@
     - It is because **EVERY** bug in frontend testing is a complete block that we need to perfect frontend code **BEFORE** testing again 
 
   **STEP 3: Update PDF viewer to fit visual design mockups**
+
   + Current solution was meant to clean up the clunky iFrame, but is just as clunky 
     - I had done research using Dia Browser and created an implementation guide 
     - Whatever methodology was used doesn't fit design specs though did add a Pen and Canvas so User could literally sign 
@@ -239,6 +173,7 @@
     - Text is white with AgencyFB font which is in repository here `assets/font/AgencyFB-RegularCompressed.otf` and `assets/font/AgencyFB-RegularCondensed.otf`
 
   **STEP 4: Use Stripe Docs "Build a checkout page with Checkout Sessions API" guide with human**
+
   + The last notable item I already know we need to do is set up checkout sessions properly 
     - The initialization for checkout_sessions_1 after the invoice and checkout_sessions_2 after the balance 
     - Each agent so far had issues, initially between different APIs and then between ui-type embedded (not what we want) and custom 
@@ -261,6 +196,7 @@
     - They expire and can't be made ahead of time like the other objects were created ahead of time when the JSON job file was originally added 
 
   **STEP 5: Finish testing document and add more specifics** 
+
   + Current test results shared earlier that stop after frontend login `assets/docs/v5/TEST_uid-ilt-036.md` 
     - After build of front end is confirm sound and fully understood, then we should finish testing and record each step there 
     - Under the steps already there and new steps I would like to indicate exactly what file(s) are responsible for facilitating that step 
