@@ -29,49 +29,9 @@
 
 ### End-to-End Data & User Flow 
 
-- **ADMIN ADDS PROJECT JOB** -> `(01)` New Job JSON uploaded -> `(02)` Stripe catalog objects created -> `(03)` Stripe object artifacts added back to JSON -> `(04)` Job contract, invoice, and balance PDFs produced -> `(05)` PDF artifacts added to JSON -> **PLATFORM READY FOR CLIENT** -> `(06)` Client login -> `(07)` First user workflow event trigger collected until end of user session -> `(08)` Login Details Locate JSON -> `(09)` JSON Populates Contract Dynamically -> `(10)` User lands on Contract page -> `(11)` User Signs Contract -> `(12)` Adds triggered event to collection during flow -> `(13)` User lands on invoice PDF -> `(14)` User downloads or rejects download of docs -> `(14)` Adds triggered event to collection during flow -> `(15)` Next page load starts with Stripe API call to create checkout session -> `(16)` User lands on initialized Payment_1 checkout Stripe Embedded component -> `(17)` User makes successful payment -> `(18)` Adds triggered event to collection during flow -> `(19)` User lands on return_url for payment_1 -> `(20)` User leaves site and all events are written to JSON -> `(21)` User returns when notified to make final payment -> `(22)` Client login -> `(23)` Login Details Locate JSON -> `(24)` JSON referenced to see what state.client_status is next -> `(25)` User lands on balance PDF document -> `(26)` User downloads or rejects download of docs -> `(27)` Adds triggered event to collection during flow -> `(28)` Next page load starts with Stripe API call to create checkout session -> `(29)` User lands on initialized Payment_2 checkout Stripe Embedded component -> `(30)` User makes successful payment -> `(31)` Adds triggered event to collection during flow -> `(32)` User lands on return_url for payment_2 with links for final access to download any PDF -> `(33)` User leaves site and all events are written to JSON -> **CLIENT COMPLETED PROJECT PAYMENTS AND FLOW**
+  + The following is illustrative of User and user-behavior event tracking. It does not specifically illustrate exactly where and through what service data travels; e.g. the user-behavior events on the front end of the website are sent through Vercel serverless functions to get to the GitHub Actions backend. Stripe events come through webhook which Vercel also currently captures initially. 
 
----
-
-## Generalized Goals & Tips for Approach 
-
-  1. Get your head space right 
-    + Many of the old files are still in the project directory so understand the architecture `assets/docs/v5/CURRENT_STATE.md` 
-    + Understand the JSON and 404-redirect dynamic architecture `assets/docs/v5/AI_CONTEXT_PRIMER.md` 
-    + Consider if it makes more sense to rewrite a file in full instead of getting into repeated debugging 
-      - With todays products, LLM output rate, and LLM tendency to go down wrong path 
-      - Simple process to follow is that when bug identified, read full script to look for similar bugs and rewrite in full if there is more than one 
-      - This will save us multiple rebuilds and testing rounds which take at least 10 minutes every bug round  
-  2. Understand new build, don't presume code is accurate 
-    + Conduct in-depth review of ALL script files 
-      - Understand the new build well enough to check the previous AIs work 
-      - Know where to pick things up easily 
-      - Check in with User instead of making assumptions when things aren't clear enough 
-    + Logic written in this file is explicit for a reason 
-      - Often the AI writes the script not fully understanding the depth of the logic 
-      - They won't immediately see purpose of specifics and will skip to simplify code, always causing bugs 
-      - The written logic includes exactly what is needed and nothing extra and nothing missing 
-  3. Focus on executing plan not proposing solutions in plan 
-    + Don't propose plan as solution, create intentional detailed plan to execute instead 
-    + If the directions or next steps are not clear 
-      - Avoid on-the-fly solutions and building code 
-      - Do not make assumptions or presume what to do 
-    + Always pause and get with user to fully discuss what the plan should be 
-      - Do all necessary research and find all code snippets and patterns needed 
-      - Together, EXPLICITLY PLAN next steps 
-    + Don't create huge implementation plan addressing everything needed by coming up with solutions in the plan 
-      - Instead, stop, talk it out with User, be exact 
-      - Engage user for planning steps, don't create list of steps and then ask for review 
-    + Engagement to plan concrete steps together is best 
-      - Then when you start working all you are doing is executing 
-      - This should eliminate so many bugs 
-    + Get with User to walk through human friendly only checkout_session code creation tool, for example 
-    + Talk out all previous AI concerns with Sean 
-  4. User works and thinks with a design-first mentality 
-    + Understand the importance of high bar 
-    + Current new homepage is ugly colors 
-    + PDF viewer is clunky not minimal and clean 
-    + These are clients paying me to do design work for them 
+- **ADMIN ADDS PROJECT JOB** -> `(01)` New Job JSON uploaded -> `(02)` Stripe catalog objects created -> `(03)` Stripe object artifacts added back to JSON -> `(04)` Job contract, invoice, and balance PDFs produced -> `(05)` PDF artifacts added to JSON -> **PLATFORM READY FOR CLIENT** -> `(06)` Client login -> `(07)` First user workflow event trigger collected until end of user session -> `(08)` Login Details Locate JSON -> `(09)` JSON Populates Contract Dynamically -> `(10)` User lands on Contract page -> `(11)` User Signs Contract -> `(12)` Adds triggered event to collection during flow -> `(13)` User lands on invoice PDF -> `(14)` User downloads docs or just acknowledges them -> `(14)` Adds triggered event to collection during flow -> `(15)` Next page load starts with Stripe API call to create checkout session -> `(16)` User lands on initialized Payment_1 checkout Stripe component -> `(17)` User makes successful payment -> `(18)` Adds triggered event to collection during flow -> `(19)` User lands on return_url for payment_1 -> `(20)` User leaves site and all events are written to JSON -> **CLIENT COMPLETED FIRST PAYMENT, RETURNS LATER TO MAKE SECOND PAYMENT** --> `(21)` User returns when notified to make final payment -> `(22)` Client login -> `(23)` Login Details Locate JSON -> `(24)` JSON referenced to see what state.client_status is next -> `(25)` User lands on balance PDF document -> `(26)` User downloads docs or just acknowledges them -> `(27)` Adds triggered event to collection during flow -> `(28)` Next page load starts with Stripe API call to create checkout session -> `(29)` User lands on initialized Payment_2 checkout Stripe component -> `(30)` User makes successful payment -> `(31)` Adds triggered event to collection during flow -> `(32)` User lands on return_url for payment_2 with links for final access to download any PDF -> `(33)` User leaves site and all events are written to JSON -> **CLIENT COMPLETED PROJECT PAYMENTS AND FLOW**
 
 ### Current Job JSON Schema 
 

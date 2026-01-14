@@ -165,7 +165,7 @@
    */
   async function init(explicitPaymentNumber) {
     // Note: FlowManager ensures section is visible before calling init
-    
+
     const jobData = await getJobData();
 
     if (!jobData) {
@@ -176,10 +176,10 @@
     }
 
     // Use explicit number from FlowManager, or fallback (shouldn't happen)
-    const paymentNumber = explicitPaymentNumber || 1; 
+    const paymentNumber = explicitPaymentNumber || 1;
 
     // ... (rest of render logic is fine) ...
-    
+
     const jobId = jobData.product?.id || sessionStorage.getItem('jobId');
 
     // v4 schema: Get PDF URL from docs.invoice (or balance)
@@ -187,7 +187,7 @@
     // Payment 1 -> 'invoice'
     // Payment 2 -> 'balance'
     const docKey = paymentNumber === 1 ? 'invoice' : 'balance';
-    
+
     const pdfPath = jobData.docs?.[docKey]?.pdf;
     const pdfUrl = pdfPath
       ? `https://payments.august.style/${pdfPath}`
@@ -211,23 +211,23 @@
     // Show Action Buttons & Setup Listener
     const actionsDiv = document.getElementById('invoice-actions');
     const proceedBtn = document.getElementById('invoice-proceed-btn');
-    
+
     if (actionsDiv) {
       actionsDiv.classList.remove('hidden');
-      
+
       if (proceedBtn) {
-         proceedBtn.innerHTML = `Proceed to Payment ${paymentNumber} <svg class="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
-         
-         // Clone to strip old listeners
-         const newBtn = proceedBtn.cloneNode(true);
-         proceedBtn.parentNode.replaceChild(newBtn, proceedBtn);
-         
-         newBtn.addEventListener('click', () => {
-             handleProceed(jobId, paymentNumber, jobData);
-         });
-         
-         // Reset state
-         newBtn.disabled = false;
+        proceedBtn.innerHTML = `Proceed to Payment ${paymentNumber} <svg class="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>`;
+
+        // Clone to strip old listeners
+        const newBtn = proceedBtn.cloneNode(true);
+        proceedBtn.parentNode.replaceChild(newBtn, proceedBtn);
+
+        newBtn.addEventListener('click', () => {
+          handleProceed(jobId, paymentNumber, jobData);
+        });
+
+        // Reset state
+        newBtn.disabled = false;
       }
     }
 
@@ -239,30 +239,30 @@
    * Handle Proceed
    */
   async function handleProceed(jobId, paymentNumber, jobData) {
-      const btn = document.getElementById('invoice-proceed-btn');
-      if (btn) {
-          btn.disabled = true;
-          btn.innerHTML = 'Processing...';
-      }
+    const btn = document.getElementById('invoice-proceed-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = 'Processing...';
+    }
 
-      // Track event
-      if (typeof EventTracker !== 'undefined') {
-          // Ensure we call generic track if available, or fallback
-          if (EventTracker.track) {
-             await EventTracker.track(jobId, 'downloaded_docs', { payment_number: paymentNumber });
-          } else {
-             // Fallback for safety
-             console.warn('EventTracker.track missing');
-          }
-      }
-
-      // Update FlowManager
-      const key = paymentNumber === 1 ? 'invoice' : 'balance';
-      if (window.FlowManager) {
-          window.FlowManager.updateState(key);
+    // Track event
+    if (typeof EventTracker !== 'undefined') {
+      // Ensure we call generic track if available, or fallback
+      if (EventTracker.track) {
+        await EventTracker.track(jobId, 'downloaded_docs', { payment_number: paymentNumber });
       } else {
-          window.location.reload();
+        // Fallback for safety
+        console.warn('EventTracker.track missing');
       }
+    }
+
+    // Update FlowManager
+    const key = paymentNumber === 1 ? 'invoice' : 'balance';
+    if (window.FlowManager) {
+      window.FlowManager.updateState(key);
+    } else {
+      window.location.reload();
+    }
   }
 
   // Export

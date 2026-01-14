@@ -345,10 +345,10 @@
 
       // Update FlowManager
       if (window.FlowManager) {
-          window.FlowManager.updateState('contract_signed', clientDate);
+        window.FlowManager.updateState('contract_signed', clientDate);
       } else {
-          // Fallback if FlowManager missing (shouldn't happen)
-          window.location.reload();
+        // Fallback if FlowManager missing (shouldn't happen)
+        window.location.reload();
       }
 
     } catch (error) {

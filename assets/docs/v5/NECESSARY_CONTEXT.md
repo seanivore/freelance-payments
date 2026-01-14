@@ -135,6 +135,10 @@
     - From what I can tell, the new architecture was built without a full understanding of how Vercel was playing a role 
     - And then Vercel was only patched in afterwards 
 
+  + Pay special attention to the "Documentation Discrepancies" listed in the `assets/docs/v5/CURRENT_STATE.md` document 
+    - We will probably want to discuss them particularly #4 I do not think it accurately implemented 
+    - I mention throughout the steps below, but I think we should understand and rewrite front end script rather than try to debug this agent's work 
+
   + This seems like it should explain why the first half, backend setup and build automations, of the application functionality works perfectly 
     - Those were completely debugged and probably even left to function using the same previous python and JS files 
 

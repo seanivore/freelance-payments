@@ -46,7 +46,7 @@ A custom React component utilizing `pdfjs-dist`
 Serverless functions running on Vercel (Node.js) 
 
   + `create-checkout-session.js` 
-    - **CRITICAL WORKFLOW NOT CONFIRMED** 
+    - **CRITICAL WORKFLOW NOT CONFIRMED**  --> and according to Stripe docs, there are more files than this necessary; details TK 
     - Generates Stripe Checkout Sessions on demand 
     - Requires runtime execution (Node.js).
   + `track-event.js` 
