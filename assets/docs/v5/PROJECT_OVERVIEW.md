@@ -73,6 +73,16 @@
     + PDF viewer is clunky not minimal and clean 
     + These are clients paying me to do design work for them 
 
+### Current Job JSON Schema 
+
+  * **BLANK VERSION** TO BE COPIED TO `assets/jobs/...` 
+    WHEN CREATING A NEW JOB 
+    `assets/docs/uid-xxx-xxx.json` 
+
+  * **GUIDE VERSION** TO USE WHEN FILLING OUT A NEW JOB JSON 
+    IT DEFINES THE FORMAT OF EACH VALUE, WHAT IS REQUIRED, AND WHAT IS PROVIDED 
+    `assets/docs/GUIDE_uid-xxx-xxx.json.md` 
+
 ### Current Project Directory Important Files 
 
 ```
