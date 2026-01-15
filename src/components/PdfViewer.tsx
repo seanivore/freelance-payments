@@ -42,6 +42,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const loadedBytesRef = useRef<ArrayBuffer | null>(null);
   const hasEmittedLoadedRef = useRef(false);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map()); // Store refs for all page canvases
+  const renderedPagesRef = useRef<Set<number>>(new Set()); // Track which pages have actually been rendered
 
   useEffect(() => {
     // Set PDF.js worker path (use unpkg CDN in production, local in dev)
@@ -64,6 +65,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       setIsLoading(true);
       setPdfError(null);
       hasEmittedLoadedRef.current = false; // Reset emit flag for new PDF
+      renderedPagesRef.current.clear(); // Clear rendered pages when loading new PDF
       
       openPdfFromBytes(initialPdfBytes)
         .then(() => {
@@ -156,18 +158,19 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       const canvas = canvasRefs.current.get(pageNum);
       // Check if canvas exists and is in the DOM
       if (canvas && canvas.isConnected) {
-        // Check if canvas hasn't been rendered yet (width === 0 or very small means not rendered)
-        if (canvas.width === 0 || canvas.width < 100) {
+        // Check if this page has actually been rendered (not just canvas exists)
+        if (!renderedPagesRef.current.has(pageNum)) {
           try {
             console.log(`Rendering page ${pageNum}...`);
             await renderPage(pageNum, canvas);
+            renderedPagesRef.current.add(pageNum); // Mark as rendered
             console.log(`Page ${pageNum} rendered successfully`);
           } catch (err) {
             console.error(`Error rendering page ${pageNum}:`, err);
             setPdfError(`Failed to render page ${pageNum}: ${err}`);
           }
         } else {
-          console.log(`Page ${pageNum} already rendered (width: ${canvas.width})`);
+          console.log(`Page ${pageNum} already rendered (tracked in renderedPagesRef)`);
         }
       } else {
         console.warn(`Canvas for page ${pageNum} not ready yet`, { 
