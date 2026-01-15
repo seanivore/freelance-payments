@@ -123,12 +123,24 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     
     const totalPages = pdfDoc.numPages;
     
+    // Wait a bit to ensure all canvases are mounted
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
     // Render pages sequentially to avoid overwhelming the browser
     for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
       const canvas = canvasRefs.current.get(pageNum);
-      // Check if canvas exists and hasn't been rendered yet (width === 0 means not rendered)
-      if (canvas && canvas.width === 0) {
-        await renderPage(pageNum, canvas);
+      // Check if canvas exists and is in the DOM
+      if (canvas && canvas.isConnected) {
+        // Check if canvas hasn't been rendered yet (width === 0 or very small means not rendered)
+        if (canvas.width === 0 || canvas.width < 100) {
+          try {
+            await renderPage(pageNum, canvas);
+          } catch (err) {
+            console.error(`Error rendering page ${pageNum}:`, err);
+          }
+        }
+      } else {
+        console.warn(`Canvas for page ${pageNum} not ready yet`);
       }
     }
   }
@@ -150,18 +162,53 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }
   }
 
-  // Render all pages when PDF doc is loaded
+  // Render all pages when PDF doc is loaded and canvases are ready
   useEffect(() => {
     if (pdfDoc && !isLoading) {
-      // Small delay to ensure canvases are fully mounted
-      const timer = setTimeout(() => {
-        renderAllPages().catch((err) => {
-          console.error('Error rendering PDF pages:', err);
-          setPdfError('Failed to render PDF pages');
-        });
-      }, 100);
+      // Wait for canvases to be mounted - use requestAnimationFrame for better timing
+      let frameId: number;
+      let retryCount = 0;
+      const maxRetries = 20; // Max 2 seconds of retries
       
-      return () => clearTimeout(timer);
+      const checkAndRender = () => {
+        const totalPages = pdfDoc.numPages;
+        const readyCanvases = Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(pageNum => {
+            const canvas = canvasRefs.current.get(pageNum);
+            return canvas && canvas.isConnected && canvas.parentElement !== null;
+          });
+        
+        // If all canvases are ready, render
+        if (readyCanvases.length === totalPages) {
+          console.log(`All ${totalPages} canvases ready, starting render...`);
+          renderAllPages().catch((err) => {
+            console.error('Error rendering PDF pages:', err);
+            setPdfError('Failed to render PDF pages');
+          });
+        } else if (retryCount < maxRetries) {
+          // Retry after a short delay
+          retryCount++;
+          frameId = requestAnimationFrame(() => {
+            setTimeout(checkAndRender, 50);
+          });
+        } else {
+          console.warn(`Only ${readyCanvases.length} of ${totalPages} canvases ready after ${maxRetries} retries`);
+          // Try rendering anyway with what we have
+          renderAllPages().catch((err) => {
+            console.error('Error rendering PDF pages:', err);
+            setPdfError('Failed to render PDF pages');
+          });
+        }
+      };
+      
+      // Start checking after a short initial delay
+      frameId = requestAnimationFrame(() => {
+        setTimeout(checkAndRender, 100);
+      });
+      
+      return () => {
+        if (frameId) cancelAnimationFrame(frameId);
+      };
     }
   }, [pdfDoc, isLoading, scale]); // Re-render when PDF doc changes, loading completes, or scale changes
 
