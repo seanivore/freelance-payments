@@ -9,7 +9,7 @@
  */
 
 module.exports = async (req, res) => {
-  // Set CORS headers - allow requests from frontend domain
+  // CORS configuration - allow requests from frontend domain
   const allowedOrigins = [
     'https://payments.august.style',
     'http://localhost:5173', // Vite dev server
@@ -17,18 +17,25 @@ module.exports = async (req, res) => {
   ];
   
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
+  const isAllowedOrigin = origin && allowedOrigins.includes(origin);
+  
+  // Set CORS headers for all requests (including OPTIONS)
+  if (isAllowedOrigin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
-  
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
 
-  // Handle preflight OPTIONS request
+  // Handle preflight OPTIONS request - MUST return early with headers set
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+  
+  // Reject if origin not allowed (for non-OPTIONS requests)
+  if (!isAllowedOrigin) {
+    return res.status(403).json({ error: 'Origin not allowed' });
   }
 
   // Only allow POST
