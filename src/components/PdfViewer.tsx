@@ -40,6 +40,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const [section, setSection] = useState<Section>(initialSection);
   const [isSignModalOpen, setIsSignModalOpen] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const loadedBytesRef = useRef<ArrayBuffer | null>(null);
 
   useEffect(() => {
     // Set PDF.js worker path (use CDN in production, local in dev)
@@ -49,16 +51,27 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         : '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
   }, []);
 
-  // Load PDF when initialPdfBytes is provided
+  // Load PDF when initialPdfBytes is provided (only once per unique bytes)
   useEffect(() => {
-    if (initialPdfBytes) {
+    // Prevent infinite loop: only load if bytes changed and not already loading
+    if (initialPdfBytes && initialPdfBytes !== loadedBytesRef.current && !isLoading) {
+      loadedBytesRef.current = initialPdfBytes;
       setPdfData(initialPdfBytes);
-      openPdfFromBytes(initialPdfBytes).catch((err) => {
-        console.error('Failed to load PDF:', err);
-        setPdfError('Failed to load PDF document');
-      });
+      setIsLoading(true);
+      setPdfError(null);
+      
+      openPdfFromBytes(initialPdfBytes)
+        .then(() => {
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.error('Failed to load PDF:', err);
+          setPdfError('Failed to load PDF document');
+          setIsLoading(false);
+          loadedBytesRef.current = null; // Allow retry
+        });
     }
-  }, [initialPdfBytes]);
+  }, [initialPdfBytes, isLoading]);
 
   async function renderPage(pageNum: number) {
     if (!pdfDoc) return;
@@ -75,11 +88,19 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   }
 
   async function openPdfFromBytes(bytes: ArrayBuffer) {
-    const docTask = getDocument({ data: bytes });
-    const doc = await docTask.promise;
-    setPdfDoc(doc);
-    await renderPage(1);
-    emitEvent?.('contract_loaded', { page: 1, totalPages: doc.numPages });
+    try {
+      const docTask = getDocument({ data: bytes });
+      const doc = await docTask.promise;
+      setPdfDoc(doc);
+      await renderPage(1);
+      // Only emit event once when PDF is first loaded (not on every render)
+      if (loadedBytesRef.current === bytes) {
+        emitEvent?.('contract_loaded', { page: 1, totalPages: doc.numPages });
+      }
+    } catch (err) {
+      console.error('Error loading PDF:', err);
+      throw err;
+    }
   }
 
   // Stamp signature at bottom of last page
@@ -176,7 +197,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   }
 
   // Show loading state if PDF not loaded yet
-  if (!pdfDoc) {
+  if (!pdfDoc || isLoading) {
     return (
       <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
         <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[600px]">
