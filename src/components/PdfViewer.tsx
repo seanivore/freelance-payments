@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import configJson from '../config/pdfViewer.config.json';
 import { dataURLToUint8Array } from '../lib/pdf-utils';
 import { GateBar } from './GateBar';
-import { format } from 'date-fns';
 
 // PDF.js (ESM, Vite-friendly)
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
@@ -249,7 +248,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   }, [pdfDoc, isLoading, scale]); // Re-render when PDF doc changes, loading completes, or scale changes
 
   // Stamp signature at bottom of last page
-  async function embedSignature(signatureDataUrl: string) {
+  async function embedSignature(
+    signatureDataUrl: string,
+    legalName: string,
+    signedDate: string
+  ) {
     if (!pdfData) return;
 
     try {
@@ -262,7 +265,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         const lastPage = pages[pages.length - 1];
         const { width } = lastPage.getSize();
         
-        // Place at bottom right
+        // Place signature at bottom right
         const sigWidth = 200;
         const sigHeight = 100;
         
@@ -273,8 +276,15 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
             height: sigHeight
         });
 
+        // Add legal name below signature
+        lastPage.drawText(`Signed by: ${legalName}`, {
+            x: width - sigWidth - 50,
+            y: 30,
+            size: 12
+        });
+
         // Add Date
-        lastPage.drawText(`Signed: ${format(new Date(), 'yyyy-MM-dd')}`, {
+        lastPage.drawText(`Signed: ${signedDate}`, {
              x: 50,
              y: 70,
              size: 12
@@ -285,8 +295,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         // Update view with signed PDF
         await openPdfFromBytes(bytes.buffer as any);
         
-        // Emit success
-        emitEvent?.('contract_signed', { date: format(new Date(), 'yyyy-MM-dd') });
+        // Emit success with name and date
+        emitEvent?.('contract_signed', { 
+          date: signedDate,
+          legalName: legalName
+        });
         // NOTE: App.tsx will handle the navigation via optimistic update.
         setSection('invoice');
         
@@ -296,38 +309,9 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }
   }
 
-  // Gate handlers
-  // Gate handlers
+  // Gate handler for contract section only
   function handleSignContract() {
     setIsSignModalOpen(true);
-  }
-
-  function handleInvoiceDocs(choice: 'yes' | 'no') {
-    emitEvent?.('invoice_docs', { choice });
-  }
-
-  function handleBalanceDocs(choice: 'yes' | 'no') {
-    emitEvent?.('balance_docs', { choice });
-  }
-
-  function continueFromInvoice() {
-    emitEvent?.('invoice_acknowledged');
-    setSection('payment1'); // moves to payment_1
-  }
-
-  function continueFromBalance() {
-    emitEvent?.('balance_acknowledged');
-    setSection('payment2'); // moves to payment_2
-  }
-
-  function pay1() {
-    emitEvent?.('payment_1_intent');
-    // Your controller should create checkout_session_1 and route to checkout.
-  }
-
-  function pay2() {
-    emitEvent?.('payment_2_intent');
-    // Your controller should create checkout_session_2 and route to checkout.
   }
 
   // Show error if PDF failed to load
@@ -389,22 +373,22 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         </div>
       </div>
 
-      <div className="mt-6 flex justify-center">
-        <GateBar
-          section={section}
-          onSign={handleSignContract}
-          onDownloadDocs={section === 'invoice' ? handleInvoiceDocs : section === 'balance' ? handleBalanceDocs : undefined}
-          onContinue={section === 'invoice' ? continueFromInvoice : section === 'balance' ? continueFromBalance : undefined}
-          onPay={section === 'payment1' ? pay1 : section === 'payment2' ? pay2 : undefined}
-        />
-      </div>
+      {/* Only render GateBar for contract section - invoice/balance gates handle their own GateBar */}
+      {section === 'contract' && (
+        <div className="mt-6 flex justify-center">
+          <GateBar
+            section={section}
+            onSign={handleSignContract}
+          />
+        </div>
+      )}
 
       <SignatureModal 
         isOpen={isSignModalOpen} 
         onClose={() => setIsSignModalOpen(false)}
-        onSign={(dataUrl) => {
+        onSign={(dataUrl, legalName, signedDate) => {
             setIsSignModalOpen(false);
-            embedSignature(dataUrl);
+            embedSignature(dataUrl, legalName, signedDate);
         }}
       />
     </div>

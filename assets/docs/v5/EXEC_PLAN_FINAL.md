@@ -692,9 +692,18 @@ App.tsx (Main Router/State Machine)
 
 ### Phase 7: Return URLs
 
+**Status**: ✅ Already Complete (implemented in Phase 2)
+
 **Goal**: Handle Stripe return URLs correctly  
-**Files**: `src/App.tsx` (hash detection)  
+**Files**: `src/App.tsx` (query param detection)  
 **Success**: Payment completion detected, state updated, correct view shown
+
+**Implementation**: 
+- Checks for `?session_id=` query param in URL (not hash-based)
+- Fetches session status from `/api/session-status`
+- Updates `client_status` optimistically
+- Tracks payment events
+- Clears query param to prevent reload loops
 
 ### Phase 8: Build & Test
 
@@ -880,3 +889,78 @@ App.tsx (Main Router/State Machine)
 - Canvas refs need to be attached to DOM before rendering
 - Device pixel ratio must be accounted for crisp rendering
 - Use refs (not state) to track rendered pages to avoid dependency issues
+
+---
+
+## End-to-End Flow Testing Checklist
+
+**Prerequisites**:
+- [ ] Build succeeds: `npm run build` (no TypeScript errors)
+- [ ] Environment variables set: `VITE_STRIPE_PUBLISHABLE_KEY` in Vercel
+- [ ] Test job JSON exists: `assets/jobs/uid-ilt-036.json`
+- [ ] Stripe test mode enabled
+
+**Gate Flow Testing** (Test each gate in sequence):
+
+1. **Login & Contract Gate**:
+   - [ ] Login form works → redirects to `/uid-ilt-036`
+   - [ ] Contract PDF loads and displays all 8 pages
+   - [ ] PDF scrolls vertically through all pages
+   - [ ] No pixelation on high-DPI displays
+   - [ ] Signature modal opens when clicking "Sign Contract"
+   - [ ] Signature modal collects: legal name, date, signature canvas
+   - [ ] Signature embeds correctly with name and date visible on PDF
+   - [ ] Contract signed → automatically navigates to invoice view
+
+2. **Invoice Gate**:
+   - [ ] Invoice PDF loads and displays correctly
+   - [ ] Download docs buttons work (yes/no)
+   - [ ] "Continue" button acknowledges invoice
+   - [ ] Invoice acknowledged → navigates to payment 1
+
+3. **Payment 1 Gate**:
+   - [ ] Payment 1 shows correct amount (with discount if applicable)
+   - [ ] Shows invoice reference
+   - [ ] "Continue to Checkout" button creates checkout session
+   - [ ] CheckoutForm renders with PaymentElement
+   - [ ] Line items display correctly
+   - [ ] Email input validates correctly
+   - [ ] Test card `4242 4242 4242 4242` payment completes
+   - [ ] Redirects to return URL with `?session_id=cs_xxx`
+   - [ ] Complete page shows success
+   - [ ] State updates optimistically to show completion1/balance
+
+4. **Balance Gate** (if applicable):
+   - [ ] Balance PDF loads and displays correctly
+   - [ ] Download docs buttons work
+   - [ ] "Continue" button acknowledges balance
+   - [ ] Balance acknowledged → navigates to payment 2
+
+5. **Payment 2 Gate** (if applicable):
+   - [ ] Payment 2 shows correct amount (no discount)
+   - [ ] Shows balance reference
+   - [ ] Checkout flow works same as payment 1
+   - [ ] Second payment completes successfully
+   - [ ] Final completion page shows
+
+6. **Completion Gates**:
+   - [ ] Completion1 shows after payment 1
+   - [ ] Completion2 shows after payment 2
+   - [ ] PDF download links work correctly
+
+**Technical Verification**:
+- [ ] No console errors throughout flow
+- [ ] No infinite loops or re-render issues
+- [ ] All PDFs render without pixelation
+- [ ] All PDFs scroll through all pages
+- [ ] Events tracked correctly (check console/network tab)
+- [ ] State updates optimistically (UI updates immediately)
+- [ ] Return URLs handled correctly (session_id detection works)
+- [ ] Checkout sessions created with correct parameters
+- [ ] Webhook receives payment completion events (check Stripe dashboard)
+
+**Edge Cases**:
+- [ ] Payment failure handling (use declined card `4000 0000 0000 9995`)
+- [ ] Payment requires authentication (use `4000 0025 0000 3155`)
+- [ ] User closes browser during checkout (webhook should still fire)
+- [ ] User returns to page after payment (should show correct gate)

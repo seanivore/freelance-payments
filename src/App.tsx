@@ -1,11 +1,12 @@
-import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { fetchJobData, JobData } from '@/lib/data';
-import { PdfLoader } from '@/components/PdfLoader';
 import { Loader2 } from 'lucide-react';
-import { CheckoutProvider } from '@stripe/react-stripe-js/checkout';
-import { stripePromise } from '@/lib/stripe';
-import { CheckoutForm } from '@/components/CheckoutForm';
 import { Complete } from '@/components/Complete';
+import { ContractView } from '@/components/ContractView';
+import { InvoiceView } from '@/components/InvoiceView';
+import { BalanceView } from '@/components/BalanceView';
+import { PaymentView } from '@/components/PaymentView';
+import { CompletionView } from '@/components/CompletionView';
 
 export default function App() {
   const [data, setData] = useState<JobData | null>(null);
@@ -233,6 +234,22 @@ export default function App() {
         };
       });
     }
+    
+    if (name === 'balance_acknowledged') {
+      setData(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          state: {
+            ...prev.state,
+            client_status: {
+              ...prev.state.client_status,
+              balance: new Date().toISOString()
+            }
+          }
+        };
+      });
+    }
   }, [trackEvent]); // trackEvent is memoized, setData is stable
 
   // --- Display Logic ---
@@ -273,55 +290,39 @@ export default function App() {
 
   const { client_status } = data.state;
   let initialSection: 'contract' | 'invoice' | 'payment1' | 'completion1' | 'balance' | 'payment2' | 'completion2' = 'contract';
-  let initialPdfUrl = data.docs.contract.url;
 
   if (client_status.contract_signed) {
     initialSection = 'invoice';
-    initialPdfUrl = data.docs.invoice.url;
   }
   if (client_status.invoice) {
     initialSection = 'payment1';
   }
   if (client_status.payment_1) {
     initialSection = 'balance';
-    initialPdfUrl = data.docs.balance.url;
   }
   if (client_status.balance) {
     initialSection = 'payment2';
-    initialPdfUrl = data.docs.balance.url;
   }
   if (client_status.payment_2) {
     initialSection = 'completion2';
-    initialPdfUrl = data.docs.balance.url;
   }
 
   // Re-calculate derived section after potential optimistic update
   if (data.state.client_status.payment_1 && !data.state.client_status.balance) {
        // After payment_1, show completion1 until balance is available
        initialSection = 'completion1';
-       initialPdfUrl = data.docs.invoice.url; // Fallback
   }
   if (data.state.client_status.payment_1 && data.state.client_status.balance) {
       initialSection = 'balance';
-      initialPdfUrl = data.docs.balance.url;
   }
   if (data.state.client_status.payment_2) {
       initialSection = 'completion2';
-      initialPdfUrl = data.docs.balance.url;
   }
 
-  const isPaymentSection = initialSection === 'payment1' || initialSection === 'payment2';
-  
   // Check if we're on the complete/return page
   const urlParams = new URLSearchParams(window.location.search);
   const sessionId = urlParams.get('session_id');
   const showCompletePage = !!sessionId;
-
-  // Create checkout session promise for CheckoutProvider
-  const checkoutSessionPromise = useMemo(() => {
-    if (!clientSecret) return null;
-    return Promise.resolve(clientSecret);
-  }, [clientSecret]);
 
   // Function to create checkout session
   const createCheckoutSession = async (paymentNumber: 1 | 2) => {
@@ -367,73 +368,36 @@ export default function App() {
       
       <main className="pt-20 pb-10">
         {showCompletePage ? (
-          // Show Complete component when session_id is in URL
           <Complete />
-        ) : !isPaymentSection ? (
-          // Show PDF viewer for non-payment sections
-          <PdfLoader 
-            initialPdfUrl={initialPdfUrl}
-            initialSection={initialSection}
+        ) : initialSection === 'contract' ? (
+          <ContractView 
+            data={data}
             emitEvent={emitEvent}
-            isPaymentSection={isPaymentSection}
           />
-        ) : clientSecret ? (
-          // Show CheckoutForm when clientSecret is available
-          <CheckoutProvider
-            stripe={stripePromise}
-            options={{
-              clientSecret: checkoutSessionPromise!,
-              elementsOptions: {
-                appearance: {
-                  theme: 'stripe'
-                }
-              }
-            }}
-          >
-            <CheckoutForm />
-          </CheckoutProvider>
-        ) : (
-          // Show payment initiation UI
-          <div className="flex flex-col items-center justify-center p-10 mt-10">
-            <div className="max-w-md w-full bg-slate-900 p-8 rounded-lg border border-slate-800 shadow-xl">
-              <h2 className="text-2xl font-bold mb-6 text-center text-white">
-                {initialSection === 'payment1' ? 'First Payment' : 'Final Balance'}
-              </h2>
-              
-              <div className="mb-8 space-y-4">
-                <div className="flex justify-between border-b border-slate-700 pb-2">
-                  <span className="text-slate-400">Invoice</span>
-                  <span className="font-mono">{initialSection === 'payment1' ? data.docs.invoice.url.split('/').pop() : data.docs.balance.url.split('/').pop()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Amount Due</span>
-                  <span className="text-3xl font-bold text-emerald-400">
-                    ${(initialSection === 'payment1' ? data.product.price1.unit_amount : data.product.price2.unit_amount) / 100}
-                  </span>
-                </div>
-              </div>
-
-              <button 
-                className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-600 disabled:cursor-not-allowed text-slate-900 font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2"
-                onClick={() => createCheckoutSession(initialSection === 'payment1' ? 1 : 2)}
-                disabled={isCreatingSession}
-              >
-                {isCreatingSession ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Starting checkout...
-                  </>
-                ) : (
-                  'Continue to Checkout'
-                )}
-              </button>
-              
-              <p className="mt-4 text-xs text-center text-slate-500">
-                Payments processed securely by Stripe. No card data is stored on this server.
-              </p>
-            </div>
-          </div>
-        )}
+        ) : initialSection === 'invoice' ? (
+          <InvoiceView
+            data={data}
+            emitEvent={emitEvent}
+          />
+        ) : initialSection === 'balance' ? (
+          <BalanceView
+            data={data}
+            emitEvent={emitEvent}
+          />
+        ) : initialSection === 'payment1' || initialSection === 'payment2' ? (
+          <PaymentView
+            data={data}
+            paymentNumber={initialSection === 'payment1' ? 1 : 2}
+            onCreateSession={() => createCheckoutSession(initialSection === 'payment1' ? 1 : 2)}
+            isCreatingSession={isCreatingSession}
+            clientSecret={clientSecret}
+          />
+        ) : initialSection === 'completion1' || initialSection === 'completion2' ? (
+          <CompletionView
+            data={data}
+            completionType={initialSection === 'completion1' ? 'completion1' : 'completion2'}
+          />
+        ) : null}
       </main>
     </div>
   );
