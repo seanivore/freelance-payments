@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "great-tester-job": {
-      "file_path": "assets/jobs/uid-ilt-036.json",
-      "job_id": "uid-ilt-036",
-      "login_keyword": "tester-job",
-      "login_name": "Great"
+    "craig-doggo": {
+      "file_path": "assets/jobs/uid-lit-740.json",
+      "job_id": "uid-lit-740",
+      "login_keyword": "doggo",
+      "login_name": "Craig"
     }
   },
-  "generated_at": "2026-01-15T13:10:03.050225Z"
+  "generated_at": "2026-01-15T15:19:56.374200Z"
 }
