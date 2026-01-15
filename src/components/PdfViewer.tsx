@@ -85,43 +85,68 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       return;
     }
     
-    const page = await pdfDoc.getPage(pageNum);
-    const viewport = page.getViewport({ scale });
+    try {
+      const page = await pdfDoc.getPage(pageNum);
+      const viewport = page.getViewport({ scale });
+      
+      console.log(`Page ${pageNum} viewport:`, { width: viewport.width, height: viewport.height, scale });
 
-    const pdfCtx = canvas.getContext('2d', { alpha: false });
-    if (!pdfCtx) {
-      console.error('Failed to get 2d context from canvas');
-      return;
+      const pdfCtx = canvas.getContext('2d', { alpha: false });
+      if (!pdfCtx) {
+        console.error('Failed to get 2d context from canvas');
+        return;
+      }
+
+      // Support HiDPI screens for crisp rendering (prevents pixelation)
+      const outputScale = window.devicePixelRatio || 1;
+      
+      // Set canvas internal size (actual pixels)
+      const canvasWidth = Math.floor(viewport.width * outputScale);
+      const canvasHeight = Math.floor(viewport.height * outputScale);
+      
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      
+      console.log(`Canvas ${pageNum} dimensions:`, { 
+        internal: { width: canvasWidth, height: canvasHeight },
+        display: { width: viewport.width, height: viewport.height },
+        outputScale 
+      });
+      
+      // Set canvas display size (CSS pixels)
+      canvas.style.width = Math.floor(viewport.width) + 'px';
+      canvas.style.height = Math.floor(viewport.height) + 'px';
+
+      // Scale context for high-DPI displays
+      const transform = outputScale !== 1
+        ? [outputScale, 0, 0, outputScale, 0, 0]
+        : null;
+
+      const renderContext = {
+        canvasContext: pdfCtx,
+        viewport,
+        ...(transform && { transform })
+      };
+      
+      console.log(`Starting render for page ${pageNum}...`);
+      const renderTask = page.render(renderContext);
+      await renderTask.promise;
+      console.log(`Page ${pageNum} render completed`);
+    } catch (err) {
+      console.error(`Error in renderPage for page ${pageNum}:`, err);
+      throw err;
     }
-
-    // Support HiDPI screens for crisp rendering (prevents pixelation)
-    const outputScale = window.devicePixelRatio || 1;
-    
-    // Set canvas internal size (actual pixels)
-    canvas.width = Math.floor(viewport.width * outputScale);
-    canvas.height = Math.floor(viewport.height * outputScale);
-    
-    // Set canvas display size (CSS pixels)
-    canvas.style.width = Math.floor(viewport.width) + 'px';
-    canvas.style.height = Math.floor(viewport.height) + 'px';
-
-    // Scale context for high-DPI displays
-    const transform = outputScale !== 1
-      ? [outputScale, 0, 0, outputScale, 0, 0]
-      : null;
-
-    await page.render({ 
-      canvasContext: pdfCtx, 
-      viewport,
-      transform 
-    }).promise;
   }
 
   // Render all pages when PDF doc is loaded
   async function renderAllPages() {
-    if (!pdfDoc) return;
+    if (!pdfDoc) {
+      console.error('renderAllPages: pdfDoc is null');
+      return;
+    }
     
     const totalPages = pdfDoc.numPages;
+    console.log(`renderAllPages: Starting render for ${totalPages} pages`);
     
     // Wait a bit to ensure all canvases are mounted
     await new Promise(resolve => setTimeout(resolve, 50));
@@ -134,13 +159,21 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         // Check if canvas hasn't been rendered yet (width === 0 or very small means not rendered)
         if (canvas.width === 0 || canvas.width < 100) {
           try {
+            console.log(`Rendering page ${pageNum}...`);
             await renderPage(pageNum, canvas);
+            console.log(`Page ${pageNum} rendered successfully`);
           } catch (err) {
             console.error(`Error rendering page ${pageNum}:`, err);
+            setPdfError(`Failed to render page ${pageNum}: ${err}`);
           }
+        } else {
+          console.log(`Page ${pageNum} already rendered (width: ${canvas.width})`);
         }
       } else {
-        console.warn(`Canvas for page ${pageNum} not ready yet`);
+        console.warn(`Canvas for page ${pageNum} not ready yet`, { 
+          exists: !!canvas, 
+          connected: canvas?.isConnected 
+        });
       }
     }
   }
