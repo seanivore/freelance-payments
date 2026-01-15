@@ -6,9 +6,9 @@
  * Body: { job_id: string, signature_data: object }
  */
 
-const https = require('https');
+import https from 'https';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', 'https://payments.august.style');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');

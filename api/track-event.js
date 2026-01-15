@@ -8,7 +8,7 @@
  * Queues events for batch processing to update state.client_status in JSON files (v4 schema)
  */
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // CORS configuration - allow requests from frontend domain
   const allowedOrigins = [
     'https://payments.august.style',

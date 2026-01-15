@@ -9,9 +9,9 @@
  * We exchange code for tokens and extract refresh_token for GitHub Secrets
  */
 
-const { google } = require('googleapis');
+import { google } from 'googleapis';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Only allow GET
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });

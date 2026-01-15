@@ -7,11 +7,13 @@
  * Returns session status, payment status, and payment intent details
  */
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-03-31.basil'
 });
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // CORS configuration - allow requests from frontend domain
   const allowedOrigins = [
     'https://payments.august.style',

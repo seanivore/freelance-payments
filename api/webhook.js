@@ -6,13 +6,15 @@
  * POST /api/webhook
  */
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-03-31.basil' // Required for ui_mode: 'custom'
 });
 
 // Disable body parsing for Stripe webhook signature verification
 // Vercel serverless functions need raw body as Buffer/string
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });

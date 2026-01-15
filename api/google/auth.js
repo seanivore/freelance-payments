@@ -9,9 +9,9 @@
  * One-time setup: refresh token stored in GitHub Secrets as GOOGLE_REFRESH_TOKEN
  */
 
-const { google } = require('googleapis');
+import { google } from 'googleapis';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Only allow GET
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
