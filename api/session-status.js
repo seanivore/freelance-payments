@@ -76,7 +76,9 @@ export default async (req, res) => {
       status: session.status,
       payment_status: session.payment_status,
       payment_intent_id: session.payment_intent?.id || null,
-      payment_intent_status: session.payment_intent?.status || null
+      payment_intent_status: session.payment_intent?.status || null,
+      amount_total: session.amount_total || null,
+      amount_subtotal: session.amount_subtotal || null
     });
   } catch (error) {
     console.error('Error retrieving session:', error);

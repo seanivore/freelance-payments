@@ -18,12 +18,13 @@ export const CheckoutForm: React.FC = () => {
     // Guard: only execute when checkout is ready (success state)
     if (checkoutState.type === 'success') {
       const checkout = checkoutState.checkout;
-      const hasTotals = checkout.total?.total?.amount;
+      const totalAmountRaw = checkout?.total?.total?.amount;
+      const totalAmount = totalAmountRaw ? Number(totalAmountRaw) : 0;
       
-      // If totals missing, try to fetch from session-status API
+      // If totals missing or zero, try to fetch from session-status API
       // Type assertion: clientSecret exists on checkout sessions but TypeScript types don't expose it
       const clientSecret = (checkout as any).clientSecret;
-      if (!hasTotals && clientSecret) {
+      if ((!totalAmount || totalAmount === 0) && clientSecret) {
         // Extract session_id from client_secret (format: cs_test_xxx_secret_yyy)
         const sessionId = clientSecret.split('_secret_')[0];
         if (sessionId) {
@@ -83,64 +84,36 @@ export const CheckoutForm: React.FC = () => {
   };
 
   const { checkout } = checkoutState;
-  const totalAmount = checkout?.total?.total?.amount;
-  const displayTotal = fallbackTotal || (totalAmount ? Number(totalAmount) / 100 : 0);
-  const formattedAmount = displayTotal > 0 ? displayTotal.toFixed(2) : '0.00';
+  const totalAmountRaw = checkout?.total?.total?.amount;
+  const totalAmount = totalAmountRaw ? Number(totalAmountRaw) : 0;
   
-  // Access line items and totals from checkout session
-  const lineItems = checkout?.lineItems || [];
-  const subtotal = checkout?.total?.subtotal?.amount ? Number(checkout.total.subtotal.amount) / 100 : 0;
-  const discount = checkout?.total?.discount?.amount ? Number(checkout.total.discount.amount) / 100 : 0;
-  const total = displayTotal || (checkout?.total?.total?.amount ? Number(checkout.total.total.amount) / 100 : 0);
+  // Calculate display total: use fallback if available, otherwise use checkout total, otherwise 0
+  let displayTotal = 0;
+  if (fallbackTotal !== null) {
+    displayTotal = fallbackTotal;
+  } else if (totalAmount > 0) {
+    displayTotal = totalAmount / 100;
+  }
+  
+  const formattedAmount = displayTotal > 0 ? displayTotal.toFixed(2) : '0.00';
   
   // Debug logging
   if (process.env.NODE_ENV === 'development') {
     console.log('Checkout state:', checkoutState);
-    console.log('Total amount:', totalAmount);
+    console.log('Total amount (raw):', totalAmount);
     console.log('Fallback total:', fallbackTotal);
     console.log('Display total:', displayTotal);
+    console.log('Formatted amount:', formattedAmount);
   }
 
   return (
     <div className="max-w-md mx-auto p-8 bg-slate-900 rounded-lg border border-slate-800 shadow-xl">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Order Summary - Display line items and totals */}
-        {lineItems.length > 0 && (
-          <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-            <h4 className="mb-3 text-lg font-semibold text-slate-200">Order Summary</h4>
-            <div className="space-y-2 mb-4">
-              {lineItems.map((item: any, index: number) => {
-                const itemAmount = item.amount_total ? Number(item.amount_total) / 100 : 0;
-                return (
-                  <div key={index} className="flex justify-between text-sm">
-                    <span className="text-slate-300">
-                      {item.description || `Item ${index + 1}`} {item.quantity > 1 ? `× ${item.quantity}` : ''}
-                    </span>
-                    <span className="text-slate-200 font-medium">${itemAmount.toFixed(2)}</span>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="border-t border-slate-700 pt-3 space-y-2">
-              {subtotal > 0 && (
-                <div className="flex justify-between text-sm text-slate-400">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-              )}
-              {discount > 0 && (
-                <div className="flex justify-between text-sm text-emerald-400">
-                  <span>Discount</span>
-                  <span>-${discount.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-slate-700">
-                <span>Total</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Amount Due - Simplified display */}
+        <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 text-center">
+          <div className="text-slate-400 text-sm mb-2">Amount Due</div>
+          <div className="text-4xl font-bold text-emerald-400">${formattedAmount}</div>
+        </div>
         
         <div>
           <h4 className="mb-3 text-lg font-semibold text-slate-200">Payment</h4>

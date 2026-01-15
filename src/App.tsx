@@ -39,12 +39,26 @@ export default function App() {
 
   // --- Event Buffering Logic ---
   // Flush events as single batch - memoized to prevent dependency issues
+  // Use ref to track if flush is in progress to prevent multiple simultaneous flushes
+  const isFlushingRef = useRef(false);
+  
   const flushEvents = useCallback(async () => {
+    // Prevent multiple simultaneous flushes
+    if (isFlushingRef.current) {
+      console.log('Flush already in progress, skipping...');
+      return;
+    }
+    
     const buffer = eventBufferRef.current;
     if (buffer.length === 0) return;
     
     const jobId = window.location.pathname.substring(1);
     if (!jobId || jobId === '/') return;
+
+    // Mark as flushing and create a copy of the buffer
+    isFlushingRef.current = true;
+    const eventsToSend = [...buffer]; // Copy buffer before clearing
+    eventBufferRef.current = []; // Clear buffer immediately to prevent duplicate sends
 
     // Send ALL events as single batch
     try {
@@ -54,7 +68,7 @@ export default function App() {
         body: JSON.stringify({
           job_id: jobId,
           event_type: 'batch',
-          event_data: buffer // Array of all events
+          event_data: eventsToSend // Use copied array
         })
       });
 
@@ -64,12 +78,14 @@ export default function App() {
         } else {
           console.error("Event tracking failed:", response.statusText);
         }
+      } else {
+        console.log(`✅ Flushed ${eventsToSend.length} event(s) to API`);
       }
     } catch (error) {
       console.error("Event tracking error:", error);
+    } finally {
+      isFlushingRef.current = false; // Reset flushing flag
     }
-
-    eventBufferRef.current = []; // Clear buffer
   }, []); // No dependencies - uses refs which are stable
 
   // Reset inactivity timer - memoized to prevent dependency issues
@@ -103,36 +119,45 @@ export default function App() {
     activityEvents.forEach(e => window.addEventListener(e, handleActivity));
     
     // Flush events on page unload/beforeunload
+    // Use a flag to prevent multiple unload handlers from firing
+    let unloadHandled = false;
     const handleUnload = () => {
-      if (eventBufferRef.current.length > 0) {
-        const jobId = window.location.pathname.substring(1);
-        if (jobId && jobId !== '/') {
-          // Use fetch with keepalive for reliable unload sending
-          fetch(apiUrl('/api/track-event'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              job_id: jobId,
-              event_type: 'batch',
-              event_data: eventBufferRef.current
-            }),
-            keepalive: true
-          }).catch(() => {
-            // Ignore unload errors - events will be lost but that's acceptable
-          });
-        }
+      if (unloadHandled) return; // Prevent multiple calls
+      if (eventBufferRef.current.length === 0) return;
+      
+      unloadHandled = true;
+      const jobId = window.location.pathname.substring(1);
+      if (jobId && jobId !== '/') {
+        const eventsToSend = [...eventBufferRef.current]; // Copy buffer
+        // Use fetch with keepalive for reliable unload sending
+        fetch(apiUrl('/api/track-event'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            job_id: jobId,
+            event_type: 'batch',
+            event_data: eventsToSend
+          }),
+          keepalive: true
+        }).catch(() => {
+          // Ignore unload errors - events will be lost but that's acceptable
+        });
       }
     };
     
-    // Flush on visibility change (tab switch, minimize)
-    window.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') handleUnload();
-    });
+    // Flush on visibility change (tab switch, minimize) - only once
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && !unloadHandled) {
+        handleUnload();
+      }
+    };
+    
+    window.addEventListener('visibilitychange', handleVisibilityChange);
     
     // Flush on page hide (navigation, close)
     window.addEventListener('pagehide', handleUnload);
     
-    // Flush on beforeunload (browser close)
+    // Flush on beforeunload (browser close) - note: beforeunload fires before pagehide
     window.addEventListener('beforeunload', handleUnload);
 
     // Start timer initially
@@ -141,7 +166,7 @@ export default function App() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       activityEvents.forEach(e => window.removeEventListener(e, handleActivity));
-      window.removeEventListener('visibilitychange', handleUnload);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handleUnload);
       window.removeEventListener('beforeunload', handleUnload);
     };

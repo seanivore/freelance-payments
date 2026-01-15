@@ -656,8 +656,18 @@ def format_currency(cents: int) -> str:
     """Format cents to currency string: '$X,XXX.XX'"""
     if cents is None:
         return '$0.00'
-    dollars = cents / 100.0
-    return f"${dollars:,.2f}"
+    # Handle string inputs (convert to int)
+    if isinstance(cents, str):
+        try:
+            cents = int(cents)
+        except (ValueError, TypeError):
+            return '$0.00'
+    # Ensure it's a number
+    try:
+        dollars = float(cents) / 100.0
+        return f"${dollars:,.2f}"
+    except (ValueError, TypeError):
+        return '$0.00'
 
 
 def calculate_amount_due(job_data: dict) -> str:
