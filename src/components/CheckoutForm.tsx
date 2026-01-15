@@ -12,6 +12,38 @@ export const CheckoutForm: React.FC = () => {
 
   const checkoutState = useCheckout();
 
+  // ✅ ALL hooks must be called BEFORE any early returns (React Rules of Hooks)
+  // Fetch session details if totals missing (fallback for $0 display issue)
+  useEffect(() => {
+    // Guard: only execute when checkout is ready (success state)
+    if (checkoutState.type === 'success') {
+      const checkout = checkoutState.checkout;
+      const hasTotals = checkout.total?.total?.amount;
+      
+      // If totals missing, try to fetch from session-status API
+      // Type assertion: clientSecret exists on checkout sessions but TypeScript types don't expose it
+      const clientSecret = (checkout as any).clientSecret;
+      if (!hasTotals && clientSecret) {
+        // Extract session_id from client_secret (format: cs_test_xxx_secret_yyy)
+        const sessionId = clientSecret.split('_secret_')[0];
+        if (sessionId) {
+          fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
+            .then(res => res.json())
+            .then(data => {
+              // Use amount_total from session if available
+              if (data.amount_total) {
+                setFallbackTotal(Number(data.amount_total) / 100);
+              }
+            })
+            .catch(err => {
+              console.warn('Failed to fetch session details:', err);
+            });
+        }
+      }
+    }
+  }, [checkoutState]);
+
+  // NOW early returns are safe (all hooks have been called)
   if (checkoutState.type === 'loading') {
     return (
       <div className="flex items-center justify-center p-10">
@@ -49,36 +81,6 @@ export const CheckoutForm: React.FC = () => {
 
     setIsSubmitting(false);
   };
-
-  // Fetch session details if totals missing (fallback for $0 display issue)
-  useEffect(() => {
-    // After early returns, checkoutState.type is 'success' and checkout exists
-    if (checkoutState.type === 'success') {
-      const checkout = checkoutState.checkout;
-      const hasTotals = checkout.total?.total?.amount;
-      
-      // If totals missing, try to fetch from session-status API
-      // Type assertion: clientSecret exists on checkout sessions but TypeScript types don't expose it
-      const clientSecret = (checkout as any).clientSecret;
-      if (!hasTotals && clientSecret) {
-        // Extract session_id from client_secret (format: cs_test_xxx_secret_yyy)
-        const sessionId = clientSecret.split('_secret_')[0];
-        if (sessionId) {
-          fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
-            .then(res => res.json())
-            .then(data => {
-              // Use amount_total from session if available
-              if (data.amount_total) {
-                setFallbackTotal(Number(data.amount_total) / 100);
-              }
-            })
-            .catch(err => {
-              console.warn('Failed to fetch session details:', err);
-            });
-        }
-      }
-    }
-  }, [checkoutState]);
 
   const { checkout } = checkoutState;
   const totalAmount = checkout?.total?.total?.amount;

@@ -913,6 +913,82 @@ App.tsx (Main Router/State Machine)
 
 ---
 
+## Critical Bug Fixes - January 2026
+
+**Status**: ✅ Complete
+
+**Implementation Date**: 2026-01-15
+
+### Issues Fixed
+
+1. **React Error #310**: ✅ Fixed - CheckoutForm blank screen after clicking "Continue" on invoice
+2. **Event Tracking Not Sending**: ✅ Fixed - Events logged to console but never sent to API
+3. **Contract PDF Formatting**: ✅ Fixed - Late fee showing as "10000" instead of "$100.00"
+4. **Workflow Environment Variables**: ✅ Fixed - Removed unnecessary Google credentials from user-exit-events.yml
+
+### React Error #310 Fix
+
+**Problem**: `useEffect` hook was called AFTER early return statements in `CheckoutForm.tsx`, causing React to see different numbers of hooks on different renders.
+
+**Root Cause**: 
+- Render #1 (loading): `useCheckout()` returns 'loading' → early return → `useEffect` never called (4 hooks)
+- Render #2 (success): `useCheckout()` returns 'success' → no early return → `useEffect` called (5 hooks)
+- React Error: "Different number of hooks called on different renders"
+
+**Solution**: Moved `useEffect` hook (lines 54-81) to BEFORE early return statements (before line 15). Added guard inside `useEffect` to only execute when `checkoutState.type === 'success'`.
+
+**File Modified**: `src/components/CheckoutForm.tsx`
+
+**Key Learning**: React requires ALL hooks to be called BEFORE any conditional returns. This ensures React always sees the same number of hooks on every render, regardless of state.
+
+### Event Tracking Fix
+
+**Problem**: Events were being logged to console but never sent to `/api/track-event`. No API calls, no workflow runs.
+
+**Root Cause**: `flushEvents()` and `resetTimer()` functions were not memoized with `useCallback`, causing dependency issues in `useEffect`. The activity listener `useEffect` had empty dependency array `[]`, so it couldn't access the updated `resetTimer` function.
+
+**Solution**: 
+- Wrapped `flushEvents` in `useCallback` with empty dependencies (uses refs which are stable)
+- Wrapped `resetTimer` in `useCallback` with `[flushEvents]` dependency
+- Updated `trackEvent` to depend on `[resetTimer]`
+- Updated `flushOnPayment` to depend on `[flushEvents]`
+- Added `resetTimer` to activity listener `useEffect` dependency array
+
+**Files Modified**: `src/App.tsx`
+
+**Expected Result**: Events now properly sent to API as batches, triggering GitHub Actions workflow runs.
+
+### Contract PDF Formatting Fix
+
+**Problem**: `{{price2.late_fee}}` placeholder rendered as "10000" (pennies format) instead of "$100.00" on contract PDF.
+
+**Root Cause**: Line 797 in `admin_push.py` used raw value without formatting: `'{{price2.late_fee}}': price2.get('late_fee', '')`
+
+**Solution**: Changed to use `format_currency()` function like other currency fields:
+```python
+'{{price2.late_fee}}': format_currency(price2.get('late_fee', 0)),
+```
+
+**File Modified**: `.github/scripts/orchestration/admin_push.py` (line 797)
+
+**Expected Result**: Contract PDF now displays late fee as "$100.00" instead of "10000".
+
+### Workflow Environment Variables Fix
+
+**Problem**: `user-exit-events.yml` workflow had incorrect Google credential environment variables (`GOOGLE_CREDENTIALS`, `GOOGLE_DRIVE_FOLDER_ID`) that don't exist and aren't needed.
+
+**Root Cause**: The `user_exit_events.py` script doesn't use Google APIs - it only processes JSON files and updates Stripe price flags. These credentials were copied from `admin-push.yml` workflow but aren't needed here.
+
+**Solution**: 
+- Removed `GOOGLE_CREDENTIALS` and `GOOGLE_DRIVE_FOLDER_ID` from workflow env section
+- Removed Google packages from pip install (only `stripe` needed)
+
+**File Modified**: `.github/workflows/user-exit-events.yml`
+
+**Expected Result**: Workflow runs without missing credential errors.
+
+---
+
 ## Phase 4 & 5: Event Tracking & State Management Complete Rewrite
 
 **Status**: ✅ Complete

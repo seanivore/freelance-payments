@@ -38,8 +38,8 @@ export default function App() {
   }, []);
 
   // --- Event Buffering Logic ---
-  // Flush events as single batch
-  const flushEvents = async () => {
+  // Flush events as single batch - memoized to prevent dependency issues
+  const flushEvents = useCallback(async () => {
     const buffer = eventBufferRef.current;
     if (buffer.length === 0) return;
     
@@ -70,7 +70,15 @@ export default function App() {
     }
 
     eventBufferRef.current = []; // Clear buffer
-  };
+  }, []); // No dependencies - uses refs which are stable
+
+  // Reset inactivity timer - memoized to prevent dependency issues
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      flushEvents();
+    }, INACTIVITY_LIMIT);
+  }, [flushEvents]); // Depends on flushEvents which is memoized
 
   // Track event (adds to buffer, resets timer)
   const trackEvent = useCallback((type: string, data: any = {}) => {
@@ -80,20 +88,12 @@ export default function App() {
       data
     });
     resetTimer(); // Reset 10min inactivity timer
-  }, []);
-
-  // Reset inactivity timer
-  const resetTimer = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      flushEvents();
-    }, INACTIVITY_LIMIT);
-  };
+  }, [resetTimer]); // Depends on resetTimer which is memoized
 
   // Immediate flush on payment completion
   const flushOnPayment = useCallback(() => {
     flushEvents();
-  }, []);
+  }, [flushEvents]); // Depends on flushEvents which is memoized
 
   // Activity Listeners & Unload Handler
   useEffect(() => {
@@ -145,7 +145,7 @@ export default function App() {
       window.removeEventListener('pagehide', handleUnload);
       window.removeEventListener('beforeunload', handleUnload);
     };
-  }, []);
+  }, [resetTimer]); // Add resetTimer to dependencies since it's now memoized
 
   // --- Handle Stripe Return (Check for session_id query param) ---
   // MUST be before early returns to avoid React hook order error

@@ -5,6 +5,25 @@
 
   + Payments site for freelance clients. Login, get contract PDF, sign it, get invoice PDFs, then make payments
 
+## Project's Dual Purpose
+
+  1. **Primary**: A micro-site SPA for freelance clients to login, view and sign their contract, download their invoices, and pay for services.
+  2. **Secondary**: A learning project to repurpose portfolio website architecture for a client's online art store website.
+
+### Architecture Foundation
+
+**Portfolio Base Architecture** (Original System):
+- Simple HTML/CSS/JS build with 2 HTML template pages that load data from a directory of 30+ JSON files
+- SPA-style routing using a 404-redirect trick to host a dynamic site on free, static GitHub Pages host
+- GitHub Action Workflow auto-builds `assets/js/manifest.json` file to map login keywords to JSON files
+- See `assets/docs/RESOURCES/OG_JSON_ARCH_PORTFOLIO.md` for original architecture details
+
+**Payment Site Adaptations**:
+- Integrated Stripe Custom UI Components for payments
+- PDF generation using Google Docs Templates (contract, invoice, balance)
+- Expanded automations to create Stripe objects and PDFs via GitHub Actions
+- Event tracking system to record user behavior and state progression
+
 ## Objective 
 
   + Convey full understanding of platform for Freelance Client Contract and Invoices Payments; from big picture expectations, to details about recent refactoring changes, logic updates made, and some current and persistent issue areas encountered throughout the build process 
@@ -26,6 +45,35 @@
     + Then always `git smart-push` 
       - Intelligently sorts which conflict updated files to keep from remove versus local 
       - Created to prevent a TON of merged file errors 
+
+### Event Tracking System Architecture
+
+**How Events Are Collected**:
+- Events are collected in the frontend (`src/App.tsx`) using an event buffer stored in `useRef`
+- Events accumulate during the user session: `logged_in`, `contract_signed`, `invoice_acknowledged`, `balance_acknowledged`, `payment_1`, `payment_2`
+- Events are NOT sent immediately - they're batched together
+
+**When Events Are Flushed**:
+Events are sent as a single batch to `/api/track-event` when:
+1. **10 minutes of inactivity** - Timer resets on user activity (mouse, keyboard, scroll, touch)
+2. **Payment completion** - Immediate flush via `flushOnPayment()` callback
+3. **Browser unload** - `beforeunload`, `pagehide`, or `visibilitychange` events (uses `fetch` with `keepalive: true`)
+
+**Event Flow**:
+```
+Frontend (React) → Event Buffer (useRef) → /api/track-event (Vercel) → GitHub Actions → user_exit_events.py → JSON Update
+```
+
+**Key Files**:
+- `src/App.tsx` - Event collection, buffering, and flushing logic
+- `api/track-event.js` - Receives batch, dispatches GitHub Actions workflow
+- `.github/workflows/user-exit-events.yml` - Processes events, updates JSON
+- `.github/scripts/orchestration/user_exit_events.py` - Python script that updates JSON with timestamps, signatures, price flags
+
+**What Gets Updated**:
+- `state.client_status.*` - Timestamps for each event (logged_in, contract_signed, invoice, balance, payment_1, payment_2)
+- `contract.signatures.client.*` - Legal name and signed date from contract signing
+- `price1.active`, `price2.active`, `product.active` - Set to `false` after payments complete
 
 ### End-to-End Data & User Flow 
 
@@ -62,15 +110,9 @@ freelance-payments/
 │   ├── jobs/
 │   │   └── uid-xxx-xxx.json         # Job JSON files (one per client project) 
 │   ├── js/
-│   │   ├── checkout-controller.js   # Stripe Checkout component element integration
-│   │   ├── completion-controller.js # Complete message after using state.payment_1 state.payment_2
-│   │   ├── contract-controller.js   # Contract signing, PDF display
-│   │   ├── event-tracker.js         # Batches behavior event activity for updates
-│   │   ├── flow-manager.js          # Manages user frontend flow and gating logic 
-│   │   ├── glow-effect.js           # Dynamic UI design homepage element
-│   │   ├── invoice-controller.js    # Loads job to display embedded invoice PDF
-│   │   ├── payment-lookup.js        # Login form handler 
-│   │   └── manifest.json            # Lookup manifest (generated)
+│   │   └── manifest.json            # Lookup manifest (generated) - maps login keywords to job JSON files
+│   │   # NOTE: Other .js files in assets/js/ are DEPRECATED (legacy Vanilla JS)
+│   │   # All logic now in React components (src/components/) and App.tsx
 │   ├── pdf/
 │   │   ├── contract/
 │   │   ├── invoice/
@@ -91,22 +133,32 @@ freelance-payments/
 │   │   │   ├── button.tsx
 │   │   │   ├── calendar.tsx
 │   │   │   └── popover.tsx 
+│   │   ├── BalanceView.tsx          # Balance PDF gate component
+│   │   ├── CheckoutForm.tsx         # Stripe Payment Element form
+│   │   ├── Complete.tsx             # Payment completion/return page
+│   │   ├── CompletionView.tsx       # Thank you pages
+│   │   ├── ContractView.tsx         # Contract PDF gate component
 │   │   ├── DatePicker.tsx
-│   │   ├── GateBar.tsx
-│   │   ├── PdfViewer.tsx
-│   │   ├── PenCanvas.tsx
-│   │   ├── SignatureModal.tsx
+│   │   ├── GateBar.tsx              # Download docs buttons, Continue button
+│   │   ├── InvoiceView.tsx          # Invoice PDF gate component
+│   │   ├── PaymentView.tsx          # Payment initiation and Stripe checkout wrapper
+│   │   ├── PdfLoader.tsx           # PDF data fetching and loading states
+│   │   ├── PdfViewer.tsx           # PDF rendering with pdfjs-dist
+│   │   ├── PenCanvas.tsx           # Signature drawing canvas
+│   │   ├── SignatureModal.tsx      # Legal name, date, signature collection
 │   │   └── Toolbar.tsx
 │   ├── config/
 │   │   └── pdfViewer.config.json
-│   ├── App.tsx
+│   ├── App.tsx                      # Main router/state machine ("FluxGate"), event tracking
 │   ├── index.css
-│   ├── index.tsx
-│   ├── job.tsx
+│   ├── index.tsx                    # Login page entry point
+│   ├── job.tsx                      # Job page entry point (404 redirect handler)
 │   ├── vite-env.d.ts
 │   └── lib/
-│       ├── data.ts
-│       ├── pdf-utils.ts
+│       ├── api.ts                   # API base URL configuration
+│       ├── data.ts                  # JobData type, fetchJobData function
+│       ├── pdf-utils.ts             # PDF utility functions
+│       ├── stripe.ts                # Stripe.js initialization
 │       └── utils.ts
 ├── .github/
 │   ├── scripts/

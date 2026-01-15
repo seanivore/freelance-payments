@@ -794,7 +794,7 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
             '{{price1.nickname}}': price1.get('nickname', 'Initial Payment'),
             '{{price2.nickname}}': price2.get('nickname', 'Final Payment'),
             '{{price2.pay_days}}': str(price2.get('pay_days', '')),
-            '{{price2.late_fee}}': price2.get('late_fee', ''),
+            '{{price2.late_fee}}': format_currency(price2.get('late_fee', 0)),
             '{{price1.pay_by}}': price1.get('pay_by', 'start of work'),
             '{{price2.pay_by}}': price2.get('pay_by', 'before project launch'),
             '{{price1.unit_amount}}': format_currency(price1.get('unit_amount', 0)),
