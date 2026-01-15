@@ -34,15 +34,31 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [pdfData] = useState<ArrayBuffer | null>(initialPdfBytes);
+  const [pdfData, setPdfData] = useState<ArrayBuffer | null>(initialPdfBytes);
   const [pdfDoc, setPdfDoc] = useState<any | null>(null);
   const [scale] = useState<number>(configJson.viewer.initialScale);
   const [section, setSection] = useState<Section>(initialSection);
   const [isSignModalOpen, setIsSignModalOpen] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   useEffect(() => {
-    GlobalWorkerOptions.workerSrc = '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
+    // Set PDF.js worker path (use CDN in production, local in dev)
+    GlobalWorkerOptions.workerSrc = 
+      import.meta.env.PROD 
+        ? 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs'
+        : '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
   }, []);
+
+  // Load PDF when initialPdfBytes is provided
+  useEffect(() => {
+    if (initialPdfBytes) {
+      setPdfData(initialPdfBytes);
+      openPdfFromBytes(initialPdfBytes).catch((err) => {
+        console.error('Failed to load PDF:', err);
+        setPdfError('Failed to load PDF document');
+      });
+    }
+  }, [initialPdfBytes]);
 
   async function renderPage(pageNum: number) {
     if (!pdfDoc) return;
@@ -146,6 +162,30 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   function pay2() {
     emitEvent?.('payment_2_intent');
     // Your controller should create checkout_session_2 and route to checkout.
+  }
+
+  // Show error if PDF failed to load
+  if (pdfError) {
+    return (
+      <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
+        <div className="mt-4 p-8 text-center text-red-400 bg-red-900/20 rounded-lg border border-red-900/50">
+          {pdfError}
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state if PDF not loaded yet
+  if (!pdfDoc) {
+    return (
+      <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
+        <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[600px]">
+          <div className="relative flex items-center justify-center bg-slate-950 p-4 min-h-[600px]">
+            <div className="text-slate-400">Loading PDF...</div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
