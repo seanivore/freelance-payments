@@ -36,6 +36,21 @@ export const BalanceView: React.FC<BalanceViewProps> = ({
     await onCreateCheckoutSession();
   };
 
+  // Show loading state while creating checkout session
+  if (isCreatingSession) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="max-w-md w-full bg-slate-900 p-8 rounded-lg border border-slate-800 shadow-xl text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            <h2 className="text-xl font-semibold text-white">Preparing checkout...</h2>
+            <p className="text-slate-400 text-sm">Please wait while we set up your payment</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <PdfLoader
@@ -50,12 +65,6 @@ export const BalanceView: React.FC<BalanceViewProps> = ({
           onDownloadDocs={handleDownloadDocs}
           onContinue={handleContinue}
         />
-        {isCreatingSession && (
-          <div className="ml-4 text-slate-400 text-sm flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
-            Starting checkout...
-          </div>
-        )}
       </div>
     </>
   );

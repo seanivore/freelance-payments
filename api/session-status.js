@@ -12,10 +12,21 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
 });
 
 module.exports = async (req, res) => {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://payments.august.style');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // Set CORS headers - allow requests from frontend domain
+  const allowedOrigins = [
+    'https://payments.august.style',
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000'  // Common dev port
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
 
   // Handle preflight OPTIONS request
