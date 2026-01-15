@@ -97,10 +97,27 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       return;
     }
 
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+    // Support HiDPI screens for crisp rendering (prevents pixelation)
+    const outputScale = window.devicePixelRatio || 1;
+    
+    // Set canvas internal size (actual pixels)
+    canvas.width = Math.floor(viewport.width * outputScale);
+    canvas.height = Math.floor(viewport.height * outputScale);
+    
+    // Set canvas display size (CSS pixels)
+    canvas.style.width = Math.floor(viewport.width) + 'px';
+    canvas.style.height = Math.floor(viewport.height) + 'px';
 
-    await page.render({ canvasContext: pdfCtx, viewport }).promise;
+    // Scale context for high-DPI displays
+    const transform = outputScale !== 1
+      ? [outputScale, 0, 0, outputScale, 0, 0]
+      : null;
+
+    await page.render({ 
+      canvasContext: pdfCtx, 
+      viewport,
+      transform 
+    }).promise;
   }
 
   async function openPdfFromBytes(bytes: ArrayBuffer) {
@@ -243,13 +260,12 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
-      <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[600px]">
-        <div className="relative flex items-center justify-center bg-slate-950 p-4 min-h-[600px]">
+      <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-auto min-h-[600px] max-h-[90vh]">
+        <div className="relative flex justify-center bg-slate-950 p-4">
           <canvas 
             id="pdfCanvas" 
             ref={pdfCanvasRef} 
-            className="shadow-lg max-w-full h-auto" 
-            style={{ width: '100%', height: 'auto' }}
+            className="shadow-lg"
           />
         </div>
       </div>
