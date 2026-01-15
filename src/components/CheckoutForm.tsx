@@ -4,62 +4,7 @@ import {
   useCheckout
 } from '@stripe/react-stripe-js/checkout';
 
-const validateEmail = async (email: string, checkout: any) => {
-  const updateResult = await checkout.updateEmail(email);
-  const isValid = updateResult.type !== 'error';
-
-  return { isValid, message: !isValid ? updateResult.error.message : null };
-};
-
-type EmailInputProps = {
-  checkout: any;
-  email: string;
-  setEmail: (email: string) => void;
-  error: string | null;
-  setError: (error: string | null) => void;
-};
-
-const EmailInput: React.FC<EmailInputProps> = ({ checkout, email, setEmail, error, setError }) => {
-  const handleBlur = async () => {
-    if (!email) {
-      return;
-    }
-
-    const { isValid, message } = await validateEmail(email, checkout);
-    if (!isValid) {
-      setError(message);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null);
-    setEmail(e.target.value);
-  };
-
-  return (
-    <>
-      <label className="block mb-2 text-sm font-medium text-slate-300">
-        Email
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className={`mt-1 w-full px-3 py-2 bg-slate-800 border rounded-lg text-slate-100 ${
-            error ? 'border-red-500' : 'border-slate-700'
-          } focus:outline-none focus:ring-2 focus:ring-emerald-500`}
-          placeholder="your@email.com"
-        />
-      </label>
-      {error && <div id="email-errors" className="mt-1 text-sm text-red-400">{error}</div>}
-    </>
-  );
-};
-
 export const CheckoutForm: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -87,14 +32,8 @@ export const CheckoutForm: React.FC = () => {
     const { checkout } = checkoutState;
     setIsSubmitting(true);
 
-    const { isValid, message: errorMessage } = await validateEmail(email, checkout);
-    if (!isValid) {
-      setEmailError(errorMessage);
-      setMessage(errorMessage);
-      setIsSubmitting(false);
-      return;
-    }
-
+    // Email is automatically set from the customer object when session is created
+    // No need to validate or update email - Stripe handles it automatically
     const confirmResult = await checkout.confirm();
 
     // This point will only be reached if there is an immediate error when
@@ -109,19 +48,56 @@ export const CheckoutForm: React.FC = () => {
     setIsSubmitting(false);
   };
 
-  const totalAmount = checkoutState.checkout.total?.total?.amount;
+  const { checkout } = checkoutState;
+  const totalAmount = checkout.total?.total?.amount;
   const formattedAmount = totalAmount ? (Number(totalAmount) / 100).toFixed(2) : '0.00';
+  
+  // Access line items and totals from checkout session
+  const lineItems = checkout.lineItems || [];
+  const subtotal = checkout.total?.subtotal?.amount ? Number(checkout.total.subtotal.amount) / 100 : 0;
+  const discount = checkout.total?.discount?.amount ? Number(checkout.total.discount.amount) / 100 : 0;
+  const total = checkout.total?.total?.amount ? Number(checkout.total.total.amount) / 100 : 0;
 
   return (
     <div className="max-w-md mx-auto p-8 bg-slate-900 rounded-lg border border-slate-800 shadow-xl">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <EmailInput
-          checkout={checkoutState.checkout}
-          email={email}
-          setEmail={setEmail}
-          error={emailError}
-          setError={setEmailError}
-        />
+        {/* Order Summary - Display line items and totals */}
+        {lineItems.length > 0 && (
+          <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+            <h4 className="mb-3 text-lg font-semibold text-slate-200">Order Summary</h4>
+            <div className="space-y-2 mb-4">
+              {lineItems.map((item: any, index: number) => {
+                const itemAmount = item.amount_total ? Number(item.amount_total) / 100 : 0;
+                return (
+                  <div key={index} className="flex justify-between text-sm">
+                    <span className="text-slate-300">
+                      {item.description || `Item ${index + 1}`} {item.quantity > 1 ? `× ${item.quantity}` : ''}
+                    </span>
+                    <span className="text-slate-200 font-medium">${itemAmount.toFixed(2)}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="border-t border-slate-700 pt-3 space-y-2">
+              {subtotal > 0 && (
+                <div className="flex justify-between text-sm text-slate-400">
+                  <span>Subtotal</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+              )}
+              {discount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-400">
+                  <span>Discount</span>
+                  <span>-${discount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-slate-700">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div>
           <h4 className="mb-3 text-lg font-semibold text-slate-200">Payment</h4>

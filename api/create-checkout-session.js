@@ -115,6 +115,8 @@ export default async (req, res) => {
       sessionParams.customer = customer_id;
       // Set client_reference_id to customer.id for reconciliation with internal systems
       sessionParams.client_reference_id = customer_id;
+      // Note: When customer is set, Stripe automatically uses the customer's email
+      // and makes it read-only. No need to set customer_email separately.
     }
 
     // Add discounts if any
