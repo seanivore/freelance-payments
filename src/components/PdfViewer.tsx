@@ -44,12 +44,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const hasEmittedLoadedRef = useRef(false);
 
   useEffect(() => {
-    // Set PDF.js worker path (use CDN in production, local in dev)
+    // Set PDF.js worker path (use unpkg CDN in production, local in dev)
     // Must be set before any getDocument calls
+    // Using unpkg which reliably hosts .mjs files for pdfjs-dist
     if (!GlobalWorkerOptions.workerSrc) {
       GlobalWorkerOptions.workerSrc = 
         import.meta.env.PROD 
-          ? 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs'
+          ? 'https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs'
           : '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
     }
   }, []);
