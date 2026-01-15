@@ -51,6 +51,7 @@ export const PdfLoader: React.FC<PdfLoaderProps> = ({
   return (
     <PdfViewer 
       initialPdfBytes={pdfBytes}
+      pdfUrl={initialPdfUrl}
       initialSection={initialSection}
       emitEvent={emitEvent}
     />

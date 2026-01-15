@@ -20,12 +20,14 @@ type Section =
 
 type PdfViewerProps = {
   initialPdfBytes?: ArrayBuffer | null;
+  pdfUrl?: string; // URL to fetch PDF fresh when needed (for signing)
   emitEvent?: (name: string, payload?: unknown) => void;
   initialSection?: Section; // Start where returning users land based on state
 };
 
 export const PdfViewer: React.FC<PdfViewerProps> = ({
   initialPdfBytes = null,
+  pdfUrl,
   emitEvent,
   initialSection = 'contract'
 }) => {
@@ -42,6 +44,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const hasEmittedLoadedRef = useRef(false);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map()); // Store refs for all page canvases
   const renderedPagesRef = useRef<Set<number>>(new Set()); // Track which pages have actually been rendered
+  // Store a cloned copy of the PDF bytes for signing (to avoid detached buffer issues)
+  const pdfBytesForSigningRef = useRef<ArrayBuffer | null>(null);
 
   useEffect(() => {
     // Set PDF.js worker path (use unpkg CDN in production, local in dev)
@@ -59,8 +63,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   useEffect(() => {
     // Prevent infinite loop: only load if bytes changed and not already loaded/loading
     if (initialPdfBytes && initialPdfBytes !== loadedBytesRef.current && !isLoading && !pdfDoc) {
+      // Clone the buffer immediately to avoid detached buffer issues later
+      const clonedBuffer = initialPdfBytes.slice(0);
       loadedBytesRef.current = initialPdfBytes;
-      setPdfData(initialPdfBytes);
+      pdfBytesForSigningRef.current = clonedBuffer; // Store cloned copy for signing
+      setPdfData(clonedBuffer);
       setIsLoading(true);
       setPdfError(null);
       hasEmittedLoadedRef.current = false; // Reset emit flag for new PDF
@@ -75,6 +82,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           setPdfError('Failed to load PDF document');
           setIsLoading(false);
           loadedBytesRef.current = null; // Allow retry
+          pdfBytesForSigningRef.current = null;
           hasEmittedLoadedRef.current = false;
         });
     }
@@ -253,13 +261,30 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     legalName: string,
     signedDate: string
   ) {
-    if (!pdfData) return;
-
     try {
-        // Clone the ArrayBuffer to avoid detached buffer errors
-        // Create a new Uint8Array from the existing buffer, then get its buffer
-        const clonedBuffer = pdfData.slice(0);
-        const loaded = await PDFDocument.load(clonedBuffer);
+        // Fetch PDF fresh from URL to avoid detached buffer issues
+        // This ensures we always have a valid, non-detached buffer
+        let pdfBytesToUse: ArrayBuffer;
+        
+        if (pdfUrl) {
+          // Fetch fresh from URL
+          const response = await fetch(pdfUrl);
+          pdfBytesToUse = await response.arrayBuffer();
+        } else if (pdfBytesForSigningRef.current) {
+          // Use stored cloned copy if available
+          pdfBytesToUse = pdfBytesForSigningRef.current;
+        } else if (pdfData) {
+          // Fallback: try to clone pdfData (may fail if detached)
+          try {
+            pdfBytesToUse = pdfData.slice(0);
+          } catch (e) {
+            throw new Error('PDF buffer is detached. Please refresh the page and try again.');
+          }
+        } else {
+          throw new Error('No PDF data available for signing');
+        }
+        
+        const loaded = await PDFDocument.load(pdfBytesToUse);
         const pngBytes = dataURLToUint8Array(signatureDataUrl);
         const img = await loaded.embedPng(pngBytes);
         
@@ -301,6 +326,12 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         const signedBuffer = bytes.buffer instanceof ArrayBuffer 
           ? bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
           : new Uint8Array(bytes).buffer;
+        
+        // Clone the signed buffer and store it for future signing operations
+        const clonedSignedBuffer = signedBuffer.slice(0);
+        pdfBytesForSigningRef.current = clonedSignedBuffer;
+        setPdfData(clonedSignedBuffer);
+        
         await openPdfFromBytes(signedBuffer);
         
         // Emit success with name and date
