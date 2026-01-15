@@ -834,6 +834,27 @@ App.tsx (Main Router/State Machine)
 - `package.json`: Added `@stripe/stripe-js` and `@stripe/react-stripe-js` packages
 - `.example.env`: Added `VITE_STRIPE_PUBLISHABLE_KEY` example
 
+**Production Deployment Checklist**:
+
+⚠️ **IMPORTANT**: When moving from test mode to live/production mode, the following updates are required:
+
+1. **Session ID Extraction Logic** (`src/components/CheckoutForm.tsx`):
+   - **Current (Test Mode)**: Extracts session ID from `clientSecret` format `cs_test_xxx_secret_yyy`
+   - **Production Update Needed**: Change to handle `cs_live_xxx_secret_yyy` format
+   - **Location**: Line 63 in `CheckoutForm.tsx` - `clientSecret.split('_secret_')[0]` will still work, but verify the prefix changes from `cs_test_` to `cs_live_`
+   - **Note**: The split logic should still work, but ensure the code handles both formats or update to specifically check for `cs_live_` prefix
+
+2. **Environment Variables** (Vercel Dashboard → Project Settings → Environment Variables):
+   - **`STRIPE_SECRET_KEY`**: Update from `sk_test_xxx` to `sk_live_xxx` (production secret key from Stripe Dashboard)
+   - **`VITE_STRIPE_PUBLISHABLE_KEY`**: Update from `pk_test_xxx` to `pk_live_xxx` (production publishable key from Stripe Dashboard)
+   - **Note**: These keys are different from test keys and must be obtained from Stripe Dashboard → Developers → API keys (toggle to "Live mode")
+
+3. **Stripe Dashboard Configuration**:
+   - Switch Stripe Dashboard to "Live mode" (toggle in top right)
+   - Verify webhook endpoint URL is correct for production domain
+   - Ensure webhook signing secret is updated if webhook endpoint changed
+   - Test payment flow with real card (use Stripe's test card numbers in test mode first)
+
 ### PDF Viewer Fixes
 
 **Status**: ✅ Complete (Phase 3)
@@ -892,18 +913,305 @@ App.tsx (Main Router/State Machine)
 
 ---
 
+## Phase 4 & 5: Event Tracking & State Management Complete Rewrite
+
+**Status**: ✅ Complete
+
+**Implementation Date**: 2026-01-15
+
+### Overview
+
+Complete rewrite of event tracking system to batch events per session, fix missing JSON updates (contract signatures, invoice acknowledgment), fix webhook workflow dispatch, implement price deactivation, fix return URL routing, and resolve $0 display issue.
+
+### Critical Issues Resolved
+
+1. **Event Batching Problem**: ✅ Fixed - Events now batched per session, single workflow run prevents merge conflicts
+2. **Missing Contract Signature Data**: ✅ Fixed - `contract.signatures.client.legal_name` and `signed_date` now persisted
+3. **Missing Invoice Update**: ✅ Fixed - `state.client_status.invoice` now updated correctly
+4. **Webhook Workflow Error**: ✅ Fixed - Now dispatches `user-exit-events.yml` with correct payload format
+5. **Price Deactivation**: ✅ Fixed - `price1.active`, `price2.active`, and `product.active` deactivated after payments
+6. **Return URL Routing**: ✅ Fixed - `?session_id=` query param handled before gate determination
+7. **$0 Display Issue**: ✅ Fixed - Added fallback to fetch session details if checkout state missing totals
+8. **Multiple Workflow Runs**: ✅ Fixed - Single workflow run per session via batching + git rebase
+
+### Implementation Details
+
+#### Event Buffering Architecture (`src/App.tsx`)
+
+**Key Changes**:
+- Event buffer stored in `useRef` (not state) to avoid re-renders
+- Events collected during session, flushed as single batch when:
+  - User becomes inactive (10 minutes)
+  - Payment completes (immediate flush via `flushOnPayment()`)
+  - Browser closes (`beforeunload`, `pagehide`, `visibilitychange`)
+- Single API call per session → single workflow run → no merge conflicts
+
+**Code Structure**:
+```typescript
+const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>([]);
+
+const flushEvents = async () => {
+  // Send ALL events as single batch
+  await fetch(apiUrl('/api/track-event'), {
+    method: 'POST',
+    body: JSON.stringify({
+      job_id: jobId,
+      event_type: 'batch',
+      event_data: buffer // Array of all events
+    })
+  });
+  eventBufferRef.current = [];
+};
+
+const trackEvent = (type: string, data: any = {}) => {
+  eventBufferRef.current.push({
+    type,
+    timestamp: new Date().toISOString(),
+    data
+  });
+  resetTimer();
+};
+```
+
+#### Return URL Routing Fix (`src/App.tsx`)
+
+**Problem**: `?session_id=cs_xxx` caused 404 because React router didn't handle query params on 404.html route
+
+**Solution**:
+- Check for `session_id` query param BEFORE determining gate (runs once on mount)
+- Show `Complete` component immediately if `session_id` present
+- Fetch session status and update state optimistically
+- Clear query param immediately to prevent reload loops
+
+**Code Structure**:
+```typescript
+const [sessionId, setSessionId] = useState<string | null>(null);
+const [showCompletePage, setShowCompletePage] = useState(false);
+
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sid = urlParams.get('session_id');
+  
+  if (sid) {
+    setSessionId(sid);
+    setShowCompletePage(true);
+    window.history.replaceState(null, '', window.location.pathname);
+    // Fetch session status and update state...
+  }
+}, []); // Run once on mount
+```
+
+#### Event Type Mapping (`src/App.tsx`)
+
+**Changes**:
+- `invoice_acknowledged` → mapped to `invoice` event type
+- `balance_acknowledged` → mapped to `balance` event type
+- `contract_signed` → includes `legal_name` and `signed_date` in payload (keys updated in PdfViewer)
+
+#### Contract Signature Data (`src/components/PdfViewer.tsx`)
+
+**Changes**:
+- Updated event payload keys: `date` → `signed_date`, `legalName` → `legal_name`
+- Matches Python processor expectations
+
+**Code**:
+```typescript
+emitEvent?.('contract_signed', { 
+  signed_date: signedDate,
+  legal_name: legalName
+});
+```
+
+#### API Endpoint Updates (`api/track-event.js`)
+
+**Changes**:
+- Accepts `batch` event type with array of events
+- Single workflow dispatch per batch (prevents multiple simultaneous runs)
+- Added `invoice` and `balance` to valid event types
+
+**Code Structure**:
+```javascript
+if (event_type === 'batch') {
+  // event_data is already an array of events
+  eventsArray = Array.isArray(event_data) ? event_data : [];
+} else {
+  // Single event - wrap it in an array
+  eventsArray = [{
+    type: event_type,
+    timestamp: new Date().toISOString(),
+    data: event_data || {}
+  }];
+}
+
+// Dispatch single workflow run with all events
+await fetch(workflowUrl, {
+  method: 'POST',
+  body: JSON.stringify({
+    ref: 'freelance-payments',
+    inputs: {
+      job_id: job_id,
+      payload_json: JSON.stringify(eventsArray)
+    }
+  })
+});
+```
+
+#### Python Processor Rewrite (`.github/scripts/orchestration/user_exit_events.py`)
+
+**Complete Rewrite** - Processes batch events and updates:
+
+1. **State Updates**:
+   - `state.client_status.logged_in`
+   - `state.client_status.contract_signed`
+   - `state.client_status.invoice`
+   - `state.client_status.payment_1`
+   - `state.client_status.balance`
+   - `state.client_status.payment_2`
+
+2. **Contract Signatures**:
+   - `contract.signatures.client.legal_name` (from event data)
+   - `contract.signatures.client.signed_date` (from event data)
+
+3. **Price Deactivation**:
+   - `price1.active = false` after `payment_1`
+   - `price2.active = false` after `payment_2`
+   - `product.active = false` after `payment_2`
+
+**Key Features**:
+- Processes events in order
+- Only updates if value is null (prevents overwriting)
+- Detailed logging for each update
+- Handles missing structure gracefully
+
+#### Webhook Fix (`api/webhook.js`)
+
+**Changes**:
+- Fixed workflow dispatch: `user-behavior.yml` → `user-exit-events.yml`
+- Fixed payload format to match workflow inputs:
+  ```javascript
+  {
+    ref: 'freelance-payments',
+    inputs: {
+      job_id: jobId,
+      payload_json: JSON.stringify([{
+        type: `payment_${paymentNumber}`,
+        timestamp: succeededTimestamp,
+        data: { payment_number, session_id }
+      }])
+    }
+  }
+  ```
+
+#### Checkout Form Display Fix (`src/components/CheckoutForm.tsx`)
+
+**Problem**: Checkout form showed $0 because `checkout.total?.total?.amount` was undefined
+
+**Solution**:
+- Added fallback to fetch session details from `/api/session-status` if totals missing
+- Extract `session_id` from `client_secret` (format: `cs_test_xxx_secret_yyy`)
+- Use `amount_total` from session response as fallback
+- Added debug logging in development mode
+
+**Code**:
+```typescript
+useEffect(() => {
+  if (!checkout?.total && checkout?.clientSecret) {
+    const sessionId = checkout.clientSecret.split('_secret_')[0];
+    fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
+      .then(res => res.json())
+      .then(data => {
+        if (data.amount_total) {
+          setFallbackTotal(Number(data.amount_total) / 100);
+        }
+      });
+  }
+}, [checkoutState]);
+```
+
+#### Workflow Concurrency Fix (`.github/workflows/user-exit-events.yml`)
+
+**Changes**:
+- Added `git pull --rebase origin freelance-payments` before push
+- Prevents merge conflicts when multiple workflows run simultaneously
+- Concurrency group already configured: `cancel-in-progress: false` (queues instead of cancels)
+
+**Code**:
+```yaml
+- name: Commit Changes
+  run: |
+    git config --global user.name 'github-actions[bot]'
+    git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+    git pull --rebase origin freelance-payments  # Pull before push
+    git add assets/jobs/*.json
+    git commit -m "Update user behavior stats [skip ci]" || echo "No changes to commit"
+    git push
+```
+
+### Files Modified
+
+1. **`src/App.tsx`**: Complete rewrite of event buffering, return URL handling, event type mapping
+2. **`api/track-event.js`**: Accept batch events, single workflow dispatch
+3. **`.github/scripts/orchestration/user_exit_events.py`**: Complete rewrite - process batch events, update signatures, deactivate prices
+4. **`api/webhook.js`**: Fix workflow dispatch and payload format
+5. **`src/components/CheckoutForm.tsx`**: Add fallback for $0 display issue
+6. **`src/components/PdfViewer.tsx`**: Update contract_signed event payload keys
+7. **`src/components/InvoiceView.tsx`**: Event emission verified (mapped in App.tsx)
+8. **`src/components/BalanceView.tsx`**: Event emission verified (mapped in App.tsx)
+9. **`src/components/Complete.tsx`**: Accept `sessionId` as prop
+10. **`.github/workflows/user-exit-events.yml`**: Add git rebase before push
+
+### Test JSON Job
+
+**Created**: `assets/jobs/uid-test-001.json`
+- Complete structure with all required fields
+- Realistic test data
+- Login credentials: `login_name: "Test"`, `login_keyword: "event-test"`
+
+**Deleted**: `assets/jobs/uid-ilt-036.json` (archived in Stripe)
+
+### Testing Checklist Updates
+
+**Event Tracking**:
+- [ ] Multiple events in one session → single workflow run
+- [ ] No merge conflicts in GitHub Actions
+- [ ] All events processed in order
+- [ ] Contract signatures (`legal_name`, `signed_date`) persisted correctly
+- [ ] Invoice acknowledgment updates `state.client_status.invoice`
+- [ ] Payment completion updates `state.client_status.payment_1` or `payment_2`
+- [ ] Price deactivation: `price1.active = false` after payment_1
+- [ ] Price deactivation: `price2.active = false` and `product.active = false` after payment_2
+
+**Return URL Routing**:
+- [ ] `?session_id=cs_xxx` routes to Complete component immediately
+- [ ] Session status fetched and state updated optimistically
+- [ ] Query param cleared to prevent reload loops
+
+**Checkout Display**:
+- [ ] Checkout form shows correct total (not $0 or NaN)
+- [ ] Fallback to session-status API works if checkout state missing totals
+- [ ] Line items display correctly
+
+**Workflow Stability**:
+- [ ] No empty commits
+- [ ] No merge conflicts
+- [ ] Single workflow run per session
+- [ ] Git rebase prevents conflicts
+
+---
+
 ## End-to-End Flow Testing Checklist
 
 **Prerequisites**:
 - [ ] Build succeeds: `npm run build` (no TypeScript errors)
 - [ ] Environment variables set: `VITE_STRIPE_PUBLISHABLE_KEY` in Vercel
-- [ ] Test job JSON exists: `assets/jobs/uid-ilt-036.json`
+- [ ] Test job JSON exists: `assets/jobs/uid-test-001.json`
 - [ ] Stripe test mode enabled
+- [ ] Login credentials: `login_name: "Test"`, `login_keyword: "event-test"`
 
 **Gate Flow Testing** (Test each gate in sequence):
 
 1. **Login & Contract Gate**:
-   - [ ] Login form works → redirects to `/uid-ilt-036`
+   - [ ] Login form works → redirects to `/uid-test-001`
    - [ ] Contract PDF loads and displays all 8 pages
    - [ ] PDF scrolls vertically through all pages
    - [ ] No pixelation on high-DPI displays
@@ -953,11 +1261,18 @@ App.tsx (Main Router/State Machine)
 - [ ] No infinite loops or re-render issues
 - [ ] All PDFs render without pixelation
 - [ ] All PDFs scroll through all pages
-- [ ] Events tracked correctly (check console/network tab)
-- [ ] State updates optimistically (UI updates immediately)
-- [ ] Return URLs handled correctly (session_id detection works)
-- [ ] Checkout sessions created with correct parameters
-- [ ] Webhook receives payment completion events (check Stripe dashboard)
+   - [ ] Events tracked correctly (check console/network tab)
+   - [ ] Events batched per session (single API call per session)
+   - [ ] Single workflow run per session (check GitHub Actions)
+   - [ ] Contract signatures persisted (`legal_name`, `signed_date` in JSON)
+   - [ ] Invoice acknowledgment persisted (`state.client_status.invoice` in JSON)
+   - [ ] Payment timestamps persisted (`state.client_status.payment_1`, `payment_2` in JSON)
+   - [ ] Price deactivation persisted (`price1.active`, `price2.active`, `product.active` in JSON)
+   - [ ] State updates optimistically (UI updates immediately)
+   - [ ] Return URLs handled correctly (session_id detection works)
+   - [ ] Checkout sessions created with correct parameters
+   - [ ] Webhook receives payment completion events (check Stripe dashboard)
+   - [ ] Webhook dispatches `user-exit-events.yml` workflow correctly
 
 **Edge Cases**:
 - [ ] Payment failure handling (use declined card `4000 0000 0000 9995`)

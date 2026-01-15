@@ -31,7 +31,7 @@ export const BalanceView: React.FC<BalanceViewProps> = ({
   };
 
   const handleContinue = async () => {
-    emitEvent('balance_acknowledged');
+    emitEvent('balance_acknowledged'); // This will be mapped to 'balance' in App.tsx
     // Immediately create checkout session and show Stripe checkout
     await onCreateCheckoutSession();
   };

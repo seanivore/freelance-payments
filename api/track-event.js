@@ -76,7 +76,9 @@ export default async (req, res) => {
       'contract_loaded',
       'contract_signed',
       'downloaded_docs',
-      'payment_1', // Can be tracked if client side wants to log it, though webhook is source of truth
+      'invoice',
+      'balance',
+      'payment_1',
       'payment_2',
       'batch'
     ];
@@ -86,15 +88,27 @@ export default async (req, res) => {
     }
 
     // Trigger GitHub Actions workflow to update state
-    // This queues the update for batch processing
     const githubToken = process.env.GITHUB_TOKEN;
     const repo = process.env.GITHUB_REPO || 'seanivore/freelance-payments';
-    
-    // UPDATED: Use the new exit-events workflow
     const workflowId = 'user-exit-events.yml';
 
     if (githubToken) {
       try {
+        // Handle batch events (array) or single events
+        let eventsArray;
+        if (event_type === 'batch') {
+          // event_data is already an array of events
+          eventsArray = Array.isArray(event_data) ? event_data : [];
+        } else {
+          // Single event - wrap it in an array
+          eventsArray = [{
+            type: event_type,
+            timestamp: new Date().toISOString(),
+            data: event_data || {}
+          }];
+        }
+
+        // Dispatch single workflow run with all events
         const githubResponse = await fetch(
           `https://api.github.com/repos/${repo}/actions/workflows/${workflowId}/dispatches`,
           {
@@ -107,15 +121,8 @@ export default async (req, res) => {
             body: JSON.stringify({
               ref: 'freelance-payments',
               inputs: {
-                // We pass the raw payload for the python script to parse
-                // The API can accept a single event or a batch (array)
-                // If single, we wrap it
                 job_id: job_id,
-                payload_json: JSON.stringify(Array.isArray(event_data) ? event_data : [{
-                    type: event_type,
-                    timestamp: new Date().toISOString(),
-                    data: event_data
-                }])
+                payload_json: JSON.stringify(eventsArray) // All events in one payload
               }
             })
           }
@@ -125,6 +132,8 @@ export default async (req, res) => {
           const errorText = await githubResponse.text();
           console.warn('GitHub Actions trigger failed:', errorText);
           // Don't fail the request - event is still logged
+        } else {
+          console.log(`✅ Dispatched workflow with ${eventsArray.length} event(s) for job ${job_id}`);
         }
       } catch (githubError) {
         console.warn('Error triggering GitHub Actions:', githubError);

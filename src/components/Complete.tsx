@@ -8,7 +8,11 @@ type SessionStatus = {
   payment_intent_status: string | null;
 };
 
-export const Complete: React.FC = () => {
+type CompleteProps = {
+  sessionId: string;
+};
+
+export const Complete: React.FC<CompleteProps> = ({ sessionId }) => {
   const [status, setStatus] = useState<string | null>(null);
   const [paymentIntentId, setPaymentIntentId] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('');
@@ -30,10 +34,6 @@ export const Complete: React.FC = () => {
         <path fillRule="evenodd" clipRule="evenodd" d="M1.25628 1.25628C1.59799 0.914573 2.15201 0.914573 2.49372 1.25628L8 6.76256L13.5063 1.25628C13.848 0.914573 14.402 0.914573 14.7437 1.25628C15.0854 1.59799 15.0854 2.15201 14.7437 2.49372L9.23744 8L14.7437 13.5063C15.0854 13.848 15.0854 14.402 14.7437 14.7437C14.402 15.0854 13.848 15.0854 13.5063 14.7437L8 9.23744L2.49372 14.7437C2.15201 15.0854 1.59799 15.0854 1.25628 14.7437C0.914573 14.402 0.914573 13.848 1.25628 13.5063L6.76256 8L1.25628 2.49372C0.914573 2.15201 0.914573 1.59799 1.25628 1.25628Z" fill="white"/>
       </svg>
     );
-
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const sessionId = urlParams.get('session_id');
 
     if (!sessionId) {
       setIconColor('#DF1B41');
@@ -69,7 +69,7 @@ export const Complete: React.FC = () => {
         setText('Failed to retrieve payment status');
         setIsLoading(false);
       });
-  }, []);
+  }, [sessionId]);
 
   if (isLoading) {
     return (

@@ -109,18 +109,23 @@ export default async (req, res) => {
         const githubToken = process.env.GITHUB_TOKEN;
         const repoOwner = process.env.GITHUB_REPO_OWNER || 'seanivore';
         const repoName = process.env.GITHUB_REPO_NAME || 'freelance-payments';
-        const workflowId = 'user-behavior.yml';
+        // Fixed: Use user-exit-events.yml workflow (has workflow_dispatch trigger)
+        const workflowId = 'user-exit-events.yml';
         const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`;
 
+        // Format payload to match user-exit-events workflow inputs
         const payload = JSON.stringify({
           ref: 'freelance-payments',
           inputs: {
-            action: 'update-payment',
             job_id: jobId,
-            payload: JSON.stringify({
-              payment_number: paymentNumber,
-              succeeded: succeededTimestamp
-            }),
+            payload_json: JSON.stringify([{
+              type: `payment_${paymentNumber}`,
+              timestamp: succeededTimestamp,
+              data: {
+                payment_number: paymentNumber,
+                session_id: session.id
+              }
+            }])
           },
         });
 

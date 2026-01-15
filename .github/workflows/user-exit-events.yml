@@ -50,6 +50,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git pull --rebase origin freelance-payments  # Pull before push to prevent merge conflicts
           git add assets/jobs/*.json
           git commit -m "Update user behavior stats [skip ci]" || echo "No changes to commit"
           git push

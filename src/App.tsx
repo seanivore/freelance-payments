@@ -16,16 +16,10 @@ export default function App() {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   
   // --- Event Tracking State ---
-  const [eventBuffer, setEventBuffer] = useState<any[]>([]);
+  // Use ref only (not state) to avoid re-renders
+  const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>([]);
   const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  // Refs for closure access
-  const eventBufferRef = useRef<any[]>([]);
-  
-  // Sync ref
-  useEffect(() => {
-    eventBufferRef.current = eventBuffer;
-  }, [eventBuffer]);
 
   // Initial Data Fetch
   useEffect(() => {
@@ -43,48 +37,52 @@ export default function App() {
     });
   }, []);
 
-  // --- Inactivity Logic ---
-  const flushEvents = () => {
-    const currentBuffer = eventBufferRef.current;
-    if (currentBuffer.length === 0) return;
+  // --- Event Buffering Logic ---
+  // Flush events as single batch
+  const flushEvents = async () => {
+    const buffer = eventBufferRef.current;
+    if (buffer.length === 0) return;
     
-    const jobId = window.location.pathname.substring(1); // Robustness needed?
+    const jobId = window.location.pathname.substring(1);
     if (!jobId || jobId === '/') return;
 
-    // Send batch to API
-    fetch(apiUrl('/api/track-event'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        job_id: jobId,
-        event_type: 'batch',
-        event_data: currentBuffer
-      })
-    })
-    .then(response => {
-        if (!response.ok) {
-            // If 405 or 404, we are likely on a static host without API support.
-            if (response.status === 405 || response.status === 404) {
-                console.warn("Event tracking skipped: Backend API not available on static host.");
-            } else {
-                console.error("Event tracking failed:", response.statusText);
-            }
-        }
-    })
-    .catch(console.error);
+    // Send ALL events as single batch
+    try {
+      const response = await fetch(apiUrl('/api/track-event'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job_id: jobId,
+          event_type: 'batch',
+          event_data: buffer // Array of all events
+        })
+      });
 
-    setEventBuffer([]); // clear state
-    eventBufferRef.current = []; // clear ref immediate
+      if (!response.ok) {
+        if (response.status === 405 || response.status === 404) {
+          console.warn("Event tracking skipped: Backend API not available on static host.");
+        } else {
+          console.error("Event tracking failed:", response.statusText);
+        }
+      }
+    } catch (error) {
+      console.error("Event tracking error:", error);
+    }
+
+    eventBufferRef.current = []; // Clear buffer
   };
 
-  const trackEvent = useCallback((type: string, payload: any = {}) => {
-    const timestamp = new Date().toISOString();
-    const newEvent = { type, timestamp, data: payload };
-    
-    setEventBuffer(prev => [...prev, newEvent]);
-    resetTimer();
-  }, []); // Empty deps: uses state setters and refs which are stable
+  // Track event (adds to buffer, resets timer)
+  const trackEvent = useCallback((type: string, data: any = {}) => {
+    eventBufferRef.current.push({
+      type,
+      timestamp: new Date().toISOString(),
+      data
+    });
+    resetTimer(); // Reset 10min inactivity timer
+  }, []);
 
+  // Reset inactivity timer
   const resetTimer = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
@@ -92,40 +90,50 @@ export default function App() {
     }, INACTIVITY_LIMIT);
   };
 
-  // Activity Listeners
+  // Immediate flush on payment completion
+  const flushOnPayment = useCallback(() => {
+    flushEvents();
+  }, []);
+
+  // Activity Listeners & Unload Handler
   useEffect(() => {
     const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
     const handleActivity = () => resetTimer();
     
     activityEvents.forEach(e => window.addEventListener(e, handleActivity));
     
-    // Visibility/Unload
+    // Flush events on page unload/beforeunload
     const handleUnload = () => {
-         if (eventBufferRef.current.length > 0) {
-             const jobId = window.location.pathname.substring(1);
-             const payload = JSON.stringify({
-                 job_id: jobId,
-                 event_type: 'batch',
-                 event_data: eventBufferRef.current
-             });
-            // Use fetch with keepalive as beacon fallback or primary
-            fetch(apiUrl('/api/track-event'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: payload,
-                keepalive: true
-            }).catch(() => {
-                // Ignore unload errors
-            });
-         }
+      if (eventBufferRef.current.length > 0) {
+        const jobId = window.location.pathname.substring(1);
+        if (jobId && jobId !== '/') {
+          // Use fetch with keepalive for reliable unload sending
+          fetch(apiUrl('/api/track-event'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              job_id: jobId,
+              event_type: 'batch',
+              event_data: eventBufferRef.current
+            }),
+            keepalive: true
+          }).catch(() => {
+            // Ignore unload errors - events will be lost but that's acceptable
+          });
+        }
+      }
     };
     
-    // Combine unload and visibilitychange
+    // Flush on visibility change (tab switch, minimize)
     window.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') handleUnload();
+      if (document.visibilityState === 'hidden') handleUnload();
     });
-    // For page close
+    
+    // Flush on page hide (navigation, close)
     window.addEventListener('pagehide', handleUnload);
+    
+    // Flush on beforeunload (browser close)
+    window.addEventListener('beforeunload', handleUnload);
 
     // Start timer initially
     resetTimer();
@@ -133,62 +141,75 @@ export default function App() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       activityEvents.forEach(e => window.removeEventListener(e, handleActivity));
+      window.removeEventListener('visibilitychange', handleUnload);
       window.removeEventListener('pagehide', handleUnload);
+      window.removeEventListener('beforeunload', handleUnload);
     };
   }, []);
 
   // --- Handle Stripe Return (Check for session_id query param) ---
   // MUST be before early returns to avoid React hook order error
+  // Check for session_id BEFORE determining gate - show Complete component immediately
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [showCompletePage, setShowCompletePage] = useState(false);
+  
   useEffect(() => {
-      if (!data) return; // Early return inside hook is fine
+    // Check for session_id in URL (from Stripe return redirect)
+    const urlParams = new URLSearchParams(window.location.search);
+    const sid = urlParams.get('session_id');
+    
+    if (sid) {
+      setSessionId(sid);
+      setShowCompletePage(true);
       
-      // Check for session_id in URL (from Stripe return redirect)
-      const urlParams = new URLSearchParams(window.location.search);
-      const sessionId = urlParams.get('session_id');
+      // Clear query param immediately to prevent reload loops
+      window.history.replaceState(null, '', window.location.pathname);
       
-      if (sessionId) {
-          // Fetch session status to verify payment completion
-          fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
-              .then(res => res.json())
-              .then(sessionData => {
-                  if (sessionData.status === 'complete') {
-                      const s = data.state.client_status;
-                      let updates: Partial<typeof s> = {};
-                      
-                      // Determine which payment based on current state
-                      if (s.invoice && !s.payment_1) {
-                          updates = { payment_1: new Date().toISOString() };
-                          trackEvent('payment_1');
-                      } else if (s.balance && !s.payment_2) {
-                          updates = { payment_2: new Date().toISOString() };
-                          trackEvent('payment_2');
+      // Fetch session status and update state if payment completed
+      if (data) {
+        fetch(apiUrl(`/api/session-status?session_id=${sid}`))
+          .then(res => res.json())
+          .then(sessionData => {
+            if (sessionData.status === 'complete') {
+              const s = data.state.client_status;
+              let updates: Partial<typeof s> = {};
+              
+              // Determine which payment based on current state
+              if (s.invoice && !s.payment_1) {
+                const timestamp = new Date().toISOString();
+                updates = { payment_1: timestamp };
+                trackEvent('payment_1', { session_id: sid });
+                flushOnPayment(); // Immediate flush on payment completion
+              } else if (s.balance && !s.payment_2) {
+                const timestamp = new Date().toISOString();
+                updates = { payment_2: timestamp };
+                trackEvent('payment_2', { session_id: sid });
+                flushOnPayment(); // Immediate flush on payment completion
+              }
+              
+              if (Object.keys(updates).length > 0) {
+                setData(prev => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    state: {
+                      ...prev.state,
+                      client_status: {
+                        ...prev.state.client_status,
+                        ...updates
                       }
-                      
-                      if (Object.keys(updates).length > 0) {
-                          setData(prev => {
-                             if (!prev) return null;
-                             return {
-                                 ...prev,
-                                 state: {
-                                     ...prev.state,
-                                     client_status: {
-                                         ...prev.state.client_status,
-                                         ...updates
-                                     }
-                                 }
-                             };
-                          });
-                      }
-                      
-                      // Clear query param to prevent reload loops
-                      window.history.replaceState(null, '', window.location.pathname);
-                  }
-              })
-              .catch(err => {
-                  console.error('Error fetching session status:', err);
-              });
+                    }
+                  };
+                });
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Error fetching session status:', err);
+          });
       }
-  }, [data?.state.client_status, trackEvent]); // Depend on loaded data and trackEvent
+    }
+  }, []); // Run once on mount - before data loads
 
   // Memoized emitEvent callback to prevent PdfViewer re-renders
   // MUST be before early returns to avoid React hook order error
@@ -201,7 +222,18 @@ export default function App() {
     }
     
     console.log('Event:', name, payload);
-    trackEvent(name === 'sign' ? 'contract_signed' : name, payload);
+    
+    // Map event names to correct types
+    let eventType = name;
+    if (name === 'sign') {
+      eventType = 'contract_signed';
+    } else if (name === 'invoice_acknowledged') {
+      eventType = 'invoice';
+    } else if (name === 'balance_acknowledged') {
+      eventType = 'balance';
+    }
+    
+    trackEvent(eventType, payload);
     
     if (name === 'contract_signed') {
       // Optimistic Update: Unlock next stage locally
@@ -324,11 +356,6 @@ export default function App() {
       initialSection = 'completion2';
   }
 
-  // Check if we're on the complete/return page
-  const urlParams = new URLSearchParams(window.location.search);
-  const sessionId = urlParams.get('session_id');
-  const showCompletePage = !!sessionId;
-
   // Function to create checkout session
   const createCheckoutSession = async (paymentNumber: 1 | 2) => {
     setIsCreatingSession(true);
@@ -372,8 +399,8 @@ export default function App() {
       </header>
       
       <main className="pt-20 pb-10">
-        {showCompletePage ? (
-          <Complete />
+        {showCompletePage && sessionId ? (
+          <Complete sessionId={sessionId} />
         ) : initialSection === 'contract' ? (
           <ContractView 
             data={data}

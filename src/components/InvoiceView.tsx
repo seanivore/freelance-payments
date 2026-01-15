@@ -31,7 +31,7 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({
   };
 
   const handleContinue = async () => {
-    emitEvent('invoice_acknowledged');
+    emitEvent('invoice_acknowledged'); // This will be mapped to 'invoice' in App.tsx
     // Immediately create checkout session and show Stripe checkout
     await onCreateCheckoutSession();
   };

@@ -1,8 +1,8 @@
 {
-    "project": null,
+    "project": "DoggoDate iOS App",
     "contract": {
-        "work_start": null,
-        "work_end": null,
+        "work_start": "2026-01-15",
+        "work_end": "2026-02-15",
         "legal_jurisdiction": "Massachusetts",
         "maintenance_period_months": 3,
         "maintenance_monthly_fee": 150,
@@ -62,57 +62,57 @@
         }
     },
     "product": {
-        "name": null,
+        "name": "Dating Application Build and Launch",
         "active": true,
-        "description": null,
-        "id": null,
-        "login_name": null,
-        "login_keyword": null,
-        "service_usd": null,
+        "description": "Build and launch a dating application for dachshund parents.",
+        "id": "uid-lit-740",
+        "login_name": "Craig",
+        "login_keyword": "doggo",
+        "service_usd": "2500000",
         "total_payments": 2,
-        "discount_usd": null,
+        "discount_usd": "200000",
         "type": "service",
         "unit_label": "Payment"
     },
     "customer": {
-        "name": null,
-        "business": null,
-        "title": null,
-        "email": null,
-        "phone": null,
-        "id": null,
+        "name": "Craig De'Long-Fur",
+        "business": "Dating With Dachshunds LLC",
+        "title": "Managing Owner",
+        "email": "craig@dachshund-dating.com",
+        "phone": "424-777-1111",
+        "id": "cus-lit-740",
         "address": {
-            "city": null,
-            "line1": null,
-            "state": null,
-            "postal_code": null,
-            "country": null
+            "city": "Los Angeles",
+            "line1": "123 Dachshund Lane",
+            "state": "CA",
+            "postal_code": "90210",
+            "country": "US"
         }
     },
     "coupon": {
-        "amount_off": 0,
+        "amount_off": 200000,
         "applies_to": {
             "products": [
-                null
+                "uid-lit-740"
             ]
         },
         "currency": "usd",
         "duration": "once",
-        "id": null,
+        "id": "cou-lit-740",
         "max_redemptions": 1,
-        "name": null
+        "name": "DOGGO-DATE"
     },
     "price1": {
         "count": 1,
         "currency": "usd",
-        "unit_amount": null,
+        "unit_amount": 1500000,
         "active": true,
         "billing_scheme": "per_unit",
         "pay_by": "start of work",
         "nickname": "Initial Payment",
         "product": {
             "products": [
-                null
+                "uid-lit-740"
             ]
         },
         "id": ""
@@ -120,7 +120,7 @@
     "price2": {
         "count": 2,
         "currency": "usd",
-        "unit_amount": null,
+        "unit_amount": 1000000,
         "active": true,
         "billing_scheme": "per_unit",
         "pay_by": "before project launch",
@@ -129,7 +129,7 @@
         "nickname": "Final Payment",
         "product": {
             "products": [
-                null
+                "uid-lit-740"
             ]
         },
         "id": ""
@@ -137,7 +137,7 @@
     "checkout_session_1": {
         "discounts": [
             {
-                "coupon": null
+                "coupon": "cou-lit-740"
             }
         ],
         "line_items": [
@@ -147,7 +147,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/[uid-xxx-xxx]?session_id={CHECKOUT_SESSION_ID}",
+        "return_url": "https://payments.august.style/uid-lit-740?session_id={CHECKOUT_SESSION_ID}",
         "ui_mode": "custom"
     },
     "checkout_session_2": {
@@ -163,9 +163,9 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/[uid-xxx-xxx]?session_id={CHECKOUT_SESSION_ID}",
+        "return_url": "https://payments.august.style/uid-lit-740?session_id={CHECKOUT_SESSION_ID}",
         "ui_mode": "custom"
     },
-    "project_scope_summary": null,
-    "project_scope_full": null
+    "project_scope_summary": "Client deliverables include a dating app that is designed to help dachshund parents find other dachshund parents.",
+    "project_scope_full": "Design and build a dating app that is designed to help dachshund parents find other dachshund parents. The app will include features such as a user profile, a chat feature, and a way to connect with other dachshund parents. The app will be built using Swift and will be available on the App Store. The app will be launched in the first quarter of 2026. The app will be designed to be user-friendly and easy to navigate. The app will be designed to be visually appealing and engaging. The app will be designed to be accessible to all users. The app will be designed to be secure and protected against hacking. The app will be designed to be scalable and able to handle a large number of users. The app will be designed to be able to handle a large number of users. The app will be designed to be able to handle a large number of users."
 }

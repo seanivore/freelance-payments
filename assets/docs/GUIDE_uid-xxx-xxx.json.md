@@ -1,30 +1,31 @@
 # Blank JSON Schema Value Guide
-*Updated 2026-01-13 for v5 schema*
+
+_Updated 2026-01-13 for v5 schema_
 
 ## Summary
 
-  **When creating a new JSON file to add a new freelance job to the platform, fill out the schema values in the JSON according to the comments below** 
+**When creating a new JSON file to add a new freelance job to the platform, fill out the schema values in the JSON according to the comments below**
 
-## Overview 
+## Overview
 
-  + New jobs
-    - Make a copy of `assets/docs/uid-xxx-xxx.json` template 
-    - Fill out value according to guide below 
-    - Place the finished JSON file with unique ID in `assets/jobs/...` 
-  + Template values 
-    - Values present below represent values on copied template
-    - Comments define expected values when creating new job file
-    - `required` = must be admin created before submission
-    - `artifact` = values provided by automation 
-    - `"",` = values provided by automation 
-    - `provided` = value to leave as is for submission
-  + Updates 
-    - The schema below must represent the current `assets/docs/uid-xxx-xxx.json`
-    - Backwards compatibility is not our preferred solution to updates
-    - Record major schema changes `assets/docs/**version**/CHANGELOG_schema-xxx-xxx.json.md`
-    - Keep this file current, located at `assets/docs/GUIDE_uid-xxx-xxx.json.md`
+- New jobs
+  - Make a copy of `assets/docs/uid-xxx-xxx.json` template
+  - Fill out value according to guide below
+  - Place the finished JSON file with unique ID in `assets/jobs/...`
+- Template values
+  - Values present below represent values on copied template
+  - Comments define expected values when creating new job file
+  - `required` = must be admin created before submission
+  - `artifact` = values provided by automation
+  - `"",` = values provided by automation
+  - `provided` = value to leave as is for submission
+- Updates
+  - The schema below must represent the current `assets/docs/uid-xxx-xxx.json`
+  - Backwards compatibility is not our preferred solution to updates
+  - Record major schema changes `assets/docs/**version**/CHANGELOG_schema-xxx-xxx.json.md`
+  - Keep this file current, located at `assets/docs/GUIDE_uid-xxx-xxx.json.md`
 
-## Schema v5 With Comments 
+## Schema v5 With Comments
 
 ```JSON
 {
@@ -55,7 +56,7 @@
             "sha256": null, // artifact, 'random character string' from process
             "created": null // artifact, ISO timestamp confirmation
         },
-        "invoice": { // mirror 'contract' artifact definitions 
+        "invoice": { // mirror 'contract' artifact definitions
             "id": null, // artifact, 'inv-xxx-xxx'
             "pdf": null, // artifact, 'assets/pdf/contract/inv-xxx-xxx.pdf'
             "file_id": null,
@@ -93,7 +94,7 @@
     "product": { // creates main Stripe product object for job
         "name": null, // required, line-item visible deliverable name
         "active": true, // provided
-        "description": null, // required, define deliverable for docs 
+        "description": null, // required, define deliverable for docs
         "id": null, // required, uid-xxx-xxx admin bash command 'uid' created
         "login_name": null, // required, client last name for client login
         "login_keyword": null, // required, keyword for client login
@@ -108,7 +109,7 @@
         "business": null, // required, client's legal taxable entity
         "title": null, // required, client's business role
         "email": null, // required, client's email contact
-        "phone": null, // required, 123-456-7890 business's legal phone number 
+        "phone": null, // required, 123-456-7890 business's legal phone number
         "id": null, // required, cus-xxx-xxx admin provided 'cus' prefix product.id
         "address": { // client's legal business address in values below
             "city": null, // required
@@ -176,7 +177,7 @@
             }
         ],
         "mode": "payment", // provided
-        "return_url": "https://payments.august.style/[uid-xxx-xxx]#completion-1", // required, update [uid-xxx-xxx] with actual product.id
+        "return_url": "https://payments.august.style/[uid-xxx-xxx]?session_id={CHECKOUT_SESSION_ID}", // required, update [uid-xxx-xxx] with actual product.id
         "ui_mode": "custom" // provided
     },
     "checkout_session_2": { // facilitates on-demand price2 checkout session initialization
@@ -192,7 +193,7 @@
             }
         ],
         "mode": "payment", // provided
-        "return_url": "https://payments.august.style/[uid-xxx-xxx]#completion-2", // required, update [uid-xxx-xxx] with actual product.id
+        "return_url": "https://payments.august.style/[uid-xxx-xxx]?session_id={CHECKOUT_SESSION_ID}", // required, update [uid-xxx-xxx] with actual product.id
         "ui_mode": "custom" // provided
     },
     "project_scope_summary": null, // required, summary of deliverable
@@ -201,4 +202,5 @@
 ```
 
 ---
-*Update reviewed 2026-01-13 by Sean August Horvath*
+
+_Update reviewed 2026-01-13 by Sean August Horvath_

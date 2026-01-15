@@ -334,10 +334,10 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         
         await openPdfFromBytes(signedBuffer);
         
-        // Emit success with name and date
+        // Emit success with name and date (using correct keys for Python processor)
         emitEvent?.('contract_signed', { 
-          date: signedDate,
-          legalName: legalName
+          signed_date: signedDate,
+          legal_name: legalName
         });
         // NOTE: App.tsx will handle the navigation via optimistic update.
         setSection('invoice');

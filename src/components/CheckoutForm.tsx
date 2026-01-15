@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   PaymentElement,
   useCheckout
 } from '@stripe/react-stripe-js/checkout';
+import { apiUrl } from '@/lib/api';
 
 export const CheckoutForm: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fallbackTotal, setFallbackTotal] = useState<number | null>(null);
 
   const checkoutState = useCheckout();
 
@@ -48,15 +50,54 @@ export const CheckoutForm: React.FC = () => {
     setIsSubmitting(false);
   };
 
+  // Fetch session details if totals missing (fallback for $0 display issue)
+  useEffect(() => {
+    // After early returns, checkoutState.type is 'success' and checkout exists
+    if (checkoutState.type === 'success') {
+      const checkout = checkoutState.checkout;
+      const hasTotals = checkout.total?.total?.amount;
+      
+      // If totals missing, try to fetch from session-status API
+      // Type assertion: clientSecret exists on checkout sessions but TypeScript types don't expose it
+      const clientSecret = (checkout as any).clientSecret;
+      if (!hasTotals && clientSecret) {
+        // Extract session_id from client_secret (format: cs_test_xxx_secret_yyy)
+        const sessionId = clientSecret.split('_secret_')[0];
+        if (sessionId) {
+          fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
+            .then(res => res.json())
+            .then(data => {
+              // Use amount_total from session if available
+              if (data.amount_total) {
+                setFallbackTotal(Number(data.amount_total) / 100);
+              }
+            })
+            .catch(err => {
+              console.warn('Failed to fetch session details:', err);
+            });
+        }
+      }
+    }
+  }, [checkoutState]);
+
   const { checkout } = checkoutState;
-  const totalAmount = checkout.total?.total?.amount;
-  const formattedAmount = totalAmount ? (Number(totalAmount) / 100).toFixed(2) : '0.00';
+  const totalAmount = checkout?.total?.total?.amount;
+  const displayTotal = fallbackTotal || (totalAmount ? Number(totalAmount) / 100 : 0);
+  const formattedAmount = displayTotal > 0 ? displayTotal.toFixed(2) : '0.00';
   
   // Access line items and totals from checkout session
-  const lineItems = checkout.lineItems || [];
-  const subtotal = checkout.total?.subtotal?.amount ? Number(checkout.total.subtotal.amount) / 100 : 0;
-  const discount = checkout.total?.discount?.amount ? Number(checkout.total.discount.amount) / 100 : 0;
-  const total = checkout.total?.total?.amount ? Number(checkout.total.total.amount) / 100 : 0;
+  const lineItems = checkout?.lineItems || [];
+  const subtotal = checkout?.total?.subtotal?.amount ? Number(checkout.total.subtotal.amount) / 100 : 0;
+  const discount = checkout?.total?.discount?.amount ? Number(checkout.total.discount.amount) / 100 : 0;
+  const total = displayTotal || (checkout?.total?.total?.amount ? Number(checkout.total.total.amount) / 100 : 0);
+  
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Checkout state:', checkoutState);
+    console.log('Total amount:', totalAmount);
+    console.log('Fallback total:', fallbackTotal);
+    console.log('Display total:', displayTotal);
+  }
 
   return (
     <div className="max-w-md mx-auto p-8 bg-slate-900 rounded-lg border border-slate-800 shadow-xl">
