@@ -22,19 +22,34 @@ module.exports = async (req, res) => {
   const origin = req.headers.origin;
   const isAllowedOrigin = origin && allowedOrigins.includes(origin);
   
-  // Set CORS headers for all requests (including OPTIONS)
+  // Handle preflight OPTIONS request FIRST - before any other logic
+  if (req.method === 'OPTIONS') {
+    try {
+      // Always allow OPTIONS requests (preflight) - set CORS headers
+      if (isAllowedOrigin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+      }
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS, POST');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Max-Age', '86400');
+      return res.status(200).json({});
+    } catch (error) {
+      // If there's an error, still try to return with CORS headers
+      if (isAllowedOrigin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+      }
+      return res.status(200).json({});
+    }
+  }
+  
+  // For actual requests (GET, POST), set CORS headers and validate origin
   if (isAllowedOrigin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS, POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // Handle preflight OPTIONS request - MUST return early with headers set
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
   
   // Reject if origin not allowed (for non-OPTIONS requests)
   if (!isAllowedOrigin) {
