@@ -168,6 +168,53 @@ export default function App() {
       }
   }, [data?.state.client_status]); // Depend on loaded data to know where we are
 
+  // Memoized emitEvent callback to prevent PdfViewer re-renders
+  // MUST be before early returns to avoid React hook order error
+  const emitEvent = useCallback((name: string, payload?: unknown) => {
+    // Only log contract_loaded, don't trigger state updates (prevents infinite loop)
+    if (name === 'contract_loaded') {
+      console.log('Event:', name, payload);
+      trackEvent('contract_loaded', payload);
+      return; // Don't update state for load events
+    }
+    
+    console.log('Event:', name, payload);
+    trackEvent(name === 'sign' ? 'contract_signed' : name, payload);
+    
+    if (name === 'contract_signed') {
+      // Optimistic Update: Unlock next stage locally
+      setData(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          state: {
+            ...prev.state,
+            client_status: {
+              ...prev.state.client_status,
+              contract_signed: new Date().toISOString()
+            }
+          }
+        };
+      });
+    }
+    
+    if (name === 'invoice_acknowledged') {
+      setData(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          state: {
+            ...prev.state,
+            client_status: {
+              ...prev.state.client_status,
+              invoice: new Date().toISOString()
+            }
+          }
+        };
+      });
+    }
+  }, [trackEvent]); // trackEvent is memoized, setData is stable
+
   // --- Display Logic ---
   // All hooks must be called before any early returns
   if (loading) {
@@ -244,52 +291,6 @@ export default function App() {
   }
 
   const isPaymentSection = initialSection === 'payment1' || initialSection === 'payment2';
-  
-  // Memoized emitEvent callback to prevent PdfViewer re-renders
-  const emitEvent = useCallback((name: string, payload?: unknown) => {
-    // Only log contract_loaded, don't trigger state updates (prevents infinite loop)
-    if (name === 'contract_loaded') {
-      console.log('Event:', name, payload);
-      trackEvent('contract_loaded', payload);
-      return; // Don't update state for load events
-    }
-    
-    console.log('Event:', name, payload);
-    trackEvent(name === 'sign' ? 'contract_signed' : name, payload);
-    
-    if (name === 'contract_signed') {
-      // Optimistic Update: Unlock next stage locally
-      setData(prev => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          state: {
-            ...prev.state,
-            client_status: {
-              ...prev.state.client_status,
-              contract_signed: new Date().toISOString()
-            }
-          }
-        };
-      });
-    }
-    
-    if (name === 'invoice_acknowledged') {
-      setData(prev => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          state: {
-            ...prev.state,
-            client_status: {
-              ...prev.state.client_status,
-              invoice: new Date().toISOString()
-            }
-          }
-        };
-      });
-    }
-  }, [trackEvent]); // trackEvent is memoized, setData is stable
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30">
