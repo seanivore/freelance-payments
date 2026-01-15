@@ -256,7 +256,10 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     if (!pdfData) return;
 
     try {
-        const loaded = await PDFDocument.load(pdfData as any);
+        // Clone the ArrayBuffer to avoid detached buffer errors
+        // Create a new Uint8Array from the existing buffer, then get its buffer
+        const clonedBuffer = pdfData.slice(0);
+        const loaded = await PDFDocument.load(clonedBuffer);
         const pngBytes = dataURLToUint8Array(signatureDataUrl);
         const img = await loaded.embedPng(pngBytes);
         
@@ -293,7 +296,12 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         const bytes = await loaded.save();
         
         // Update view with signed PDF
-        await openPdfFromBytes(bytes.buffer as any);
+        // bytes is a Uint8Array, convert to ArrayBuffer
+        // Create a new ArrayBuffer from the Uint8Array to avoid detached buffer issues
+        const signedBuffer = bytes.buffer instanceof ArrayBuffer 
+          ? bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+          : new Uint8Array(bytes).buffer;
+        await openPdfFromBytes(signedBuffer);
         
         // Emit success with name and date
         emitEvent?.('contract_signed', { 
