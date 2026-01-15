@@ -6,11 +6,15 @@ import { GateBar } from './GateBar';
 type BalanceViewProps = {
   data: JobData;
   emitEvent: (name: string, payload?: unknown) => void;
+  onCreateCheckoutSession: () => Promise<void>;
+  isCreatingSession: boolean;
 };
 
 export const BalanceView: React.FC<BalanceViewProps> = ({
   data,
-  emitEvent
+  emitEvent,
+  onCreateCheckoutSession,
+  isCreatingSession
 }) => {
   const handleDownloadDocs = (choice: 'yes' | 'no') => {
     emitEvent('balance_docs', { choice });
@@ -26,8 +30,10 @@ export const BalanceView: React.FC<BalanceViewProps> = ({
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     emitEvent('balance_acknowledged');
+    // Immediately create checkout session and show Stripe checkout
+    await onCreateCheckoutSession();
   };
 
   return (
@@ -44,6 +50,12 @@ export const BalanceView: React.FC<BalanceViewProps> = ({
           onDownloadDocs={handleDownloadDocs}
           onContinue={handleContinue}
         />
+        {isCreatingSession && (
+          <div className="ml-4 text-slate-400 text-sm flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+            Starting checkout...
+          </div>
+        )}
       </div>
     </>
   );

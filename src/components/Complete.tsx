@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '@/lib/api';
 
 type SessionStatus = {
   status: string;
@@ -42,7 +43,7 @@ export const Complete: React.FC = () => {
       return;
     }
 
-    fetch(`/api/session-status?session_id=${sessionId}`)
+    fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
       .then((res) => res.json())
       .then((data: SessionStatus) => {
         setStatus(data.status);

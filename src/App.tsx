@@ -7,6 +7,7 @@ import { InvoiceView } from '@/components/InvoiceView';
 import { BalanceView } from '@/components/BalanceView';
 import { PaymentView } from '@/components/PaymentView';
 import { CompletionView } from '@/components/CompletionView';
+import { apiUrl } from '@/lib/api';
 
 export default function App() {
   const [data, setData] = useState<JobData | null>(null);
@@ -51,7 +52,7 @@ export default function App() {
     if (!jobId || jobId === '/') return;
 
     // Send batch to API
-    fetch('/api/track-event', {
+    fetch(apiUrl('/api/track-event'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -107,15 +108,15 @@ export default function App() {
                  event_type: 'batch',
                  event_data: eventBufferRef.current
              });
-             // Use fetch with keepalive as beacon fallback or primary
-             fetch('/api/track-event', {
-                 method: 'POST',
-                 headers: { 'Content-Type': 'application/json' },
-                 body: payload,
-                 keepalive: true
-             }).catch(() => {
-                 // Ignore unload errors
-             });
+            // Use fetch with keepalive as beacon fallback or primary
+            fetch(apiUrl('/api/track-event'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload,
+                keepalive: true
+            }).catch(() => {
+                // Ignore unload errors
+            });
          }
     };
     
@@ -147,7 +148,7 @@ export default function App() {
       
       if (sessionId) {
           // Fetch session status to verify payment completion
-          fetch(`/api/session-status?session_id=${sessionId}`)
+          fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
               .then(res => res.json())
               .then(sessionData => {
                   if (sessionData.status === 'complete') {
@@ -233,6 +234,8 @@ export default function App() {
           }
         };
       });
+      // Note: Checkout session creation is now handled directly in InvoiceView
+      // No need to navigate to payment1 section - we show checkout directly
     }
     
     if (name === 'balance_acknowledged') {
@@ -249,6 +252,8 @@ export default function App() {
           }
         };
       });
+      // Note: Checkout session creation is now handled directly in BalanceView
+      // No need to navigate to payment2 section - we show checkout directly
     }
   }, [trackEvent]); // trackEvent is memoized, setData is stable
 
@@ -329,7 +334,7 @@ export default function App() {
     setIsCreatingSession(true);
     try {
       const jobId = window.location.pathname.substring(1);
-      const response = await fetch('/api/create-checkout-session', {
+      const response = await fetch(apiUrl('/api/create-checkout-session'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -375,15 +380,41 @@ export default function App() {
             emitEvent={emitEvent}
           />
         ) : initialSection === 'invoice' ? (
-          <InvoiceView
-            data={data}
-            emitEvent={emitEvent}
-          />
+          clientSecret ? (
+            // Show Stripe checkout if session already created
+            <PaymentView
+              data={data}
+              paymentNumber={1}
+              onCreateSession={() => createCheckoutSession(1)}
+              isCreatingSession={isCreatingSession}
+              clientSecret={clientSecret}
+            />
+          ) : (
+            <InvoiceView
+              data={data}
+              emitEvent={emitEvent}
+              onCreateCheckoutSession={() => createCheckoutSession(1)}
+              isCreatingSession={isCreatingSession}
+            />
+          )
         ) : initialSection === 'balance' ? (
-          <BalanceView
-            data={data}
-            emitEvent={emitEvent}
-          />
+          clientSecret ? (
+            // Show Stripe checkout if session already created
+            <PaymentView
+              data={data}
+              paymentNumber={2}
+              onCreateSession={() => createCheckoutSession(2)}
+              isCreatingSession={isCreatingSession}
+              clientSecret={clientSecret}
+            />
+          ) : (
+            <BalanceView
+              data={data}
+              emitEvent={emitEvent}
+              onCreateCheckoutSession={() => createCheckoutSession(2)}
+              isCreatingSession={isCreatingSession}
+            />
+          )
         ) : initialSection === 'payment1' || initialSection === 'payment2' ? (
           <PaymentView
             data={data}
