@@ -6,7 +6,6 @@ import { format } from 'date-fns';
 
 // PDF.js (ESM, Vite-friendly)
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import 'pdfjs-dist/build/pdf.worker.mjs';
 
 // pdf-lib (ESM)
 import { PDFDocument } from 'pdf-lib';
@@ -46,10 +45,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
 
   useEffect(() => {
     // Set PDF.js worker path (use CDN in production, local in dev)
-    GlobalWorkerOptions.workerSrc = 
-      import.meta.env.PROD 
-        ? 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs'
-        : '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
+    // Must be set before any getDocument calls
+    if (!GlobalWorkerOptions.workerSrc) {
+      GlobalWorkerOptions.workerSrc = 
+        import.meta.env.PROD 
+          ? 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.mjs'
+          : '/node_modules/pdfjs-dist/build/pdf.worker.mjs';
+    }
   }, []);
 
   // Load PDF when initialPdfBytes is provided (only once per unique bytes)
@@ -77,12 +79,22 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   }, [initialPdfBytes]); // Only depend on initialPdfBytes, not isLoading or pdfDoc
 
   async function renderPage(pageNum: number) {
-    if (!pdfDoc) return;
+    if (!pdfDoc || !pdfCanvasRef.current) {
+      console.warn('Cannot render: pdfDoc or canvas not ready', { pdfDoc: !!pdfDoc, canvas: !!pdfCanvasRef.current });
+      return;
+    }
+    
     const page = await pdfDoc.getPage(pageNum);
     const viewport = page.getViewport({ scale });
 
-    const canvas = pdfCanvasRef.current!;
-    const pdfCtx = canvas.getContext('2d', { alpha: false })!;
+    const canvas = pdfCanvasRef.current;
+    if (!canvas) return;
+    
+    const pdfCtx = canvas.getContext('2d', { alpha: false });
+    if (!pdfCtx) {
+      console.error('Failed to get 2d context from canvas');
+      return;
+    }
 
     canvas.width = viewport.width;
     canvas.height = viewport.height;
@@ -95,7 +107,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       const docTask = getDocument({ data: bytes });
       const doc = await docTask.promise;
       setPdfDoc(doc);
-      await renderPage(1);
+      // Don't render here - let useEffect handle rendering when canvas is ready
       // Only emit event once when PDF is first loaded (prevent infinite loop)
       if (!hasEmittedLoadedRef.current) {
         hasEmittedLoadedRef.current = true;
@@ -106,6 +118,21 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       throw err;
     }
   }
+
+  // Render page when PDF doc is loaded and canvas is ready
+  useEffect(() => {
+    if (pdfDoc && pdfCanvasRef.current && !isLoading) {
+      // Small delay to ensure canvas is fully mounted
+      const timer = setTimeout(() => {
+        renderPage(1).catch((err) => {
+          console.error('Error rendering PDF page:', err);
+          setPdfError('Failed to render PDF page');
+        });
+      }, 0);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [pdfDoc, isLoading, scale]); // Re-render when PDF doc changes, loading completes, or scale changes
 
   // Stamp signature at bottom of last page
   async function embedSignature(signatureDataUrl: string) {
