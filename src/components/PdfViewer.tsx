@@ -42,6 +42,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const loadedBytesRef = useRef<ArrayBuffer | null>(null);
+  const hasEmittedLoadedRef = useRef(false);
 
   useEffect(() => {
     // Set PDF.js worker path (use CDN in production, local in dev)
@@ -53,12 +54,13 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
 
   // Load PDF when initialPdfBytes is provided (only once per unique bytes)
   useEffect(() => {
-    // Prevent infinite loop: only load if bytes changed and not already loading
-    if (initialPdfBytes && initialPdfBytes !== loadedBytesRef.current && !isLoading) {
+    // Prevent infinite loop: only load if bytes changed and not already loaded/loading
+    if (initialPdfBytes && initialPdfBytes !== loadedBytesRef.current && !isLoading && !pdfDoc) {
       loadedBytesRef.current = initialPdfBytes;
       setPdfData(initialPdfBytes);
       setIsLoading(true);
       setPdfError(null);
+      hasEmittedLoadedRef.current = false; // Reset emit flag for new PDF
       
       openPdfFromBytes(initialPdfBytes)
         .then(() => {
@@ -69,9 +71,10 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           setPdfError('Failed to load PDF document');
           setIsLoading(false);
           loadedBytesRef.current = null; // Allow retry
+          hasEmittedLoadedRef.current = false;
         });
     }
-  }, [initialPdfBytes, isLoading]);
+  }, [initialPdfBytes]); // Only depend on initialPdfBytes, not isLoading or pdfDoc
 
   async function renderPage(pageNum: number) {
     if (!pdfDoc) return;
@@ -93,8 +96,9 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       const doc = await docTask.promise;
       setPdfDoc(doc);
       await renderPage(1);
-      // Only emit event once when PDF is first loaded (not on every render)
-      if (loadedBytesRef.current === bytes) {
+      // Only emit event once when PDF is first loaded (prevent infinite loop)
+      if (!hasEmittedLoadedRef.current) {
+        hasEmittedLoadedRef.current = true;
         emitEvent?.('contract_loaded', { page: 1, totalPages: doc.numPages });
       }
     } catch (err) {

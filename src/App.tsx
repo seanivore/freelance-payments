@@ -270,6 +270,13 @@ export default function App() {
             initialPdfBytes={pdfBytes}
             initialSection={initialSection}
             emitEvent={(name, payload) => {
+                // Only log contract_loaded, don't trigger state updates (prevents infinite loop)
+                if (name === 'contract_loaded') {
+                    console.log('Event:', name, payload);
+                    trackEvent('contract_loaded', payload);
+                    return; // Don't update state for load events
+                }
+                
                 console.log('Event:', name, payload);
                 trackEvent(name === 'sign' ? 'contract_signed' : name, payload);
                 
@@ -288,7 +295,6 @@ export default function App() {
                              }
                          };
                      });
-                     // Force re-render will pick up new initialSection and fetch new PDF
                 }
                 
                 if (name === 'invoice_acknowledged') {
