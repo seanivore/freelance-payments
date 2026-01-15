@@ -1,11 +1,17 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { fetchJobData, JobData } from '@/lib/data';
 import { PdfLoader } from '@/components/PdfLoader';
 import { Loader2 } from 'lucide-react';
+import { CheckoutProvider } from '@stripe/react-stripe-js/checkout';
+import { stripePromise } from '@/lib/stripe';
+import { CheckoutForm } from '@/components/CheckoutForm';
+import { Complete } from '@/components/Complete';
 
 export default function App() {
   const [data, setData] = useState<JobData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
   
   // --- Event Tracking State ---
   const [eventBuffer, setEventBuffer] = useState<any[]>([]);
@@ -129,44 +135,58 @@ export default function App() {
     };
   }, []);
 
-  // --- Handle Stripe Return (Optimistic) ---
+  // --- Handle Stripe Return (Check for session_id query param) ---
   // MUST be before early returns to avoid React hook order error
   useEffect(() => {
       if (!data) return; // Early return inside hook is fine
       
-      if (window.location.hash === '#completion-1' || window.location.hash === '#completion-2') {
-          const s = data.state.client_status;
-          let updates: Partial<typeof s> = {};
-          
-          if (window.location.hash === '#completion-1' && s.invoice && !s.payment_1) {
-              updates = { payment_1: new Date().toISOString() };
-          } else if (window.location.hash === '#completion-2' && s.balance && !s.payment_2) {
-              updates = { payment_2: new Date().toISOString() };
-          }
-          
-          if (Object.keys(updates).length > 0) {
-              setData(prev => {
-                 if (!prev) return null;
-                 return {
-                     ...prev,
-                     state: {
-                         ...prev.state,
-                         client_status: {
-                             ...prev.state.client_status,
-                             ...updates
-                         }
-                     }
-                 };
+      // Check for session_id in URL (from Stripe return redirect)
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session_id');
+      
+      if (sessionId) {
+          // Fetch session status to verify payment completion
+          fetch(`/api/session-status?session_id=${sessionId}`)
+              .then(res => res.json())
+              .then(sessionData => {
+                  if (sessionData.status === 'complete') {
+                      const s = data.state.client_status;
+                      let updates: Partial<typeof s> = {};
+                      
+                      // Determine which payment based on current state
+                      if (s.invoice && !s.payment_1) {
+                          updates = { payment_1: new Date().toISOString() };
+                          trackEvent('payment_1');
+                      } else if (s.balance && !s.payment_2) {
+                          updates = { payment_2: new Date().toISOString() };
+                          trackEvent('payment_2');
+                      }
+                      
+                      if (Object.keys(updates).length > 0) {
+                          setData(prev => {
+                             if (!prev) return null;
+                             return {
+                                 ...prev,
+                                 state: {
+                                     ...prev.state,
+                                     client_status: {
+                                         ...prev.state.client_status,
+                                         ...updates
+                                     }
+                                 }
+                             };
+                          });
+                      }
+                      
+                      // Clear query param to prevent reload loops
+                      window.history.replaceState(null, '', window.location.pathname);
+                  }
+              })
+              .catch(err => {
+                  console.error('Error fetching session status:', err);
               });
-              
-              // Track payment event
-              trackEvent(updates.payment_1 ? 'payment_1' : 'payment_2');
-              
-              // Clear hash to prevent reload loops
-              window.history.replaceState(null, '', window.location.pathname);
-          }
       }
-  }, [data?.state.client_status]); // Depend on loaded data to know where we are
+  }, [data?.state.client_status, trackEvent]); // Depend on loaded data and trackEvent
 
   // Memoized emitEvent callback to prevent PdfViewer re-renders
   // MUST be before early returns to avoid React hook order error
@@ -291,6 +311,52 @@ export default function App() {
   }
 
   const isPaymentSection = initialSection === 'payment1' || initialSection === 'payment2';
+  
+  // Check if we're on the complete/return page
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionId = urlParams.get('session_id');
+  const showCompletePage = !!sessionId;
+
+  // Create checkout session promise for CheckoutProvider
+  const checkoutSessionPromise = useMemo(() => {
+    if (!clientSecret) return null;
+    return Promise.resolve(clientSecret);
+  }, [clientSecret]);
+
+  // Function to create checkout session
+  const createCheckoutSession = async (paymentNumber: 1 | 2) => {
+    setIsCreatingSession(true);
+    try {
+      const jobId = window.location.pathname.substring(1);
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job_id: jobId,
+          price_id: paymentNumber === 1 ? data!.product.price1.id : data!.product.price2.id,
+          coupon_id: paymentNumber === 1 ? data!.state.objects?.coupon : undefined,
+          customer_id: data!.customer.id,
+          payment_number: paymentNumber
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const session = await response.json();
+      if (session.client_secret) {
+        setClientSecret(session.client_secret);
+      } else {
+        throw new Error('No client_secret in response');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      alert('Failed to start checkout. Please try again.');
+    } finally {
+      setIsCreatingSession(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30">
@@ -300,72 +366,73 @@ export default function App() {
       </header>
       
       <main className="pt-20 pb-10">
-        { !isPaymentSection ? (
-            <PdfLoader 
-              initialPdfUrl={initialPdfUrl}
-              initialSection={initialSection}
-              emitEvent={emitEvent}
-              isPaymentSection={isPaymentSection}
-            />
+        {showCompletePage ? (
+          // Show Complete component when session_id is in URL
+          <Complete />
+        ) : !isPaymentSection ? (
+          // Show PDF viewer for non-payment sections
+          <PdfLoader 
+            initialPdfUrl={initialPdfUrl}
+            initialSection={initialSection}
+            emitEvent={emitEvent}
+            isPaymentSection={isPaymentSection}
+          />
+        ) : clientSecret ? (
+          // Show CheckoutForm when clientSecret is available
+          <CheckoutProvider
+            stripe={stripePromise}
+            options={{
+              clientSecret: checkoutSessionPromise!,
+              elementsOptions: {
+                appearance: {
+                  theme: 'stripe'
+                }
+              }
+            }}
+          >
+            <CheckoutForm />
+          </CheckoutProvider>
         ) : (
-            <div className="flex flex-col items-center justify-center p-10 mt-10">
-                <div className="max-w-md w-full bg-slate-900 p-8 rounded-lg border border-slate-800 shadow-xl">
-                    <h2 className="text-2xl font-bold mb-6 text-center text-white">
-                        {initialSection === 'payment1' ? 'First Payment' : 'Final Balance'}
-                    </h2>
-                    
-                    <div className="mb-8 space-y-4">
-                        <div className="flex justify-between border-b border-slate-700 pb-2">
-                            <span className="text-slate-400">Invoice</span>
-                            <span className="font-mono">{initialSection === 'payment1' ? data.docs.invoice.url.split('/').pop() : data.docs.balance.url.split('/').pop()}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-slate-400">Amount Due</span>
-                            <span className="text-3xl font-bold text-emerald-400">
-                                ${(initialSection === 'payment1' ? data.product.price1.unit_amount : data.product.price2.unit_amount) / 100}
-                            </span>
-                        </div>
-                    </div>
-
-                    <button 
-                        className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2"
-                        onClick={() => {
-                            // Create session
-                            const btn = document.activeElement as HTMLButtonElement;
-                            if(btn) btn.disabled = true;
-                            
-                            fetch('/api/create-checkout-session', {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({
-                                    job_id: window.location.pathname.substring(1),
-                                    price_id: initialSection === 'payment1' ? data.product.price1.id : data.product.price2.id,
-                                    payment_number: initialSection === 'payment1' ? 1 : 2
-                                })
-                            })
-                            .then(r => r.json())
-                            .then(session => {
-                                if(session.url) window.location.href = session.url;
-                                else {
-                                    alert("Error creating payment session");
-                                    if(btn) btn.disabled = false;
-                                }
-                            })
-                            .catch((e) => {
-                                console.error(e);
-                                alert("Connection error: API not available");
-                                if(btn) btn.disabled = false;
-                            });
-                        }}
-                    >
-                        Process Secure Payment
-                    </button>
-                    
-                    <p className="mt-4 text-xs text-center text-slate-500">
-                        Payments processed securely by Stripe. No card data is stored on this server.
-                    </p>
+          // Show payment initiation UI
+          <div className="flex flex-col items-center justify-center p-10 mt-10">
+            <div className="max-w-md w-full bg-slate-900 p-8 rounded-lg border border-slate-800 shadow-xl">
+              <h2 className="text-2xl font-bold mb-6 text-center text-white">
+                {initialSection === 'payment1' ? 'First Payment' : 'Final Balance'}
+              </h2>
+              
+              <div className="mb-8 space-y-4">
+                <div className="flex justify-between border-b border-slate-700 pb-2">
+                  <span className="text-slate-400">Invoice</span>
+                  <span className="font-mono">{initialSection === 'payment1' ? data.docs.invoice.url.split('/').pop() : data.docs.balance.url.split('/').pop()}</span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400">Amount Due</span>
+                  <span className="text-3xl font-bold text-emerald-400">
+                    ${(initialSection === 'payment1' ? data.product.price1.unit_amount : data.product.price2.unit_amount) / 100}
+                  </span>
+                </div>
+              </div>
+
+              <button 
+                className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-600 disabled:cursor-not-allowed text-slate-900 font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2"
+                onClick={() => createCheckoutSession(initialSection === 'payment1' ? 1 : 2)}
+                disabled={isCreatingSession}
+              >
+                {isCreatingSession ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Starting checkout...
+                  </>
+                ) : (
+                  'Continue to Checkout'
+                )}
+              </button>
+              
+              <p className="mt-4 text-xs text-center text-slate-500">
+                Payments processed securely by Stripe. No card data is stored on this server.
+              </p>
             </div>
+          </div>
         )}
       </main>
     </div>

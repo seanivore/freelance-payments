@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
       mode: 'payment',
       line_items: lineItems,
       ui_mode: 'custom', // Custom UI with Stripe Elements (per user request)
-      return_url: return_url || `${req.headers.origin}/${job_id}#completion`,
+      return_url: return_url || `${req.headers.origin}/${job_id}?session_id={CHECKOUT_SESSION_ID}`,
       expires_at: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours from now
       metadata: {
         job_id: job_id,
@@ -78,6 +78,8 @@ module.exports = async (req, res) => {
     // and Stripe Elements defaults.
     if (customer_id) {
       sessionParams.customer = customer_id;
+      // Set client_reference_id to customer.id for reconciliation with internal systems
+      sessionParams.client_reference_id = customer_id;
     }
 
     // Add discounts if any

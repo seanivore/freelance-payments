@@ -748,3 +748,135 @@ App.tsx (Main Router/State Machine)
 **We'll learn together** - As we implement, I'll explain React concepts as they come up. By the end, you'll understand React well enough to maintain this codebase.
 
 **Trust the process** - We have a complete plan. We've resolved unknowns before coding. We'll write fresh code with confidence. It will work.
+
+---
+
+## Implementation Details
+
+### Stripe Checkout Flow Implementation
+
+**Status**: ✅ Complete (Phase 2)
+
+**Architecture**: Custom UI with Stripe Elements (not hosted checkout)
+
+**Key Components**:
+
+1. **`src/lib/stripe.ts`**: Initializes Stripe.js with publishable key from environment variables
+   - Uses `VITE_STRIPE_PUBLISHABLE_KEY` for client-side access
+   - Exports `stripePromise` for use in CheckoutProvider
+
+2. **`src/components/CheckoutForm.tsx`**: Custom checkout form with Stripe Elements
+   - Uses `PaymentElement` from `@stripe/react-stripe-js/checkout`
+   - Email validation with `checkout.updateEmail()`
+   - Form submission calls `checkout.confirm()` to complete payment
+   - Styled with Tailwind to match app theme
+
+3. **`src/components/Complete.tsx`**: Return/completion page component
+   - Extracts `session_id` from URL query params (`?session_id=cs_xxx`)
+   - Fetches session status from `/api/session-status`
+   - Displays success/error based on `status === 'complete'`
+   - Shows payment details and link to Stripe dashboard
+
+4. **`api/session-status.js`**: Serverless function to retrieve checkout session status
+   - GET endpoint: `/api/session-status?session_id=cs_xxx`
+   - Returns: `status`, `payment_status`, `payment_intent_id`, `payment_intent_status`
+   - Used by Complete component to verify payment completion
+
+**Flow**:
+
+1. User clicks "Continue to Checkout" button
+2. `createCheckoutSession()` function called in `App.tsx`
+3. POST to `/api/create-checkout-session` with `price_id`, `customer_id`, `coupon_id` (for payment_1)
+4. API creates Stripe checkout session with `ui_mode: 'custom'`
+5. API returns `client_secret` (required for Stripe Elements)
+6. `App.tsx` stores `client_secret` in state
+7. `CheckoutProvider` wraps `CheckoutForm` with `client_secret`
+8. `CheckoutForm` renders `PaymentElement` (shows line items + payment form)
+9. User enters card details and submits
+10. `checkout.confirm()` called - card is charged
+11. Stripe redirects to `return_url` with `?session_id={CHECKOUT_SESSION_ID}`
+12. `Complete` component fetches session status
+13. If `status === 'complete'`, optimistically update `client_status` (payment_1 or payment_2)
+14. Track payment event and show next gate
+
+**Return URL Template**: 
+- Uses `{CHECKOUT_SESSION_ID}` template variable in `return_url`
+- Stripe replaces this with actual session ID before redirecting
+- Format: `https://payments.august.style/${job_id}?session_id={CHECKOUT_SESSION_ID}`
+
+**Key Differences from Hash-Based Routing**:
+- Old: `#completion-1` or `#completion-2` hash-based
+- New: `?session_id=cs_xxx` query param-based
+- Allows proper session verification via API call
+- More reliable than hash-based detection
+
+**Webhook vs Session-Status Endpoint**:
+- **Webhook** (`api/webhook.js`): Server-side, reliable, handles async payments, updates JSON files via GitHub Actions. Used for backend persistence.
+- **Session-Status Endpoint** (`api/session-status.js`): Client-side, immediate feedback, shows status on return page. Used for UI feedback only.
+- **Both are needed**: Webhook ensures backend updates even if user closes browser. Session-status provides immediate UI feedback.
+
+**Customer ID & client_reference_id**:
+- `customer` field: Set to `customer_id` - Links session to Stripe customer object
+- `client_reference_id`: Set to `customer.id` - Flexible reference field for reconciliation with internal systems
+
+**Files Modified**:
+- `api/create-checkout-session.js`: Updated `return_url` template, added `client_reference_id`
+- `src/App.tsx`: Integrated `CheckoutProvider`, routing logic, session creation, return URL handling
+- `package.json`: Added `@stripe/stripe-js` and `@stripe/react-stripe-js` packages
+- `.example.env`: Added `VITE_STRIPE_PUBLISHABLE_KEY` example
+
+### PDF Viewer Fixes
+
+**Status**: ✅ Complete (Phase 3)
+
+**Issues Resolved**:
+
+1. **Infinite Re-render Loop**:
+   - **Problem**: `PdfLoader` component was defined inside `App.tsx`, causing recreation on every render
+   - **Solution**: Extracted `PdfLoader` to `src/components/PdfLoader.tsx` as separate component
+   - **Result**: Component only created once, not recreated on every render
+
+2. **React Hook Order Error (#310)**:
+   - **Problem**: `useCallback` hooks defined after early return statements
+   - **Solution**: Moved all hooks (including `emitEvent` useCallback) before any conditional returns
+   - **Result**: All hooks called in same order on every render
+
+3. **PDF.js Worker 404 Error**:
+   - **Problem**: CDN URL for worker was incorrect (version mismatch, wrong file extension)
+   - **Solution**: Updated to use unpkg CDN with correct version (`5.4.530`) matching installed package
+   - **Result**: Worker loads correctly, no "fake worker" warning
+
+4. **Pixelation on High-DPI Displays**:
+   - **Problem**: Canvas not accounting for device pixel ratio
+   - **Solution**: Added `devicePixelRatio` support - multiply canvas internal resolution by pixel ratio
+   - **Result**: Crisp rendering on Retina/high-DPI displays
+
+5. **Scrolling Not Working**:
+   - **Problem**: Container had `overflow-hidden` and centering prevented scrolling
+   - **Solution**: Changed to `overflow-auto`, removed centering, added `max-h-[90vh]`
+   - **Result**: PDF pages scroll vertically through entire document
+
+6. **Multi-Page Rendering**:
+   - **Problem**: Only page 1 was rendering, even though PDF had 8 pages
+   - **Solution**: 
+     - Created canvas element for each page (1-8)
+     - Added `renderAllPages()` function to render sequentially
+     - Used `renderedPagesRef` Set to track which pages have been rendered (instead of checking canvas width)
+   - **Result**: All pages render and stack vertically for scrolling
+
+7. **Canvas Rendering Timing**:
+   - **Problem**: `renderPage()` called before canvas refs were attached to DOM
+   - **Solution**: Added `useEffect` with retry logic using `requestAnimationFrame` to wait for canvases to be mounted
+   - **Result**: Pages render only after canvases are ready
+
+**Files Modified**:
+- `src/components/PdfViewer.tsx`: Added HiDPI support, multi-page rendering, canvas readiness checks
+- `src/components/PdfLoader.tsx`: Extracted from `App.tsx` to prevent recreation
+- `src/App.tsx`: Memoized callbacks, moved hooks before early returns
+
+**Key Learnings**:
+- React components defined inside other components are recreated on every render
+- Hooks must be called in the same order on every render (before any conditional returns)
+- Canvas refs need to be attached to DOM before rendering
+- Device pixel ratio must be accounted for crisp rendering
+- Use refs (not state) to track rendered pages to avoid dependency issues
