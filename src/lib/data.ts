@@ -40,10 +40,40 @@ export type JobData = {
   };
   product: {
     id: string;
+    name: string;
     total_payments: number;
     active: boolean;
-    price1: { id: string; unit_amount: number; active: boolean };
-    price2: { id: string; unit_amount: number; active: boolean };
+    description?: string;
+    login_name?: string;
+    login_keyword?: string;
+    service_usd?: number;
+    discount_usd?: number;
+    type?: string;
+    unit_label?: string;
+  };
+  price1: {
+    id: string;
+    unit_amount: number;
+    active: boolean;
+    currency: string;
+    count?: number;
+    billing_scheme?: string;
+    pay_by?: string;
+    pay_days?: number;
+    late_fee?: number;
+    nickname?: string;
+  };
+  price2: {
+    id: string;
+    unit_amount: number;
+    active: boolean;
+    currency: string;
+    count?: number;
+    billing_scheme?: string;
+    pay_by?: string;
+    pay_days?: number;
+    late_fee?: number;
+    nickname?: string;
   };
 };
 

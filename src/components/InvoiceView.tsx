@@ -14,6 +14,16 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({
 }) => {
   const handleDownloadDocs = (choice: 'yes' | 'no') => {
     emitEvent('invoice_docs', { choice });
+    
+    // If user wants to download, trigger download
+    if (choice === 'yes') {
+      const link = document.createElement('a');
+      link.href = data.docs.invoice.url;
+      link.download = data.docs.invoice.url.split('/').pop() || 'invoice.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const handleContinue = () => {

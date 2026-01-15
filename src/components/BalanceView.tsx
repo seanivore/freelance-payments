@@ -14,6 +14,16 @@ export const BalanceView: React.FC<BalanceViewProps> = ({
 }) => {
   const handleDownloadDocs = (choice: 'yes' | 'no') => {
     emitEvent('balance_docs', { choice });
+    
+    // If user wants to download, trigger download
+    if (choice === 'yes') {
+      const link = document.createElement('a');
+      link.href = data.docs.balance.url;
+      link.download = data.docs.balance.url.split('/').pop() || 'balance.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const handleContinue = () => {

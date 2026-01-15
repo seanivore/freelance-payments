@@ -334,7 +334,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           job_id: jobId,
-          price_id: paymentNumber === 1 ? data!.product.price1.id : data!.product.price2.id,
+          price_id: paymentNumber === 1 ? data!.price1.id : data!.price2.id,
           coupon_id: paymentNumber === 1 ? data!.state.objects?.coupon : undefined,
           customer_id: data!.customer.id,
           payment_number: paymentNumber

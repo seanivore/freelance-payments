@@ -21,7 +21,7 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
   clientSecret
 }) => {
   const isPayment1 = paymentNumber === 1;
-  const price = isPayment1 ? data.product.price1 : data.product.price2;
+  const price = isPayment1 ? data.price1 : data.price2;
   const invoiceUrl = isPayment1 ? data.docs.invoice.url : data.docs.balance.url;
   const invoiceFilename = invoiceUrl.split('/').pop() || '';
 
