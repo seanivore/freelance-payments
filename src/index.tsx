@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import './index.css';
 
@@ -13,10 +13,8 @@ function LoginApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Clear session on mount
-  useEffect(() => {
-    sessionStorage.clear();
-  }, []);
+  // Note: No need to clear sessionStorage - we don't use it for job data
+  // We always fetch fresh JSON from URL path in App.tsx
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,15 +47,13 @@ function LoginApp() {
 
       if (!jobEntry) throw new Error('Job not found. Check credentials.');
 
-      // 3. Fetch Job Data & Verify
-      const jobRes = await fetch(`/${jobEntry.file_path}`);
-      if (!jobRes.ok) throw new Error('Job data file missing.');
+      // 3. Extract job_id and redirect (don't fetch or store job data)
+      // App.tsx will fetch fresh JSON from URL path
+      const jobId = jobEntry.job_id;
+      if (!jobId) throw new Error('Invalid job entry in manifest.');
       
-      const jobData = await jobRes.json();
-      
-      // 4. Store and Redirect
-      sessionStorage.setItem('jobData', JSON.stringify(jobData));
-      window.location.href = `/${jobEntry.job_id}`;
+      // 4. Redirect to job URL (404.html will route to App.tsx)
+      window.location.href = `/${jobId}`;
 
     } catch (err: any) {
       console.error(err);

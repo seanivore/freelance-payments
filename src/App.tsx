@@ -341,7 +341,7 @@ export default function App() {
                         <div className="flex justify-between items-center">
                             <span className="text-slate-400">Amount Due</span>
                             <span className="text-3xl font-bold text-emerald-400">
-                                ${(initialSection === 'payment1' ? data.product.price1.amount : data.product.price2.amount) / 100}
+                                ${(initialSection === 'payment1' ? data.product.price1.unit_amount : data.product.price2.unit_amount) / 100}
                             </span>
                         </div>
                     </div>

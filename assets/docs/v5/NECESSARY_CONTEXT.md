@@ -129,6 +129,8 @@
 
 ## Conclusions & Next Steps 
 
+  + As you work through the project's documented details and important file, please create the described detailed exclusively executable plan here so that we can keep it up-to-date through each step and as we expand on any details to make sure we aren't leaving anything to be figured out during developmental implementation `assets/docs/v5/EXEC_PLAN_FINAL.md`
+
   **STEP 1: Review materials and then discuss**
 
   + Please review the remaining three context priming materials and then help me understand the true state of things with this project. 

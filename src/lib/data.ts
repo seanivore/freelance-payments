@@ -1,7 +1,20 @@
 export type JobData = {
-  id: string;
-  customer: { name: string; email: string };
   project: string;
+  customer: {
+    name: string;
+    email: string;
+    business?: string;
+    title?: string;
+    phone?: string;
+    id?: string;
+    address?: {
+      city: string;
+      line1: string;
+      state: string;
+      postal_code: string;
+      country: string;
+    };
+  };
   state: {
     client_status: {
       logged_in: string | null;
@@ -11,42 +24,64 @@ export type JobData = {
       balance: string | null;
       payment_2: string | null;
     };
+    objects?: {
+      created?: string;
+      product?: string;
+      price_1?: string;
+      price_2?: string;
+      customer?: string;
+      coupon?: string;
+    };
   };
   docs: {
-    contract: { url: string };
-    invoice: { url: string };
-    balance: { url: string };
+    contract: { url: string; id?: string; pdf?: string };
+    invoice: { url: string; id?: string; pdf?: string };
+    balance: { url: string; id?: string; pdf?: string };
   };
   product: {
     id: string;
     total_payments: number;
     active: boolean;
-    price1: { id: string; amount: number; active: boolean };
-    price2: { id: string; amount: number; active: boolean };
+    price1: { id: string; unit_amount: number; active: boolean };
+    price2: { id: string; unit_amount: number; active: boolean };
   };
 };
 
+/**
+ * Fetches job data fresh from JSON file using job_id from URL path.
+ * Always fetches fresh - never uses sessionStorage or cache.
+ * 
+ * @returns JobData if found, null if not found or error
+ */
 export async function fetchJobData(): Promise<JobData | null> {
-  const params = new URLSearchParams(window.location.search);
-  let id = params.get('id');
+  // Extract job_id from URL path (e.g., /uid-ilt-036 -> uid-ilt-036)
+  const path = window.location.pathname;
   
-  if (!id) {
-    // Try to get ID from path (e.g. /uid-123)
-    const path = window.location.pathname;
-    if (path && path !== '/' && path !== '/index.html' && path !== '/job.html') {
-      id = path.replace(/^\//, '');
-    }
+  // Remove leading slash and filter out root/index paths
+  let jobId = path.replace(/^\//, '').replace(/\/$/, '');
+  
+  // Filter out known HTML files and empty paths
+  if (!jobId || jobId === 'index.html' || jobId === 'job.html' || jobId === '404.html') {
+    return null;
   }
 
-  if (!id) return null;
+  // Remove .html extension if present (shouldn't be, but handle it)
+  jobId = jobId.replace(/\.html$/, '');
+
+  if (!jobId) return null;
 
   try {
-    const res = await fetch(`/assets/jobs/${id}.json`);
-    if (!res.ok) throw new Error('Job not found');
+    // Always fetch fresh JSON from server
+    const res = await fetch(`/assets/jobs/${jobId}.json`);
+    if (!res.ok) {
+      console.error(`Failed to fetch job data: ${res.status} ${res.statusText}`);
+      return null;
+    }
+    
     const data = await res.json();
-    return data;
+    return data as JobData;
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching job data:', err);
     return null;
   }
 }
