@@ -31,7 +31,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   initialSection = 'contract'
 }) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const pdfCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [pdfData, setPdfData] = useState<ArrayBuffer | null>(initialPdfBytes);
   const [pdfDoc, setPdfDoc] = useState<any | null>(null);
@@ -42,6 +41,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const loadedBytesRef = useRef<ArrayBuffer | null>(null);
   const hasEmittedLoadedRef = useRef(false);
+  const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map()); // Store refs for all page canvases
 
   useEffect(() => {
     // Set PDF.js worker path (use unpkg CDN in production, local in dev)
@@ -79,18 +79,15 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }
   }, [initialPdfBytes]); // Only depend on initialPdfBytes, not isLoading or pdfDoc
 
-  async function renderPage(pageNum: number) {
-    if (!pdfDoc || !pdfCanvasRef.current) {
-      console.warn('Cannot render: pdfDoc or canvas not ready', { pdfDoc: !!pdfDoc, canvas: !!pdfCanvasRef.current });
+  async function renderPage(pageNum: number, canvas: HTMLCanvasElement) {
+    if (!pdfDoc || !canvas) {
+      console.warn('Cannot render: pdfDoc or canvas not ready', { pdfDoc: !!pdfDoc, canvas: !!canvas });
       return;
     }
     
     const page = await pdfDoc.getPage(pageNum);
     const viewport = page.getViewport({ scale });
 
-    const canvas = pdfCanvasRef.current;
-    if (!canvas) return;
-    
     const pdfCtx = canvas.getContext('2d', { alpha: false });
     if (!pdfCtx) {
       console.error('Failed to get 2d context from canvas');
@@ -120,6 +117,22 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }).promise;
   }
 
+  // Render all pages when PDF doc is loaded
+  async function renderAllPages() {
+    if (!pdfDoc) return;
+    
+    const totalPages = pdfDoc.numPages;
+    
+    // Render pages sequentially to avoid overwhelming the browser
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      const canvas = canvasRefs.current.get(pageNum);
+      // Check if canvas exists and hasn't been rendered yet (width === 0 means not rendered)
+      if (canvas && canvas.width === 0) {
+        await renderPage(pageNum, canvas);
+      }
+    }
+  }
+
   async function openPdfFromBytes(bytes: ArrayBuffer) {
     try {
       const docTask = getDocument({ data: bytes });
@@ -137,16 +150,16 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }
   }
 
-  // Render page when PDF doc is loaded and canvas is ready
+  // Render all pages when PDF doc is loaded
   useEffect(() => {
-    if (pdfDoc && pdfCanvasRef.current && !isLoading) {
-      // Small delay to ensure canvas is fully mounted
+    if (pdfDoc && !isLoading) {
+      // Small delay to ensure canvases are fully mounted
       const timer = setTimeout(() => {
-        renderPage(1).catch((err) => {
-          console.error('Error rendering PDF page:', err);
-          setPdfError('Failed to render PDF page');
+        renderAllPages().catch((err) => {
+          console.error('Error rendering PDF pages:', err);
+          setPdfError('Failed to render PDF pages');
         });
-      }, 0);
+      }, 100);
       
       return () => clearTimeout(timer);
     }
@@ -258,15 +271,38 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     );
   }
 
+  // Create canvas elements for all pages
+  const renderCanvasElements = () => {
+    if (!pdfDoc) return null;
+    
+    const totalPages = pdfDoc.numPages;
+    const canvases = [];
+    
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      canvases.push(
+        <div key={pageNum} className="flex justify-center mb-4">
+          <canvas
+            ref={(el) => {
+              if (el) {
+                canvasRefs.current.set(pageNum, el);
+              } else {
+                canvasRefs.current.delete(pageNum);
+              }
+            }}
+            className="shadow-lg"
+          />
+        </div>
+      );
+    }
+    
+    return canvases;
+  };
+
   return (
     <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
       <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-auto min-h-[600px] max-h-[90vh]">
-        <div className="relative flex justify-center bg-slate-950 p-4">
-          <canvas 
-            id="pdfCanvas" 
-            ref={pdfCanvasRef} 
-            className="shadow-lg"
-          />
+        <div className="relative flex flex-col items-center bg-slate-950 p-4">
+          {renderCanvasElements()}
         </div>
       </div>
 
