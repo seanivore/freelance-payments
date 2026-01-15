@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { fetchJobData, JobData } from '@/lib/data';
-import { PdfViewer } from '@/components/PdfViewer';
+import { PdfLoader } from '@/components/PdfLoader';
 import { Loader2 } from 'lucide-react';
 
 export default function App() {
@@ -69,13 +69,13 @@ export default function App() {
     eventBufferRef.current = []; // clear ref immediate
   };
 
-  const trackEvent = (type: string, payload: any = {}) => {
+  const trackEvent = useCallback((type: string, payload: any = {}) => {
     const timestamp = new Date().toISOString();
     const newEvent = { type, timestamp, data: payload };
     
     setEventBuffer(prev => [...prev, newEvent]);
     resetTimer();
-  };
+  }, []); // Empty deps: uses state setters and refs which are stable
 
   const resetTimer = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -245,77 +245,51 @@ export default function App() {
 
   const isPaymentSection = initialSection === 'payment1' || initialSection === 'payment2';
   
-  // PDF Loading
-  const PdfLoader = () => {
-      const [pdfBytes, setPdfBytes] = useState<ArrayBuffer | null>(null);
-      const [pdfError, setPdfError] = useState(false);
-
-      useEffect(() => {
-        if (!initialPdfUrl || isPaymentSection) return; // Don't load PDF for payment section if unrelated? 
-        // Actually user wants to see Invoice during Payment 1 probably. 
-        // But for "Payment 1", the UI should prompt to pay.
-        // Let's stick to the "Viewer handles it" unless it's pure checkout.
-        
-        fetch(initialPdfUrl)
-          .then(res => res.arrayBuffer())
-          .then(bytes => setPdfBytes(bytes))
-          .catch(() => setPdfError(true));
-      }, [initialPdfUrl]);
-
-      if (pdfError) return <div className="p-8 text-center text-red-400">Failed to load PDF document.</div>;
-      if (!pdfBytes) return <div className="flex justify-center p-10"><Loader2 className="animate-spin" /></div>;
-
-      return (
-        <PdfViewer 
-            initialPdfBytes={pdfBytes}
-            initialSection={initialSection}
-            emitEvent={(name, payload) => {
-                // Only log contract_loaded, don't trigger state updates (prevents infinite loop)
-                if (name === 'contract_loaded') {
-                    console.log('Event:', name, payload);
-                    trackEvent('contract_loaded', payload);
-                    return; // Don't update state for load events
-                }
-                
-                console.log('Event:', name, payload);
-                trackEvent(name === 'sign' ? 'contract_signed' : name, payload);
-                
-                if (name === 'contract_signed') {
-                     // Optimistic Update: Unlock next stage locally
-                     setData(prev => {
-                         if (!prev) return null;
-                         return {
-                             ...prev,
-                             state: {
-                                 ...prev.state,
-                                 client_status: {
-                                     ...prev.state.client_status,
-                                     contract_signed: new Date().toISOString()
-                                 }
-                             }
-                         };
-                     });
-                }
-                
-                if (name === 'invoice_acknowledged') {
-                     setData(prev => {
-                         if (!prev) return null;
-                         return {
-                             ...prev,
-                             state: {
-                                 ...prev.state,
-                                 client_status: {
-                                     ...prev.state.client_status,
-                                     invoice: new Date().toISOString()
-                                 }
-                             }
-                         };
-                     });
-                }
-            }}
-        />
-      );
-  };
+  // Memoized emitEvent callback to prevent PdfViewer re-renders
+  const emitEvent = useCallback((name: string, payload?: unknown) => {
+    // Only log contract_loaded, don't trigger state updates (prevents infinite loop)
+    if (name === 'contract_loaded') {
+      console.log('Event:', name, payload);
+      trackEvent('contract_loaded', payload);
+      return; // Don't update state for load events
+    }
+    
+    console.log('Event:', name, payload);
+    trackEvent(name === 'sign' ? 'contract_signed' : name, payload);
+    
+    if (name === 'contract_signed') {
+      // Optimistic Update: Unlock next stage locally
+      setData(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          state: {
+            ...prev.state,
+            client_status: {
+              ...prev.state.client_status,
+              contract_signed: new Date().toISOString()
+            }
+          }
+        };
+      });
+    }
+    
+    if (name === 'invoice_acknowledged') {
+      setData(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          state: {
+            ...prev.state,
+            client_status: {
+              ...prev.state.client_status,
+              invoice: new Date().toISOString()
+            }
+          }
+        };
+      });
+    }
+  }, [trackEvent]); // trackEvent is memoized, setData is stable
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30">
@@ -326,7 +300,12 @@ export default function App() {
       
       <main className="pt-20 pb-10">
         { !isPaymentSection ? (
-            <PdfLoader />
+            <PdfLoader 
+              initialPdfUrl={initialPdfUrl}
+              initialSection={initialSection}
+              emitEvent={emitEvent}
+              isPaymentSection={isPaymentSection}
+            />
         ) : (
             <div className="flex flex-col items-center justify-center p-10 mt-10">
                 <div className="max-w-md w-full bg-slate-900 p-8 rounded-lg border border-slate-800 shadow-xl">
