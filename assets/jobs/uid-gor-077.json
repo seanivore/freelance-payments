@@ -1,171 +1,171 @@
 {
-    "project": "AI Application Data Analytics Dashboard",
+  "project": "AI Application Data Analytics Dashboard",
+  "contract": {
+    "work_start": "2026-02-15",
+    "work_end": "2026-06-15",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": "2026-01-15T18:14:08.906774Z"
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
     "contract": {
-        "work_start": "2026-02-15",
-        "work_end": "2026-06-15",
-        "legal_jurisdiction": "Massachusetts",
-        "maintenance_period_months": 3,
-        "maintenance_monthly_fee": 150,
-        "signatures": {
-            "contractor": {
-                "legal_name": "Sean August Horvath",
-                "signed_date": null
-            },
-            "client": {
-                "legal_name": null,
-                "signed_date": null
-            }
-        }
+      "id": "kon-gor-077",
+      "pdf": "assets/pdf/contract/kon-gor-077.pdf",
+      "file_id": "1IQmyRzN_ic8s7TiMlAbqTZpH4J7Exkc8zjeOYqExevc",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-gor-077.pdf",
+      "sha256": "030359723870217d67b1d7586610134b29b4f21d78bc8e02e8b83cf43a122838",
+      "created": "2026-01-15T18:14:17.193734Z"
     },
-    "docs": {
-        "contract": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "invoice": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "balance": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        }
+    "invoice": {
+      "id": "inv-gor-077",
+      "pdf": "assets/pdf/invoice/inv-gor-077.pdf",
+      "file_id": "1Y-uCNWE-N2MQ7s3ud-ZRIdN-Gh3IGHgyfliuMYXB6YQ",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-gor-077.pdf",
+      "sha256": "87b00eead56f7f3645b1f29197f2956c5e5661ae76496967502d5e7c0041fc0a",
+      "created": "2026-01-15T18:14:22.009354Z"
     },
-    "state": {
-        "objects": {
-            "created": null,
-            "product": null,
-            "price_1": null,
-            "price_2": null,
-            "customer": null,
-            "coupon": null
-        },
-        "client_status": {
-            "logged_in": null,
-            "contract_signed": null,
-            "invoice": null,
-            "payment_1": null,
-            "balance": null,
-            "payment_2": null
-        }
+    "balance": {
+      "id": "bal-gor-077",
+      "pdf": "assets/pdf/balance/bal-gor-077.pdf",
+      "file_id": "14yBbxpu8QYXWpRnQVb7TMKSJU6m2b9K9GmJOAvYFPHE",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-gor-077.pdf",
+      "sha256": "9c2ef8fe269b21caa0460018eb40b4a2695cd103e92b51c97b2b49823218b4bb",
+      "created": "2026-01-15T18:14:29.014985Z"
+    }
+  },
+  "state": {
+    "objects": {
+      "created": "2026-01-15T18:14:08.906774Z",
+      "product": "uid-gor-077",
+      "price_1": "price_1Spv3d9fljwH26CPbeNxmxvl",
+      "price_2": "price_1Spv3d9fljwH26CPUMDp8fMp",
+      "customer": "cus-gor-077",
+      "coupon": "cou-gor-077"
     },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "Analytics Dashboard",
+    "active": true,
+    "description": "A modern analytics dashboard for organizing and understanding AI application data.",
+    "id": "uid-gor-077",
+    "login_name": "Roberta",
+    "login_keyword": "ai-analytics",
+    "service_usd": 1200000,
+    "total_payments": 2,
+    "discount_usd": 200000,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Roberta Bryant",
+    "business": "Digging Your Data, Inc.",
+    "title": "CMO",
+    "email": "roberta.bryant@auguststyle.com",
+    "phone": "312-555-1212",
+    "id": "cus-gor-077",
+    "address": {
+      "city": "Chicago",
+      "line1": "123 Main St",
+      "state": "IL",
+      "postal_code": "60601",
+      "country": "USA"
+    }
+  },
+  "coupon": {
+    "amount_off": 200000,
+    "applies_to": {
+      "products": [
+        "uid-gor-077"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-gor-077",
+    "max_redemptions": 1,
+    "name": "DIGGING-DATA"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 1000000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
     "product": {
-        "name": "Analytics Dashboard",
-        "active": true,
-        "description": "A modern analytics dashboard for organizing and understanding AI application data.",
-        "id": "uid-gor-077",
-        "login_name": "Roberta",
-        "login_keyword": "ai-analytics",
-        "service_usd": 1200000,
-        "total_payments": 2,
-        "discount_usd": 200000,
-        "type": "service",
-        "unit_label": "Payment"
+      "products": [
+        "uid-gor-077"
+      ]
     },
-    "customer": {
-        "name": "Roberta Bryant",
-        "business": "Digging Your Data, Inc.",
-        "title": "CMO",
-        "email": "roberta.bryant@auguststyle.com",
-        "phone": "312-555-1212",
-        "id": "cus-gor-077",
-        "address": {
-            "city": "Chicago",
-            "line1": "123 Main St",
-            "state": "IL",
-            "postal_code": "60601",
-            "country": "USA"
-        }
+    "id": "price_1Spv3d9fljwH26CPbeNxmxvl"
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 200000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-gor-077"
+      ]
     },
-    "coupon": {
-        "amount_off": 200000,
-        "applies_to": {
-            "products": [
-                "uid-gor-077"
-            ]
-        },
-        "currency": "usd",
-        "duration": "once",
-        "id": "cou-gor-077",
-        "max_redemptions": 1,
-        "name": "DIGGING-DATA"
-    },
-    "price1": {
-        "count": 1,
-        "currency": "usd",
-        "unit_amount": 1000000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "start of work",
-        "nickname": "Initial Payment",
-        "product": {
-            "products": [
-                "uid-gor-077"
-            ]
-        },
-        "id": ""
-    },
-    "price2": {
-        "count": 2,
-        "currency": "usd",
-        "unit_amount": 200000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "before project launch",
-        "pay_days": 14,
-        "late_fee": 10000,
-        "nickname": "Final Payment",
-        "product": {
-            "products": [
-                "uid-gor-077"
-            ]
-        },
-        "id": ""
-    },
-    "checkout_session_1": {
-        "discounts": [
-            {
-                "coupon": "cou-gor-077"
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-gor-077?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "checkout_session_2": {
-        "discounts": [
-            {
-                "coupon": null
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-gor-077?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "project_scope_summary": "Modern apps have new data challenges. AI applications are no exception. This dashboard will help you understand and manage the data your AI application generates.",
-    "project_scope_full": "Modern apps have new data challenges. AI applications are no exception. This dashboard will help you understand and manage the data your AI application generates. It will provide a modern, intuitive interface for visualizing and analyzing the data your AI application generates. It will include features such as real-time data visualization, data filtering and sorting, and data export. We will use AI to come up with new ways to visualize the data on a regular basis, creating a self-improvement loop."
+    "id": "price_1Spv3d9fljwH26CPUMDp8fMp"
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-gor-077"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1Spv3d9fljwH26CPbeNxmxvl",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-gor-077?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1Spv3d9fljwH26CPUMDp8fMp",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-gor-077?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Modern apps have new data challenges. AI applications are no exception. This dashboard will help you understand and manage the data your AI application generates.",
+  "project_scope_full": "Modern apps have new data challenges. AI applications are no exception. This dashboard will help you understand and manage the data your AI application generates. It will provide a modern, intuitive interface for visualizing and analyzing the data your AI application generates. It will include features such as real-time data visualization, data filtering and sorting, and data export. We will use AI to come up with new ways to visualize the data on a regular basis, creating a self-improvement loop."
 }

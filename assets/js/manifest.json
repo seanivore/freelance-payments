@@ -1,5 +1,11 @@
 {
   "jobs": {
+    "roberta-ai-analytics": {
+      "file_path": "assets/jobs/uid-gor-077.json",
+      "job_id": "uid-gor-077",
+      "login_keyword": "ai-analytics",
+      "login_name": "Roberta"
+    },
     "craig-doggo": {
       "file_path": "assets/jobs/uid-lit-740.json",
       "job_id": "uid-lit-740",
@@ -7,5 +13,5 @@
       "login_name": "Craig"
     }
   },
-  "generated_at": "2026-01-15T15:19:56.374200Z"
+  "generated_at": "2026-01-15T18:14:29.016414Z"
 }
