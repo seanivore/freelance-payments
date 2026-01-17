@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "jameson-jump-start": {
-      "file_path": "assets/jobs/uid-nsq-976.json",
-      "job_id": "uid-nsq-976",
-      "login_keyword": "jump-start",
-      "login_name": "Jameson"
+    "drogon-ai-ride": {
+      "file_path": "assets/jobs/uid-unc-480.json",
+      "job_id": "uid-unc-480",
+      "login_keyword": "ai-ride",
+      "login_name": "Drogon"
     }
   },
-  "generated_at": "2026-01-17T14:44:44.123865Z"
+  "generated_at": "2026-01-17T15:07:57.739105Z"
 }
