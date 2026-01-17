@@ -1,35 +1,4 @@
 {
-  "jobs": {
-    "dog-dating-app": {
-      "file_path": "assets/jobs/uid-fse-296.json",
-      "job_id": "uid-eut-953",
-      "login_keyword": "dating-app",
-      "login_name": "Dog"
-    },
-    "tyler-ai-automation": {
-      "file_path": "assets/jobs/uid-glf-987.json",
-      "job_id": "uid-ixx-967",
-      "login_keyword": "ai-automation",
-      "login_name": "Tyler"
-    },
-    "miller-ai-writer": {
-      "file_path": "assets/jobs/uid-iih-779.json",
-      "job_id": "uid-uoj-055",
-      "login_keyword": "ai-writer",
-      "login_name": "Miller"
-    },
-    "turtle-ai-dashboard": {
-      "file_path": "assets/jobs/uid-mdl-241.json",
-      "job_id": "uid-gev-120",
-      "login_keyword": "ai-dashboard",
-      "login_name": "Turtle"
-    },
-    "chang-education": {
-      "file_path": "assets/jobs/uid-yex-166.json",
-      "job_id": "uid-gwv-840",
-      "login_keyword": "education",
-      "login_name": "Chang"
-    }
-  },
-  "generated_at": "2026-01-17T05:43:58.073900Z"
+  "jobs": {},
+  "generated_at": "2026-01-17T06:03:57.111826Z"
 }
