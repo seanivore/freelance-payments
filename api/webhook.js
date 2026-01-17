@@ -104,51 +104,12 @@ export default async (req, res) => {
         succeeded: succeededTimestamp
       };
 
-      // Trigger GitHub Actions workflow to update payment status
-      try {
-        const githubToken = process.env.GITHUB_TOKEN;
-        const repoOwner = process.env.GITHUB_REPO_OWNER || 'seanivore';
-        const repoName = process.env.GITHUB_REPO_NAME || 'freelance-payments';
-        // Fixed: Use user-exit-events.yml workflow (has workflow_dispatch trigger)
-        const workflowId = 'user-exit-events.yml';
-        const workflowUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`;
-
-        // Format payload to match user-exit-events workflow inputs
-        const payload = JSON.stringify({
-          ref: 'freelance-payments',
-          inputs: {
-            job_id: jobId,
-            payload_json: JSON.stringify([{
-              type: `payment_${paymentNumber}`,
-              timestamp: succeededTimestamp,
-              data: {
-                payment_number: paymentNumber,
-                session_id: session.id
-              }
-            }])
-          },
-        });
-
-        const updateResponse = await fetch(workflowUrl, {
-          method: 'POST',
-          headers: {
-            'Authorization': `token ${githubToken}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: payload,
-        });
-
-        if (!updateResponse.ok) {
-          const errorText = await updateResponse.text();
-          throw new Error(`GitHub API error: ${updateResponse.status} - ${errorText}`);
-        }
-
-        console.log(`✅ Payment updated: ${jobId} - Payment ${paymentNumber}`);
-      } catch (error) {
-        console.error('Error updating payment:', error);
-        // Don't fail webhook - log and continue
-      }
+      // CRITICAL FIX for BUG_01_012: Do NOT trigger workflow from webhook
+      // Payment events are now included in frontend batch to prevent multiple workflow runs
+      // The frontend will flush all events (including payment) as a single batch
+      // This ensures all events from a session are processed together atomically
+      console.log(`✅ Payment completed: ${jobId} - Payment ${paymentNumber}`);
+      console.log('ℹ️  Payment event will be included in frontend event batch (not triggering separate workflow)');
 
       break;
 

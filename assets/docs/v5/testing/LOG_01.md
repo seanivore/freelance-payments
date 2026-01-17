@@ -357,3 +357,98 @@ Event: contract_loaded
 - User correctly routed based on their progress through the flow
 
 ---
+
+## Test Job: `uid-nsq-976.json`
+
+### BUG_01_012 - Multiple Workflow Runs Still Occurring, Payment Events Not Recorded
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: Workflow still runs multiple times:
+1. **First workflow (#30)**: Successfully records `logged_in`, `contract_signed`, `invoice`, and contract signatures
+2. **Second workflow (#31)**: Attempts to record `payment_1` but fails with git merge conflict (exit code 128)
+3. **Third workflow (#32)**: Sees "Processing 2 events" but reports "No state changes required" - payment_1 never recorded
+
+**Expected**: Single workflow run that processes ALL events (including payment) together  
+**Actual**: Three separate workflow runs, payment_1 not recorded
+
+**Root Cause**: 
+- Webhook triggers separate workflow run for payment events
+- Frontend flushes its own batch of events separately
+- These two separate workflow runs conflict with each other
+- User correctly identified: "Every instance of this bug would have worked properly if not for the action running multiple times"
+
+**User Insight**: "It seems like it would be a more direct and complete, long term solution if we were to, instead, get all of the events that are added to the JSON after the user's session to be written to the JSON at the same time."
+
+**Fixes Implemented** (2026-01-17):
+- **Removed webhook workflow trigger**: Webhook no longer triggers separate workflow run
+- **Frontend includes payment event**: When payment completes, frontend adds payment event to buffer BEFORE flushing
+- **Single batch processing**: All events (including payment) are flushed together as one batch
+- **Updated Effect 2**: Now calls `trackEvent()` for payment events and includes them in the batch flush
+
+**Files Modified**:
+- `src/App.tsx`: Updated Effect 2 to add payment event to buffer before flushing
+- `api/webhook.js`: Removed workflow trigger, now only logs payment completion
+
+**Expected Result**: Single workflow run processes all events together atomically, no conflicts
+
+---
+
+### BUG_01_013 - Return URL Still Redirects to Contract (JSON Shows All Null Timestamps)
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: After successful payment, return URL redirects to contract. Console shows:
+```
+✅ Loaded job data for uid-nsq-976: {logged_in: null, contract_signed: null, invoice: null, payment_1: null, balance: null, …}
+📍 Routing: no progress detected → contract (default)
+```
+
+**Expected**: Return URL should show completion page  
+**Actual**: Routes to contract because JSON shows all null timestamps
+
+**Root Cause**: 
+- JSON file being served has all null timestamps (stale cached version)
+- Even though workflow successfully committed timestamps to GitHub
+- Vercel CDN/browser is caching the old JSON file
+- Cache busting query parameter may not be enough if CDN ignores it
+
+**Fixes Implemented** (2026-01-17):
+- **Added cache headers to vercel.json**: JSON files now have `Cache-Control: no-cache, no-store, must-revalidate` headers
+- **Cache busting already in place**: `fetchJobData()` already uses `?t=${Date.now()}` query parameter
+- **Explicit no-cache headers**: Ensures CDN and browser don't cache JSON files
+
+**Files Modified**:
+- `vercel.json`: Added cache headers for `/assets/jobs/*.json` files
+
+**Expected Result**: JSON files always served fresh, timestamps correctly read, routing works
+
+---
+
+### BUG_01_014 - State Management Still Shows All Null Timestamps on Second Login
+
+**Date**: 2026-01-17  
+**Status**: Fixed (same root cause as BUG_01_013)
+
+**Issue**: User logged in again 30 minutes after BUG_01_013. Console shows:
+```
+✅ Loaded job data for uid-nsq-976: {logged_in: null, contract_signed: null, invoice: null, payment_1: null, balance: null, …}
+📍 Routing: no progress detected → contract (default)
+```
+
+**Expected**: Should recognize existing timestamps and route to appropriate section  
+**Actual**: All timestamps show as null, routes to contract
+
+**Root Cause**: Same as BUG_01_013 - JSON file being served is stale cached version
+
+**Fixes Implemented**: Same as BUG_01_013 - cache headers added to prevent JSON caching
+
+**Files Modified**: Same as BUG_01_013
+
+**Expected Result**: JSON files always fresh, state management correctly recognizes progress
+
+---
+
+---

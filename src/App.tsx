@@ -205,7 +205,7 @@ export default function App() {
   }, []); // Run once on mount
   
   // Effect 2: Process session_id when data becomes available
-  // CRITICAL: This effect MUST run immediately to update state before routing logic
+  // CRITICAL FIX for BUG_01_012: Include payment event in frontend batch instead of webhook triggering separate workflow
   useEffect(() => {
     if (!sessionId || !data) return; // Wait for both session_id and data
     
@@ -215,25 +215,31 @@ export default function App() {
       .then(sessionData => {
         if (sessionData.status === 'complete') {
           const s = data.state.client_status;
+          let paymentType: 'payment_1' | 'payment_2' | null = null;
           let updates: Partial<typeof s> = {};
           
           // Determine which payment based on current state
-          // NOTE: Don't call trackEvent for payment events - webhook.js handles this to prevent double workflow runs
           if (s.invoice && !s.payment_1) {
+            paymentType = 'payment_1';
             const timestamp = new Date().toISOString();
             updates = { payment_1: timestamp };
-            console.log('✅ Payment 1 completed - applying optimistic update');
-            // Webhook will trigger workflow, so we only update local state optimistically
-            flushOnPayment(); // Immediate flush on payment completion (for other events, not payment)
+            console.log('✅ Payment 1 completed - adding to event batch');
           } else if (s.balance && !s.payment_2) {
+            paymentType = 'payment_2';
             const timestamp = new Date().toISOString();
             updates = { payment_2: timestamp };
-            console.log('✅ Payment 2 completed - applying optimistic update');
-            // Webhook will trigger workflow, so we only update local state optimistically
-            flushOnPayment(); // Immediate flush on payment completion (for other events, not payment)
+            console.log('✅ Payment 2 completed - adding to event batch');
           }
           
-          if (Object.keys(updates).length > 0) {
+          if (paymentType && Object.keys(updates).length > 0) {
+            // CRITICAL: Add payment event to buffer BEFORE flushing
+            // This ensures payment event is included in the same batch as other events
+            trackEvent(paymentType, {
+              payment_number: paymentType === 'payment_1' ? 1 : 2,
+              session_id: sessionId
+            });
+            
+            // Update local state optimistically
             setData(prev => {
               if (!prev) return null;
               return {
@@ -247,6 +253,11 @@ export default function App() {
                 }
               };
             });
+            
+            // Flush ALL events (including payment) as single batch
+            // This ensures all events from the session are processed together
+            console.log('📤 Flushing all events including payment event...');
+            flushOnPayment();
           } else {
             console.log('⚠️ Session complete but no updates needed (payment already recorded?)');
           }
@@ -257,7 +268,7 @@ export default function App() {
       .catch(err => {
         console.error('Error fetching session status:', err);
       });
-  }, [sessionId, data, flushOnPayment]); // Run when sessionId or data changes
+  }, [sessionId, data, flushOnPayment, trackEvent]); // Added trackEvent dependency
 
   // Memoized emitEvent callback to prevent PdfViewer re-renders
   // MUST be before early returns to avoid React hook order error
