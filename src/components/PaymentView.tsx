@@ -45,7 +45,10 @@ export const PaymentView: React.FC<PaymentViewProps> = ({
           }
         }}
       >
-        <CheckoutForm />
+        <CheckoutForm 
+          price={price}
+          coupon={isPayment1 ? data.coupon : undefined}
+        />
       </CheckoutProvider>
     );
   }

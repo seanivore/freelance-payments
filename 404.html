@@ -9,6 +9,15 @@
   <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
   <link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
+  <!-- Preserve query parameters for React app -->
+  <script>
+    // Preserve query parameters when React app loads
+    // This ensures session_id and other params are available to App.tsx
+    if (window.location.search) {
+      // Query params are already in URL, React will read them
+      // No action needed - React reads from window.location.search
+    }
+  </script>
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30">

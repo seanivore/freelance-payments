@@ -181,15 +181,20 @@ export default function App() {
   // Effect 1: Detect session_id on mount (runs once, before data loads)
   useEffect(() => {
     // Check for session_id in URL (from Stripe return redirect)
+    // Read from URL before any navigation/clearing happens
     const urlParams = new URLSearchParams(window.location.search);
     const sid = urlParams.get('session_id');
     
     if (sid) {
+      console.log('Detected session_id in URL:', sid);
       setSessionId(sid);
       setShowCompletePage(true);
       
-      // Clear query param immediately to prevent reload loops
+      // Clear query param from URL bar to prevent reload loops, but keep it in state
+      // Use replaceState to avoid adding to history
       window.history.replaceState(null, '', window.location.pathname);
+    } else {
+      console.log('No session_id found in URL');
     }
   }, []); // Run once on mount
   
@@ -206,16 +211,17 @@ export default function App() {
           let updates: Partial<typeof s> = {};
           
           // Determine which payment based on current state
+          // NOTE: Don't call trackEvent for payment events - webhook.js handles this to prevent double workflow runs
           if (s.invoice && !s.payment_1) {
             const timestamp = new Date().toISOString();
             updates = { payment_1: timestamp };
-            trackEvent('payment_1', { session_id: sessionId });
-            flushOnPayment(); // Immediate flush on payment completion
+            // Webhook will trigger workflow, so we only update local state optimistically
+            flushOnPayment(); // Immediate flush on payment completion (for other events, not payment)
           } else if (s.balance && !s.payment_2) {
             const timestamp = new Date().toISOString();
             updates = { payment_2: timestamp };
-            trackEvent('payment_2', { session_id: sessionId });
-            flushOnPayment(); // Immediate flush on payment completion
+            // Webhook will trigger workflow, so we only update local state optimistically
+            flushOnPayment(); // Immediate flush on payment completion (for other events, not payment)
           }
           
           if (Object.keys(updates).length > 0) {

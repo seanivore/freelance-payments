@@ -7,6 +7,7 @@
       "destination": "/404.html"
     }
   ],
+  "cleanUrls": false,
   "headers": [
     {
       "source": "/api/(.*)",

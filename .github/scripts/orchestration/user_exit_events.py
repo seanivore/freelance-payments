@@ -99,10 +99,14 @@ def process_exit_events():
                 print(f"  ✓ Updated invoice: {e_time}")
 
         elif e_type == 'payment_1':
-            if not client_status.get('payment_1'):
-                client_status['payment_1'] = e_time
-                updates_made = True
-                print(f"  ✓ Updated payment_1: {e_time}")
+            # Deduplication: Skip if already processed
+            if client_status.get('payment_1'):
+                print(f"  ⏭️  Skipping payment_1 - already processed at {client_status.get('payment_1')}")
+                continue
+                
+            client_status['payment_1'] = e_time
+            updates_made = True
+            print(f"  ✓ Updated payment_1: {e_time}")
             
             # Deactivate price1 (flag exists at base level)
             if 'price1' in job_data:
@@ -118,10 +122,14 @@ def process_exit_events():
                 print(f"  ✓ Updated balance: {e_time}")
 
         elif e_type == 'payment_2':
-            if not client_status.get('payment_2'):
-                client_status['payment_2'] = e_time
-                updates_made = True
-                print(f"  ✓ Updated payment_2: {e_time}")
+            # Deduplication: Skip if already processed
+            if client_status.get('payment_2'):
+                print(f"  ⏭️  Skipping payment_2 - already processed at {client_status.get('payment_2')}")
+                continue
+                
+            client_status['payment_2'] = e_time
+            updates_made = True
+            print(f"  ✓ Updated payment_2: {e_time}")
             
             # Deactivate price2 and product (flags exist at base level)
             if 'price2' in job_data:

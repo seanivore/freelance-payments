@@ -75,6 +75,17 @@ export type JobData = {
     late_fee?: number;
     nickname?: string;
   };
+  coupon?: {
+    id?: string;
+    amount_off?: number;
+    name?: string;
+    currency?: string;
+    duration?: string;
+    max_redemptions?: number;
+    applies_to?: {
+      products?: string[];
+    };
+  };
 };
 
 /**

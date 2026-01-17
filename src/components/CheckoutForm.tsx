@@ -5,12 +5,30 @@ import {
 } from '@stripe/react-stripe-js/checkout';
 import { apiUrl } from '@/lib/api';
 
-export const CheckoutForm: React.FC = () => {
+type CheckoutFormProps = {
+  price?: { unit_amount: number };
+  coupon?: { amount_off?: number };
+};
+
+export const CheckoutForm: React.FC<CheckoutFormProps> = ({ 
+  price, 
+  coupon
+}) => {
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fallbackTotal, setFallbackTotal] = useState<number | null>(null);
 
   const checkoutState = useCheckout();
+  
+  // Calculate expected amount from price data immediately (used as fallback)
+  const calculatedAmount = React.useMemo(() => {
+    if (price) {
+      const baseAmount = price.unit_amount / 100;
+      const discountAmount = (coupon?.amount_off || 0) / 100;
+      return Math.max(0, baseAmount - discountAmount);
+    }
+    return null;
+  }, [price, coupon]);
 
   // ✅ ALL hooks must be called BEFORE any early returns (React Rules of Hooks)
   // Fetch session details if totals missing (fallback for $0 display issue)
@@ -21,28 +39,59 @@ export const CheckoutForm: React.FC = () => {
       const totalAmountRaw = checkout?.total?.total?.amount;
       const totalAmount = totalAmountRaw ? Number(totalAmountRaw) : 0;
       
-      // If totals missing or zero, try to fetch from session-status API
-      // Type assertion: clientSecret exists on checkout sessions but TypeScript types don't expose it
-      const clientSecret = (checkout as any).clientSecret;
-      if ((!totalAmount || totalAmount === 0) && clientSecret) {
-        // Extract session_id from client_secret (format: cs_test_xxx_secret_yyy)
-        const sessionId = clientSecret.split('_secret_')[0];
-        if (sessionId) {
-          fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
-            .then(res => res.json())
-            .then(data => {
-              // Use amount_total from session if available
-              if (data.amount_total) {
-                setFallbackTotal(Number(data.amount_total) / 100);
-              }
-            })
-            .catch(err => {
-              console.warn('Failed to fetch session details:', err);
-            });
+      // If totals missing or zero, try multiple fallback strategies
+      if (!totalAmount || totalAmount === 0) {
+        const clientSecret = (checkout as any).clientSecret;
+        
+        // Strategy 1: Fetch from session-status API
+        if (clientSecret) {
+          const sessionId = clientSecret.split('_secret_')[0];
+          if (sessionId) {
+            console.log('Fetching session status for fallback amount...', sessionId);
+            fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
+              .then(res => res.json())
+              .then(data => {
+                console.log('Session status response:', data);
+                if (data.amount_total) {
+                  const amount = Number(data.amount_total) / 100;
+                  console.log('Using session-status amount:', amount);
+                  setFallbackTotal(amount);
+                } else {
+                  // Strategy 2: Calculate from price data if available
+                  if (price) {
+                    const calculatedAmount = (price.unit_amount / 100) - ((coupon?.amount_off || 0) / 100);
+                    console.log('Calculating from price data:', calculatedAmount, 'price:', price.unit_amount, 'coupon:', coupon?.amount_off);
+                    if (calculatedAmount > 0) {
+                      setFallbackTotal(calculatedAmount);
+                    }
+                  }
+                }
+              })
+              .catch(err => {
+                console.warn('Failed to fetch session details:', err);
+                // Strategy 2 fallback: Calculate from price data
+                if (price) {
+                  const calculatedAmount = (price.unit_amount / 100) - ((coupon?.amount_off || 0) / 100);
+                  console.log('Using calculated fallback amount:', calculatedAmount);
+                  if (calculatedAmount > 0) {
+                    setFallbackTotal(calculatedAmount);
+                  }
+                }
+              });
+          }
+        } else if (price) {
+          // Strategy 2: Calculate from price data if no clientSecret yet
+          const calculatedAmount = (price.unit_amount / 100) - ((coupon?.amount_off || 0) / 100);
+          console.log('Using price data fallback (no session yet):', calculatedAmount);
+          if (calculatedAmount > 0) {
+            setFallbackTotal(calculatedAmount);
+          }
         }
+      } else {
+        console.log('Checkout has valid total amount:', totalAmount / 100);
       }
     }
-  }, [checkoutState]);
+  }, [checkoutState, price, coupon]);
 
   // NOW early returns are safe (all hooks have been called)
   if (checkoutState.type === 'loading') {
@@ -87,24 +136,30 @@ export const CheckoutForm: React.FC = () => {
   const totalAmountRaw = checkout?.total?.total?.amount;
   const totalAmount = totalAmountRaw ? Number(totalAmountRaw) : 0;
   
-  // Calculate display total: use fallback if available, otherwise use checkout total, otherwise 0
+  // Calculate display total: use fallback if available, otherwise use checkout total, otherwise calculated amount
   let displayTotal = 0;
   if (fallbackTotal !== null) {
     displayTotal = fallbackTotal;
   } else if (totalAmount > 0) {
     displayTotal = totalAmount / 100;
+  } else if (calculatedAmount !== null && calculatedAmount > 0) {
+    // Use calculated amount as immediate fallback while waiting for session-status API
+    displayTotal = calculatedAmount;
   }
   
   const formattedAmount = displayTotal > 0 ? displayTotal.toFixed(2) : '0.00';
   
-  // Debug logging
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Checkout state:', checkoutState);
-    console.log('Total amount (raw):', totalAmount);
-    console.log('Fallback total:', fallbackTotal);
-    console.log('Display total:', displayTotal);
-    console.log('Formatted amount:', formattedAmount);
-  }
+  // Debug logging (always log in case of issues)
+  console.log('CheckoutForm Debug:', {
+    checkoutStateType: checkoutState.type,
+    totalAmountRaw: totalAmount,
+    totalAmountDollars: totalAmount / 100,
+    fallbackTotal,
+    calculatedAmount,
+    displayTotal,
+    formattedAmount,
+    priceData: price ? { unit_amount: price.unit_amount, coupon: coupon?.amount_off } : null
+  });
 
   return (
     <div className="max-w-md mx-auto p-8 bg-slate-900 rounded-lg border border-slate-800 shadow-xl">

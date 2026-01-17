@@ -13,8 +13,8 @@ on:
         required: true
 
 concurrency:
-  group: user-events
-  cancel-in-progress: false
+  group: user-events-${{ github.event.inputs.job_id || 'default' }}
+  cancel-in-progress: true
 
 jobs:
   process-events:
