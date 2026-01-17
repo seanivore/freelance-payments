@@ -178,6 +178,7 @@ export default function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<'complete' | 'open' | null>(null);
   const [sessionPaymentNumber, setSessionPaymentNumber] = useState<1 | 2 | null>(null);
+  const [forcedSection, setForcedSection] = useState<'balance' | null>(null); // Force navigation to balance from completion1
   
   // Effect 1: Detect session_id on mount (runs once, before data loads)
   useEffect(() => {
@@ -458,9 +459,14 @@ export default function App() {
   
   let initialSection: 'contract' | 'invoice' | 'payment1' | 'completion1' | 'balance' | 'payment2' | 'completion2' = 'contract';
 
+  // CRITICAL FIX: Check for forced section first (e.g., button click from completion1)
+  if (forcedSection) {
+    initialSection = forcedSection;
+    console.log(`📍 Routing: Forced section → ${forcedSection}`);
+  }
   // CRITICAL FIX: Check session status first (Stripe best practice)
   // Handle both 'complete' (success) and 'open' (failed/canceled) statuses
-  if (sessionId && sessionStatus) {
+  else if (sessionId && sessionStatus) {
     if (sessionStatus === 'complete') {
       // Payment succeeded - route to completion view based on payment_number
       if (sessionPaymentNumber === 1) {
@@ -505,14 +511,28 @@ export default function App() {
       initialSection = 'payment1';
       console.log('📍 Routing: invoice viewed → payment1');
     }
-    // 3. Payment 1 completed → show completion1 or balance
+    // 3. Payment 1 completed → show balance (completion1 only shows once after payment via sessionId)
+    // CRITICAL FIX: completion1 should only show ONCE right after payment_1 completes (when sessionId exists)
+    // Returning users with payment_1 done should go straight to balance
     else if (client_status.payment_1) {
-      if (!client_status.balance) {
-        initialSection = 'completion1';
-        console.log('📍 Routing: payment_1 completed → completion1 (balance not available)');
-      } else {
+      // Check if balance is available (price2 exists)
+      const balanceAvailable = !!(data.price2?.id);
+      
+      if (balanceAvailable) {
+        // Balance is available - route to balance
         initialSection = 'balance';
         console.log('📍 Routing: payment_1 completed + balance available → balance');
+      } else {
+        // No balance (single payment) - show completion1 only if JUST completed (has sessionId)
+        // Otherwise, if returning user, show completion2 (all done)
+        if (sessionId && sessionStatus === 'complete' && sessionPaymentNumber === 1) {
+          initialSection = 'completion1';
+          console.log('📍 Routing: payment_1 JUST completed (sessionId present) → completion1');
+        } else {
+          // Returning user, no balance - all payments done
+          initialSection = 'completion2';
+          console.log('📍 Routing: payment_1 completed, no balance, returning user → completion2');
+        }
       }
     }
     // 4. Balance viewed → show payment2
@@ -661,6 +681,12 @@ export default function App() {
           <CompletionView
             data={data}
             completionType={initialSection === 'completion1' ? 'completion1' : 'completion2'}
+            onNavigateToBalance={() => {
+              // Force navigation to balance section
+              setForcedSection('balance');
+              // Clear forced section after a moment to allow normal routing
+              setTimeout(() => setForcedSection(null), 100);
+            }}
           />
         ) : null}
       </main>
