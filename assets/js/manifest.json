@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "drogon-ai-ride": {
-      "file_path": "assets/jobs/uid-unc-480.json",
-      "job_id": "uid-unc-480",
-      "login_keyword": "ai-ride",
-      "login_name": "Drogon"
+    "jinx-love-cats": {
+      "file_path": "assets/jobs/uid-jxr-848.json",
+      "job_id": "uid-jxr-848",
+      "login_keyword": "love-cats",
+      "login_name": "Jinx"
     }
   },
-  "generated_at": "2026-01-17T19:32:24.763739Z"
+  "generated_at": "2026-01-17T19:35:36.326177Z"
 }
