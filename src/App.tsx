@@ -19,6 +19,7 @@ export default function App() {
   const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>([]);
   const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const processedSessionRef = useRef<string | null>(null); // Track processed sessions to prevent infinite loops
 
   // Initial Data Fetch
   useEffect(() => {
@@ -212,6 +213,15 @@ export default function App() {
   useEffect(() => {
     if (!sessionId || !data) return; // Wait for both session_id and data
     
+    // CRITICAL FIX: Prevent infinite loop - only process each session once
+    if (processedSessionRef.current === sessionId) {
+      console.log('⏭️  Session already processed, skipping...');
+      return;
+    }
+    
+    // Mark this session as being processed
+    processedSessionRef.current = sessionId;
+    
     // Fetch session status immediately (Stripe best practice)
     fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
       .then(res => res.json())
@@ -229,20 +239,39 @@ export default function App() {
         
         if (sessionData.status === 'complete') {
           const s = data.state.client_status;
+          
+          // CRITICAL FIX: Check if payment already recorded before processing
+          const payment1AlreadyRecorded = !!s.payment_1;
+          const payment2AlreadyRecorded = !!s.payment_2;
+          
           let paymentType: 'payment_1' | 'payment_2' | null = null;
           let updates: Partial<typeof s> = {};
           
           // Determine which payment from metadata (preferred) or fallback to state
-          if (paymentNumber === 1 || (s.invoice && !s.payment_1)) {
+          // Only process if not already recorded
+          if (paymentNumber === 1 && !payment1AlreadyRecorded) {
             paymentType = 'payment_1';
             const timestamp = new Date().toISOString();
             updates = { payment_1: timestamp };
             console.log('✅ Payment 1 completed - adding to event buffer');
-          } else if (paymentNumber === 2 || (s.balance && !s.payment_2)) {
+          } else if (paymentNumber === 2 && !payment2AlreadyRecorded) {
             paymentType = 'payment_2';
             const timestamp = new Date().toISOString();
             updates = { payment_2: timestamp };
             console.log('✅ Payment 2 completed - adding to event buffer');
+          } else if (!paymentNumber) {
+            // Fallback: determine from state if metadata missing
+            if (s.invoice && !payment1AlreadyRecorded) {
+              paymentType = 'payment_1';
+              const timestamp = new Date().toISOString();
+              updates = { payment_1: timestamp };
+              console.log('✅ Payment 1 completed (fallback) - adding to event buffer');
+            } else if (s.balance && !payment2AlreadyRecorded) {
+              paymentType = 'payment_2';
+              const timestamp = new Date().toISOString();
+              updates = { payment_2: timestamp };
+              console.log('✅ Payment 2 completed (fallback) - adding to event buffer');
+            }
           }
           
           if (paymentType && Object.keys(updates).length > 0) {
@@ -272,7 +301,7 @@ export default function App() {
             console.log('📤 Flushing payment event immediately...');
             flushOnPayment();
           } else {
-            console.log('⚠️ Session complete but no updates needed (payment already recorded?)');
+            console.log('⚠️ Session complete but no updates needed (payment already recorded or cannot determine payment number)');
           }
         } else if (sessionData.status === 'open') {
           console.log('⚠️ Session status is "open" - payment failed or was canceled. Will remount checkout.');
@@ -280,8 +309,10 @@ export default function App() {
       })
       .catch(err => {
         console.error('Error fetching session status:', err);
+        // Reset processed flag on error so we can retry
+        processedSessionRef.current = null;
       });
-  }, [sessionId, data, flushOnPayment, trackEvent]);
+  }, [sessionId, data?.state?.client_status?.payment_1, data?.state?.client_status?.payment_2, flushOnPayment, trackEvent]);
 
   // Memoized emitEvent callback to prevent PdfViewer re-renders
   // MUST be before early returns to avoid React hook order error
