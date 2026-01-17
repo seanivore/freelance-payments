@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "app-tester-job": {
-      "file_path": "assets/jobs/uid-tst-003.json",
-      "job_id": "uid-tst-003",
-      "login_keyword": "tester-job",
-      "login_name": "APP"
+    "world-testing-world": {
+      "file_path": "assets/jobs/uid-tmw-100.json",
+      "job_id": "uid-tmw-100",
+      "login_keyword": "testing-world",
+      "login_name": "World"
     }
   },
-  "generated_at": "2026-01-17T09:21:17.674159Z"
+  "generated_at": "2026-01-17T09:58:56.979818Z"
 }
