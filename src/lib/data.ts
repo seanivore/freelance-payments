@@ -112,14 +112,31 @@ export async function fetchJobData(): Promise<JobData | null> {
   if (!jobId) return null;
 
   try {
-    // Always fetch fresh JSON from server
-    const res = await fetch(`/assets/jobs/${jobId}.json`);
+    // CRITICAL FIX for BUG_01_011: Add cache busting to ensure fresh data
+    // Browser/CDN may cache JSON files, causing stale state timestamps
+    const cacheBuster = `?t=${Date.now()}`;
+    const res = await fetch(`/assets/jobs/${jobId}.json${cacheBuster}`, {
+      cache: 'no-store', // Explicitly disable caching
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
     if (!res.ok) {
       console.error(`Failed to fetch job data: ${res.status} ${res.statusText}`);
       return null;
     }
     
     const data = await res.json();
+    console.log(`✅ Loaded job data for ${jobId}:`, {
+      logged_in: data.state?.client_status?.logged_in || null,
+      contract_signed: data.state?.client_status?.contract_signed || null,
+      invoice: data.state?.client_status?.invoice || null,
+      payment_1: data.state?.client_status?.payment_1 || null,
+      balance: data.state?.client_status?.balance || null,
+      payment_2: data.state?.client_status?.payment_2 || null
+    });
     return data as JobData;
   } catch (err) {
     console.error('Error fetching job data:', err);

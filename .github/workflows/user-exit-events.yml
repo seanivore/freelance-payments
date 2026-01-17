@@ -14,7 +14,7 @@ on:
 
 concurrency:
   group: user-events-${{ github.event.inputs.job_id || 'default' }}
-  cancel-in-progress: true
+  cancel-in-progress: false  # Queue workflows instead of canceling to prevent data loss
 
 jobs:
   process-events:
@@ -42,15 +42,85 @@ jobs:
           JOB_ID: ${{ github.event.inputs.job_id }}
           PAYLOAD_JSON: ${{ github.event.inputs.payload_json }}
         run: |
-          python .github/scripts/orchestration/user_exit_events.py
+          # Store payload for potential re-processing
+          echo "$PAYLOAD_JSON" > /tmp/event_payload.json
+          python .github/scripts/orchestration/user_exit_events.py || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" -eq 2 ]; then
+            echo "⚠️  Merge conflict detected - will resolve in commit step"
+            exit 0  # Don't fail workflow, let commit step handle it
+          elif [ "${EXIT_CODE:-0}" -ne 0 ]; then
+            exit $EXIT_CODE  # Fail for other errors
+          fi
 
       - name: Commit Changes
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # Pull latest changes before committing to ensure we have the latest state
-          git pull origin freelance-payments --no-rebase || true
+          
+          # CRITICAL FIX for BUG_01_010: Improved git operations to prevent conflicts
+          # Strategy: Fetch latest, merge/rebase cleanly, handle conflicts by re-processing
+          
+          # Fetch latest changes
+          git fetch origin freelance-payments
+          
+          # Check if we have local changes to commit
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "ℹ️  No local changes to commit"
+            exit 0
+          fi
+          
+          # Stage our changes
           git add assets/jobs/*.json
-          git commit -m "Update user behavior stats [skip ci]" || echo "No changes to commit"
-          # Push with retry logic to handle race conditions
-          git push origin freelance-payments || git pull origin freelance-payments --rebase && git push origin freelance-payments
+          
+          # Try to merge latest remote changes
+          # Use merge (not rebase) to preserve our commit history
+          if ! git merge origin/freelance-payments --no-edit; then
+            echo "⚠️  Merge conflict detected - resolving by re-processing events"
+            
+            # Abort the merge
+            git merge --abort
+            
+            # Reset to remote state to get clean file
+            git reset --hard origin/freelance-payments
+            
+            # Re-run the Python script with latest file state and stored payload
+            # This will re-read the file and apply our events on top of latest state
+            echo "Re-processing events with latest file state..."
+            if [ -f /tmp/event_payload.json ]; then
+              export PAYLOAD_JSON=$(cat /tmp/event_payload.json)
+            fi
+            python .github/scripts/orchestration/user_exit_events.py
+            
+            # Stage changes again
+            git add assets/jobs/*.json
+          fi
+          
+          # Commit if there are changes
+          if ! git diff --cached --quiet; then
+            git commit -m "Update user behavior stats [skip ci]"
+            
+            # Push with simple retry
+            MAX_RETRIES=3
+            for i in $(seq 1 $MAX_RETRIES); do
+              if git push origin freelance-payments; then
+                echo "✅ Successfully pushed changes"
+                exit 0
+              else
+                echo "⚠️  Push failed, attempt $i/$MAX_RETRIES"
+                if [ $i -lt $MAX_RETRIES ]; then
+                  # Fetch latest and try again
+                  git fetch origin freelance-payments
+                  git rebase origin/freelance-payments || {
+                    echo "❌ Rebase failed - aborting"
+                    git rebase --abort || true
+                    exit 1
+                  }
+                fi
+              fi
+            done
+            
+            echo "❌ Failed to push after $MAX_RETRIES attempts"
+            exit 1
+          else
+            echo "ℹ️  No changes to commit"
+          fi

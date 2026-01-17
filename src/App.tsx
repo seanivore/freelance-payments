@@ -205,6 +205,7 @@ export default function App() {
   }, []); // Run once on mount
   
   // Effect 2: Process session_id when data becomes available
+  // CRITICAL: This effect MUST run immediately to update state before routing logic
   useEffect(() => {
     if (!sessionId || !data) return; // Wait for both session_id and data
     
@@ -221,11 +222,13 @@ export default function App() {
           if (s.invoice && !s.payment_1) {
             const timestamp = new Date().toISOString();
             updates = { payment_1: timestamp };
+            console.log('✅ Payment 1 completed - applying optimistic update');
             // Webhook will trigger workflow, so we only update local state optimistically
             flushOnPayment(); // Immediate flush on payment completion (for other events, not payment)
           } else if (s.balance && !s.payment_2) {
             const timestamp = new Date().toISOString();
             updates = { payment_2: timestamp };
+            console.log('✅ Payment 2 completed - applying optimistic update');
             // Webhook will trigger workflow, so we only update local state optimistically
             flushOnPayment(); // Immediate flush on payment completion (for other events, not payment)
           }
@@ -244,7 +247,11 @@ export default function App() {
                 }
               };
             });
+          } else {
+            console.log('⚠️ Session complete but no updates needed (payment already recorded?)');
           }
+        } else {
+          console.log('⚠️ Session status not complete:', sessionData.status);
         }
       })
       .catch(err => {
@@ -366,36 +373,92 @@ export default function App() {
       );
   }
 
+  // CRITICAL FIX for BUG_01_011: Ensure client_status exists and has expected structure
+  if (!data.state.client_status) {
+    console.error('❌ Missing client_status in state:', data.state);
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-950 text-slate-100">
+        <div className="text-center p-8 bg-slate-900 rounded-lg border border-red-900/50">
+          <h1 className="text-xl font-bold text-red-500 mb-2">Invalid Job State</h1>
+          <p className="text-slate-400 text-sm">The job state structure is missing client_status.</p>
+        </div>
+      </div>
+    );
+  }
+
   const { client_status } = data.state;
+  
+  // CRITICAL FIX for BUG_01_011: Comprehensive logging to debug state routing
+  console.log('🔍 State Management Debug:', {
+    sessionId: sessionId || 'none',
+    client_status: {
+      logged_in: client_status.logged_in || null,
+      contract_signed: client_status.contract_signed || null,
+      invoice: client_status.invoice || null,
+      payment_1: client_status.payment_1 || null,
+      balance: client_status.balance || null,
+      payment_2: client_status.payment_2 || null
+    }
+  });
+  
   let initialSection: 'contract' | 'invoice' | 'payment1' | 'completion1' | 'balance' | 'payment2' | 'completion2' = 'contract';
 
-  if (client_status.contract_signed) {
-    initialSection = 'invoice';
-  }
-  if (client_status.invoice) {
-    initialSection = 'payment1';
-  }
-  if (client_status.payment_1) {
-    initialSection = 'balance';
-  }
-  if (client_status.balance) {
-    initialSection = 'payment2';
-  }
-  if (client_status.payment_2) {
-    initialSection = 'completion2';
+  // CRITICAL FIX for BUG_01_009: If we have a sessionId, we're returning from Stripe
+  // Check if we're in a state where payment just completed but isn't recorded yet
+  // This handles the race condition where workflow hasn't run yet
+  if (sessionId) {
+    // If invoice was viewed but payment_1 not recorded, assume payment_1 just completed
+    if (client_status.invoice && !client_status.payment_1) {
+      initialSection = 'completion1';
+      console.log('📍 Routing: sessionId detected + invoice viewed → completion1 (payment_1 pending workflow)');
+    }
+    // If balance was viewed but payment_2 not recorded, assume payment_2 just completed
+    else if (client_status.balance && !client_status.payment_2) {
+      initialSection = 'completion2';
+      console.log('📍 Routing: sessionId detected + balance viewed → completion2 (payment_2 pending workflow)');
+    }
   }
 
-  // Re-calculate derived section after potential optimistic update
-  if (data.state.client_status.payment_1 && !data.state.client_status.balance) {
-       // After payment_1, show completion1 until balance is available
-       initialSection = 'completion1';
+  // CRITICAL FIX for BUG_01_011: State-based routing with proper precedence
+  // Check conditions in order of progression through the flow
+  // Each condition should only apply if we haven't progressed further
+  
+  // 1. Contract signed → show invoice
+  if (client_status.contract_signed && !client_status.invoice) {
+    initialSection = 'invoice';
+    console.log('📍 Routing: contract_signed → invoice');
   }
-  if (data.state.client_status.payment_1 && data.state.client_status.balance) {
+  // 2. Invoice viewed → show payment1 (unless returning from payment)
+  else if (client_status.invoice && !client_status.payment_1 && !sessionId) {
+    initialSection = 'payment1';
+    console.log('📍 Routing: invoice viewed → payment1');
+  }
+  // 3. Payment 1 completed → show completion1 or balance
+  else if (client_status.payment_1) {
+    if (!client_status.balance) {
+      initialSection = 'completion1';
+      console.log('📍 Routing: payment_1 completed → completion1 (balance not available)');
+    } else {
       initialSection = 'balance';
+      console.log('📍 Routing: payment_1 completed + balance available → balance');
+    }
   }
-  if (data.state.client_status.payment_2) {
-      initialSection = 'completion2';
+  // 4. Balance viewed → show payment2
+  else if (client_status.balance && !client_status.payment_2) {
+    initialSection = 'payment2';
+    console.log('📍 Routing: balance viewed → payment2');
   }
+  // 5. Payment 2 completed → show completion2
+  else if (client_status.payment_2) {
+    initialSection = 'completion2';
+    console.log('📍 Routing: payment_2 completed → completion2');
+  }
+  // 6. Default: contract (only if no progress made)
+  else {
+    console.log('📍 Routing: no progress detected → contract (default)');
+  }
+  
+  console.log(`✅ Final routing decision: ${initialSection}`);
 
   // Function to create checkout session
   const createCheckoutSession = async (paymentNumber: 1 | 2) => {

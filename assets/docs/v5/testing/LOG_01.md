@@ -229,3 +229,131 @@ Error reading job file: Expecting property name enclosed in double quotes: line 
   - Added fallback logic to detect partially created jobs
 
 **Test Job**: `uid-tst-003.json`
+
+---
+
+## Test Job: `uid-ngq-236.json`
+
+### BUG_01_009 - Return URL Redirects to Contract Instead of Completion Page
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: After successful payment, Stripe redirects to `return_url` with `session_id`, but the app routes back to contract instead of showing the completion page. This happens because the state management checks `data.state.client_status.payment_1` which is still `null` (workflow hasn't run yet to update the JSON file).
+
+**Expected**: User should see completion1 page immediately after payment, even before workflow updates JSON  
+**Actual**: App routes to contract page because `payment_1` is null in JSON
+
+**Root Cause**: 
+- Routing logic (`initialSection`) runs synchronously based on `data.state.client_status`
+- Optimistic update happens asynchronously in `useEffect` (Effect 2)
+- When `sessionId` is detected, routing logic doesn't account for the fact that payment just completed
+
+**Console Log**:
+```
+Detected session_id: cs_test_a1pcTH9gIc6Pa2hNZNIzR47djNDgMWQJ0fhp1FPFNhB63pYcoHn7EzsWgo (from URL)
+Event: contract_loaded
+```
+
+**Fixes Implemented** (2026-01-17):
+- Updated routing logic in `src/App.tsx` to check for `sessionId` first
+- If `sessionId` exists AND `invoice` viewed but `payment_1` not recorded → route to `completion1`
+- If `sessionId` exists AND `balance` viewed but `payment_2` not recorded → route to `completion2`
+- Added logging to track routing decisions
+- Improved Effect 2 logging to show when optimistic updates are applied
+
+**Files Modified**:
+- `src/App.tsx`: Updated `initialSection` calculation to account for `sessionId` and payment completion state
+
+**Expected Result**: Return URL should immediately show completion page, even before workflow updates JSON
+
+---
+
+### BUG_01_010 - User Exit Events Workflow Runs Multiple Times, Fails to Process Payment
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: Workflow attempted to run 3 times for same payment event:
+1. **First workflow (#27)**: Cancelled due to `cancel-in-progress: true` setting
+2. **Second workflow (#28)**: Failed with merge conflict during git operations
+3. **Third workflow (#29)**: Succeeded but reported "No state changes required" - payment_1 was NOT updated
+
+**Expected**: Single workflow run that processes payment_1 event and updates JSON  
+**Actual**: Three workflow runs, payment_1 left as `null`, `price1.active` left as `true`
+
+**Root Cause**:
+- `cancel-in-progress: true` cancels first workflow when second is queued
+- Git operations (`git pull --no-rebase`) cause merge conflicts when multiple workflows run
+- Third workflow reads file with conflicts, can't process properly, reports "No changes"
+
+**GitHub Actions Logs**:
+- Workflow #27: Cancelled - "Canceling since a higher priority waiting request for user-events-uid-ngq-236 exists"
+- Workflow #28: Failed - Merge conflict in `assets/jobs/uid-ngq-236.json`, rebase failed
+- Workflow #29: Succeeded - "No state changes required" but payment_1 was never updated
+
+**Actual Result in JSON**:
+- `payment_1`: `null` (should be timestamp)
+- `price1.active`: `true` (should be `false`)
+
+**Fixes Implemented** (2026-01-17):
+- Changed concurrency from `cancel-in-progress: true` to `cancel-in-progress: false` to queue workflows sequentially instead of canceling
+- Improved git operations in workflow:
+  - Fetch latest before committing
+  - Use merge (not rebase) to preserve commit history
+  - If merge conflict detected, reset to remote and re-run Python script with latest file state
+  - Store `PAYLOAD_JSON` in temp file for re-processing after reset
+- Enhanced Python script to detect Git merge conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`)
+- Exit with code 2 if merge conflict detected, workflow handles by resetting and re-processing
+
+**Files Modified**:
+- `.github/workflows/user-exit-events.yml`: Changed concurrency, improved git operations, added conflict resolution
+- `.github/scripts/orchestration/user_exit_events.py`: Added merge conflict detection
+
+**Expected Result**: Workflows queue sequentially, git operations handle conflicts gracefully, payment_1 is always recorded
+
+---
+
+### BUG_01_011 - State Management Ignores All Timestamps on Second Login
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: User logged in again after payment_1 (even though it wasn't recorded due to BUG_01_010). The app should have recognized existing timestamps (`logged_in`, `contract_signed`, `invoice`) and routed to `payment1` to retry payment_1, or to `balance` if payment_1 had been recorded. Instead, it routed to contract as if it was a completely fresh login, ignoring all existing state timestamps.
+
+**Expected**: 
+- If `payment_1` not recorded: Route to `payment1` (to retry payment_1)
+- If `payment_1` recorded: Route to `balance` (for payment_2)
+- Should recognize `logged_in`, `contract_signed`, `invoice` timestamps
+
+**Actual**: Routed to `contract` page, completely ignoring all existing timestamps
+
+**Root Cause**: 
+- **JSON Caching**: `fetchJobData()` was fetching JSON without cache busting, so browser/CDN may have served stale cached version without timestamps
+- **Routing Logic**: Sequential `if` statements could overwrite each other incorrectly
+- **No Debugging**: No logging to verify what state values were actually read
+
+**Console Log**:
+```
+No session_id found in URL or sessionStorage
+Event: contract_loaded
+```
+
+**Fixes Implemented** (2026-01-17):
+- **Cache Busting**: Added `?t=${Date.now()}` query parameter and explicit cache headers (`cache: 'no-store'`, `Cache-Control: no-cache`) to `fetchJobData()` in `src/lib/data.ts`
+- **State Logging**: Added comprehensive logging in `fetchJobData()` to show all timestamp values when data loads
+- **Routing Logic**: Refactored routing to use `else if` chain with proper precedence instead of sequential `if` statements that could overwrite
+- **Debug Logging**: Added detailed routing decision logging to track which condition matched and why
+- **Safety Checks**: Added validation to ensure `client_status` structure exists before routing
+
+**Files Modified**:
+- `src/lib/data.ts`: Added cache busting and state logging
+- `src/App.tsx`: Refactored routing logic, added comprehensive debug logging, added safety checks
+
+**Expected Result**: 
+- Fresh JSON data always loaded (no stale cache)
+- Routing correctly recognizes existing timestamps
+- Debug logs show exactly what state values are read and which routing decision is made
+- User correctly routed based on their progress through the flow
+
+---

@@ -35,7 +35,7 @@ def process_exit_events():
 
     print(f"Processing {len(events_batch)} events for {job_id}...")
 
-    # 3. Read & Parse Job JSON (with retry logic for race conditions)
+    # 3. Read & Parse Job JSON (with retry logic for race conditions and conflict handling)
     max_retries = 3
     retry_delay = 1  # seconds
     job_data = None
@@ -47,6 +47,15 @@ def process_exit_events():
                 # Validate JSON before parsing
                 if not content.strip():
                     raise ValueError("File is empty")
+                
+                # CRITICAL FIX for BUG_01_010: Detect and handle Git merge conflict markers
+                if '<<<<<<< HEAD' in content or '=======' in content or '>>>>>>>' in content:
+                    print(f"⚠️  Warning: Git merge conflict markers detected in file!")
+                    print(f"   This usually means another workflow updated the file concurrently.")
+                    print(f"   Attempting to resolve by using remote version and re-processing...")
+                    # Return error code that workflow can handle
+                    raise ValueError("Merge conflict detected - workflow should reset and re-process")
+                
                 job_data = json.loads(content)
                 break  # Success, exit retry loop
         except (json.JSONDecodeError, ValueError, IOError) as e:
@@ -57,6 +66,10 @@ def process_exit_events():
                 time.sleep(retry_delay)
             else:
                 print(f"Error reading job file after {max_retries} attempts: {e}")
+                # If it's a merge conflict, exit with specific code
+                if 'Merge conflict' in str(e):
+                    print("❌ Cannot process file with merge conflicts. Workflow should reset and re-run.")
+                    sys.exit(2)  # Exit code 2 = merge conflict
                 sys.exit(1)
     
     if job_data is None:
