@@ -2,6 +2,23 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import path from 'path';
+import fs from 'fs';
+
+// Helper to check if PDF directory has any files (recursively)
+function hasPdfFiles(dir: string): boolean {
+  if (!fs.existsSync(dir)) return false;
+  
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isFile() && !entry.name.startsWith('.')) {
+      return true;
+    }
+    if (entry.isDirectory() && hasPdfFiles(path.join(dir, entry.name))) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export default defineConfig({
   plugins: [
@@ -12,10 +29,11 @@ export default defineConfig({
           src: 'assets/jobs',
           dest: 'assets'
         },
-        {
-          src: 'assets/pdf',
-          dest: 'assets'
-        },
+        // Only copy PDF directory if it contains files (handles empty directories gracefully)
+        ...(hasPdfFiles('assets/pdf') ? [{
+          src: 'assets/pdf/**/*',
+          dest: 'assets/pdf'
+        }] : []),
         {
           src: 'assets/docs',
           dest: 'assets'
