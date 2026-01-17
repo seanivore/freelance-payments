@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "pixel-candy-store": {
-      "file_path": "assets/jobs/uid-pex-655.json",
-      "job_id": "uid-pex-655",
-      "login_keyword": "candy-store",
-      "login_name": "Pixel"
+    "anderson-jake-acts": {
+      "file_path": "assets/jobs/uid-bnp-832.json",
+      "job_id": "uid-bnp-832",
+      "login_keyword": "jake-acts",
+      "login_name": "Anderson"
     }
   },
-  "generated_at": "2026-01-17T20:42:01.067383Z"
+  "generated_at": "2026-01-17T21:05:32.634397Z"
 }

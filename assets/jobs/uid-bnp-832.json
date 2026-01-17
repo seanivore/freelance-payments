@@ -1,171 +1,171 @@
 {
-    "project": "Jake Anderson Commercial & Theater Actor Reels Website",
+  "project": "Jake Anderson Commercial & Theater Actor Reels Website",
+  "contract": {
+    "work_start": "2026-01-17",
+    "work_end": "2026-02-17",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": "2026-01-17T21:05:14.121956Z"
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
     "contract": {
-        "work_start": "2026-01-17",
-        "work_end": "2026-02-17",
-        "legal_jurisdiction": "Massachusetts",
-        "maintenance_period_months": 3,
-        "maintenance_monthly_fee": 150,
-        "signatures": {
-            "contractor": {
-                "legal_name": "Sean August Horvath",
-                "signed_date": null
-            },
-            "client": {
-                "legal_name": null,
-                "signed_date": null
-            }
-        }
+      "id": "kon-bnp-832",
+      "pdf": "assets/pdf/contract/kon-bnp-832.pdf",
+      "file_id": "11Ec3aJsc_u7VsZqoxOespLYIZ2Uiu8hY7TZzTqORhxY",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-bnp-832.pdf",
+      "sha256": "cdd5bb7cedea2f6163c7f30e3968c0cb181f065eec3ffcc1c9f76e7be4b3aa99",
+      "created": "2026-01-17T21:05:20.201190Z"
     },
-    "docs": {
-        "contract": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "invoice": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "balance": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        }
+    "invoice": {
+      "id": "inv-bnp-832",
+      "pdf": "assets/pdf/invoice/inv-bnp-832.pdf",
+      "file_id": "1Gu691TrpZmmW318mENhybC0zQ4r1u9GVxnyPP4D93q4",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-bnp-832.pdf",
+      "sha256": "c34cc133597bd6838946dcdf1a68f19cd66f1690b82bff90078966c36bd0fa3f",
+      "created": "2026-01-17T21:05:27.380215Z"
     },
-    "state": {
-        "objects": {
-            "created": null,
-            "product": null,
-            "price_1": null,
-            "price_2": null,
-            "customer": null,
-            "coupon": null
-        },
-        "client_status": {
-            "logged_in": null,
-            "contract_signed": null,
-            "invoice": null,
-            "payment_1": null,
-            "balance": null,
-            "payment_2": null
-        }
+    "balance": {
+      "id": "bal-bnp-832",
+      "pdf": "assets/pdf/balance/bal-bnp-832.pdf",
+      "file_id": "1Ig_49B_dEYjaWB1C4o4AlcQQx0XCZ4tLFPxT6Eeb2Pw",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-bnp-832.pdf",
+      "sha256": "0ca7a7b8389a8afbc0b4b321b892c6869c271cd65071e5d9ef54dbe6114f5f85",
+      "created": "2026-01-17T21:05:32.633297Z"
+    }
+  },
+  "state": {
+    "objects": {
+      "created": "2026-01-17T21:05:14.121956Z",
+      "product": "uid-bnp-832",
+      "price_1": "price_1SqggI9fljwH26CPy2qG7fDq",
+      "price_2": "price_1SqggI9fljwH26CPIEckCSpX",
+      "customer": "cus-bnp-832",
+      "coupon": "cou-bnp-832"
     },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "Actor Portfolio Website",
+    "active": true,
+    "description": "Jake needs a professional website to showcase his commercial and theater acting reels.",
+    "id": "uid-bnp-832",
+    "login_name": "Anderson",
+    "login_keyword": "jake-acts",
+    "service_usd": 520000,
+    "total_payments": 2,
+    "discount_usd": 20000,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Jake Anderson",
+    "business": "Jake Anderson Media",
+    "title": "Actor",
+    "email": "jake@jandersonmedia.com",
+    "phone": "424-278-8094",
+    "id": "cus-bnp-832",
+    "address": {
+      "city": "Los Angeles",
+      "line1": "123 Main St",
+      "state": "CA",
+      "postal_code": "90001",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 20000,
+    "applies_to": {
+      "products": [
+        "uid-bnp-832"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-bnp-832",
+    "max_redemptions": 1,
+    "name": "JAKE-ACTS"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 260000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
     "product": {
-        "name": "Actor Portfolio Website",
-        "active": true,
-        "description": "Jake needs a professional website to showcase his commercial and theater acting reels.",
-        "id": "uid-bnp-832",
-        "login_name": "Anderson",
-        "login_keyword": "jake-acts",
-        "service_usd": 520000,
-        "total_payments": 2,
-        "discount_usd": 20000,
-        "type": "service",
-        "unit_label": "Payment"
+      "products": [
+        "uid-bnp-832"
+      ]
     },
-    "customer": {
-        "name": "Jake Anderson",
-        "business": "Jake Anderson Media",
-        "title": "Actor",
-        "email": "jake@jandersonmedia.com",
-        "phone": "424-278-8094",
-        "id": "cus-bnp-832",
-        "address": {
-            "city": "Los Angeles",
-            "line1": "123 Main St",
-            "state": "CA",
-            "postal_code": "90001",
-            "country": "US"
-        }
+    "id": "price_1SqggI9fljwH26CPy2qG7fDq"
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 260000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-bnp-832"
+      ]
     },
-    "coupon": {
-        "amount_off": 20000,
-        "applies_to": {
-            "products": [
-                "uid-bnp-832"
-            ]
-        },
-        "currency": "usd",
-        "duration": "once",
-        "id": "cou-bnp-832",
-        "max_redemptions": 1,
-        "name": "JAKE-ACTS"
-    },
-    "price1": {
-        "count": 1,
-        "currency": "usd",
-        "unit_amount": 260000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "start of work",
-        "nickname": "Initial Payment",
-        "product": {
-            "products": [
-                "uid-bnp-832"
-            ]
-        },
-        "id": ""
-    },
-    "price2": {
-        "count": 2,
-        "currency": "usd",
-        "unit_amount": 260000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "before project launch",
-        "pay_days": 14,
-        "late_fee": 10000,
-        "nickname": "Final Payment",
-        "product": {
-            "products": [
-                "uid-bnp-832"
-            ]
-        },
-        "id": ""
-    },
-    "checkout_session_1": {
-        "discounts": [
-            {
-                "coupon": "cou-bnp-832"
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-bnp-832?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "checkout_session_2": {
-        "discounts": [
-            {
-                "coupon": null
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-bnp-832?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "project_scope_summary": "Jake needs a professional website to showcase his commercial and theater acting reels.",
-    "project_scope_full": "Jake needs a professional website to showcase his commercial and theater acting reels. This will be a multi-page website with a focus on video embeds and a clean, modern design. The website will be built on the August platform and will be fully responsive and mobile-friendly. The website will also include a contact form and a link to his social media profiles."
+    "id": "price_1SqggI9fljwH26CPIEckCSpX"
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-bnp-832"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1SqggI9fljwH26CPy2qG7fDq",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-bnp-832?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1SqggI9fljwH26CPIEckCSpX",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-bnp-832?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Jake needs a professional website to showcase his commercial and theater acting reels.",
+  "project_scope_full": "Jake needs a professional website to showcase his commercial and theater acting reels. This will be a multi-page website with a focus on video embeds and a clean, modern design. The website will be built on the August platform and will be fully responsive and mobile-friendly. The website will also include a contact form and a link to his social media profiles."
 }
