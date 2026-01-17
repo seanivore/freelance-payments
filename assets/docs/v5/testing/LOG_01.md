@@ -1,7 +1,7 @@
 # Testing Log 01 - v5 Development
 
 **Created**: 2026-01-17  
-**Last Updated**: 2026-01-17 (fixes implemented)
+**Last Updated**: 2026-01-17 (all fixes implemented)
 
 ## Logging Instructions for AI Agents
 
@@ -171,3 +171,27 @@ Error reading job file: Expecting property name enclosed in double quotes: line 
 - `.github/scripts/orchestration/admin_push.py`: Added `validate_google_token()` and pre-check logic
 - `vite.config.ts`: Added `hasPdfFiles()` helper and conditional PDF copy targets
 - `assets/pdf/*/.gitkeep`: Created placeholder files
+
+---
+
+### BUG_01_004 - PDF Generation Type Error: String/Int Arithmetic
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: PDF generation fails with error: `unsupported operand type(s) for -: 'str' and 'int'` when generating contract, invoice, and balance PDFs.
+
+**Root Cause**: JSON values for `unit_amount` and `amount_off` are sometimes stored as strings instead of integers. Arithmetic operations (`+`, `-`) fail when mixing string and int types.
+
+**Fixes Implemented**:
+- Added `safe_int()` helper function to convert string/int/None values to integers safely
+- Updated all calculation functions to use `safe_int()`:
+  - `calculate_amount_due()`: Converts `unit_amount` values
+  - `calculate_subtotal()`: Converts both price amounts
+  - `calculate_payment_due()`: Converts `unit_amount` and `amount_off`
+  - `generate_invoice_pdf()`: Converts all price/coupon values before arithmetic
+
+**Files Modified**:
+- `.github/scripts/orchestration/admin_push.py`: Added `safe_int()` helper and updated all calculation functions
+
+**Test Job**: `uid-tst-002.json`

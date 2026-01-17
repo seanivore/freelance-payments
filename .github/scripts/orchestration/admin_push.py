@@ -721,6 +721,21 @@ def format_currency(cents: int) -> str:
         return '$0.00'
 
 
+def safe_int(value, default=0):
+    """Convert value to int, handling strings and None."""
+    if value is None:
+        return default
+    if isinstance(value, str):
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return default
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+
 def calculate_amount_due(job_data: dict) -> str:
     """Calculate amount due based on payment state"""
     state = job_data.get('state', {})
@@ -731,16 +746,16 @@ def calculate_amount_due(job_data: dict) -> str:
     price2 = job_data.get('price2', {})
     
     if not payment_1.get('succeeded'):
-        amount = price1.get('unit_amount')
-        return format_currency(amount if amount is not None else 0)
+        amount = safe_int(price1.get('unit_amount'), 0)
+        return format_currency(amount)
     
     if product.get('total_payments') == 1:
         return '$0.00'
     
     if product.get('total_payments') == 2:
         if not payment_2.get('succeeded'):
-            amount = price2.get('unit_amount')
-            return format_currency(amount if amount is not None else 0)
+            amount = safe_int(price2.get('unit_amount'), 0)
+            return format_currency(amount)
         return '$0.00'
     
     return '$0.00'
@@ -748,19 +763,19 @@ def calculate_amount_due(job_data: dict) -> str:
 
 def calculate_subtotal(job_data: dict) -> str:
     """Calculate subtotal (price1 + price2)."""
-    price1 = job_data.get('price1', {}).get('unit_amount', 0)
-    price2 = job_data.get('price2', {}).get('unit_amount', 0)
-    return format_currency(price1 + price2)
+    price1_amount = safe_int(job_data.get('price1', {}).get('unit_amount', 0), 0)
+    price2_amount = safe_int(job_data.get('price2', {}).get('unit_amount', 0), 0)
+    return format_currency(price1_amount + price2_amount)
 
 def calculate_payment_due(job_data: dict, payment_number: int) -> str:
     """Calculate amount due for a specific payment."""
     if payment_number == 1:
-        unit_amount = job_data.get('price1', {}).get('unit_amount', 0)
+        unit_amount = safe_int(job_data.get('price1', {}).get('unit_amount', 0), 0)
         # Coupon applies to first payment usually
-        coupon_amount = job_data.get('coupon', {}).get('amount_off', 0)
+        coupon_amount = safe_int(job_data.get('coupon', {}).get('amount_off', 0), 0)
         return format_currency(max(0, unit_amount - coupon_amount))
     elif payment_number == 2:
-        unit_amount = job_data.get('price2', {}).get('unit_amount', 0)
+        unit_amount = safe_int(job_data.get('price2', {}).get('unit_amount', 0), 0)
         return format_currency(unit_amount)
     return "$0.00"
 
@@ -863,9 +878,9 @@ def generate_contract_pdf(drive_service, docs_service, job_data: dict, template_
             '{{today}}': format_date(datetime.now(UTC).isoformat()),
             '{{project_scope_summary}}': job_data.get('project_scope_summary', ''),
             '{{project_scope_full}}': job_data.get('project_scope_full', ''),
-            '{{subtotal}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0))),
-            '{{amount_off}}': format_currency(job_data.get('coupon', {}).get('amount_off', 0)),
-            '{{total}}': format_currency((price1.get('unit_amount', 0) + price2.get('unit_amount', 0)) - job_data.get('coupon', {}).get('amount_off', 0)),
+            '{{subtotal}}': format_currency(safe_int(price1.get('unit_amount', 0)) + safe_int(price2.get('unit_amount', 0))),
+            '{{amount_off}}': format_currency(safe_int(job_data.get('coupon', {}).get('amount_off', 0))),
+            '{{total}}': format_currency(safe_int(price1.get('unit_amount', 0)) + safe_int(price2.get('unit_amount', 0)) - safe_int(job_data.get('coupon', {}).get('amount_off', 0))),
             '{{amount_paid}}': "$0.00"
         }
         
@@ -940,8 +955,13 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
         coupon = job_data.get('coupon', {})  # Added coupon
         
         # Calculate subtotal and total using helper (or inline, but let's be explicit per doc)
-        subtotal_cents = price1.get('unit_amount', 0) + price2.get('unit_amount', 0)
-        coupon_cents = coupon.get('amount_off', 0)
+        # Ensure all values are integers (handle string inputs from JSON)
+        price1_amount = safe_int(price1.get('unit_amount', 0))
+        price2_amount = safe_int(price2.get('unit_amount', 0))
+        coupon_amount = safe_int(coupon.get('amount_off', 0))
+        
+        subtotal_cents = price1_amount + price2_amount
+        coupon_cents = coupon_amount
         total_cents = subtotal_cents - coupon_cents
         
         replacements = {
@@ -964,8 +984,8 @@ def generate_invoice_pdf(drive_service, docs_service, job_data: dict, template_i
             '{{price1.count}}': str(price1.get('count', 1)),
             '{{price2.count}}': str(price2.get('count', 2)),
             '{{product.total_payments}}': str(product.get('total_payments', 1)),
-            '{{payment1_due}}': format_currency(max(0, price1.get('unit_amount', 0) - coupon_cents)),
-            '{{payment2_due}}': format_currency(price2.get('unit_amount', 0)),
+            '{{payment1_due}}': format_currency(max(0, price1_amount - coupon_cents)),
+            '{{payment2_due}}': format_currency(price2_amount),
 
             # Standard Fields
             '{{customer.business}}': customer.get('business', ''),
