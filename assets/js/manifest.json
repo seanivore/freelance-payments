@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "jinx-love-cats": {
-      "file_path": "assets/jobs/uid-jxr-848.json",
-      "job_id": "uid-jxr-848",
-      "login_keyword": "love-cats",
-      "login_name": "Jinx"
+    "pixel-candy-store": {
+      "file_path": "assets/jobs/uid-pex-655.json",
+      "job_id": "uid-pex-655",
+      "login_keyword": "candy-store",
+      "login_name": "Pixel"
     }
   },
-  "generated_at": "2026-01-17T19:35:36.326177Z"
+  "generated_at": "2026-01-17T20:11:10.553835Z"
 }
