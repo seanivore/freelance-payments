@@ -1,171 +1,171 @@
 {
-    "project": "Sandra the Town Seamstress Company Website",
+  "project": "Sandra the Town Seamstress Company Website",
+  "contract": {
+    "work_start": "2026-01-17",
+    "work_end": "2026-02-17",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": "2026-01-17T21:21:22.394819Z"
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
     "contract": {
-        "work_start": "2026-01-17",
-        "work_end": "2026-02-17",
-        "legal_jurisdiction": "Massachusetts",
-        "maintenance_period_months": 3,
-        "maintenance_monthly_fee": 150,
-        "signatures": {
-            "contractor": {
-                "legal_name": "Sean August Horvath",
-                "signed_date": null
-            },
-            "client": {
-                "legal_name": null,
-                "signed_date": null
-            }
-        }
+      "id": "kon-oac-784",
+      "pdf": "assets/pdf/contract/kon-oac-784.pdf",
+      "file_id": "1XfaiRZV91WLVYM-dLDU_V0uzYLGALVkiheCTxPHahmE",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-oac-784.pdf",
+      "sha256": "69900bbc05754dd9da83b84f7819ec246a21d1c3baad7ffeb08f591781e6c258",
+      "created": "2026-01-17T21:21:29.139832Z"
     },
-    "docs": {
-        "contract": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "invoice": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "balance": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        }
+    "invoice": {
+      "id": "inv-oac-784",
+      "pdf": "assets/pdf/invoice/inv-oac-784.pdf",
+      "file_id": "12vteqW7OsPICTN4biVvPbsA8sQ7qlOQZEgoU0nd07R0",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-oac-784.pdf",
+      "sha256": "85d04dbfb5de1c12430b819bb117ee8dc990f4c3d928ba73da3a90a13b73a963",
+      "created": "2026-01-17T21:21:34.385209Z"
     },
-    "state": {
-        "objects": {
-            "created": null,
-            "product": null,
-            "price_1": null,
-            "price_2": null,
-            "customer": null,
-            "coupon": null
-        },
-        "client_status": {
-            "logged_in": null,
-            "contract_signed": null,
-            "invoice": null,
-            "payment_1": null,
-            "balance": null,
-            "payment_2": null
-        }
+    "balance": {
+      "id": "bal-oac-784",
+      "pdf": "assets/pdf/balance/bal-oac-784.pdf",
+      "file_id": "1db-6p809Td2MHwC7v5_MWWKUZfPI1mv4K2vbkC7pSSA",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-oac-784.pdf",
+      "sha256": "421fa2a47507638411ca22196e14773fb559179046c342f41fc81c0cfc7dc172",
+      "created": "2026-01-17T21:21:38.767145Z"
+    }
+  },
+  "state": {
+    "objects": {
+      "created": "2026-01-17T21:21:22.394819Z",
+      "product": "uid-oac-784",
+      "price_1": "price_1Sqgvu9fljwH26CPO51Uji9O",
+      "price_2": "price_1Sqgvu9fljwH26CPOXdYST2z",
+      "customer": "cus-oac-784",
+      "coupon": "cou-oac-784"
     },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "Company Website",
+    "active": true,
+    "description": "Website representing Sandra the Town Seamstress",
+    "id": "uid-oac-784",
+    "login_name": "Mobile",
+    "login_keyword": "town-seams",
+    "service_usd": 785000,
+    "total_payments": 2,
+    "discount_usd": 5000,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Sandra Mobile",
+    "business": "Sandra the Town Seamstress",
+    "title": "Owner",
+    "email": "sandra@northboroughseams.com",
+    "phone": "508-241-7070",
+    "id": "cus-oac-784",
+    "address": {
+      "city": "Northborough",
+      "line1": "123 Main St",
+      "state": "MA",
+      "postal_code": "01532",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 5000,
+    "applies_to": {
+      "products": [
+        "uid-oac-784"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-oac-784",
+    "max_redemptions": 1,
+    "name": "SANDRA-50"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 392500,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
     "product": {
-        "name": "Company Website",
-        "active": true,
-        "description": "Website representing Sandra the Town Seamstress",
-        "id": "uid-oac-784",
-        "login_name": "Mobile",
-        "login_keyword": "town-seams",
-        "service_usd": 785000,
-        "total_payments": 2,
-        "discount_usd": 5000,
-        "type": "service",
-        "unit_label": "Payment"
+      "products": [
+        "uid-oac-784"
+      ]
     },
-    "customer": {
-        "name": "Sandra Mobile",
-        "business": "Sandra the Town Seamstress",
-        "title": "Owner",
-        "email": "sandra@northboroughseams.com",
-        "phone": "508-241-7070",
-        "id": "cus-oac-784",
-        "address": {
-            "city": "Northborough",
-            "line1": "123 Main St",
-            "state": "MA",
-            "postal_code": "01532",
-            "country": "US"
-        }
+    "id": "price_1Sqgvu9fljwH26CPO51Uji9O"
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 392500,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-oac-784"
+      ]
     },
-    "coupon": {
-        "amount_off": 5000,
-        "applies_to": {
-            "products": [
-                "uid-oac-784"
-            ]
-        },
-        "currency": "usd",
-        "duration": "once",
-        "id": "cou-oac-784",
-        "max_redemptions": 1,
-        "name": "SANDRA-50"
-    },
-    "price1": {
-        "count": 1,
-        "currency": "usd",
-        "unit_amount": 392500,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "start of work",
-        "nickname": "Initial Payment",
-        "product": {
-            "products": [
-                "uid-oac-784"
-            ]
-        },
-        "id": ""
-    },
-    "price2": {
-        "count": 2,
-        "currency": "usd",
-        "unit_amount": 392500,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "before project launch",
-        "pay_days": 14,
-        "late_fee": 10000,
-        "nickname": "Final Payment",
-        "product": {
-            "products": [
-                "uid-oac-784"
-            ]
-        },
-        "id": ""
-    },
-    "checkout_session_1": {
-        "discounts": [
-            {
-                "coupon": "cou-oac-784"
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-oac-784?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "checkout_session_2": {
-        "discounts": [
-            {
-                "coupon": null
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-oac-784?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "project_scope_summary": "Sandra the Town Seamstress Company Website",
-    "project_scope_full": "Ms. Sandra Mobile, owner of Sandra the Town Seamstress, requires a company website to represent her business. The website will be used to showcase her services and provide information about her business. The website will be used to attract new customers and to provide information to existing customers. The website will be used to provide information about her business. The website will be used to provide information about her business."
+    "id": "price_1Sqgvu9fljwH26CPOXdYST2z"
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-oac-784"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1Sqgvu9fljwH26CPO51Uji9O",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-oac-784?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1Sqgvu9fljwH26CPOXdYST2z",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-oac-784?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Sandra the Town Seamstress Company Website",
+  "project_scope_full": "Ms. Sandra Mobile, owner of Sandra the Town Seamstress, requires a company website to represent her business. The website will be used to showcase her services and provide information about her business. The website will be used to attract new customers and to provide information to existing customers. The website will be used to provide information about her business. The website will be used to provide information about her business."
 }

@@ -5,7 +5,13 @@
       "job_id": "uid-bnp-832",
       "login_keyword": "jake-acts",
       "login_name": "Anderson"
+    },
+    "mobile-town-seams": {
+      "file_path": "assets/jobs/uid-oac-784.json",
+      "job_id": "uid-oac-784",
+      "login_keyword": "town-seams",
+      "login_name": "Mobile"
     }
   },
-  "generated_at": "2026-01-17T21:13:51.981818Z"
+  "generated_at": "2026-01-17T21:21:38.768381Z"
 }
