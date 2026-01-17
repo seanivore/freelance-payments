@@ -1,0 +1,171 @@
+{
+    "project": "Dog Dating App",
+    "contract": {
+        "work_start": "2026-01-17",
+        "work_end": "2026-02-17",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": null
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
+    },
+    "docs": {
+        "contract": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "invoice": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "balance": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        }
+    },
+    "state": {
+        "objects": {
+            "created": null,
+            "product": null,
+            "price_1": null,
+            "price_2": null,
+            "customer": null,
+            "coupon": null
+        },
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
+    },
+    "product": {
+        "name": "iOS App Development & Launch",
+        "active": true,
+        "description": "An app for dog owners to find and date other dog owners.",
+        "id": "uid-eut-953",
+        "login_name": "Dog",
+        "login_keyword": "dating-app",
+        "service_usd": 2300000,
+        "total_payments": 2,
+        "discount_usd": 300000,
+        "type": "service",
+        "unit_label": "Payment"
+    },
+    "customer": {
+        "name": "Matilda Hill",
+        "business": "Hills Art House LLC",
+        "title": "Managing Owner",
+        "email": "matilda@hillsarthouse.com",
+        "phone": "510-263-5555",
+        "id": "cus-eut-953",
+        "address": {
+            "city": "Berkeley",
+            "line1": "123 Main St",
+            "state": "CA",
+            "postal_code": "94704",
+            "country": "US"
+        }
+    },
+    "coupon": {
+        "amount_off": 300000,
+        "applies_to": {
+            "products": [
+                "uid-eut-953"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-eut-953",
+        "max_redemptions": 1,
+        "name": "DOG-APP"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 1300000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-eut-953"
+            ]
+        },
+        "id": ""
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 1000000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-eut-953"
+            ]
+        },
+        "id": ""
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-eut-953"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-eut-953?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-eut-953?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "The client is creating an application for iOS that will allow dog owners to find and date other dog owners.",
+    "project_scope_full": "An application for iOS that will allow dog owners to find and date other dog owners. The app will have a user-friendly interface and will allow users to create profiles, search for other users, and connect with them. The app will also have a chat feature to allow users to communicate with each other. The app will be launched on the App Store. The app will be available for free for the first month, and then a subscription will be required to continue using the app."
+}

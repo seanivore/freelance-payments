@@ -1,0 +1,171 @@
+{
+    "project": "Blog & Email Composition Assistant Workflows",
+    "contract": {
+        "work_start": "2026-03-17",
+        "work_end": "2026-06-17",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": null
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
+    },
+    "docs": {
+        "contract": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "invoice": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "balance": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        }
+    },
+    "state": {
+        "objects": {
+            "created": null,
+            "product": null,
+            "price_1": null,
+            "price_2": null,
+            "customer": null,
+            "coupon": null
+        },
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
+    },
+    "product": {
+        "name": "Automated AI Tools for Content Production",
+        "active": true,
+        "description": "AI-powered workflows tested and perfected for blog and emails related to the client's business.",
+        "id": "uid-uoj-055",
+        "login_name": "Miller",
+        "login_keyword": "ai-writer",
+        "service_usd": 1585000,
+        "total_payments": 2,
+        "discount_usd": 85000,
+        "type": "service",
+        "unit_label": "Payment"
+    },
+    "customer": {
+        "name": "Timothy James Miller, Sr.",
+        "business": "The Bulwark Media",
+        "title": "President, Founder",
+        "email": "tim@bulwark.com",
+        "phone": "(617) 855-6557",
+        "id": "cus-uoj-055",
+        "address": {
+            "city": "Boston",
+            "line1": "101 Arch St",
+            "state": "MA",
+            "postal_code": "02110",
+            "country": "US"
+        }
+    },
+    "coupon": {
+        "amount_off": 85000,
+        "applies_to": {
+            "products": [
+                "uid-uoj-055"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-uoj-055",
+        "max_redemptions": 1,
+        "name": "WATCH-BULWARK"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 792500,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-uoj-055"
+            ]
+        },
+        "id": ""
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 792500,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-uoj-055"
+            ]
+        },
+        "id": ""
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-uoj-055"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-uoj-055?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-uoj-055?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "AI-powered content production workflows for blogs and emails.",
+    "project_scope_full": "Tim has a thriving media platform and needs to scale content production. We will create AI-powered workflows for blogs and emails. There will be controls for the producer to adjust the tone, style, and content of the output. The workflows will be tested and perfected for the client's business. The system will include automated routing of content to the client's preferred platforms, as well as for prior review and approval by the client. The system will be built on a foundation of open-source tools and technologies, with a focus on privacy and security."
+}
