@@ -147,7 +147,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/uid-pex-655?session_id={CHECKOUT_SESSION_ID}",
+        "return_url": "https://payments.august.style/uid-pex-655?complete=payment_1&session_id={CHECKOUT_SESSION_ID}",
         "ui_mode": "custom"
     },
     "checkout_session_2": {
@@ -163,7 +163,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/uid-pex-655?session_id={CHECKOUT_SESSION_ID}",
+        "return_url": "https://payments.august.style/uid-pex-655?complete=payment_2&session_id={CHECKOUT_SESSION_ID}",
         "ui_mode": "custom"
     },
     "project_scope_summary": "The client needs a website store for their candy business.",

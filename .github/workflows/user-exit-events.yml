@@ -25,9 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # CRITICAL FIX for BUG_01_016: Ensure checkout uses correct commit reference
-          # Explicitly use the workflow's commit SHA to prevent wrong commit references
-          ref: ${{ github.sha }}
+          # CRITICAL FIX for BUG_01_016: Checkout branch instead of specific commit
+          # This prevents detached HEAD state which causes "src refspec does not match any" push errors
+          # We checkout the branch and then fetch latest in the commit step to ensure we're up to date
+          ref: freelance-payments
           fetch-depth: 0  # Fetch full history to ensure correct commit context
 
       - name: Set up Python
@@ -64,6 +65,12 @@ jobs:
           
           # CRITICAL FIX for BUG_01_010: Improved git operations to prevent conflicts
           # Strategy: Fetch latest, merge/rebase cleanly, handle conflicts by re-processing
+          
+          # Ensure we're on the branch (not detached HEAD)
+          # If we're in detached HEAD state, checkout the branch
+          if ! git branch --show-current | grep -q freelance-payments; then
+            git checkout freelance-payments || git checkout -b freelance-payments origin/freelance-payments
+          fi
           
           # Fetch latest changes
           git fetch origin freelance-payments
