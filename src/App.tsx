@@ -205,7 +205,8 @@ export default function App() {
   }, []); // Run once on mount
   
   // Effect 2: Process session_id when data becomes available
-  // CRITICAL FIX for BUG_01_012: Include payment event in frontend batch instead of webhook triggering separate workflow
+  // CRITICAL FIX for BUG_01_016: On return URL load, add payment event to buffer and flush immediately
+  // This ensures payment event is tracked even though it's a new page load
   useEffect(() => {
     if (!sessionId || !data) return; // Wait for both session_id and data
     
@@ -218,22 +219,25 @@ export default function App() {
           let paymentType: 'payment_1' | 'payment_2' | null = null;
           let updates: Partial<typeof s> = {};
           
-          // Determine which payment based on current state
-          if (s.invoice && !s.payment_1) {
+          // Determine which payment based on current state or URL parameter
+          const urlParams = new URLSearchParams(window.location.search);
+          const completeParam = urlParams.get('complete');
+          
+          if (completeParam === 'payment_1' || (s.invoice && !s.payment_1)) {
             paymentType = 'payment_1';
             const timestamp = new Date().toISOString();
             updates = { payment_1: timestamp };
-            console.log('✅ Payment 1 completed - adding to event batch');
-          } else if (s.balance && !s.payment_2) {
+            console.log('✅ Payment 1 completed - adding to event buffer');
+          } else if (completeParam === 'payment_2' || (s.balance && !s.payment_2)) {
             paymentType = 'payment_2';
             const timestamp = new Date().toISOString();
             updates = { payment_2: timestamp };
-            console.log('✅ Payment 2 completed - adding to event batch');
+            console.log('✅ Payment 2 completed - adding to event buffer');
           }
           
           if (paymentType && Object.keys(updates).length > 0) {
-            // CRITICAL: Add payment event to buffer BEFORE flushing
-            // This ensures payment event is included in the same batch as other events
+            // CRITICAL: Add payment event to buffer (this is a new page load, so buffer is empty)
+            // Then flush immediately to ensure it's sent
             trackEvent(paymentType, {
               payment_number: paymentType === 'payment_1' ? 1 : 2,
               session_id: sessionId
@@ -254,9 +258,8 @@ export default function App() {
               };
             });
             
-            // Flush ALL events (including payment) as single batch
-            // This ensures all events from the session are processed together
-            console.log('📤 Flushing all events including payment event...');
+            // Flush payment event immediately (it's the only event in buffer on new page load)
+            console.log('📤 Flushing payment event immediately...');
             flushOnPayment();
           } else {
             console.log('⚠️ Session complete but no updates needed (payment already recorded?)');
@@ -268,7 +271,7 @@ export default function App() {
       .catch(err => {
         console.error('Error fetching session status:', err);
       });
-  }, [sessionId, data, flushOnPayment, trackEvent]); // Added trackEvent dependency
+  }, [sessionId, data, flushOnPayment, trackEvent]); // Added trackEvent back since we need it here
 
   // Memoized emitEvent callback to prevent PdfViewer re-renders
   // MUST be before early returns to avoid React hook order error
@@ -414,10 +417,21 @@ export default function App() {
   
   let initialSection: 'contract' | 'invoice' | 'payment1' | 'completion1' | 'balance' | 'payment2' | 'completion2' = 'contract';
 
-  // CRITICAL FIX for BUG_01_009: If we have a sessionId, we're returning from Stripe
-  // Check if we're in a state where payment just completed but isn't recorded yet
+  // CRITICAL FIX for BUG_01_015: Check for explicit payment completion parameter first
+  // This works even when JSON state is null (workflow hasn't run yet)
+  const urlParams = new URLSearchParams(window.location.search);
+  const completeParam = urlParams.get('complete');
+  if (completeParam === 'payment_1') {
+    initialSection = 'completion1';
+    console.log('📍 Routing: complete=payment_1 parameter detected → completion1');
+  } else if (completeParam === 'payment_2') {
+    initialSection = 'completion2';
+    console.log('📍 Routing: complete=payment_2 parameter detected → completion2');
+  }
+  
+  // CRITICAL FIX for BUG_01_009: If we have a sessionId but no complete param, check JSON state
   // This handles the race condition where workflow hasn't run yet
-  if (sessionId) {
+  else if (sessionId) {
     // If invoice was viewed but payment_1 not recorded, assume payment_1 just completed
     if (client_status.invoice && !client_status.payment_1) {
       initialSection = 'completion1';
@@ -476,8 +490,19 @@ export default function App() {
     setIsCreatingSession(true);
     try {
       const jobId = window.location.pathname.substring(1);
-      // Explicit return URL with session_id template variable
-      const returnUrl = `${window.location.origin}/${jobId}?session_id={CHECKOUT_SESSION_ID}`;
+      
+      // CRITICAL FIX for BUG_01_015: Add explicit payment completion parameter to return URL
+      // This allows routing to completion page even when JSON state is null (workflow hasn't run yet)
+      // Format: ?complete=payment_X&session_id={CHECKOUT_SESSION_ID}
+      const returnUrl = `${window.location.origin}/${jobId}?complete=payment_${paymentNumber}&session_id={CHECKOUT_SESSION_ID}`;
+      
+      // CRITICAL FIX for BUG_01_016: Track payment event BEFORE redirect happens
+      // Add payment event to buffer now so it's included in the batch when events flush
+      trackEvent(`payment_${paymentNumber}` as 'payment_1' | 'payment_2', {
+        payment_number: paymentNumber,
+        session_id: 'pending' // Will be updated when session is created
+      });
+      console.log(`📝 Payment ${paymentNumber} event added to buffer before checkout session creation`);
       
       const response = await fetch(apiUrl('/api/create-checkout-session'), {
         method: 'POST',
@@ -498,6 +523,23 @@ export default function App() {
 
       const session = await response.json();
       if (session.client_secret) {
+        // CRITICAL FIX for BUG_01_016: Update payment event in buffer with actual session_id
+        // Find the payment event we just added and update it with real session_id
+        const paymentEventIndex = eventBufferRef.current.findIndex(
+          e => e.type === `payment_${paymentNumber}` && e.data.session_id === 'pending'
+        );
+        if (paymentEventIndex !== -1) {
+          eventBufferRef.current[paymentEventIndex].data.session_id = session.session_id;
+          console.log(`✅ Updated payment event in buffer with session_id: ${session.session_id}`);
+        } else {
+          // If event wasn't found (shouldn't happen), add it now
+          console.warn('⚠️ Payment event not found in buffer, adding now');
+          trackEvent(`payment_${paymentNumber}` as 'payment_1' | 'payment_2', {
+            payment_number: paymentNumber,
+            session_id: session.session_id
+          });
+        }
+        
         setClientSecret(session.client_secret);
       } else {
         throw new Error('No client_secret in response');

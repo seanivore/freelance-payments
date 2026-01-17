@@ -24,6 +24,11 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # CRITICAL FIX for BUG_01_016: Ensure checkout uses correct commit reference
+          # Explicitly use the workflow's commit SHA to prevent wrong commit references
+          ref: ${{ github.sha }}
+          fetch-depth: 0  # Fetch full history to ensure correct commit context
 
       - name: Set up Python
         uses: actions/setup-python@v5

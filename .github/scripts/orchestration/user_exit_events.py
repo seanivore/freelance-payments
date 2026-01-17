@@ -97,13 +97,23 @@ def process_exit_events():
 
         # Map event types to JSON updates
         if e_type == 'logged_in':
-            if not client_status.get('logged_in'):
+            if client_status.get('logged_in'):
+                print(f"  ⏭️  Skipping logged_in - already processed at {client_status.get('logged_in')}")
+            else:
                 client_status['logged_in'] = e_time
                 updates_made = True
                 print(f"  ✓ Updated logged_in: {e_time}")
+        
+        elif e_type == 'contract_loaded':
+            # contract_loaded events don't update state, just log for analytics
+            # Skip silently to avoid "No state changes required" message
+            print(f"  ℹ️  Skipping contract_loaded - informational event only")
+            continue
                 
         elif e_type == 'contract_signed':
-            if not client_status.get('contract_signed'):
+            if client_status.get('contract_signed'):
+                print(f"  ⏭️  Skipping contract_signed - already processed at {client_status.get('contract_signed')}")
+            else:
                 client_status['contract_signed'] = e_time
                 updates_made = True
                 print(f"  ✓ Updated contract_signed: {e_time}")
@@ -126,7 +136,9 @@ def process_exit_events():
                     print(f"  ✓ Updated contract signature signed_date: {e_data['signed_date']}")
 
         elif e_type == 'invoice':
-            if not client_status.get('invoice'):
+            if client_status.get('invoice'):
+                print(f"  ⏭️  Skipping invoice - already processed at {client_status.get('invoice')}")
+            else:
                 client_status['invoice'] = e_time
                 updates_made = True
                 print(f"  ✓ Updated invoice: {e_time}")
@@ -149,7 +161,9 @@ def process_exit_events():
                     print(f"  ✓ Deactivated price1")
                 
         elif e_type == 'balance':
-            if not client_status.get('balance'):
+            if client_status.get('balance'):
+                print(f"  ⏭️  Skipping balance - already processed at {client_status.get('balance')}")
+            else:
                 client_status['balance'] = e_time
                 updates_made = True
                 print(f"  ✓ Updated balance: {e_time}")

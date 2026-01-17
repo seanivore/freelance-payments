@@ -451,4 +451,98 @@ Event: contract_loaded
 
 ---
 
+## Test Job: `uid-unc-480.json`
+
+### BUG_01_015 - Checkout Session Return URL Redirect
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: After payment completes, return URL redirects to contract instead of completion page. Console shows all null timestamps because workflow hasn't run yet to update JSON state.
+
+**Expected**: Return URL should route to completion page (`completion1` or `completion2`) based on which payment completed  
+**Actual**: Routes to contract because JSON state shows all null timestamps
+
+**Root Cause**: 
+- Routing logic relies on `client_status` JSON state to determine which completion page to show
+- When payment completes and Stripe redirects, workflow hasn't updated JSON yet
+- All timestamps are null → routing logic defaults to contract
+
+**User Solution Discovery**: Add explicit `complete=payment_X` parameter to return URL to identify which payment completed, similar to how `session_id` parameter works.
+
+**Fixes Implemented** (2026-01-17):
+- **Updated return_url construction** in `src/App.tsx` `createCheckoutSession()`:
+  - Changed from: `${window.location.origin}/${jobId}?session_id={CHECKOUT_SESSION_ID}`
+  - Changed to: `${window.location.origin}/${jobId}?complete=payment_${paymentNumber}&session_id={CHECKOUT_SESSION_ID}`
+  - Uses `&` (ampersand) for second parameter
+- **Updated routing logic** in `src/App.tsx`:
+  - Check for `complete` URL parameter FIRST (before checking JSON state)
+  - If `complete=payment_1` → route to `completion1`
+  - If `complete=payment_2` → route to `completion2`
+  - This works even when JSON state is null
+- **Enhanced CompletionView component** (`src/components/CompletionView.tsx`):
+  - Different content for `completion1` vs `completion2`
+  - `completion1`: "Payment Received" message, next steps, download contract/invoice, optional "Pay balance now" button
+  - `completion2`: "All Payments Complete" message, download all PDFs, thank you message, contact info
+
+**Files Modified**:
+- `src/App.tsx`: Updated return_url construction and routing logic
+- `src/components/CompletionView.tsx`: Enhanced with different content for each completion type
+
+**Expected Result**: Return URL correctly routes to completion page even when JSON state is null
+
+---
+
+### BUG_01_016 - User Exit Events Workflow Issues & Return User State Placement
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: 
+1. Payment event not included in workflow batch - workflow #35 received `logged_in` and `contract_loaded` (already processed) but `payment_1` event never made it into batch
+2. Commit hash references are wrong - workflow #34 references commit `1d14aad` which was before testing started
+3. Return user state placement - second login shows all null timestamps, routes to contract
+
+**Expected**: 
+- Single workflow run processes all events (including payment) together
+- Commit hash references should match actual commits
+- Second login should recognize existing timestamps and route correctly
+
+**Actual**: 
+- Multiple workflow runs, payment event sent separately
+- Commit hash references are incorrect
+- Second login shows all nulls, routes to contract
+
+**Root Causes**:
+1. **Payment Event Timing**: Payment event was being added to buffer AFTER redirect (in Effect 2), but on redirect it's a new page load so buffer is empty. Payment event needs to be tracked when return URL loads.
+2. **Commit Hash Issue**: GitHub Actions checkout step wasn't explicitly using workflow's commit SHA
+3. **Deduplication Logging**: Events like `logged_in` and `contract_loaded` were being processed even though they were already set, causing "No state changes required" message
+
+**Fixes Implemented** (2026-01-17):
+- **Fixed payment event timing** in `src/App.tsx`:
+  - Add payment event to buffer when checkout session is created (before redirect)
+  - Also add payment event when return URL loads (as backup, since redirect is new page load)
+  - Update event with actual session_id when session is created
+  - Flush immediately when return URL loads
+- **Fixed commit hash issue** in `.github/workflows/user-exit-events.yml`:
+  - Added explicit `ref: ${{ github.sha }}` to checkout step
+  - Added `fetch-depth: 0` to ensure full history
+- **Improved deduplication logging** in `.github/scripts/orchestration/user_exit_events.py`:
+  - Added logging for `logged_in`, `contract_signed`, `invoice`, `balance` events when already processed
+  - Added handling for `contract_loaded` event (informational only, skip silently)
+  - All events now show clear logging when skipped vs when processed
+
+**Files Modified**:
+- `src/App.tsx`: Fixed payment event timing, added to buffer before redirect and on return URL load
+- `.github/workflows/user-exit-events.yml`: Added explicit commit reference to checkout step
+- `.github/scripts/orchestration/user_exit_events.py`: Improved deduplication logging for all event types
+
+**Expected Result**: 
+- Payment event included in workflow batch
+- Commit hash references are correct
+- Deduplication logging shows which events were skipped
+- Single workflow run processes all events together
+
+---
+
 ---
