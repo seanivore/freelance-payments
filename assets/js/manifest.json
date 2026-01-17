@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "world-testing-world": {
-      "file_path": "assets/jobs/uid-tmw-100.json",
-      "job_id": "uid-tmw-100",
-      "login_keyword": "testing-world",
-      "login_name": "World"
-    }
-  },
-  "generated_at": "2026-01-17T09:58:56.979818Z"
+  "jobs": {},
+  "generated_at": "2026-01-17T13:00:30.174374Z"
 }
