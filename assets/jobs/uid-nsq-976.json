@@ -1,171 +1,171 @@
 {
-    "project": "Jameson Social Media Platforms",
+  "project": "Jameson Social Media Platforms",
+  "contract": {
+    "work_start": "2026-01-17",
+    "work_end": "2026-02-17",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": "2026-01-17T14:01:05.663442Z"
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
     "contract": {
-        "work_start": "2026-01-17",
-        "work_end": "2026-02-17",
-        "legal_jurisdiction": "Massachusetts",
-        "maintenance_period_months": 3,
-        "maintenance_monthly_fee": 150,
-        "signatures": {
-            "contractor": {
-                "legal_name": "Sean August Horvath",
-                "signed_date": null
-            },
-            "client": {
-                "legal_name": null,
-                "signed_date": null
-            }
-        }
+      "id": "kon-nsq-976",
+      "pdf": "assets/pdf/contract/kon-nsq-976.pdf",
+      "file_id": "1JVhfb16RNQtqUD0pQL8_imhe9fXp9DTHnet1wUSEl6U",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-nsq-976.pdf",
+      "sha256": "93283a7ae3b25de6801ee56b4f1481c792f31caae203dacba76e8b7f5b89c297",
+      "created": "2026-01-17T14:01:12.876455Z"
     },
-    "docs": {
-        "contract": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "invoice": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "balance": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        }
+    "invoice": {
+      "id": "inv-nsq-976",
+      "pdf": "assets/pdf/invoice/inv-nsq-976.pdf",
+      "file_id": "1jyKGlPWH7WbXMhzSULs9KBXOkrhU3Kc4HlCWPBSWZDw",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-nsq-976.pdf",
+      "sha256": "19ac7afd3e743f060e931d48737b1eb7918affbc469ae2f7abe1da16d67ee2d6",
+      "created": "2026-01-17T14:01:17.538978Z"
     },
-    "state": {
-        "objects": {
-            "created": null,
-            "product": null,
-            "price_1": null,
-            "price_2": null,
-            "customer": null,
-            "coupon": null
-        },
-        "client_status": {
-            "logged_in": null,
-            "contract_signed": null,
-            "invoice": null,
-            "payment_1": null,
-            "balance": null,
-            "payment_2": null
-        }
+    "balance": {
+      "id": "bal-nsq-976",
+      "pdf": "assets/pdf/balance/bal-nsq-976.pdf",
+      "file_id": "1zxHE6b-Pk-xyIPxN93Znv5oT0Bj6lQtQ-rRwaOr0e0g",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-nsq-976.pdf",
+      "sha256": "75280866bf87719b6fbd577238346df4a895a3b19e15d4758fc5b34152a7c534",
+      "created": "2026-01-17T14:01:23.315767Z"
+    }
+  },
+  "state": {
+    "objects": {
+      "created": "2026-01-17T14:01:05.663442Z",
+      "product": "uid-nsq-976",
+      "price_1": "price_1Sqa3q9fljwH26CP4GfIc1vK",
+      "price_2": "price_1Sqa3q9fljwH26CPSuh3BPei",
+      "customer": "cus-nsq-976",
+      "coupon": "cou-nsq-976"
     },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "Jump-Start New Social Platforms",
+    "active": true,
+    "description": "The client needs all social media platforms up and running ASAP.",
+    "id": "uid-nsq-976",
+    "login_name": "Jameson",
+    "login_keyword": "jump-start",
+    "service_usd": 150000,
+    "total_payments": 2,
+    "discount_usd": 50000,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "James Jameson",
+    "business": "Jameson Co.",
+    "title": "CFO",
+    "email": "james.jameson@jamesjame.com",
+    "phone": "424-295-4444",
+    "id": "cus-nsq-976",
+    "address": {
+      "city": "Boston",
+      "line1": "123 Main St",
+      "state": "MA",
+      "postal_code": "02108",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 50000,
+    "applies_to": {
+      "products": [
+        "uid-nsq-976"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-nsq-976",
+    "max_redemptions": 1,
+    "name": "JAMESON"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 75000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
     "product": {
-        "name": "Jump-Start New Social Platforms",
-        "active": true,
-        "description": "The client needs all social media platforms up and running ASAP.",
-        "id": "uid-nsq-976",
-        "login_name": "Jameson",
-        "login_keyword": "jump-start",
-        "service_usd": 150000,
-        "total_payments": 2,
-        "discount_usd": 50000,
-        "type": "service",
-        "unit_label": "Payment"
+      "products": [
+        "uid-nsq-976"
+      ]
     },
-    "customer": {
-        "name": "James Jameson",
-        "business": "Jameson Co.",
-        "title": "CFO",
-        "email": "james.jameson@jamesjame.com",
-        "phone": "424-295-4444",
-        "id": "cus-nsq-976",
-        "address": {
-            "city": "Boston",
-            "line1": "123 Main St",
-            "state": "MA",
-            "postal_code": "02108",
-            "country": "US"
-        }
+    "id": "price_1Sqa3q9fljwH26CP4GfIc1vK"
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 75000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-nsq-976"
+      ]
     },
-    "coupon": {
-        "amount_off": 50000,
-        "applies_to": {
-            "products": [
-                "uid-nsq-976"
-            ]
-        },
-        "currency": "usd",
-        "duration": "once",
-        "id": "cou-nsq-976",
-        "max_redemptions": 1,
-        "name": "JAMESON"
-    },
-    "price1": {
-        "count": 1,
-        "currency": "usd",
-        "unit_amount": 75000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "start of work",
-        "nickname": "Initial Payment",
-        "product": {
-            "products": [
-                "uid-nsq-976"
-            ]
-        },
-        "id": ""
-    },
-    "price2": {
-        "count": 2,
-        "currency": "usd",
-        "unit_amount": 75000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "before project launch",
-        "pay_days": 14,
-        "late_fee": 10000,
-        "nickname": "Final Payment",
-        "product": {
-            "products": [
-                "uid-nsq-976"
-            ]
-        },
-        "id": ""
-    },
-    "checkout_session_1": {
-        "discounts": [
-            {
-                "coupon": "cou-nsq-976"
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-nsq-976?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "checkout_session_2": {
-        "discounts": [
-            {
-                "coupon": null
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-nsq-976?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "project_scope_summary": "Jameson needs all social media platforms up and running ASAP.",
-    "project_scope_full": "For this project, we will be setting up all social media platforms for Jameson. This includes creating accounts, setting up profiles, and creating initial content. The platforms we will be setting up are: Instagram, Facebook, Twitter, LinkedIn, and TikTok. We will also be setting up a content calendar for the first month."
+    "id": "price_1Sqa3q9fljwH26CPSuh3BPei"
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-nsq-976"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1Sqa3q9fljwH26CP4GfIc1vK",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-nsq-976?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1Sqa3q9fljwH26CPSuh3BPei",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-nsq-976?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Jameson needs all social media platforms up and running ASAP.",
+  "project_scope_full": "For this project, we will be setting up all social media platforms for Jameson. This includes creating accounts, setting up profiles, and creating initial content. The platforms we will be setting up are: Instagram, Facebook, Twitter, LinkedIn, and TikTok. We will also be setting up a content calendar for the first month."
 }

@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "gerbil-video-short": {
-      "file_path": "assets/jobs/uid-ngq-236.json",
-      "job_id": "uid-ngq-236",
-      "login_keyword": "video-short",
-      "login_name": "Gerbil"
+    "jameson-jump-start": {
+      "file_path": "assets/jobs/uid-nsq-976.json",
+      "job_id": "uid-nsq-976",
+      "login_keyword": "jump-start",
+      "login_name": "Jameson"
     }
   },
-  "generated_at": "2026-01-17T13:57:10.644944Z"
+  "generated_at": "2026-01-17T14:01:23.316859Z"
 }
