@@ -1,171 +1,171 @@
 {
-  "project": "Bob's Carwash Video Shorts",
-  "contract": {
-    "work_start": "2026-01-17",
-    "work_end": "2026-01-24",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-17T13:01:35.079832Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Bob's Carwash Video Shorts",
     "contract": {
-      "id": "kon-ngq-236",
-      "pdf": "assets/pdf/contract/kon-ngq-236.pdf",
-      "file_id": "1f_AXqmZU1qMlpDBBo46yTpPeT_zRSWs3Bu9aAFkzn-E",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-ngq-236.pdf",
-      "sha256": "0fc6ebe65e85c4074dbcd3b59e7225ee8f5d2b2d9c3e4074115657a523743dba",
-      "created": "2026-01-17T13:01:41.499131Z"
+        "work_start": "2026-01-17",
+        "work_end": "2026-01-24",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-17T13:01:35.079832Z"
+            },
+            "client": {
+                "legal_name": "Gerbil Smith",
+                "signed_date": "2026-01-17"
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-ngq-236",
-      "pdf": "assets/pdf/invoice/inv-ngq-236.pdf",
-      "file_id": "1ww4-4rZLqVnRgbBpfBJdj4hxUu1xa7cQHvr4_H8etEw",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-ngq-236.pdf",
-      "sha256": "296a891eadb72c1a5dd9917530bd5354b571b030f47dfd2d754c2ce9ec3fdd2f",
-      "created": "2026-01-17T13:01:45.638398Z"
+    "docs": {
+        "contract": {
+            "id": "kon-ngq-236",
+            "pdf": "assets/pdf/contract/kon-ngq-236.pdf",
+            "file_id": "1f_AXqmZU1qMlpDBBo46yTpPeT_zRSWs3Bu9aAFkzn-E",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-ngq-236.pdf",
+            "sha256": "0fc6ebe65e85c4074dbcd3b59e7225ee8f5d2b2d9c3e4074115657a523743dba",
+            "created": "2026-01-17T13:01:41.499131Z"
+        },
+        "invoice": {
+            "id": "inv-ngq-236",
+            "pdf": "assets/pdf/invoice/inv-ngq-236.pdf",
+            "file_id": "1ww4-4rZLqVnRgbBpfBJdj4hxUu1xa7cQHvr4_H8etEw",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-ngq-236.pdf",
+            "sha256": "296a891eadb72c1a5dd9917530bd5354b571b030f47dfd2d754c2ce9ec3fdd2f",
+            "created": "2026-01-17T13:01:45.638398Z"
+        },
+        "balance": {
+            "id": "bal-ngq-236",
+            "pdf": "assets/pdf/balance/bal-ngq-236.pdf",
+            "file_id": "1VtwPgtAY0vfBDXJTqdhebIdGHowauYAQgpLuvKVdME4",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-ngq-236.pdf",
+            "sha256": "a1baa2c54989c15b41cbbfc327d18ea55697b1ce31ea2018f07d74a0e2a30b5f",
+            "created": "2026-01-17T13:01:50.052601Z"
+        }
     },
-    "balance": {
-      "id": "bal-ngq-236",
-      "pdf": "assets/pdf/balance/bal-ngq-236.pdf",
-      "file_id": "1VtwPgtAY0vfBDXJTqdhebIdGHowauYAQgpLuvKVdME4",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-ngq-236.pdf",
-      "sha256": "a1baa2c54989c15b41cbbfc327d18ea55697b1ce31ea2018f07d74a0e2a30b5f",
-      "created": "2026-01-17T13:01:50.052601Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-17T13:01:35.079832Z",
-      "product": "uid-ngq-236",
-      "price_1": "price_1SqZ8F9fljwH26CPKjejsrMh",
-      "price_2": "price_1SqZ8F9fljwH26CPCUGco4DJ",
-      "customer": "cus-ngq-236",
-      "coupon": "cou-ngq-236"
+    "state": {
+        "objects": {
+            "created": "2026-01-17T13:01:35.079832Z",
+            "product": "uid-ngq-236",
+            "price_1": "price_1SqZ8F9fljwH26CPKjejsrMh",
+            "price_2": "price_1SqZ8F9fljwH26CPCUGco4DJ",
+            "customer": "cus-ngq-236",
+            "coupon": "cou-ngq-236"
+        },
+        "client_status": {
+            "logged_in": "2026-01-17T13:05:18.303Z",
+            "contract_signed": "2026-01-17T13:05:54.647Z",
+            "invoice": "2026-01-17T13:06:05.507Z",
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Video Editing for Social Media",
-    "active": true,
-    "description": "Creating a month of videos shorts for Bob's Carwash to post on social media.",
-    "id": "uid-ngq-236",
-    "login_name": "Gerbil",
-    "login_keyword": "video-short",
-    "service_usd": 100000,
-    "total_payments": 2,
-    "discount_usd": 5000,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Bob Gerbil",
-    "business": "Bob's Carwash",
-    "title": "Owner",
-    "email": "bob@gerbilcarwash.com",
-    "phone": "508-269-9292",
-    "id": "cus-ngq-236",
-    "address": {
-      "city": "Uxbridge",
-      "line1": "114 Mendon St",
-      "state": "MA",
-      "postal_code": "01569",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 5000,
-    "applies_to": {
-      "products": [
-        "uid-ngq-236"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-ngq-236",
-    "max_redemptions": 1,
-    "name": "GERBIL"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 50000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-ngq-236"
-      ]
+        "name": "Video Editing for Social Media",
+        "active": true,
+        "description": "Creating a month of videos shorts for Bob's Carwash to post on social media.",
+        "id": "uid-ngq-236",
+        "login_name": "Gerbil",
+        "login_keyword": "video-short",
+        "service_usd": 100000,
+        "total_payments": 2,
+        "discount_usd": 5000,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1SqZ8F9fljwH26CPKjejsrMh"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 50000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-ngq-236"
-      ]
+    "customer": {
+        "name": "Bob Gerbil",
+        "business": "Bob's Carwash",
+        "title": "Owner",
+        "email": "bob@gerbilcarwash.com",
+        "phone": "508-269-9292",
+        "id": "cus-ngq-236",
+        "address": {
+            "city": "Uxbridge",
+            "line1": "114 Mendon St",
+            "state": "MA",
+            "postal_code": "01569",
+            "country": "US"
+        }
     },
-    "id": "price_1SqZ8F9fljwH26CPCUGco4DJ"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-ngq-236"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1SqZ8F9fljwH26CPKjejsrMh",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-ngq-236?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1SqZ8F9fljwH26CPCUGco4DJ",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-ngq-236?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Creating a month of video shorts for Bob's Carwash to post on social media.",
-  "project_scope_full": "Creating a month of video shorts for Bob's Carwash to post on social media. The videos will be 30 seconds long and will be posted on TikTok, Instagram, and Facebook. The videos will be posted once a day for a month. The videos will be edited in a way that is engaging and entertaining for the audience. The videos will be edited in a way that is consistent with the brand of Bob's Carwash. The videos will be edited in a way that is consistent with the brand of Bob's Carwash. Reviews will be used in the videos by routing to stakeholders for approval before video creation."
+    "coupon": {
+        "amount_off": 5000,
+        "applies_to": {
+            "products": [
+                "uid-ngq-236"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-ngq-236",
+        "max_redemptions": 1,
+        "name": "GERBIL"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 50000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-ngq-236"
+            ]
+        },
+        "id": "price_1SqZ8F9fljwH26CPKjejsrMh"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 50000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-ngq-236"
+            ]
+        },
+        "id": "price_1SqZ8F9fljwH26CPCUGco4DJ"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-ngq-236"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1SqZ8F9fljwH26CPKjejsrMh",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-ngq-236?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1SqZ8F9fljwH26CPCUGco4DJ",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-ngq-236?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Creating a month of video shorts for Bob's Carwash to post on social media.",
+    "project_scope_full": "Creating a month of video shorts for Bob's Carwash to post on social media. The videos will be 30 seconds long and will be posted on TikTok, Instagram, and Facebook. The videos will be posted once a day for a month. The videos will be edited in a way that is engaging and entertaining for the audience. The videos will be edited in a way that is consistent with the brand of Bob's Carwash. The videos will be edited in a way that is consistent with the brand of Bob's Carwash. Reviews will be used in the videos by routing to stakeholders for approval before video creation."
 }
