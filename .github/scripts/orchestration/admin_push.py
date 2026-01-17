@@ -610,6 +610,57 @@ SCOPES = [
 ]
 
 
+def validate_google_token():
+    """Validate Google OAuth refresh token by attempting to refresh it.
+    Returns True if valid, raises ValueError with helpful error message if invalid.
+    """
+    refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
+    client_id = os.getenv('GOOGLE_CLIENT_ID')
+    client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+    
+    if not (refresh_token and client_id and client_secret):
+        auth_url = "https://freelance-payments-neon.vercel.app/api/google/auth"
+        raise ValueError(
+            f"GOOGLE_REFRESH_TOKEN, GOOGLE_CLIENT_ID, and GOOGLE_CLIENT_SECRET environment variables must be set.\n"
+            f"To get a new refresh token:\n"
+            f"1. Visit: {auth_url}\n"
+            f"2. Complete OAuth consent flow\n"
+            f"3. Copy the refresh_token from the callback response\n"
+            f"4. Add to GitHub Secrets as GOOGLE_REFRESH_TOKEN"
+        )
+    
+    try:
+        from google.oauth2.credentials import Credentials
+        
+        creds = Credentials(
+            token=None,
+            refresh_token=refresh_token,
+            token_uri='https://oauth2.googleapis.com/token',
+            client_id=client_id,
+            client_secret=client_secret,
+            scopes=SCOPES
+        )
+        
+        creds.refresh(Request())
+        return True
+    except Exception as e:
+        auth_url = "https://freelance-payments-neon.vercel.app/api/google/auth"
+        error_msg = str(e)
+        if 'invalid_grant' in error_msg or 'expired' in error_msg.lower() or 'revoked' in error_msg.lower():
+            raise ValueError(
+                f"Google OAuth refresh token is expired or invalid: {error_msg}\n\n"
+                f"To get a new refresh token:\n"
+                f"1. Visit: {auth_url}\n"
+                f"2. Complete OAuth consent flow\n"
+                f"3. Copy the refresh_token from the callback response\n"
+                f"4. Add to GitHub Secrets as GOOGLE_REFRESH_TOKEN\n"
+                f"5. Re-run this workflow\n\n"
+                f"Workflow stopped early to prevent partial state updates."
+            )
+        else:
+            raise ValueError(f"OAuth authentication failed: {error_msg}. Ensure refresh token is valid and template files are shared with the OAuth user account.")
+
+
 def authenticate_google():
     """Authenticate with Google using OAuth refresh token."""
     refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
@@ -1339,6 +1390,32 @@ def main():
     }
     
     try:
+        # Pre-check: Validate Google token if new jobs detected (before Step 1)
+        print(f"[TRIGGER=admin-push] Pre-check: Scanning for new jobs that will need PDFs", file=sys.stderr)
+        all_jobs = list_all_jobs(jobs_dir)
+        new_jobs_detected = []
+        for job_data in all_jobs:
+            product = job_data.get('product', {})
+            job_id = product.get('id')
+            state_objects = job_data.get('state', {}).get('objects', {})
+            # New jobs don't have 'created' timestamp yet - they'll need PDFs
+            if job_id and not state_objects.get('created'):
+                new_jobs_detected.append(job_id)
+        
+        if new_jobs_detected:
+            print(f"[TRIGGER=admin-push] Pre-check: Found {len(new_jobs_detected)} new job(s) that will need PDFs - validating Google token", file=sys.stderr)
+            try:
+                validate_google_token()
+                print(f"[TRIGGER=admin-push] Pre-check: Google token validated successfully", file=sys.stderr)
+            except ValueError as e:
+                error_msg = str(e)
+                results['errors'].append(error_msg)
+                print(f"[TRIGGER=admin-push] Pre-check: FAILED - {error_msg}", file=sys.stderr)
+                print(json.dumps(results, indent=2))
+                sys.exit(1)
+        else:
+            print(f"[TRIGGER=admin-push] Pre-check: No new jobs detected - skipping token validation", file=sys.stderr)
+        
         # Step 1: Compare JSONs to catalog (8-step matching logic)
         sync_stats = execute_8_step_sync(jobs_dir, manifest_path, 'admin-push')
         results['steps_run'].append('sync_catalog')

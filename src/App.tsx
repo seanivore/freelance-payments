@@ -178,6 +178,7 @@ export default function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showCompletePage, setShowCompletePage] = useState(false);
   
+  // Effect 1: Detect session_id on mount (runs once, before data loads)
   useEffect(() => {
     // Check for session_id in URL (from Stripe return redirect)
     const urlParams = new URLSearchParams(window.location.search);
@@ -189,52 +190,55 @@ export default function App() {
       
       // Clear query param immediately to prevent reload loops
       window.history.replaceState(null, '', window.location.pathname);
-      
-      // Fetch session status and update state if payment completed
-      if (data) {
-        fetch(apiUrl(`/api/session-status?session_id=${sid}`))
-          .then(res => res.json())
-          .then(sessionData => {
-            if (sessionData.status === 'complete') {
-              const s = data.state.client_status;
-              let updates: Partial<typeof s> = {};
-              
-              // Determine which payment based on current state
-              if (s.invoice && !s.payment_1) {
-                const timestamp = new Date().toISOString();
-                updates = { payment_1: timestamp };
-                trackEvent('payment_1', { session_id: sid });
-                flushOnPayment(); // Immediate flush on payment completion
-              } else if (s.balance && !s.payment_2) {
-                const timestamp = new Date().toISOString();
-                updates = { payment_2: timestamp };
-                trackEvent('payment_2', { session_id: sid });
-                flushOnPayment(); // Immediate flush on payment completion
-              }
-              
-              if (Object.keys(updates).length > 0) {
-                setData(prev => {
-                  if (!prev) return null;
-                  return {
-                    ...prev,
-                    state: {
-                      ...prev.state,
-                      client_status: {
-                        ...prev.state.client_status,
-                        ...updates
-                      }
-                    }
-                  };
-                });
-              }
-            }
-          })
-          .catch(err => {
-            console.error('Error fetching session status:', err);
-          });
-      }
     }
-  }, []); // Run once on mount - before data loads
+  }, []); // Run once on mount
+  
+  // Effect 2: Process session_id when data becomes available
+  useEffect(() => {
+    if (!sessionId || !data) return; // Wait for both session_id and data
+    
+    // Fetch session status and update state if payment completed
+    fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
+      .then(res => res.json())
+      .then(sessionData => {
+        if (sessionData.status === 'complete') {
+          const s = data.state.client_status;
+          let updates: Partial<typeof s> = {};
+          
+          // Determine which payment based on current state
+          if (s.invoice && !s.payment_1) {
+            const timestamp = new Date().toISOString();
+            updates = { payment_1: timestamp };
+            trackEvent('payment_1', { session_id: sessionId });
+            flushOnPayment(); // Immediate flush on payment completion
+          } else if (s.balance && !s.payment_2) {
+            const timestamp = new Date().toISOString();
+            updates = { payment_2: timestamp };
+            trackEvent('payment_2', { session_id: sessionId });
+            flushOnPayment(); // Immediate flush on payment completion
+          }
+          
+          if (Object.keys(updates).length > 0) {
+            setData(prev => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                state: {
+                  ...prev.state,
+                  client_status: {
+                    ...prev.state.client_status,
+                    ...updates
+                  }
+                }
+              };
+            });
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching session status:', err);
+      });
+  }, [sessionId, data, trackEvent, flushOnPayment]); // Run when sessionId or data changes
 
   // Memoized emitEvent callback to prevent PdfViewer re-renders
   // MUST be before early returns to avoid React hook order error
@@ -386,6 +390,9 @@ export default function App() {
     setIsCreatingSession(true);
     try {
       const jobId = window.location.pathname.substring(1);
+      // Explicit return URL with session_id template variable
+      const returnUrl = `${window.location.origin}/${jobId}?session_id={CHECKOUT_SESSION_ID}`;
+      
       const response = await fetch(apiUrl('/api/create-checkout-session'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -394,7 +401,8 @@ export default function App() {
           price_id: paymentNumber === 1 ? data!.price1.id : data!.price2.id,
           coupon_id: paymentNumber === 1 ? data!.state.objects?.coupon : undefined,
           customer_id: data!.customer.id,
-          payment_number: paymentNumber
+          payment_number: paymentNumber,
+          return_url: returnUrl
         })
       });
 

@@ -1,6 +1,12 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/((?!api|assets|index.html|job.html|404.html).*)",
+      "destination": "/404.html"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
