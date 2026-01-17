@@ -641,6 +641,21 @@ App.tsx (Main Router/State Machine)
   - Use shadcn-ui drawer for signature modal
   - One action button per gate
 
+### Future Design Tasks (Post-Testing)
+
+**Payment Completion Pages**:
+- [ ] **Completion1 (After Payment 1)**: Currently shows `CompletionView` component which is correct, but needs design refinement:
+  - Should be a thank you page with soft CTA to continue to balance when ready
+  - Should NOT show admin details (Payment Intent ID, Stripe status, etc.)
+  - Should match design mockups and provide clear next steps
+- [ ] **Completion2 (After Payment 2)**: Currently shows `CompletionView` component which is correct, but needs design refinement:
+  - Should be final thank you page with download links for all PDFs
+  - Should NOT show admin details
+  - Should clearly indicate project is complete
+- [ ] **Return URL Handling**: After Stripe redirect, ensure proper CompletionView shows (not admin `Complete` component)
+  - State management correctly routes to completion1/completion2 based on payment state
+  - Need to verify visual design matches PROJECT_OVERVIEW.md specifications
+
 ### Architecture Check
 
 - [x] Confirm data flow is understood - Clarified above

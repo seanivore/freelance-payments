@@ -48,10 +48,9 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # Stash any local changes, pull with rebase, then pop stash
-          git stash || true
-          git pull --rebase origin freelance-payments  # Pull before push to prevent merge conflicts
-          git stash pop || true
+          # Pull latest changes before committing to ensure we have the latest state
+          git pull origin freelance-payments --no-rebase || true
           git add assets/jobs/*.json
           git commit -m "Update user behavior stats [skip ci]" || echo "No changes to commit"
-          git push
+          # Push with retry logic to handle race conditions
+          git push origin freelance-payments || git pull origin freelance-payments --rebase && git push origin freelance-payments

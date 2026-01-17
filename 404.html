@@ -13,10 +13,15 @@
   <script>
     // Preserve query parameters when React app loads
     // This ensures session_id and other params are available to App.tsx
-    if (window.location.search) {
-      // Query params are already in URL, React will read them
-      // No action needed - React reads from window.location.search
-    }
+    // Store in sessionStorage as backup before React loads
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session_id');
+      if (sessionId) {
+        // Store in sessionStorage as backup (React will read from URL first)
+        sessionStorage.setItem('stripe_session_id', sessionId);
+      }
+    })();
   </script>
 </head>
 

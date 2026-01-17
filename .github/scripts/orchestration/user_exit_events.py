@@ -35,12 +35,32 @@ def process_exit_events():
 
     print(f"Processing {len(events_batch)} events for {job_id}...")
 
-    # 3. Read & Parse Job JSON
-    try:
-        with open(job_file_path, 'r') as f:
-            job_data = json.load(f)
-    except Exception as e:
-        print(f"Error reading job file: {e}")
+    # 3. Read & Parse Job JSON (with retry logic for race conditions)
+    max_retries = 3
+    retry_delay = 1  # seconds
+    job_data = None
+    
+    for attempt in range(max_retries):
+        try:
+            with open(job_file_path, 'r') as f:
+                content = f.read()
+                # Validate JSON before parsing
+                if not content.strip():
+                    raise ValueError("File is empty")
+                job_data = json.loads(content)
+                break  # Success, exit retry loop
+        except (json.JSONDecodeError, ValueError, IOError) as e:
+            if attempt < max_retries - 1:
+                print(f"Warning: Error reading job file (attempt {attempt + 1}/{max_retries}): {e}")
+                print(f"Retrying in {retry_delay} second(s)...")
+                import time
+                time.sleep(retry_delay)
+            else:
+                print(f"Error reading job file after {max_retries} attempts: {e}")
+                sys.exit(1)
+    
+    if job_data is None:
+        print("Error: Failed to read job file after all retries")
         sys.exit(1)
 
     # 4. Ensure state structure exists
@@ -144,13 +164,26 @@ def process_exit_events():
                     updates_made = True
                     print(f"  ✓ Deactivated product")
 
-    # 6. Write changes if any
+    # 6. Write changes if any (atomic write to prevent corruption)
     if updates_made:
         job_data['state']['client_status'] = client_status
         
-        with open(job_file_path, 'w') as f:
-            json.dump(job_data, f, indent=4)
-        print(f"✅ Successfully updated {job_file_path}")
+        # Atomic write: write to temp file first, then rename
+        import tempfile
+        import shutil
+        temp_file = job_file_path + '.tmp'
+        try:
+            with open(temp_file, 'w') as f:
+                json.dump(job_data, f, indent=4)
+            # Atomic rename (works on Unix/Linux/GitHub Actions)
+            shutil.move(temp_file, job_file_path)
+            print(f"✅ Successfully updated {job_file_path}")
+        except Exception as e:
+            # Clean up temp file on error
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+            print(f"Error writing job file: {e}")
+            sys.exit(1)
     else:
         print("ℹ️  No state changes required.")
 

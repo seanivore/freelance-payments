@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { fetchJobData, JobData } from '@/lib/data';
 import { Loader2 } from 'lucide-react';
-import { Complete } from '@/components/Complete';
 import { ContractView } from '@/components/ContractView';
 import { InvoiceView } from '@/components/InvoiceView';
 import { BalanceView } from '@/components/BalanceView';
@@ -174,27 +173,34 @@ export default function App() {
 
   // --- Handle Stripe Return (Check for session_id query param) ---
   // MUST be before early returns to avoid React hook order error
-  // Check for session_id BEFORE determining gate - show Complete component immediately
+  // Check for session_id BEFORE determining gate - update state optimistically
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [showCompletePage, setShowCompletePage] = useState(false);
   
   // Effect 1: Detect session_id on mount (runs once, before data loads)
   useEffect(() => {
     // Check for session_id in URL (from Stripe return redirect)
     // Read from URL before any navigation/clearing happens
+    // Also check sessionStorage as backup (set by 404.html)
     const urlParams = new URLSearchParams(window.location.search);
-    const sid = urlParams.get('session_id');
+    let sid = urlParams.get('session_id');
+    
+    // Fallback to sessionStorage if not in URL (backup from 404.html)
+    if (!sid) {
+      sid = sessionStorage.getItem('stripe_session_id');
+      if (sid) {
+        sessionStorage.removeItem('stripe_session_id'); // Clean up after reading
+      }
+    }
     
     if (sid) {
-      console.log('Detected session_id in URL:', sid);
+      console.log('Detected session_id:', sid, urlParams.get('session_id') ? '(from URL)' : '(from sessionStorage)');
       setSessionId(sid);
-      setShowCompletePage(true);
       
       // Clear query param from URL bar to prevent reload loops, but keep it in state
       // Use replaceState to avoid adding to history
       window.history.replaceState(null, '', window.location.pathname);
     } else {
-      console.log('No session_id found in URL');
+      console.log('No session_id found in URL or sessionStorage');
     }
   }, []); // Run once on mount
   
@@ -244,7 +250,7 @@ export default function App() {
       .catch(err => {
         console.error('Error fetching session status:', err);
       });
-  }, [sessionId, data, trackEvent, flushOnPayment]); // Run when sessionId or data changes
+  }, [sessionId, data, flushOnPayment]); // Run when sessionId or data changes
 
   // Memoized emitEvent callback to prevent PdfViewer re-renders
   // MUST be before early returns to avoid React hook order error
@@ -438,9 +444,7 @@ export default function App() {
       </header>
       
       <main className="pt-20 pb-10">
-        {showCompletePage && sessionId ? (
-          <Complete sessionId={sessionId} />
-        ) : initialSection === 'contract' ? (
+        {initialSection === 'contract' ? (
           <ContractView 
             data={data}
             emitEvent={emitEvent}
