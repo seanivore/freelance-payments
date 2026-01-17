@@ -1,0 +1,171 @@
+{
+    "project": "Peggy's Pixel Palace Candy Website Store",
+    "contract": {
+        "work_start": "2026-01-17",
+        "work_end": "2026-02-17",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": null
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
+    },
+    "docs": {
+        "contract": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "invoice": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "balance": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        }
+    },
+    "state": {
+        "objects": {
+            "created": null,
+            "product": null,
+            "price_1": null,
+            "price_2": null,
+            "customer": null,
+            "coupon": null
+        },
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
+    },
+    "product": {
+        "name": "Website Store",
+        "active": true,
+        "description": "The client needs a website store for their candy business.",
+        "id": "uid-pex-655",
+        "login_name": "Pixel",
+        "login_keyword": "candy-store",
+        "service_usd": 830000,
+        "total_payments": 2,
+        "discount_usd": 30000,
+        "type": "service",
+        "unit_label": "Payment"
+    },
+    "customer": {
+        "name": "Peggy's Pixel Palace Candy",
+        "business": "Peggy's Pixel Palace Candy",
+        "title": "Owner",
+        "email": "peggy@candypalace.com",
+        "phone": "215-555-5555",
+        "id": "cus-pex-655",
+        "address": {
+            "city": "Philadelphia",
+            "line1": "123 Main St",
+            "state": "PA",
+            "postal_code": "19101",
+            "country": "US"
+        }
+    },
+    "coupon": {
+        "amount_off": 30000,
+        "applies_to": {
+            "products": [
+                "uid-pex-655"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-pex-655",
+        "max_redemptions": 1,
+        "name": "GIVE-ME-CANDY"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 415000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-pex-655"
+            ]
+        },
+        "id": ""
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 415000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-pex-655"
+            ]
+        },
+        "id": ""
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-pex-655"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-pex-655?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-pex-655?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "The client needs a website store for their candy business.",
+    "project_scope_full": "This will be a modern, responsive website store for their candy business. The architecture will be a headless CMS with a custom frontend. The website will have a clean, modern design with a focus on user experience. The website will have a clean, modern design with a focus on user experience."
+}

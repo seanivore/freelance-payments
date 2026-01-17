@@ -1,0 +1,171 @@
+{
+    "project": "Ride-With-AI Social Marketing Campaign",
+    "contract": {
+        "work_start": "2026-01-17",
+        "work_end": "2026-02-17",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": null
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
+    },
+    "docs": {
+        "contract": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "invoice": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "balance": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        }
+    },
+    "state": {
+        "objects": {
+            "created": null,
+            "product": null,
+            "price_1": null,
+            "price_2": null,
+            "customer": null,
+            "coupon": null
+        },
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
+    },
+    "product": {
+        "name": "Social Media Campaign",
+        "active": true,
+        "description": "All necessary marketing assets for a full social media marketing campaign.",
+        "id": "uid-unc-480",
+        "login_name": "Drogon",
+        "login_keyword": "ai-ride",
+        "service_usd": 2200000,
+        "total_payments": 2,
+        "discount_usd": 200000,
+        "type": "service",
+        "unit_label": "Payment"
+    },
+    "customer": {
+        "name": "Dale Drogon",
+        "business": "Drogon Dragon Marketing",
+        "title": "Marketing Manager",
+        "email": "dale@drogondragonmarketing.com",
+        "phone": "(555) 555-5555",
+        "id": "cus-unc-480",
+        "address": {
+            "city": "Burlington",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "01803",
+            "country": "US"
+        }
+    },
+    "coupon": {
+        "amount_off": 200000,
+        "applies_to": {
+            "products": [
+                "uid-unc-480"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-unc-480",
+        "max_redemptions": 1,
+        "name": "AI-RIDE"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 1100000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-unc-480"
+            ]
+        },
+        "id": ""
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 1100000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-unc-480"
+            ]
+        },
+        "id": ""
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-unc-480"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-unc-480?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-unc-480?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "A marketing campaign on social media for AI driven ride-hailing services launch.",
+    "project_scope_full": "This is a comprehensive marketing campaign for AI driven ride-hailing services launch. The client is looking to generate awareness and interest in their new service, and to drive traffic to their website. The campaign will include a mix of paid and organic social media marketing, as well as influencer marketing and content marketing."
+}

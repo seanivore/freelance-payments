@@ -1,0 +1,171 @@
+{
+    "project": "Jinx-the-Cat Spay and Neuter On-Demand App",
+    "contract": {
+        "work_start": "2026-01-17",
+        "work_end": "2026-01-17",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": null
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
+    },
+    "docs": {
+        "contract": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "invoice": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        },
+        "balance": {
+            "id": null,
+            "pdf": null,
+            "file_id": null,
+            "url": null,
+            "sha256": null,
+            "created": null
+        }
+    },
+    "state": {
+        "objects": {
+            "created": null,
+            "product": null,
+            "price_1": null,
+            "price_2": null,
+            "customer": null,
+            "coupon": null
+        },
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
+    },
+    "product": {
+        "name": "Application for On-Demand Mobile Service Delivery",
+        "active": true,
+        "description": "Spay and neuter mobile service delivery needs an application for on-demand service delivery.",
+        "id": "uid-jxr-848",
+        "login_name": "Jinx",
+        "login_keyword": "love-cats",
+        "service_usd": 8810000,
+        "total_payments": 2,
+        "discount_usd": 810000,
+        "type": "service",
+        "unit_label": "Payment"
+    },
+    "customer": {
+        "name": "Jamie Jinx",
+        "business": "Jinx-the-Cat LLC",
+        "title": "Owner",
+        "email": "jinx@thecatservices.com",
+        "phone": "424-555-5555",
+        "id": "cus-jxr-848",
+        "address": {
+            "city": "Los Angeles",
+            "line1": "123 Main St",
+            "state": "CA",
+            "postal_code": "90001",
+            "country": "US"
+        }
+    },
+    "coupon": {
+        "amount_off": 810000,
+        "applies_to": {
+            "products": [
+                "uid-jxr-848"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-jxr-848",
+        "max_redemptions": 1,
+        "name": "JINX-CAT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 4405000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-jxr-848"
+            ]
+        },
+        "id": ""
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 4405000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-jxr-848"
+            ]
+        },
+        "id": ""
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-jxr-848"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-jxr-848?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-jxr-848?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Spay and neuter mobile service delivery needs an application for on-demand service delivery.",
+    "project_scope_full": "The client needs a mobile application to facilitate the spay and neuter mobile service delivery of their on-demand service delivery company in the animal welfare space. The application will allow users to book and pay for spay and neuter services on-demand. Modern, user-friendly design with a focus on ease of use and accessibility."
+}
