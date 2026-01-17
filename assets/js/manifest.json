@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-17T06:12:35.414424Z"
+  "jobs": {
+    "job-test-job": {
+      "file_path": "assets/jobs/uid-tst-001.json",
+      "job_id": "uid-tst-001",
+      "login_keyword": "test-job",
+      "login_name": "JOB"
+    }
+  },
+  "generated_at": "2026-01-17T07:37:40.944698Z"
 }

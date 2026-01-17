@@ -1,171 +1,171 @@
 {
-    "project": "New Test Job",
+  "project": "New Test Job",
+  "contract": {
+    "work_start": "2026-01-17",
+    "work_end": "2026-02-17",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": "2026-01-17T07:37:23.253150Z"
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
     "contract": {
-        "work_start": "2026-01-17",
-        "work_end": "2026-02-17",
-        "legal_jurisdiction": "Massachusetts",
-        "maintenance_period_months": 3,
-        "maintenance_monthly_fee": 150,
-        "signatures": {
-            "contractor": {
-                "legal_name": "Sean August Horvath",
-                "signed_date": null
-            },
-            "client": {
-                "legal_name": null,
-                "signed_date": null
-            }
-        }
+      "id": "kon-tst-001",
+      "pdf": "assets/pdf/contract/kon-tst-001.pdf",
+      "file_id": "1Sgk8AJMo8G3pvDXMNnxknUoNsBrvPCkJeHHuLTCaGic",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-tst-001.pdf",
+      "sha256": "2b1ecb390e125a16eac7b509b0997b9c6c102687ac8f54e6b650b91f887c0369",
+      "created": "2026-01-17T07:37:29.993712Z"
     },
-    "docs": {
-        "contract": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "invoice": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        },
-        "balance": {
-            "id": null,
-            "pdf": null,
-            "file_id": null,
-            "url": null,
-            "sha256": null,
-            "created": null
-        }
+    "invoice": {
+      "id": "inv-tst-001",
+      "pdf": "assets/pdf/invoice/inv-tst-001.pdf",
+      "file_id": "1_XYQQaTMQPF6wjVIT7RETtMTq1wIdmbBw9ivlI2ULnw",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-tst-001.pdf",
+      "sha256": "5ede02c626864fc2f290a63aa7feab19a31c07f9d4bfdaece1f32ed26791fffe",
+      "created": "2026-01-17T07:37:35.835029Z"
     },
-    "state": {
-        "objects": {
-            "created": null,
-            "product": null,
-            "price_1": null,
-            "price_2": null,
-            "customer": null,
-            "coupon": null
-        },
-        "client_status": {
-            "logged_in": null,
-            "contract_signed": null,
-            "invoice": null,
-            "payment_1": null,
-            "balance": null,
-            "payment_2": null
-        }
+    "balance": {
+      "id": "bal-tst-001",
+      "pdf": "assets/pdf/balance/bal-tst-001.pdf",
+      "file_id": "1lr_gsccZanW3ZpiWoZ-lupxXbqkq9EAbA1YxcHh_3Sc",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-tst-001.pdf",
+      "sha256": "0c2e6a3a0dd3eba77fe1b8489a47e564ffd80634369ae49869d521d84517b9f6",
+      "created": "2026-01-17T07:37:40.943566Z"
+    }
+  },
+  "state": {
+    "objects": {
+      "created": "2026-01-17T07:37:23.253150Z",
+      "product": "uid-tst-001",
+      "price_1": "price_1SqU4V9fljwH26CPWSu9k8Zc",
+      "price_2": "price_1SqU4V9fljwH26CPRfi5aI0q",
+      "customer": "cus-tst-001",
+      "coupon": "cou-tst-001"
     },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "New Test Job",
+    "active": true,
+    "description": "This is a new test job JSON file.",
+    "id": "uid-tst-001",
+    "login_name": "JOB",
+    "login_keyword": "test-job",
+    "service_usd": 1100000,
+    "total_payments": 2,
+    "discount_usd": 100000,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "John Test",
+    "business": "Test File, LLC",
+    "title": "CEO",
+    "email": "test@johntest.com",
+    "phone": "213-555-1212",
+    "id": "cus-tst-001",
+    "address": {
+      "city": "Los Angeles",
+      "line1": "123 Test St",
+      "state": "CA",
+      "postal_code": "90001",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 100000,
+    "applies_to": {
+      "products": [
+        "uid-tst-001"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-tst-001",
+    "max_redemptions": 1,
+    "name": "TEST-COUPON"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 550000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
     "product": {
-        "name": "New Test Job",
-        "active": true,
-        "description": "This is a new test job JSON file.",
-        "id": "uid-tst-001",
-        "login_name": "JOB",
-        "login_keyword": "test-job",
-        "service_usd": 1100000,
-        "total_payments": 2,
-        "discount_usd": 100000,
-        "type": "service",
-        "unit_label": "Payment"
+      "products": [
+        "uid-tst-001"
+      ]
     },
-    "customer": {
-        "name": "John Test",
-        "business": "Test File, LLC",
-        "title": "CEO",
-        "email": "test@johntest.com",
-        "phone": "213-555-1212",
-        "id": "cus-tst-001",
-        "address": {
-            "city": "Los Angeles",
-            "line1": "123 Test St",
-            "state": "CA",
-            "postal_code": "90001",
-            "country": "US"
-        }
+    "id": "price_1SqU4V9fljwH26CPWSu9k8Zc"
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 550000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-tst-001"
+      ]
     },
-    "coupon": {
-        "amount_off": 100000,
-        "applies_to": {
-            "products": [
-                "uid-tst-001"
-            ]
-        },
-        "currency": "usd",
-        "duration": "once",
-        "id": "cou-tst-001",
-        "max_redemptions": 1,
-        "name": "TEST-COUPON"
-    },
-    "price1": {
-        "count": 1,
-        "currency": "usd",
-        "unit_amount": 550000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "start of work",
-        "nickname": "Initial Payment",
-        "product": {
-            "products": [
-                "uid-tst-001"
-            ]
-        },
-        "id": ""
-    },
-    "price2": {
-        "count": 2,
-        "currency": "usd",
-        "unit_amount": 550000,
-        "active": true,
-        "billing_scheme": "per_unit",
-        "pay_by": "before project launch",
-        "pay_days": 14,
-        "late_fee": 10000,
-        "nickname": "Final Payment",
-        "product": {
-            "products": [
-                "uid-tst-001"
-            ]
-        },
-        "id": ""
-    },
-    "checkout_session_1": {
-        "discounts": [
-            {
-                "coupon": "cou-tst-001"
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-tst-001?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "checkout_session_2": {
-        "discounts": [
-            {
-                "coupon": null
-            }
-        ],
-        "line_items": [
-            {
-                "price": "",
-                "quantity": 1
-            }
-        ],
-        "mode": "payment",
-        "return_url": "https://payments.august.style/uid-tst-001?session_id={CHECKOUT_SESSION_ID}",
-        "ui_mode": "custom"
-    },
-    "project_scope_summary": "This is a test job JSON file.",
-    "project_scope_full": "This is a test job JSON file. It is used to test the system. This value on the JSON file is about the project scope. It is much longer than the summary."
+    "id": "price_1SqU4V9fljwH26CPRfi5aI0q"
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-tst-001"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1SqU4V9fljwH26CPWSu9k8Zc",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-tst-001?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "price_1SqU4V9fljwH26CPRfi5aI0q",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-tst-001?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "This is a test job JSON file.",
+  "project_scope_full": "This is a test job JSON file. It is used to test the system. This value on the JSON file is about the project scope. It is much longer than the summary."
 }
