@@ -1,171 +1,171 @@
 {
-  "project": "A Whole New Test Project",
-  "contract": {
-    "work_start": "2026-01-17",
-    "work_end": "2026-01-24",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-17T09:58:39.547188Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "A Whole New Test Project",
     "contract": {
-      "id": "kon-tmw-100",
-      "pdf": "assets/pdf/contract/kon-tmw-100.pdf",
-      "file_id": "1xcDmKbYDZH7nWpGWkRgFra-B0SNiFtCSHix8E5sJBp4",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-tmw-100.pdf",
-      "sha256": "2fd0671903f0c0f376da8245fdaea3d5f1da3ecfa6f24ca5804dd89b6c074d8e",
-      "created": "2026-01-17T09:58:46.745844Z"
+        "work_start": "2026-01-17",
+        "work_end": "2026-01-24",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-17T09:58:39.547188Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-tmw-100",
-      "pdf": "assets/pdf/invoice/inv-tmw-100.pdf",
-      "file_id": "1oIpFVCcv1vKEMXuGKEBlyLsTFSegr08gbRlbK89G0Vc",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-tmw-100.pdf",
-      "sha256": "5e8c63236debf5c75cd1c8e14bb7a4e077dc72b01dcb8f0a78dcf4f2ffdc06e7",
-      "created": "2026-01-17T09:58:51.550048Z"
+    "docs": {
+        "contract": {
+            "id": "kon-tmw-100",
+            "pdf": "assets/pdf/contract/kon-tmw-100.pdf",
+            "file_id": "1xcDmKbYDZH7nWpGWkRgFra-B0SNiFtCSHix8E5sJBp4",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-tmw-100.pdf",
+            "sha256": "2fd0671903f0c0f376da8245fdaea3d5f1da3ecfa6f24ca5804dd89b6c074d8e",
+            "created": "2026-01-17T09:58:46.745844Z"
+        },
+        "invoice": {
+            "id": "inv-tmw-100",
+            "pdf": "assets/pdf/invoice/inv-tmw-100.pdf",
+            "file_id": "1oIpFVCcv1vKEMXuGKEBlyLsTFSegr08gbRlbK89G0Vc",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-tmw-100.pdf",
+            "sha256": "5e8c63236debf5c75cd1c8e14bb7a4e077dc72b01dcb8f0a78dcf4f2ffdc06e7",
+            "created": "2026-01-17T09:58:51.550048Z"
+        },
+        "balance": {
+            "id": "bal-tmw-100",
+            "pdf": "assets/pdf/balance/bal-tmw-100.pdf",
+            "file_id": "1eVa8-3zxuDti09ZSNFIjkWwMvwnC_ZP-4l-MMRiqkFM",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-tmw-100.pdf",
+            "sha256": "b64ea9d4c2db40c2a7b6c1480a23494130e3529093a18e6c8decd79c24491ea2",
+            "created": "2026-01-17T09:58:56.978808Z"
+        }
     },
-    "balance": {
-      "id": "bal-tmw-100",
-      "pdf": "assets/pdf/balance/bal-tmw-100.pdf",
-      "file_id": "1eVa8-3zxuDti09ZSNFIjkWwMvwnC_ZP-4l-MMRiqkFM",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-tmw-100.pdf",
-      "sha256": "b64ea9d4c2db40c2a7b6c1480a23494130e3529093a18e6c8decd79c24491ea2",
-      "created": "2026-01-17T09:58:56.978808Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-17T09:58:39.547188Z",
-      "product": "uid-tmw-100",
-      "price_1": "price_1SqWHD9fljwH26CPbKsyPKpB",
-      "price_2": "price_1SqWHE9fljwH26CPY4ItXkrW",
-      "customer": "cus-tmw-100",
-      "coupon": "cou-tmw-100"
+    "state": {
+        "objects": {
+            "created": "2026-01-17T09:58:39.547188Z",
+            "product": "uid-tmw-100",
+            "price_1": "price_1SqWHD9fljwH26CPbKsyPKpB",
+            "price_2": "price_1SqWHE9fljwH26CPY4ItXkrW",
+            "customer": "cus-tmw-100",
+            "coupon": "cou-tmw-100"
+        },
+        "client_status": {
+            "logged_in": null,
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": "2026-01-17T10:34:18.311ZZ",
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "World Testing Job",
-    "active": true,
-    "description": "A whole new test product",
-    "id": "uid-tmw-100",
-    "login_name": "World",
-    "login_keyword": "testing-world",
-    "service_usd": 10421000,
-    "total_payments": 2,
-    "discount_usd": 421000,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Joe World",
-    "business": "World Testing Inc",
-    "title": "CEO",
-    "email": "joe@testingworld.com",
-    "phone": "818-230-8839",
-    "id": "cus-tmw-100",
-    "address": {
-      "city": "Los Angeles",
-      "line1": "123 Main St",
-      "state": "CA",
-      "postal_code": "90001",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 421000,
-    "applies_to": {
-      "products": [
-        "uid-tmw-100"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-tmw-100",
-    "max_redemptions": 1,
-    "name": "WORLD-DISCOUNT"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 5210500,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-tmw-100"
-      ]
+        "name": "World Testing Job",
+        "active": true,
+        "description": "A whole new test product",
+        "id": "uid-tmw-100",
+        "login_name": "World",
+        "login_keyword": "testing-world",
+        "service_usd": 10421000,
+        "total_payments": 2,
+        "discount_usd": 421000,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1SqWHD9fljwH26CPbKsyPKpB"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 5210500,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-tmw-100"
-      ]
+    "customer": {
+        "name": "Joe World",
+        "business": "World Testing Inc",
+        "title": "CEO",
+        "email": "joe@testingworld.com",
+        "phone": "818-230-8839",
+        "id": "cus-tmw-100",
+        "address": {
+            "city": "Los Angeles",
+            "line1": "123 Main St",
+            "state": "CA",
+            "postal_code": "90001",
+            "country": "US"
+        }
     },
-    "id": "price_1SqWHE9fljwH26CPY4ItXkrW"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-tmw-100"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1SqWHD9fljwH26CPbKsyPKpB",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-tmw-100?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1SqWHE9fljwH26CPY4ItXkrW",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-tmw-100?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "This is a test project for the purpose of testing the payment system. It is not a real project and should not be used for any other purpose.",
-  "project_scope_full": "This is a test project for the purpose of testing the payment system. It is not a real project and should not be used for any other purpose. The full project scope is as follows: Make a website for a company called World Testing Inc. The website should be able to do the following. More to come."
+    "coupon": {
+        "amount_off": 421000,
+        "applies_to": {
+            "products": [
+                "uid-tmw-100"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-tmw-100",
+        "max_redemptions": 1,
+        "name": "WORLD-DISCOUNT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 5210500,
+        "active": false,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-tmw-100"
+            ]
+        },
+        "id": "price_1SqWHD9fljwH26CPbKsyPKpB"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 5210500,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-tmw-100"
+            ]
+        },
+        "id": "price_1SqWHE9fljwH26CPY4ItXkrW"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-tmw-100"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1SqWHD9fljwH26CPbKsyPKpB",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-tmw-100?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1SqWHE9fljwH26CPY4ItXkrW",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-tmw-100?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "This is a test project for the purpose of testing the payment system. It is not a real project and should not be used for any other purpose.",
+    "project_scope_full": "This is a test project for the purpose of testing the payment system. It is not a real project and should not be used for any other purpose. The full project scope is as follows: Make a website for a company called World Testing Inc. The website should be able to do the following. More to come."
 }
