@@ -1,17 +1,35 @@
 {
   "jobs": {
-    "roberta-ai-analytics": {
-      "file_path": "assets/jobs/uid-gor-077.json",
-      "job_id": "uid-gor-077",
-      "login_keyword": "ai-analytics",
-      "login_name": "Roberta"
+    "dog-dating-app": {
+      "file_path": "assets/jobs/uid-eut-953.json",
+      "job_id": "uid-eut-953",
+      "login_keyword": "dating-app",
+      "login_name": "Dog"
     },
-    "craig-doggo": {
-      "file_path": "assets/jobs/uid-lit-740.json",
-      "job_id": "uid-lit-740",
-      "login_keyword": "doggo",
-      "login_name": "Craig"
+    "turtle-ai-dashboard": {
+      "file_path": "assets/jobs/uid-gev-120.json",
+      "job_id": "uid-gev-120",
+      "login_keyword": "ai-dashboard",
+      "login_name": "Turtle"
+    },
+    "chang-education": {
+      "file_path": "assets/jobs/uid-gwv-840.json",
+      "job_id": "uid-gwv-840",
+      "login_keyword": "education",
+      "login_name": "Chang"
+    },
+    "tyler-ai-automation": {
+      "file_path": "assets/jobs/uid-ixx-967.json",
+      "job_id": "uid-ixx-967",
+      "login_keyword": "ai-automation",
+      "login_name": "Tyler"
+    },
+    "miller-ai-writer": {
+      "file_path": "assets/jobs/uid-uoj-055.json",
+      "job_id": "uid-uoj-055",
+      "login_keyword": "ai-writer",
+      "login_name": "Miller"
     }
   },
-  "generated_at": "2026-01-15T19:40:01.630063Z"
+  "generated_at": "2026-01-17T04:40:07.754202Z"
 }
