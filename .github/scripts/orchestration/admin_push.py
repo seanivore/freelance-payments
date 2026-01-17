@@ -171,13 +171,31 @@ def create_stripe_customer(customer: dict) -> str:
     return customer.id
 
 
+def check_stripe_coupon_exists(coupon_id: str) -> bool:
+    """Check if a Stripe coupon exists."""
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    try:
+        coupon = stripe.Coupon.retrieve(coupon_id)
+        return coupon is not None
+    except stripe.error.InvalidRequestError:
+        return False
+    except Exception as e:
+        print(f"Warning: Error checking coupon {coupon_id}: {e}", file=sys.stderr)
+        return False
+
+
 def create_stripe_coupon(coupon: dict) -> str:
-    """Create Stripe Coupon. Returns coupon_id."""
+    """Create Stripe Coupon. Returns coupon_id. If coupon already exists, returns existing ID."""
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
     coupon_id = coupon.get('id')
     if coupon_id and not coupon_id.startswith('cou-'):
         coupon_id = f'cou-{coupon_id}'
+
+    # Check if coupon already exists
+    if coupon_id and check_stripe_coupon_exists(coupon_id):
+        print(f"DEBUG: Coupon {coupon_id} already exists, using existing coupon", file=sys.stderr)
+        return coupon_id
 
     coupon_params = {
         'id': coupon_id,
@@ -193,8 +211,17 @@ def create_stripe_coupon(coupon: dict) -> str:
     if coupon.get('applies_to'):
         coupon_params['applies_to'] = coupon['applies_to']
 
-    coupon = stripe.Coupon.create(**coupon_params)
-    return coupon.id
+    try:
+        coupon_obj = stripe.Coupon.create(**coupon_params)
+        return coupon_obj.id
+    except stripe.error.InvalidRequestError as e:
+        error_msg = str(e)
+        if 'already exists' in error_msg.lower():
+            # Coupon was created between check and create - return the ID
+            print(f"DEBUG: Coupon {coupon_id} was created concurrently, using existing coupon", file=sys.stderr)
+            return coupon_id
+        else:
+            raise
 
 
 def create_stripe_payment_link(price_id: str, job_id: str, payment_number: int, coupon_id: str = None) -> str:
@@ -316,12 +343,25 @@ def create_stripe_objects_for_job(job_data: dict, job_id: str) -> dict:
     
     
     
-    # Create coupon
+    # Create coupon (non-blocking - if it fails, continue with rest of workflow)
     coupon = job_data.get('coupon')
     if coupon and coupon.get('amount_off', 0) > 0:
-        coupon_id = create_stripe_coupon(coupon)
-        stats['coupons_created'] = 1
-        state_objects['coupon'] = coupon_id
+        try:
+            coupon_id = create_stripe_coupon(coupon)
+            stats['coupons_created'] = 1
+            state_objects['coupon'] = coupon_id
+        except Exception as e:
+            # Coupon creation failed - log warning but don't fail entire workflow
+            # Product and prices are already created, so we can continue
+            print(f"Warning: Failed to create coupon for {job_id}: {e}", file=sys.stderr)
+            # Try to use existing coupon ID if available
+            coupon_id_from_data = coupon.get('id')
+            if coupon_id_from_data:
+                if not coupon_id_from_data.startswith('cou-'):
+                    coupon_id_from_data = f'cou-{coupon_id_from_data}'
+                if check_stripe_coupon_exists(coupon_id_from_data):
+                    print(f"Using existing coupon {coupon_id_from_data} for {job_id}", file=sys.stderr)
+                    state_objects['coupon'] = coupon_id_from_data
     
     # Update checkout session parameters
     if job_data.get('checkout_session_1') and state_objects.get('price_1'):
@@ -595,7 +635,21 @@ def execute_8_step_sync(jobs_dir: str, manifest_path: str, trigger_category: str
                 save_job(job_id, job_data, jobs_dir=jobs_dir)
                 print(f"[TRIGGER={trigger_category}] Step 2: ARTIFACTS - Added Stripe object IDs to JSON {job_id} (product, prices, customer, coupon)", file=sys.stderr)
             except Exception as e:
-                print(f"Warning: Failed to create Stripe objects for {job_id}: {e}", file=sys.stderr)
+                error_msg = str(e)
+                print(f"Warning: Failed to create Stripe objects for {job_id}: {error_msg}", file=sys.stderr)
+                # Even if creation partially failed, check if product was created
+                # (product is created first, so it might exist even if coupon failed)
+                if 'state' in jobs_by_id[job_id] and 'objects' in jobs_by_id[job_id]['state']:
+                    product_id = jobs_by_id[job_id]['state']['objects'].get('product')
+                    if product_id and check_stripe_product_exists(product_id):
+                        # Product exists - count it as created so PDFs can be generated
+                        stats['products_created'] += 1
+                        print(f"Note: Product {product_id} was created before error, counting for PDF generation", file=sys.stderr)
+                        # Save partial state if product exists
+                        try:
+                            save_job(job_id, jobs_by_id[job_id], jobs_dir=jobs_dir)
+                        except Exception as save_err:
+                            print(f"Warning: Failed to save partial state for {job_id}: {save_err}", file=sys.stderr)
     
     return stats
 

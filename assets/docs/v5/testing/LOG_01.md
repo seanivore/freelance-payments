@@ -195,3 +195,37 @@ Error reading job file: Expecting property name enclosed in double quotes: line 
 - `.github/scripts/orchestration/admin_push.py`: Added `safe_int()` helper and updated all calculation functions
 
 **Test Job**: `uid-tst-002.json`
+
+---
+
+### BUG_01_005 - Stripe Object Creation Fails When Coupon Already Exists
+
+**Date**: 2026-01-17  
+**Status**: Fixed
+
+**Issue**: When creating Stripe objects for new job `uid-tst-003`, creation failed with error: "Coupon already exists" for `cou-tst-003`. This caused:
+- No Stripe objects created (products_created: 0)
+- No PDFs generated (skipped because no new products)
+- Manifest updated correctly
+- Orphaned product archived correctly
+
+**Root Cause**: `create_stripe_coupon()` function doesn't check if coupon already exists before attempting creation. Unlike `create_stripe_product()` which has error handling, coupon creation fails immediately if ID already exists. When coupon creation throws an exception:
+- Exception prevents `create_stripe_objects_for_job()` from returning stats
+- Even though product WAS created (happens before coupon), `products_created` stays 0
+- PDF generation checks `if products_created > 0`, so it skips
+- Manifest update happens regardless (reads JSON files directly)
+
+**Fixes Implemented**:
+- Added `check_stripe_coupon_exists()` helper function to check if coupon exists
+- Updated `create_stripe_coupon()` to check for existing coupon before creation
+- If coupon exists, return existing coupon ID instead of failing
+- Added try/except around coupon creation in `create_stripe_objects_for_job()` to make it non-blocking
+- Added fallback check in outer exception handler: if product exists in Stripe but stats weren't returned, count it for PDF generation
+
+**Files Modified**:
+- `.github/scripts/orchestration/admin_push.py`: 
+  - Added `check_stripe_coupon_exists()` helper
+  - Made coupon creation non-blocking with try/except
+  - Added fallback logic to detect partially created jobs
+
+**Test Job**: `uid-tst-003.json`
