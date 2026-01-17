@@ -78,7 +78,8 @@ export default async (req, res) => {
       payment_intent_id: session.payment_intent?.id || null,
       payment_intent_status: session.payment_intent?.status || null,
       amount_total: session.amount_total || null,
-      amount_subtotal: session.amount_subtotal || null
+      amount_subtotal: session.amount_subtotal || null,
+      metadata: session.metadata || {} // Include metadata to determine payment_number
     });
   } catch (error) {
     console.error('Error retrieving session:', error);

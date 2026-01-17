@@ -175,6 +175,8 @@ export default function App() {
   // MUST be before early returns to avoid React hook order error
   // Check for session_id BEFORE determining gate - update state optimistically
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionStatus, setSessionStatus] = useState<'complete' | 'open' | null>(null);
+  const [sessionPaymentNumber, setSessionPaymentNumber] = useState<1 | 2 | null>(null);
   
   // Effect 1: Detect session_id on mount (runs once, before data loads)
   useEffect(() => {
@@ -205,30 +207,38 @@ export default function App() {
   }, []); // Run once on mount
   
   // Effect 2: Process session_id when data becomes available
-  // CRITICAL FIX for BUG_01_016: On return URL load, add payment event to buffer and flush immediately
-  // This ensures payment event is tracked even though it's a new page load
+  // CRITICAL FIX: Check session status immediately (Stripe best practice)
+  // Handle both 'complete' (success) and 'open' (failed/canceled) statuses
   useEffect(() => {
     if (!sessionId || !data) return; // Wait for both session_id and data
     
-    // Fetch session status and update state if payment completed
+    // Fetch session status immediately (Stripe best practice)
     fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
       .then(res => res.json())
       .then(sessionData => {
+        console.log('📋 Session status:', sessionData.status, sessionData);
+        
+        // Set session status for routing logic
+        setSessionStatus(sessionData.status as 'complete' | 'open');
+        
+        // Extract payment_number from metadata
+        const paymentNumber = sessionData.metadata?.payment_number 
+          ? parseInt(sessionData.metadata.payment_number, 10) as 1 | 2
+          : null;
+        setSessionPaymentNumber(paymentNumber);
+        
         if (sessionData.status === 'complete') {
           const s = data.state.client_status;
           let paymentType: 'payment_1' | 'payment_2' | null = null;
           let updates: Partial<typeof s> = {};
           
-          // Determine which payment based on current state or URL parameter
-          const urlParams = new URLSearchParams(window.location.search);
-          const completeParam = urlParams.get('complete');
-          
-          if (completeParam === 'payment_1' || (s.invoice && !s.payment_1)) {
+          // Determine which payment from metadata (preferred) or fallback to state
+          if (paymentNumber === 1 || (s.invoice && !s.payment_1)) {
             paymentType = 'payment_1';
             const timestamp = new Date().toISOString();
             updates = { payment_1: timestamp };
             console.log('✅ Payment 1 completed - adding to event buffer');
-          } else if (completeParam === 'payment_2' || (s.balance && !s.payment_2)) {
+          } else if (paymentNumber === 2 || (s.balance && !s.payment_2)) {
             paymentType = 'payment_2';
             const timestamp = new Date().toISOString();
             updates = { payment_2: timestamp };
@@ -264,14 +274,14 @@ export default function App() {
           } else {
             console.log('⚠️ Session complete but no updates needed (payment already recorded?)');
           }
-        } else {
-          console.log('⚠️ Session status not complete:', sessionData.status);
+        } else if (sessionData.status === 'open') {
+          console.log('⚠️ Session status is "open" - payment failed or was canceled. Will remount checkout.');
         }
       })
       .catch(err => {
         console.error('Error fetching session status:', err);
       });
-  }, [sessionId, data, flushOnPayment, trackEvent]); // Added trackEvent back since we need it here
+  }, [sessionId, data, flushOnPayment, trackEvent]);
 
   // Memoized emitEvent callback to prevent PdfViewer re-renders
   // MUST be before early returns to avoid React hook order error
@@ -417,70 +427,77 @@ export default function App() {
   
   let initialSection: 'contract' | 'invoice' | 'payment1' | 'completion1' | 'balance' | 'payment2' | 'completion2' = 'contract';
 
-  // CRITICAL FIX for BUG_01_015: Check for explicit payment completion parameter first
-  // This works even when JSON state is null (workflow hasn't run yet)
-  const urlParams = new URLSearchParams(window.location.search);
-  const completeParam = urlParams.get('complete');
-  if (completeParam === 'payment_1') {
-    initialSection = 'completion1';
-    console.log('📍 Routing: complete=payment_1 parameter detected → completion1');
-  } else if (completeParam === 'payment_2') {
-    initialSection = 'completion2';
-    console.log('📍 Routing: complete=payment_2 parameter detected → completion2');
-  }
-  
-  // CRITICAL FIX for BUG_01_009: If we have a sessionId but no complete param, check JSON state
-  // This handles the race condition where workflow hasn't run yet
-  else if (sessionId) {
-    // If invoice was viewed but payment_1 not recorded, assume payment_1 just completed
-    if (client_status.invoice && !client_status.payment_1) {
-      initialSection = 'completion1';
-      console.log('📍 Routing: sessionId detected + invoice viewed → completion1 (payment_1 pending workflow)');
-    }
-    // If balance was viewed but payment_2 not recorded, assume payment_2 just completed
-    else if (client_status.balance && !client_status.payment_2) {
-      initialSection = 'completion2';
-      console.log('📍 Routing: sessionId detected + balance viewed → completion2 (payment_2 pending workflow)');
+  // CRITICAL FIX: Check session status first (Stripe best practice)
+  // Handle both 'complete' (success) and 'open' (failed/canceled) statuses
+  if (sessionId && sessionStatus) {
+    if (sessionStatus === 'complete') {
+      // Payment succeeded - route to completion view based on payment_number
+      if (sessionPaymentNumber === 1) {
+        initialSection = 'completion1';
+        console.log('📍 Routing: Session complete, payment_1 → completion1');
+      } else if (sessionPaymentNumber === 2) {
+        initialSection = 'completion2';
+        console.log('📍 Routing: Session complete, payment_2 → completion2');
+      } else {
+        // Fallback: determine from state if metadata missing
+        if (client_status.invoice && !client_status.payment_1) {
+          initialSection = 'completion1';
+          console.log('📍 Routing: Session complete, fallback to payment_1 → completion1');
+        } else if (client_status.balance && !client_status.payment_2) {
+          initialSection = 'completion2';
+          console.log('📍 Routing: Session complete, fallback to payment_2 → completion2');
+        }
+      }
+    } else if (sessionStatus === 'open') {
+      // Payment failed or canceled - remount checkout (show payment form again)
+      if (sessionPaymentNumber === 1 || (client_status.invoice && !client_status.payment_1)) {
+        initialSection = 'payment1';
+        console.log('📍 Routing: Session open (failed/canceled), payment_1 → remount checkout');
+      } else if (sessionPaymentNumber === 2 || (client_status.balance && !client_status.payment_2)) {
+        initialSection = 'payment2';
+        console.log('📍 Routing: Session open (failed/canceled), payment_2 → remount checkout');
+      }
     }
   }
 
-  // CRITICAL FIX for BUG_01_011: State-based routing with proper precedence
+  // State-based routing (only if no session status to handle)
   // Check conditions in order of progression through the flow
-  // Each condition should only apply if we haven't progressed further
-  
-  // 1. Contract signed → show invoice
-  if (client_status.contract_signed && !client_status.invoice) {
-    initialSection = 'invoice';
-    console.log('📍 Routing: contract_signed → invoice');
-  }
-  // 2. Invoice viewed → show payment1 (unless returning from payment)
-  else if (client_status.invoice && !client_status.payment_1 && !sessionId) {
-    initialSection = 'payment1';
-    console.log('📍 Routing: invoice viewed → payment1');
-  }
-  // 3. Payment 1 completed → show completion1 or balance
-  else if (client_status.payment_1) {
-    if (!client_status.balance) {
-      initialSection = 'completion1';
-      console.log('📍 Routing: payment_1 completed → completion1 (balance not available)');
-    } else {
-      initialSection = 'balance';
-      console.log('📍 Routing: payment_1 completed + balance available → balance');
+  // Each condition should only apply if we haven't already determined section from session status
+  if (initialSection === 'contract') {
+    // 1. Contract signed → show invoice
+    if (client_status.contract_signed && !client_status.invoice) {
+      initialSection = 'invoice';
+      console.log('📍 Routing: contract_signed → invoice');
     }
-  }
-  // 4. Balance viewed → show payment2
-  else if (client_status.balance && !client_status.payment_2) {
-    initialSection = 'payment2';
-    console.log('📍 Routing: balance viewed → payment2');
-  }
-  // 5. Payment 2 completed → show completion2
-  else if (client_status.payment_2) {
-    initialSection = 'completion2';
-    console.log('📍 Routing: payment_2 completed → completion2');
-  }
-  // 6. Default: contract (only if no progress made)
-  else {
-    console.log('📍 Routing: no progress detected → contract (default)');
+    // 2. Invoice viewed → show payment1
+    else if (client_status.invoice && !client_status.payment_1) {
+      initialSection = 'payment1';
+      console.log('📍 Routing: invoice viewed → payment1');
+    }
+    // 3. Payment 1 completed → show completion1 or balance
+    else if (client_status.payment_1) {
+      if (!client_status.balance) {
+        initialSection = 'completion1';
+        console.log('📍 Routing: payment_1 completed → completion1 (balance not available)');
+      } else {
+        initialSection = 'balance';
+        console.log('📍 Routing: payment_1 completed + balance available → balance');
+      }
+    }
+    // 4. Balance viewed → show payment2
+    else if (client_status.balance && !client_status.payment_2) {
+      initialSection = 'payment2';
+      console.log('📍 Routing: balance viewed → payment2');
+    }
+    // 5. Payment 2 completed → show completion2
+    else if (client_status.payment_2) {
+      initialSection = 'completion2';
+      console.log('📍 Routing: payment_2 completed → completion2');
+    }
+    // 6. Default: contract (only if no progress made)
+    else {
+      console.log('📍 Routing: no progress detected → contract (default)');
+    }
   }
   
   console.log(`✅ Final routing decision: ${initialSection}`);
@@ -493,8 +510,8 @@ export default function App() {
       
       // CRITICAL FIX for BUG_01_015: Add explicit payment completion parameter to return URL
       // This allows routing to completion page even when JSON state is null (workflow hasn't run yet)
-      // Format: ?complete=payment_X&session_id={CHECKOUT_SESSION_ID}
-      const returnUrl = `${window.location.origin}/${jobId}?complete=payment_${paymentNumber}&session_id={CHECKOUT_SESSION_ID}`;
+      // Format: ?session_id={CHECKOUT_SESSION_ID} (payment_number determined from session metadata)
+      const returnUrl = `${window.location.origin}/${jobId}?session_id={CHECKOUT_SESSION_ID}`;
       
       // CRITICAL FIX for BUG_01_016: Track payment event BEFORE redirect happens
       // Add payment event to buffer now so it's included in the batch when events flush
