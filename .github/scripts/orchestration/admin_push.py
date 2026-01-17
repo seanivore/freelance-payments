@@ -1404,6 +1404,10 @@ def main():
         
         if new_jobs_detected:
             print(f"[TRIGGER=admin-push] Pre-check: Found {len(new_jobs_detected)} new job(s) that will need PDFs - validating Google token", file=sys.stderr)
+            # Debug: Check if token env var is set (don't print actual token value)
+            token_set = bool(os.getenv('GOOGLE_REFRESH_TOKEN'))
+            token_length = len(os.getenv('GOOGLE_REFRESH_TOKEN', ''))
+            print(f"[TRIGGER=admin-push] Pre-check: DEBUG - GOOGLE_REFRESH_TOKEN env var is set: {token_set}, length: {token_length}", file=sys.stderr)
             try:
                 validate_google_token()
                 print(f"[TRIGGER=admin-push] Pre-check: Google token validated successfully", file=sys.stderr)
