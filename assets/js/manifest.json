@@ -1,11 +1,5 @@
 {
   "jobs": {
-    "mobile-town-seams": {
-      "file_path": "assets/jobs/uid-oac-784.json",
-      "job_id": "uid-oac-784",
-      "login_keyword": "town-seams",
-      "login_name": "Mobile"
-    },
     "miller-last-resort": {
       "file_path": "assets/jobs/uid-qee-576.json",
       "job_id": "uid-qee-576",
@@ -13,5 +7,5 @@
       "login_name": "Miller"
     }
   },
-  "generated_at": "2026-01-19T23:12:35.094796Z"
+  "generated_at": "2026-01-19T23:50:36.958629Z"
 }
