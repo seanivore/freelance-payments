@@ -1,171 +1,171 @@
 {
-  "project": "Last Resort Hotel Branding & Website",
-  "contract": {
-    "work_start": "2026-01-17",
-    "work_end": "2026-03-17",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-19T22:37:07.477704Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Last Resort Hotel Branding & Website",
     "contract": {
-      "id": "kon-qee-576",
-      "pdf": "assets/pdf/contract/kon-qee-576.pdf",
-      "file_id": "1OE9yp77CWVTGwkg4IDVHPWaALdli33S_K1Cmq1h_PiQ",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-qee-576.pdf",
-      "sha256": "60d0f59ac5cae7d8f58750e59d402fd17298bbdb45c82a9da92d2c60e597902a",
-      "created": "2026-01-19T22:37:13.769584Z"
+        "work_start": "2026-01-17",
+        "work_end": "2026-03-17",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-19T22:37:07.477704Z"
+            },
+            "client": {
+                "legal_name": "Miller",
+                "signed_date": "2026-01-19"
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-qee-576",
-      "pdf": "assets/pdf/invoice/inv-qee-576.pdf",
-      "file_id": "1TWUG8yrMk18E5qxnECmwMuDKHXxrwlT1dp-6wBnZjT0",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-qee-576.pdf",
-      "sha256": "3289f33278479642bb32489cab67d45736d9196beaff153be78cfd1f5a3da0e9",
-      "created": "2026-01-19T22:37:17.999079Z"
+    "docs": {
+        "contract": {
+            "id": "kon-qee-576",
+            "pdf": "assets/pdf/contract/kon-qee-576.pdf",
+            "file_id": "1OE9yp77CWVTGwkg4IDVHPWaALdli33S_K1Cmq1h_PiQ",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-qee-576.pdf",
+            "sha256": "60d0f59ac5cae7d8f58750e59d402fd17298bbdb45c82a9da92d2c60e597902a",
+            "created": "2026-01-19T22:37:13.769584Z"
+        },
+        "invoice": {
+            "id": "inv-qee-576",
+            "pdf": "assets/pdf/invoice/inv-qee-576.pdf",
+            "file_id": "1TWUG8yrMk18E5qxnECmwMuDKHXxrwlT1dp-6wBnZjT0",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-qee-576.pdf",
+            "sha256": "3289f33278479642bb32489cab67d45736d9196beaff153be78cfd1f5a3da0e9",
+            "created": "2026-01-19T22:37:17.999079Z"
+        },
+        "balance": {
+            "id": "bal-qee-576",
+            "pdf": "assets/pdf/balance/bal-qee-576.pdf",
+            "file_id": "1v2SGZ0A5_QgKWED26Mx9Nj4fB1yUSoMiOazYO63GPBM",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-qee-576.pdf",
+            "sha256": "322938cd4734a9f44d94001f41bf60a5ae30242bf1bc91e43f592f105512e699",
+            "created": "2026-01-19T22:37:23.428833Z"
+        }
     },
-    "balance": {
-      "id": "bal-qee-576",
-      "pdf": "assets/pdf/balance/bal-qee-576.pdf",
-      "file_id": "1v2SGZ0A5_QgKWED26Mx9Nj4fB1yUSoMiOazYO63GPBM",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-qee-576.pdf",
-      "sha256": "322938cd4734a9f44d94001f41bf60a5ae30242bf1bc91e43f592f105512e699",
-      "created": "2026-01-19T22:37:23.428833Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-19T22:37:07.477704Z",
-      "product": "uid-qee-576",
-      "price_1": "price_1SrR4J9fljwH26CPqpHitXJd",
-      "price_2": "price_1SrR4J9fljwH26CPfq6O2xEe",
-      "customer": "cus-qee-576",
-      "coupon": "cou-qee-576"
+    "state": {
+        "objects": {
+            "created": "2026-01-19T22:37:07.477704Z",
+            "product": "uid-qee-576",
+            "price_1": "price_1SrR4J9fljwH26CPqpHitXJd",
+            "price_2": "price_1SrR4J9fljwH26CPfq6O2xEe",
+            "customer": "cus-qee-576",
+            "coupon": "cou-qee-576"
+        },
+        "client_status": {
+            "logged_in": "2026-01-19T22:44:33.081Z",
+            "contract_signed": "2026-01-19T22:44:49.200Z",
+            "invoice": "2026-01-19T22:44:54.091Z",
+            "payment_1": "2026-01-19T22:44:54.091Z",
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Last Resort Hotel Branding & Website",
-    "active": true,
-    "description": "This project is for the development of a new website for Last Resort Hotel. The website will be built using React and will be hosted on Netlify. The website will be built in a way that allows for easy updates and maintenance.",
-    "id": "uid-qee-576",
-    "login_name": "Miller",
-    "login_keyword": "last-resort",
-    "service_usd": 10800000,
-    "total_payments": 2,
-    "discount_usd": 12000,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Benjamin Miller",
-    "business": "Last Resort Hotel",
-    "title": "General Manager",
-    "email": "ben.miller@lastresort.com",
-    "phone": "213-291-0000",
-    "id": "cus-qee-576",
-    "address": {
-      "city": "Los Angeles",
-      "line1": "123 Main St",
-      "state": "CA",
-      "postal_code": "90001",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 12000,
-    "applies_to": {
-      "products": [
-        "uid-qee-576"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-qee-576",
-    "max_redemptions": 1,
-    "name": "LAST-RESORT"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 5400000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-qee-576"
-      ]
+        "name": "Last Resort Hotel Branding & Website",
+        "active": true,
+        "description": "This project is for the development of a new website for Last Resort Hotel. The website will be built using React and will be hosted on Netlify. The website will be built in a way that allows for easy updates and maintenance.",
+        "id": "uid-qee-576",
+        "login_name": "Miller",
+        "login_keyword": "last-resort",
+        "service_usd": 10800000,
+        "total_payments": 2,
+        "discount_usd": 12000,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1SrR4J9fljwH26CPqpHitXJd"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 5400000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-qee-576"
-      ]
+    "customer": {
+        "name": "Benjamin Miller",
+        "business": "Last Resort Hotel",
+        "title": "General Manager",
+        "email": "ben.miller@lastresort.com",
+        "phone": "213-291-0000",
+        "id": "cus-qee-576",
+        "address": {
+            "city": "Los Angeles",
+            "line1": "123 Main St",
+            "state": "CA",
+            "postal_code": "90001",
+            "country": "US"
+        }
     },
-    "id": "price_1SrR4J9fljwH26CPfq6O2xEe"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-qee-576"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1SrR4J9fljwH26CPqpHitXJd",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-qee-576?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1SrR4J9fljwH26CPfq6O2xEe",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-qee-576?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "This project is for the development of a new website for Last Resort Hotel. The website will be built using React and will be hosted on Netlify. The website will be built in a way that allows for easy updates and maintenance.",
-  "project_scope_full": "This project is for the development of a new website for Last Resort Hotel. The website will be built using React and will be hosted on Netlify. The website will be built in a way that allows for easy updates and maintenance."
+    "coupon": {
+        "amount_off": 12000,
+        "applies_to": {
+            "products": [
+                "uid-qee-576"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-qee-576",
+        "max_redemptions": 1,
+        "name": "LAST-RESORT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 5400000,
+        "active": false,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-qee-576"
+            ]
+        },
+        "id": "price_1SrR4J9fljwH26CPqpHitXJd"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 5400000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-qee-576"
+            ]
+        },
+        "id": "price_1SrR4J9fljwH26CPfq6O2xEe"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-qee-576"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1SrR4J9fljwH26CPqpHitXJd",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-qee-576?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1SrR4J9fljwH26CPfq6O2xEe",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-qee-576?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "This project is for the development of a new website for Last Resort Hotel. The website will be built using React and will be hosted on Netlify. The website will be built in a way that allows for easy updates and maintenance.",
+    "project_scope_full": "This project is for the development of a new website for Last Resort Hotel. The website will be built using React and will be hosted on Netlify. The website will be built in a way that allows for easy updates and maintenance."
 }
