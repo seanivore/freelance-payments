@@ -11,7 +11,13 @@
       "job_id": "uid-oac-784",
       "login_keyword": "town-seams",
       "login_name": "Mobile"
+    },
+    "miller-last-resort": {
+      "file_path": "assets/jobs/uid-qee-576.json",
+      "job_id": "uid-qee-576",
+      "login_keyword": "last-resort",
+      "login_name": "Miller"
     }
   },
-  "generated_at": "2026-01-17T22:16:58.872227Z"
+  "generated_at": "2026-01-19T22:37:23.430272Z"
 }
