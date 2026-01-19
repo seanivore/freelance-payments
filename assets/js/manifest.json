@@ -1,11 +1,5 @@
 {
   "jobs": {
-    "anderson-jake-acts": {
-      "file_path": "assets/jobs/uid-bnp-832.json",
-      "job_id": "uid-bnp-832",
-      "login_keyword": "jake-acts",
-      "login_name": "Anderson"
-    },
     "mobile-town-seams": {
       "file_path": "assets/jobs/uid-oac-784.json",
       "job_id": "uid-oac-784",
@@ -19,5 +13,5 @@
       "login_name": "Miller"
     }
   },
-  "generated_at": "2026-01-19T22:37:23.430272Z"
+  "generated_at": "2026-01-19T23:12:35.094796Z"
 }
