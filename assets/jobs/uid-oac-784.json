@@ -57,13 +57,13 @@
             "contract_signed": "2026-01-17T21:34:21.037Z",
             "invoice": "2026-01-17T21:34:26.267Z",
             "payment_1": "2026-01-17T21:34:26.268Z",
-            "balance": null,
-            "payment_2": null
+            "balance": "2026-01-19T23:22:04.120Z",
+            "payment_2": "2026-01-19T23:22:04.121Z"
         }
     },
     "product": {
         "name": "Company Website",
-        "active": true,
+        "active": false,
         "description": "Website representing Sandra the Town Seamstress",
         "id": "uid-oac-784",
         "login_name": "Mobile",
@@ -121,7 +121,7 @@
         "count": 2,
         "currency": "usd",
         "unit_amount": 392500,
-        "active": true,
+        "active": false,
         "billing_scheme": "per_unit",
         "pay_by": "before project launch",
         "pay_days": 14,
