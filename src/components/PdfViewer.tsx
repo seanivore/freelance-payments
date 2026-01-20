@@ -1,13 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import configJson from '../config/pdfViewer.config.json';
-import { dataURLToUint8Array } from '../lib/pdf-utils';
 import { GateBar } from './GateBar';
+import { SignatureModal } from './SignatureModal';
 
 // PDF.js (ESM, Vite-friendly)
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-
-// pdf-lib (ESM)
-import { PDFDocument } from 'pdf-lib';
 
 type Section =
   | 'contract'
@@ -20,20 +17,24 @@ type Section =
 
 type PdfViewerProps = {
   initialPdfBytes?: ArrayBuffer | null;
-  pdfUrl?: string; // URL to fetch PDF fresh when needed (for signing)
+  pdfUrl?: string;
   emitEvent?: (name: string, payload?: unknown) => void;
-  initialSection?: Section; // Start where returning users land based on state
+  initialSection?: Section;
+  onConfirm?: () => void;
+  onDownload?: () => void;
 };
 
 export const PdfViewer: React.FC<PdfViewerProps> = ({
   initialPdfBytes = null,
   pdfUrl,
   emitEvent,
-  initialSection = 'contract'
+  initialSection = 'contract',
+  onConfirm,
+  onDownload: onDownloadProp
 }) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
 
-  const [pdfData, setPdfData] = useState<ArrayBuffer | null>(initialPdfBytes);
+  const [, setPdfData] = useState<ArrayBuffer | null>(initialPdfBytes);
   const [pdfDoc, setPdfDoc] = useState<any | null>(null);
   const [scale] = useState<number>(configJson.viewer.initialScale);
   const [section, setSection] = useState<Section>(initialSection);
@@ -42,15 +43,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const loadedBytesRef = useRef<ArrayBuffer | null>(null);
   const hasEmittedLoadedRef = useRef(false);
-  const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map()); // Store refs for all page canvases
-  const renderedPagesRef = useRef<Set<number>>(new Set()); // Track which pages have actually been rendered
-  // Store a cloned copy of the PDF bytes for signing (to avoid detached buffer issues)
+  const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+  const renderedPagesRef = useRef<Set<number>>(new Set());
   const pdfBytesForSigningRef = useRef<ArrayBuffer | null>(null);
 
   useEffect(() => {
-    // Set PDF.js worker path (use unpkg CDN in production, local in dev)
-    // Must be set before any getDocument calls
-    // Using unpkg which reliably hosts .mjs files for pdfjs-dist
     if (!GlobalWorkerOptions.workerSrc) {
       GlobalWorkerOptions.workerSrc = 
         import.meta.env.PROD 
@@ -59,19 +56,16 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }
   }, []);
 
-  // Load PDF when initialPdfBytes is provided (only once per unique bytes)
   useEffect(() => {
-    // Prevent infinite loop: only load if bytes changed and not already loaded/loading
     if (initialPdfBytes && initialPdfBytes !== loadedBytesRef.current && !isLoading && !pdfDoc) {
-      // Clone the buffer immediately to avoid detached buffer issues later
       const clonedBuffer = initialPdfBytes.slice(0);
       loadedBytesRef.current = initialPdfBytes;
-      pdfBytesForSigningRef.current = clonedBuffer; // Store cloned copy for signing
+      pdfBytesForSigningRef.current = clonedBuffer;
       setPdfData(clonedBuffer);
       setIsLoading(true);
       setPdfError(null);
-      hasEmittedLoadedRef.current = false; // Reset emit flag for new PDF
-      renderedPagesRef.current.clear(); // Clear rendered pages when loading new PDF
+      hasEmittedLoadedRef.current = false;
+      renderedPagesRef.current.clear();
       
       openPdfFromBytes(initialPdfBytes)
         .then(() => {
@@ -81,12 +75,12 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           console.error('Failed to load PDF:', err);
           setPdfError('Failed to load PDF document');
           setIsLoading(false);
-          loadedBytesRef.current = null; // Allow retry
+          loadedBytesRef.current = null;
           pdfBytesForSigningRef.current = null;
           hasEmittedLoadedRef.current = false;
         });
     }
-  }, [initialPdfBytes]); // Only depend on initialPdfBytes, not isLoading or pdfDoc
+  }, [initialPdfBytes]);
 
   async function renderPage(pageNum: number, canvas: HTMLCanvasElement) {
     if (!pdfDoc || !canvas) {
@@ -97,8 +91,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     try {
       const page = await pdfDoc.getPage(pageNum);
       const viewport = page.getViewport({ scale });
-      
-      console.log(`Page ${pageNum} viewport:`, { width: viewport.width, height: viewport.height, scale });
 
       const pdfCtx = canvas.getContext('2d', { alpha: false });
       if (!pdfCtx) {
@@ -106,27 +98,15 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         return;
       }
 
-      // Support HiDPI screens for crisp rendering (prevents pixelation)
       const outputScale = window.devicePixelRatio || 1;
-      
-      // Set canvas internal size (actual pixels)
       const canvasWidth = Math.floor(viewport.width * outputScale);
       const canvasHeight = Math.floor(viewport.height * outputScale);
       
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
-      
-      console.log(`Canvas ${pageNum} dimensions:`, { 
-        internal: { width: canvasWidth, height: canvasHeight },
-        display: { width: viewport.width, height: viewport.height },
-        outputScale 
-      });
-      
-      // Set canvas display size (CSS pixels)
       canvas.style.width = Math.floor(viewport.width) + 'px';
       canvas.style.height = Math.floor(viewport.height) + 'px';
 
-      // Scale context for high-DPI displays
       const transform = outputScale !== 1
         ? [outputScale, 0, 0, outputScale, 0, 0]
         : null;
@@ -137,17 +117,14 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         ...(transform && { transform })
       };
       
-      console.log(`Starting render for page ${pageNum}...`);
       const renderTask = page.render(renderContext);
       await renderTask.promise;
-      console.log(`Page ${pageNum} render completed`);
     } catch (err) {
       console.error(`Error in renderPage for page ${pageNum}:`, err);
       throw err;
     }
   }
 
-  // Render all pages when PDF doc is loaded
   async function renderAllPages() {
     if (!pdfDoc) {
       console.error('renderAllPages: pdfDoc is null');
@@ -155,35 +132,20 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }
     
     const totalPages = pdfDoc.numPages;
-    console.log(`renderAllPages: Starting render for ${totalPages} pages`);
-    
-    // Wait a bit to ensure all canvases are mounted
     await new Promise(resolve => setTimeout(resolve, 50));
     
-    // Render pages sequentially to avoid overwhelming the browser
     for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
       const canvas = canvasRefs.current.get(pageNum);
-      // Check if canvas exists and is in the DOM
       if (canvas && canvas.isConnected) {
-        // Check if this page has actually been rendered (not just canvas exists)
         if (!renderedPagesRef.current.has(pageNum)) {
           try {
-            console.log(`Rendering page ${pageNum}...`);
             await renderPage(pageNum, canvas);
-            renderedPagesRef.current.add(pageNum); // Mark as rendered
-            console.log(`Page ${pageNum} rendered successfully`);
+            renderedPagesRef.current.add(pageNum);
           } catch (err) {
             console.error(`Error rendering page ${pageNum}:`, err);
             setPdfError(`Failed to render page ${pageNum}: ${err}`);
           }
-        } else {
-          console.log(`Page ${pageNum} already rendered (tracked in renderedPagesRef)`);
         }
-      } else {
-        console.warn(`Canvas for page ${pageNum} not ready yet`, { 
-          exists: !!canvas, 
-          connected: canvas?.isConnected 
-        });
       }
     }
   }
@@ -193,8 +155,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       const docTask = getDocument({ data: bytes });
       const doc = await docTask.promise;
       setPdfDoc(doc);
-      // Don't render here - let useEffect handle rendering when canvas is ready
-      // Only emit event once when PDF is first loaded (prevent infinite loop)
       if (!hasEmittedLoadedRef.current) {
         hasEmittedLoadedRef.current = true;
         emitEvent?.('contract_loaded', { page: 1, totalPages: doc.numPages });
@@ -205,13 +165,11 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     }
   }
 
-  // Render all pages when PDF doc is loaded and canvases are ready
   useEffect(() => {
     if (pdfDoc && !isLoading) {
-      // Wait for canvases to be mounted - use requestAnimationFrame for better timing
       let frameId: number;
       let retryCount = 0;
-      const maxRetries = 20; // Max 2 seconds of retries
+      const maxRetries = 20;
       
       const checkAndRender = () => {
         const totalPages = pdfDoc.numPages;
@@ -221,22 +179,17 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
             return canvas && canvas.isConnected && canvas.parentElement !== null;
           });
         
-        // If all canvases are ready, render
         if (readyCanvases.length === totalPages) {
-          console.log(`All ${totalPages} canvases ready, starting render...`);
           renderAllPages().catch((err) => {
             console.error('Error rendering PDF pages:', err);
             setPdfError('Failed to render PDF pages');
           });
         } else if (retryCount < maxRetries) {
-          // Retry after a short delay
           retryCount++;
           frameId = requestAnimationFrame(() => {
             setTimeout(checkAndRender, 50);
           });
         } else {
-          console.warn(`Only ${readyCanvases.length} of ${totalPages} canvases ready after ${maxRetries} retries`);
-          // Try rendering anyway with what we have
           renderAllPages().catch((err) => {
             console.error('Error rendering PDF pages:', err);
             setPdfError('Failed to render PDF pages');
@@ -244,7 +197,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         }
       };
       
-      // Start checking after a short initial delay
       frameId = requestAnimationFrame(() => {
         setTimeout(checkAndRender, 100);
       });
@@ -253,125 +205,57 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
         if (frameId) cancelAnimationFrame(frameId);
       };
     }
-  }, [pdfDoc, isLoading, scale]); // Re-render when PDF doc changes, loading completes, or scale changes
+  }, [pdfDoc, isLoading, scale]);
 
-  // Stamp signature at bottom of last page
-  async function embedSignature(
-    signatureDataUrl: string,
-    legalName: string,
-    signedDate: string
-  ) {
-    try {
-        // Fetch PDF fresh from URL to avoid detached buffer issues
-        // This ensures we always have a valid, non-detached buffer
-        let pdfBytesToUse: ArrayBuffer;
-        
-        if (pdfUrl) {
-          // Fetch fresh from URL
-          const response = await fetch(pdfUrl);
-          pdfBytesToUse = await response.arrayBuffer();
-        } else if (pdfBytesForSigningRef.current) {
-          // Use stored cloned copy if available
-          pdfBytesToUse = pdfBytesForSigningRef.current;
-        } else if (pdfData) {
-          // Fallback: try to clone pdfData (may fail if detached)
-          try {
-            pdfBytesToUse = pdfData.slice(0);
-          } catch (e) {
-            throw new Error('PDF buffer is detached. Please refresh the page and try again.');
-          }
-        } else {
-          throw new Error('No PDF data available for signing');
-        }
-        
-        const loaded = await PDFDocument.load(pdfBytesToUse);
-        const pngBytes = dataURLToUint8Array(signatureDataUrl);
-        const img = await loaded.embedPng(pngBytes);
-        
-        // Add to last page
-        const pages = loaded.getPages();
-        const lastPage = pages[pages.length - 1];
-        const { width } = lastPage.getSize();
-        
-        // Place signature at bottom right
-        const sigWidth = 200;
-        const sigHeight = 100;
-        
-        lastPage.drawImage(img, {
-            x: width - sigWidth - 50,
-            y: 50,
-            width: sigWidth,
-            height: sigHeight
-        });
-
-        // Add legal name below signature
-        lastPage.drawText(`Signed by: ${legalName}`, {
-            x: width - sigWidth - 50,
-            y: 30,
-            size: 12
-        });
-
-        // Add Date
-        lastPage.drawText(`Signed: ${signedDate}`, {
-             x: 50,
-             y: 70,
-             size: 12
-        });
-
-        const bytes = await loaded.save();
-        
-        // Update view with signed PDF
-        // bytes is a Uint8Array, convert to ArrayBuffer
-        // Create a new ArrayBuffer from the Uint8Array to avoid detached buffer issues
-        const signedBuffer = bytes.buffer instanceof ArrayBuffer 
-          ? bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
-          : new Uint8Array(bytes).buffer;
-        
-        // Clone the signed buffer and store it for future signing operations
-        const clonedSignedBuffer = signedBuffer.slice(0);
-        pdfBytesForSigningRef.current = clonedSignedBuffer;
-        setPdfData(clonedSignedBuffer);
-        
-        await openPdfFromBytes(signedBuffer);
-        
-        // Emit success with name and date (using correct keys for Python processor)
-        emitEvent?.('contract_signed', { 
-          signed_date: signedDate,
-          legal_name: legalName
-        });
-        // NOTE: App.tsx will handle the navigation via optimistic update.
-        setSection('invoice');
-        
-    } catch (e) {
-        console.error("Signing failed", e);
-        alert("Failed to sign document.");
-    }
+  // Handle contract signing (name + date only, no pen canvas)
+  function handleSignContract(legalName: string, signedDate: string) {
+    // Emit the contract_signed event with legal name and date
+    emitEvent?.('contract_signed', { 
+      signed_date: signedDate,
+      legal_name: legalName
+    });
+    // Close modal and transition to next section
+    setIsSignModalOpen(false);
+    setSection('invoice');
   }
 
-  // Gate handler for contract section only
-  function handleSignContract() {
+  function handleOpenSignModal() {
     setIsSignModalOpen(true);
+  }
+
+  // Handle PDF download
+  function handleDownload() {
+    if (onDownloadProp) {
+      onDownloadProp();
+    } else if (pdfUrl) {
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = pdfUrl.split('/').pop() || 'document.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 
   // Show error if PDF failed to load
   if (pdfError) {
     return (
-      <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
-        <div className="mt-4 p-8 text-center text-red-400 bg-red-900/20 rounded-lg border border-red-900/50">
-          {pdfError}
+      <div className="relative min-h-[80vh] flex items-center justify-center">
+        <div className="p-8 text-center text-red-400 bg-red-900/20 rounded-lg border border-red-900/50 max-w-md">
+          <p className="font-medium mb-2">Unable to load document</p>
+          <p className="text-sm text-red-400/80">{pdfError}</p>
         </div>
       </div>
     );
   }
 
-  // Show loading state if PDF not loaded yet
+  // Show loading state
   if (!pdfDoc || isLoading) {
     return (
-      <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
-        <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden min-h-[600px]">
-          <div className="relative flex items-center justify-center bg-slate-950 p-4 min-h-[600px]">
-            <div className="text-slate-400">Loading PDF...</div>
-          </div>
+      <div className="relative min-h-[80vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-portfolio-accent-mauve border-t-transparent rounded-full animate-spin" />
+          <p className="text-portfolio-text-secondary text-sm">Loading document...</p>
         </div>
       </div>
     );
@@ -386,7 +270,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     
     for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
       canvases.push(
-        <div key={pageNum} className="flex justify-center mb-4">
+        <div key={pageNum} className="flex justify-center">
           <canvas
             ref={(el) => {
               if (el) {
@@ -395,7 +279,10 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
                 canvasRefs.current.delete(pageNum);
               }
             }}
-            className="shadow-lg"
+            className="shadow-paper"
+            style={{
+              backgroundColor: '#faf9f6',
+            }}
           />
         </div>
       );
@@ -405,32 +292,65 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   };
 
   return (
-    <div className="mx-auto max-w-[1100px] px-4 text-slate-100">
-      <div className="mt-4 relative rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-auto min-h-[600px] max-h-[90vh]">
-        <div className="relative flex flex-col items-center bg-slate-950 p-4">
-          {renderCanvasElements()}
+    <div className="relative min-h-screen">
+      {/* Background Art Layer */}
+      <div className="fixed inset-0 -z-20">
+        <img
+          src="/assets/media/pdf-viewer-bg-art-2.webp"
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+        />
+        {/* Base overlay */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(15, 15, 15, 0.5) 0%, rgba(15, 15, 15, 0.3) 50%, rgba(15, 15, 15, 0.5) 100%)',
+          }}
+        />
+      </div>
+
+      {/* Left margin vignette */}
+      <div
+        className="fixed inset-y-0 left-0 w-24 md:w-32 lg:w-48 pointer-events-none -z-10"
+        style={{
+          background: 'linear-gradient(to right, rgba(15, 15, 15, 0.9) 0%, rgba(15, 15, 15, 0.7) 40%, transparent 100%)',
+        }}
+      />
+
+      {/* Right margin vignette */}
+      <div
+        className="fixed inset-y-0 right-0 w-24 md:w-32 lg:w-48 pointer-events-none -z-10"
+        style={{
+          background: 'linear-gradient(to left, rgba(15, 15, 15, 0.9) 0%, rgba(15, 15, 15, 0.7) 40%, transparent 100%)',
+        }}
+      />
+
+      {/* GateBar at top */}
+      <div className="sticky top-0 z-20">
+        <GateBar
+          section={section}
+          onSign={handleOpenSignModal}
+          onConfirm={onConfirm}
+          onDownload={handleDownload}
+        />
+      </div>
+
+      {/* PDF Content Area */}
+      <div className="relative z-0 py-6 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col gap-4">
+            {renderCanvasElements()}
+          </div>
         </div>
       </div>
 
-      {/* Only render GateBar for contract section - invoice/balance gates handle their own GateBar */}
-      {section === 'contract' && (
-        <div className="mt-6 flex justify-center">
-          <GateBar
-            section={section}
-            onSign={handleSignContract}
-          />
-        </div>
-      )}
-
+      {/* Signature Modal */}
       <SignatureModal 
         isOpen={isSignModalOpen} 
         onClose={() => setIsSignModalOpen(false)}
-        onSign={(dataUrl, legalName, signedDate) => {
-            setIsSignModalOpen(false);
-            embedSignature(dataUrl, legalName, signedDate);
-        }}
+        onSign={handleSignContract}
       />
     </div>
   );
 };
-import { SignatureModal } from './SignatureModal';

@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 import './index.css';
 
@@ -12,9 +12,55 @@ function LoginApp() {
   const [projectKeyword, setProjectKeyword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Mouse glow effect state
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [glowPosition, setGlowPosition] = useState({ x: 0, y: 0 });
+  const [glowIntensity, setGlowIntensity] = useState(0.15);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-  // Note: No need to clear sessionStorage - we don't use it for job data
-  // We always fetch fresh JSON from URL path in App.tsx
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  // Handle mouse movement for glow effect
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const isInside =
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
+      e.clientY <= rect.bottom;
+
+    setGlowPosition({ x: e.clientX, y: e.clientY });
+    
+    if (isInside) {
+      // Calculate distance from center for edge intensity
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const distance = Math.sqrt(
+        Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2)
+      );
+      const maxDistance = Math.sqrt(
+        Math.pow(rect.width / 2, 2) + Math.pow(rect.height / 2, 2)
+      );
+      // Intensity increases near edges (0.3 to 0.6)
+      const newIntensity = 0.3 + (distance / maxDistance) * 0.3;
+      setGlowIntensity(newIntensity);
+    } else {
+      setGlowIntensity(0.15);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isTouchDevice) return;
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, [handleMouseMove, isTouchDevice]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +82,6 @@ function LoginApp() {
       const normKey = normalizeLookupKey(projectKeyword);
 
       let jobEntry: any = null;
-      // manifest.jobs is object keyed by UID or string
       for (const entry of Object.values(manifest.jobs) as any[]) {
         if (normalizeLookupKey(entry.login_name || '') === normLast &&
             normalizeLookupKey(entry.login_keyword || '') === normKey) {
@@ -47,12 +92,11 @@ function LoginApp() {
 
       if (!jobEntry) throw new Error('Job not found. Check credentials.');
 
-      // 3. Extract job_id and redirect (don't fetch or store job data)
-      // App.tsx will fetch fresh JSON from URL path
+      // 3. Extract job_id and redirect
       const jobId = jobEntry.job_id;
       if (!jobId) throw new Error('Invalid job entry in manifest.');
       
-      // 4. Redirect to job URL (404.html will route to App.tsx)
+      // 4. Redirect to job URL
       window.location.href = `/${jobId}`;
 
     } catch (err: any) {
@@ -64,62 +108,117 @@ function LoginApp() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Glow Effect Mockup */}
-        <div className="fixed pointer-events-none inset-0 flex items-center justify-center opacity-30">
-            <div className="w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[100px]"></div>
-        </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Art */}
+      <div className="fixed inset-0 -z-20">
+        <img
+          src="/assets/media/pdf-viewer-bg-art-1.webp"
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+        />
+        {/* Dark overlay */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(15, 15, 15, 0.7) 0%, rgba(15, 15, 15, 0.5) 50%, rgba(15, 15, 15, 0.7) 100%)',
+          }}
+        />
+      </div>
 
-        <div className="w-full max-w-md relative z-10 flex flex-col items-center">
-            <div className="w-full p-8 rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur-xl shadow-2xl">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-slate-100 mb-2">Horvath Payments</h1>
-                    <p className="text-slate-400 text-sm">Login to access your contract and invoices.</p>
-                </div>
+      {/* Mouse-following glow effect */}
+      {!isTouchDevice && (
+        <div
+          className="fixed pointer-events-none -z-10"
+          style={{
+            width: '500px',
+            height: '500px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(201, 156, 173, 0.5) 0%, transparent 70%)',
+            transform: 'translate(-50%, -50%)',
+            left: glowPosition.x,
+            top: glowPosition.y,
+            opacity: glowIntensity,
+            filter: 'blur(80px)',
+            transition: 'opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+        />
+      )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <input 
-                            type="text" 
-                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-slate-500 transition-all"
-                            placeholder="Last Name"
-                            value={lastName}
-                            onChange={e => setLastName(e.target.value)}
-                            disabled={loading}
-                        />
-                    </div>
-                    <div>
-                        <input 
-                            type="text" 
-                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-slate-500 transition-all"
-                            placeholder="Project Keyword"
-                            value={projectKeyword}
-                            onChange={e => setProjectKeyword(e.target.value)}
-                            disabled={loading}
-                        />
-                        <p className="text-xs text-slate-500 mt-2 text-center">Use the keyword from your notification email.</p>
-                    </div>
-
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-sm text-center">
-                            {error}
-                        </div>
-                    )}
-
-                    <button 
-                        type="submit" 
-                        disabled={loading}
-                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
-                    >
-                        {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Lookup Payments'}
-                    </button>
-                </form>
-            </div>
-            
-            <p className="text-center text-sm text-slate-600 mt-8">
-                Need help? Contact <a href="mailto:sean@august.style" className="text-emerald-500 hover:underline">sean@august.style</a>
+      {/* Login Card */}
+      <div 
+        ref={containerRef}
+        className="w-full max-w-md relative z-10 flex flex-col items-center animate-fade-in-up"
+      >
+        <div 
+          className="w-full p-8 rounded-2xl border border-portfolio-border bg-portfolio-bg-dark/80 backdrop-blur-xl shadow-2xl"
+          style={{
+            boxShadow: `0 0 60px rgba(201, 156, 173, ${glowIntensity * 0.3})`,
+          }}
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="font-agency text-4xl font-bold text-portfolio-text-primary mb-2 tracking-wider">
+              Horvath Payments
+            </h1>
+            <p className="text-portfolio-text-secondary text-sm">
+              Login to access your contract and invoices.
             </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input 
+                type="text" 
+                className="w-full bg-portfolio-bg-primary border border-portfolio-border rounded-lg px-4 py-3 text-portfolio-text-primary placeholder-portfolio-text-secondary/50 transition-all duration-300 focus:outline-none focus:border-portfolio-accent-mauve focus:shadow-glow"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <input 
+                type="text" 
+                className="w-full bg-portfolio-bg-primary border border-portfolio-border rounded-lg px-4 py-3 text-portfolio-text-primary placeholder-portfolio-text-secondary/50 transition-all duration-300 focus:outline-none focus:border-portfolio-accent-mauve focus:shadow-glow"
+                placeholder="Project Keyword"
+                value={projectKeyword}
+                onChange={e => setProjectKeyword(e.target.value)}
+                disabled={loading}
+              />
+              <p className="text-xs text-portfolio-text-secondary/70 mt-2 text-center">
+                Use the keyword from your notification email.
+              </p>
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg text-sm text-center">
+                {error}
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-portfolio-accent-mauve hover:bg-portfolio-accent-mauve/80 text-portfolio-bg-dark font-semibold py-3 rounded-lg transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-lg hover:shadow-glow"
+            >
+              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Access Portal'}
+            </button>
+          </form>
         </div>
+        
+        {/* Footer */}
+        <p className="text-center text-sm text-portfolio-text-secondary/60 mt-8">
+          Need help? Contact{' '}
+          <a 
+            href="mailto:sean@august.style" 
+            className="text-portfolio-accent-mauve hover:text-portfolio-accent-mauve/80 transition-colors"
+          >
+            sean@august.style
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

@@ -41,6 +41,7 @@
         "googleapis": "^144.0.0",
         "react-day-picker": "^9.13.0",
         "stripe": "^14.21.0",
-        "tailwindcss-animate": "^1.0.7"
+        "tailwindcss-animate": "^1.0.7",
+        "vaul": "^1.1.2"
     }
 }

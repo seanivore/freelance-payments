@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { fetchJobData, JobData } from '@/lib/data';
-import { Loader2 } from 'lucide-react';
 import { ContractView } from '@/components/ContractView';
 import { InvoiceView } from '@/components/InvoiceView';
 import { BalanceView } from '@/components/BalanceView';
@@ -15,20 +14,18 @@ export default function App() {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   
   // --- Event Tracking State ---
-  // Use ref only (not state) to avoid re-renders
   const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>([]);
   const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const processedSessionRef = useRef<string | null>(null); // Track processed sessions to prevent infinite loops
+  const processedSessionRef = useRef<string | null>(null);
 
   // Initial Data Fetch
   useEffect(() => {
     fetchJobData().then((job) => {
       setData(job);
       setLoading(false);
-      // Track initial login (only if job found and not already logged in)
       if (job && !job.state.client_status.logged_in) {
-          trackEvent('logged_in'); 
+        trackEvent('logged_in'); 
       }
     }).catch((err) => {
       console.error('Failed to fetch job data:', err);
@@ -38,16 +35,10 @@ export default function App() {
   }, []);
 
   // --- Event Buffering Logic ---
-  // Flush events as single batch - memoized to prevent dependency issues
-  // Use ref to track if flush is in progress to prevent multiple simultaneous flushes
   const isFlushingRef = useRef(false);
   
   const flushEvents = useCallback(async () => {
-    // Prevent multiple simultaneous flushes
-    if (isFlushingRef.current) {
-      console.log('Flush already in progress, skipping...');
-      return;
-    }
+    if (isFlushingRef.current) return;
     
     const buffer = eventBufferRef.current;
     if (buffer.length === 0) return;
@@ -55,12 +46,10 @@ export default function App() {
     const jobId = window.location.pathname.substring(1);
     if (!jobId || jobId === '/') return;
 
-    // Mark as flushing and create a copy of the buffer
     isFlushingRef.current = true;
-    const eventsToSend = [...buffer]; // Copy buffer before clearing
-    eventBufferRef.current = []; // Clear buffer immediately to prevent duplicate sends
+    const eventsToSend = [...buffer];
+    eventBufferRef.current = [];
 
-    // Send ALL events as single batch
     try {
       const response = await fetch(apiUrl('/api/track-event'), {
         method: 'POST',
@@ -68,7 +57,7 @@ export default function App() {
         body: JSON.stringify({
           job_id: jobId,
           event_type: 'batch',
-          event_data: eventsToSend // Use copied array
+          event_data: eventsToSend
         })
       });
 
@@ -78,38 +67,33 @@ export default function App() {
         } else {
           console.error("Event tracking failed:", response.statusText);
         }
-      } else {
-        console.log(`✅ Flushed ${eventsToSend.length} event(s) to API`);
       }
     } catch (error) {
       console.error("Event tracking error:", error);
     } finally {
-      isFlushingRef.current = false; // Reset flushing flag
+      isFlushingRef.current = false;
     }
-  }, []); // No dependencies - uses refs which are stable
+  }, []);
 
-  // Reset inactivity timer - memoized to prevent dependency issues
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       flushEvents();
     }, INACTIVITY_LIMIT);
-  }, [flushEvents]); // Depends on flushEvents which is memoized
+  }, [flushEvents]);
 
-  // Track event (adds to buffer, resets timer)
   const trackEvent = useCallback((type: string, data: any = {}) => {
     eventBufferRef.current.push({
       type,
       timestamp: new Date().toISOString(),
       data
     });
-    resetTimer(); // Reset 10min inactivity timer
-  }, [resetTimer]); // Depends on resetTimer which is memoized
+    resetTimer();
+  }, [resetTimer]);
 
-  // Immediate flush on payment completion
   const flushOnPayment = useCallback(() => {
     flushEvents();
-  }, [flushEvents]); // Depends on flushEvents which is memoized
+  }, [flushEvents]);
 
   // Activity Listeners & Unload Handler
   useEffect(() => {
@@ -118,18 +102,15 @@ export default function App() {
     
     activityEvents.forEach(e => window.addEventListener(e, handleActivity));
     
-    // Flush events on page unload/beforeunload
-    // Use a flag to prevent multiple unload handlers from firing
     let unloadHandled = false;
     const handleUnload = () => {
-      if (unloadHandled) return; // Prevent multiple calls
+      if (unloadHandled) return;
       if (eventBufferRef.current.length === 0) return;
       
       unloadHandled = true;
       const jobId = window.location.pathname.substring(1);
       if (jobId && jobId !== '/') {
-        const eventsToSend = [...eventBufferRef.current]; // Copy buffer
-        // Use fetch with keepalive for reliable unload sending
+        const eventsToSend = [...eventBufferRef.current];
         fetch(apiUrl('/api/track-event'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -139,13 +120,10 @@ export default function App() {
             event_data: eventsToSend
           }),
           keepalive: true
-        }).catch(() => {
-          // Ignore unload errors - events will be lost but that's acceptable
-        });
+        }).catch(() => {});
       }
     };
     
-    // Flush on visibility change (tab switch, minimize) - only once
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden' && !unloadHandled) {
         handleUnload();
@@ -153,14 +131,9 @@ export default function App() {
     };
     
     window.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Flush on page hide (navigation, close)
     window.addEventListener('pagehide', handleUnload);
-    
-    // Flush on beforeunload (browser close) - note: beforeunload fires before pagehide
     window.addEventListener('beforeunload', handleUnload);
 
-    // Start timer initially
     resetTimer();
 
     return () => {
@@ -170,68 +143,44 @@ export default function App() {
       window.removeEventListener('pagehide', handleUnload);
       window.removeEventListener('beforeunload', handleUnload);
     };
-  }, [resetTimer]); // Add resetTimer to dependencies since it's now memoized
+  }, [resetTimer]);
 
-  // --- Handle Stripe Return (Check for session_id query param) ---
-  // MUST be before early returns to avoid React hook order error
-  // Check for session_id BEFORE determining gate - update state optimistically
+  // --- Handle Stripe Return ---
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<'complete' | 'open' | null>(null);
   const [sessionPaymentNumber, setSessionPaymentNumber] = useState<1 | 2 | null>(null);
   
-  // Effect 1: Detect session_id on mount (runs once, before data loads)
   useEffect(() => {
-    // Check for session_id in URL (from Stripe return redirect)
-    // Read from URL before any navigation/clearing happens
-    // Also check sessionStorage as backup (set by 404.html)
     const urlParams = new URLSearchParams(window.location.search);
     let sid = urlParams.get('session_id');
     
-    // Fallback to sessionStorage if not in URL (backup from 404.html)
     if (!sid) {
       sid = sessionStorage.getItem('stripe_session_id');
       if (sid) {
-        sessionStorage.removeItem('stripe_session_id'); // Clean up after reading
+        sessionStorage.removeItem('stripe_session_id');
       }
     }
     
     if (sid) {
-      console.log('Detected session_id:', sid, urlParams.get('session_id') ? '(from URL)' : '(from sessionStorage)');
       setSessionId(sid);
-      
-      // Clear query param from URL bar to prevent reload loops, but keep it in state
-      // Use replaceState to avoid adding to history
       window.history.replaceState(null, '', window.location.pathname);
-    } else {
-      console.log('No session_id found in URL or sessionStorage');
     }
-  }, []); // Run once on mount
+  }, []);
   
-  // Effect 2: Process session_id when data becomes available
-  // CRITICAL FIX: Check session status immediately (Stripe best practice)
-  // Handle both 'complete' (success) and 'open' (failed/canceled) statuses
   useEffect(() => {
-    if (!sessionId || !data) return; // Wait for both session_id and data
+    if (!sessionId || !data) return;
     
-    // CRITICAL FIX: Prevent infinite loop - only process each session once
     if (processedSessionRef.current === sessionId) {
-      console.log('⏭️  Session already processed, skipping...');
       return;
     }
     
-    // Mark this session as being processed
     processedSessionRef.current = sessionId;
     
-    // Fetch session status immediately (Stripe best practice)
     fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
       .then(res => res.json())
       .then(sessionData => {
-        console.log('📋 Session status:', sessionData.status, sessionData);
-        
-        // Set session status for routing logic
         setSessionStatus(sessionData.status as 'complete' | 'open');
         
-        // Extract payment_number from metadata
         const paymentNumber = sessionData.metadata?.payment_number 
           ? parseInt(sessionData.metadata.payment_number, 10) as 1 | 2
           : null;
@@ -240,49 +189,38 @@ export default function App() {
         if (sessionData.status === 'complete') {
           const s = data.state.client_status;
           
-          // CRITICAL FIX: Check if payment already recorded before processing
           const payment1AlreadyRecorded = !!s.payment_1;
           const payment2AlreadyRecorded = !!s.payment_2;
           
           let paymentType: 'payment_1' | 'payment_2' | null = null;
           let updates: Partial<typeof s> = {};
           
-          // Determine which payment from metadata (preferred) or fallback to state
-          // Only process if not already recorded
           if (paymentNumber === 1 && !payment1AlreadyRecorded) {
             paymentType = 'payment_1';
             const timestamp = new Date().toISOString();
             updates = { payment_1: timestamp };
-            console.log('✅ Payment 1 completed - adding to event buffer');
           } else if (paymentNumber === 2 && !payment2AlreadyRecorded) {
             paymentType = 'payment_2';
             const timestamp = new Date().toISOString();
             updates = { payment_2: timestamp };
-            console.log('✅ Payment 2 completed - adding to event buffer');
           } else if (!paymentNumber) {
-            // Fallback: determine from state if metadata missing
             if (s.invoice && !payment1AlreadyRecorded) {
               paymentType = 'payment_1';
               const timestamp = new Date().toISOString();
               updates = { payment_1: timestamp };
-              console.log('✅ Payment 1 completed (fallback) - adding to event buffer');
             } else if (s.balance && !payment2AlreadyRecorded) {
               paymentType = 'payment_2';
               const timestamp = new Date().toISOString();
               updates = { payment_2: timestamp };
-              console.log('✅ Payment 2 completed (fallback) - adding to event buffer');
             }
           }
           
           if (paymentType && Object.keys(updates).length > 0) {
-            // CRITICAL: Add payment event to buffer (this is a new page load, so buffer is empty)
-            // Then flush immediately to ensure it's sent
             trackEvent(paymentType, {
               payment_number: paymentType === 'payment_1' ? 1 : 2,
               session_id: sessionId
             });
             
-            // Update local state optimistically
             setData(prev => {
               if (!prev) return null;
               return {
@@ -297,36 +235,23 @@ export default function App() {
               };
             });
             
-            // Flush payment event immediately (it's the only event in buffer on new page load)
-            console.log('📤 Flushing payment event immediately...');
             flushOnPayment();
-          } else {
-            console.log('⚠️ Session complete but no updates needed (payment already recorded or cannot determine payment number)');
           }
-        } else if (sessionData.status === 'open') {
-          console.log('⚠️ Session status is "open" - payment failed or was canceled. Will remount checkout.');
         }
       })
       .catch(err => {
         console.error('Error fetching session status:', err);
-        // Reset processed flag on error so we can retry
         processedSessionRef.current = null;
       });
   }, [sessionId, data?.state?.client_status?.payment_1, data?.state?.client_status?.payment_2, flushOnPayment, trackEvent]);
 
-  // Memoized emitEvent callback to prevent PdfViewer re-renders
-  // MUST be before early returns to avoid React hook order error
+  // Memoized emitEvent callback
   const emitEvent = useCallback((name: string, payload?: unknown) => {
-    // Only log contract_loaded, don't trigger state updates (prevents infinite loop)
     if (name === 'contract_loaded') {
-      console.log('Event:', name, payload);
       trackEvent('contract_loaded', payload);
-      return; // Don't update state for load events
+      return;
     }
     
-    console.log('Event:', name, payload);
-    
-    // Map event names to correct types
     let eventType = name;
     if (name === 'sign') {
       eventType = 'contract_signed';
@@ -339,7 +264,6 @@ export default function App() {
     trackEvent(eventType, payload);
     
     if (name === 'contract_signed') {
-      // Optimistic Update: Unlock next stage locally
       setData(prev => {
         if (!prev) return null;
         return {
@@ -369,8 +293,6 @@ export default function App() {
           }
         };
       });
-      // Note: Checkout session creation is now handled directly in InvoiceView
-      // No need to navigate to payment1 section - we show checkout directly
     }
     
     if (name === 'balance_acknowledged') {
@@ -387,55 +309,58 @@ export default function App() {
           }
         };
       });
-      // Note: Checkout session creation is now handled directly in BalanceView
-      // No need to navigate to payment2 section - we show checkout directly
     }
-  }, [trackEvent]); // trackEvent is memoized, setData is stable
+  }, [trackEvent]);
 
   // --- Display Logic ---
-  // All hooks must be called before any early returns
+  // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950 text-slate-100">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950 text-slate-100">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Job Not Found</h1>
-          <p className="text-slate-400">Please check the link and try again.</p>
+      <div className="min-h-screen flex items-center justify-center bg-portfolio-bg-primary">
+        <div className="flex flex-col items-center gap-4 animate-fade-in-up">
+          <div className="w-12 h-12 border-4 border-portfolio-accent-mauve border-t-transparent rounded-full animate-spin" />
+          <p className="text-portfolio-text-secondary text-sm">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Safety check for schema
-  if (!data.docs || !data.state) {
-      return (
-          <div className="flex items-center justify-center min-h-screen bg-slate-950 text-slate-100">
-             <div className="text-center p-8 bg-slate-900 rounded-lg border border-red-900/50">
-                <h1 className="text-xl font-bold text-red-500 mb-2">Invalid Job Data</h1>
-                <p className="text-slate-400 text-sm">The job data appears to be corrupted or incomplete.</p>
-                <div className="mt-4 text-xs font-mono text-slate-500 text-left bg-black/50 p-2 rounded">
-                    Missing: {!data.docs ? 'docs ' : ''} {!data.state ? 'state' : ''}
-                </div>
-             </div>
-          </div>
-      );
+  // Not found state
+  if (!data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-portfolio-bg-primary p-4">
+        <div className="text-center max-w-md animate-fade-in-up">
+          <h1 className="font-agency text-3xl text-portfolio-text-primary mb-3 tracking-wide">Job Not Found</h1>
+          <p className="text-portfolio-text-secondary">
+            The requested job could not be found. Please check the link and try again.
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  // CRITICAL FIX for BUG_01_011: Ensure client_status exists and has expected structure
-  if (!data.state.client_status) {
-    console.error('❌ Missing client_status in state:', data.state);
+  // Schema validation
+  if (!data.docs || !data.state) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950 text-slate-100">
-        <div className="text-center p-8 bg-slate-900 rounded-lg border border-red-900/50">
-          <h1 className="text-xl font-bold text-red-500 mb-2">Invalid Job State</h1>
-          <p className="text-slate-400 text-sm">The job state structure is missing client_status.</p>
+      <div className="min-h-screen flex items-center justify-center bg-portfolio-bg-primary p-4">
+        <div className="text-center max-w-md p-6 bg-portfolio-bg-dark rounded-xl border border-red-500/30 animate-fade-in-up">
+          <h1 className="font-agency text-xl text-red-400 mb-2 tracking-wide">Invalid Job Data</h1>
+          <p className="text-portfolio-text-secondary text-sm">
+            The job data appears to be incomplete. Please contact support.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data.state.client_status) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-portfolio-bg-primary p-4">
+        <div className="text-center max-w-md p-6 bg-portfolio-bg-dark rounded-xl border border-red-500/30 animate-fade-in-up">
+          <h1 className="font-agency text-xl text-red-400 mb-2 tracking-wide">Invalid Job State</h1>
+          <p className="text-portfolio-text-secondary text-sm">
+            The job state is missing required data. Please contact support.
+          </p>
         </div>
       </div>
     );
@@ -443,128 +368,71 @@ export default function App() {
 
   const { client_status } = data.state;
   
-  // CRITICAL FIX for BUG_01_011: Comprehensive logging to debug state routing
-  console.log('🔍 State Management Debug:', {
-    sessionId: sessionId || 'none',
-    client_status: {
-      logged_in: client_status.logged_in || null,
-      contract_signed: client_status.contract_signed || null,
-      invoice: client_status.invoice || null,
-      payment_1: client_status.payment_1 || null,
-      balance: client_status.balance || null,
-      payment_2: client_status.payment_2 || null
-    }
-  });
-  
   let initialSection: 'contract' | 'invoice' | 'payment1' | 'completion1' | 'balance' | 'payment2' | 'completion2' = 'contract';
 
-  // CRITICAL FIX: Check session status first (Stripe best practice)
-  // Handle both 'complete' (success) and 'open' (failed/canceled) statuses
+  // Check session status first
   if (sessionId && sessionStatus) {
     if (sessionStatus === 'complete') {
-      // Payment succeeded - route to completion view based on payment_number
       if (sessionPaymentNumber === 1) {
         initialSection = 'completion1';
-        console.log('📍 Routing: Session complete, payment_1 → completion1');
       } else if (sessionPaymentNumber === 2) {
         initialSection = 'completion2';
-        console.log('📍 Routing: Session complete, payment_2 → completion2');
       } else {
-        // Fallback: determine from state if metadata missing
         if (client_status.invoice && !client_status.payment_1) {
           initialSection = 'completion1';
-          console.log('📍 Routing: Session complete, fallback to payment_1 → completion1');
         } else if (client_status.balance && !client_status.payment_2) {
           initialSection = 'completion2';
-          console.log('📍 Routing: Session complete, fallback to payment_2 → completion2');
         }
       }
     } else if (sessionStatus === 'open') {
-      // Payment failed or canceled - remount checkout (show payment form again)
       if (sessionPaymentNumber === 1 || (client_status.invoice && !client_status.payment_1)) {
         initialSection = 'payment1';
-        console.log('📍 Routing: Session open (failed/canceled), payment_1 → remount checkout');
       } else if (sessionPaymentNumber === 2 || (client_status.balance && !client_status.payment_2)) {
         initialSection = 'payment2';
-        console.log('📍 Routing: Session open (failed/canceled), payment_2 → remount checkout');
       }
     }
   }
 
-  // State-based routing (only if no session status to handle)
-  // Check conditions in order of progression through the flow
-  // Each condition should only apply if we haven't already determined section from session status
+  // State-based routing
   if (initialSection === 'contract') {
-    // 1. Contract signed → show invoice
     if (client_status.contract_signed && !client_status.invoice) {
       initialSection = 'invoice';
-      console.log('📍 Routing: contract_signed → invoice');
     }
-    // 2. Invoice viewed → show payment1
     else if (client_status.invoice && !client_status.payment_1) {
       initialSection = 'payment1';
-      console.log('📍 Routing: invoice viewed → payment1');
     }
-    // 3. Payment 1 completed → show balance (completion1 only shows once after payment via sessionId)
-    // CRITICAL FIX: completion1 should only show ONCE right after payment_1 completes (when sessionId exists)
-    // Returning users with payment_1 done should go straight to balance
     else if (client_status.payment_1) {
-      // Check if balance is available (price2 exists)
       const balanceAvailable = !!(data.price2?.id);
       
       if (balanceAvailable) {
-        // Balance is available - route to balance
         initialSection = 'balance';
-        console.log('📍 Routing: payment_1 completed + balance available → balance');
       } else {
-        // No balance (single payment) - show completion1 only if JUST completed (has sessionId)
-        // Otherwise, if returning user, show completion2 (all done)
         if (sessionId && sessionStatus === 'complete' && sessionPaymentNumber === 1) {
           initialSection = 'completion1';
-          console.log('📍 Routing: payment_1 JUST completed (sessionId present) → completion1');
         } else {
-          // Returning user, no balance - all payments done
           initialSection = 'completion2';
-          console.log('📍 Routing: payment_1 completed, no balance, returning user → completion2');
         }
       }
     }
-    // 4. Balance viewed → show payment2
     else if (client_status.balance && !client_status.payment_2) {
       initialSection = 'payment2';
-      console.log('📍 Routing: balance viewed → payment2');
     }
-    // 5. Payment 2 completed → show completion2
     else if (client_status.payment_2) {
       initialSection = 'completion2';
-      console.log('📍 Routing: payment_2 completed → completion2');
-    }
-    // 6. Default: contract (only if no progress made)
-    else {
-      console.log('📍 Routing: no progress detected → contract (default)');
     }
   }
-  
-  console.log(`✅ Final routing decision: ${initialSection}`);
 
   // Function to create checkout session
   const createCheckoutSession = async (paymentNumber: 1 | 2) => {
     setIsCreatingSession(true);
     try {
       const jobId = window.location.pathname.substring(1);
-      
-      // CRITICAL FIX for BUG_01_015: Add explicit payment completion parameter to return URL
-      // This allows routing to completion page even when JSON state is null (workflow hasn't run yet)
-      // Format: ?session_id={CHECKOUT_SESSION_ID} (payment_number determined from session metadata)
       const returnUrl = `${window.location.origin}/${jobId}?session_id={CHECKOUT_SESSION_ID}`;
       
-      // CRITICAL FIX for BUG_01_016: Track payment event BEFORE redirect happens
-      // Add payment event to buffer now so it's included in the batch when events flush
       trackEvent(`payment_${paymentNumber}` as 'payment_1' | 'payment_2', {
         payment_number: paymentNumber,
-        session_id: 'pending' // Will be updated when session is created
+        session_id: 'pending'
       });
-      console.log(`📝 Payment ${paymentNumber} event added to buffer before checkout session creation`);
       
       const response = await fetch(apiUrl('/api/create-checkout-session'), {
         method: 'POST',
@@ -585,21 +453,11 @@ export default function App() {
 
       const session = await response.json();
       if (session.client_secret) {
-        // CRITICAL FIX for BUG_01_016: Update payment event in buffer with actual session_id
-        // Find the payment event we just added and update it with real session_id
         const paymentEventIndex = eventBufferRef.current.findIndex(
           e => e.type === `payment_${paymentNumber}` && e.data.session_id === 'pending'
         );
         if (paymentEventIndex !== -1) {
           eventBufferRef.current[paymentEventIndex].data.session_id = session.session_id;
-          console.log(`✅ Updated payment event in buffer with session_id: ${session.session_id}`);
-        } else {
-          // If event wasn't found (shouldn't happen), add it now
-          console.warn('⚠️ Payment event not found in buffer, adding now');
-          trackEvent(`payment_${paymentNumber}` as 'payment_1' | 'payment_2', {
-            payment_number: paymentNumber,
-            session_id: session.session_id
-          });
         }
         
         setClientSecret(session.client_secret);
@@ -615,13 +473,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30">
-      <header className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur-sm fixed top-0 w-full z-10">
-        <div className="font-bold text-lg tracking-tight text-white">{data.customer.name}</div>
-        <div className="text-sm text-slate-400">{data.project}</div>
-      </header>
-      
-      <main className="pt-20 pb-10">
+    <div className="min-h-screen bg-portfolio-bg-primary text-portfolio-text-primary font-sans">
+      {/* Main Content - No header, views handle their own backgrounds */}
+      <main>
         {initialSection === 'contract' ? (
           <ContractView 
             data={data}
@@ -629,7 +483,6 @@ export default function App() {
           />
         ) : initialSection === 'invoice' ? (
           clientSecret ? (
-            // Show Stripe checkout if session already created
             <PaymentView
               data={data}
               paymentNumber={1}
@@ -647,7 +500,6 @@ export default function App() {
           )
         ) : initialSection === 'balance' ? (
           clientSecret ? (
-            // Show Stripe checkout if session already created
             <PaymentView
               data={data}
               paymentNumber={2}

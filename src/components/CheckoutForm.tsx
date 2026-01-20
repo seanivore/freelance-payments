@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   PaymentElement,
   useCheckout
@@ -18,23 +18,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
   const checkoutState = useCheckout();
   
-  // Log full checkout object structure for investigation
-  useEffect(() => {
-    if (checkoutState.type === 'success') {
-      console.log('=== CHECKOUT OBJECT STRUCTURE DEBUG ===');
-      console.log('Full checkoutState:', checkoutState);
-      console.log('checkoutState.checkout:', checkoutState.checkout);
-      console.log('checkoutState.checkout.currency:', checkoutState.checkout?.currency);
-      console.log('checkoutState.checkout.total:', checkoutState.checkout?.total);
-      console.log('checkoutState.checkout.total?.total:', checkoutState.checkout?.total?.total);
-      console.log('checkoutState.checkout.total?.total?.minorUnitsAmount:', checkoutState.checkout?.total?.total?.minorUnitsAmount);
-      console.log('checkoutState.checkout.total?.total?.amount:', checkoutState.checkout?.total?.total?.amount);
-      console.log('checkoutState.checkout.total?.subtotal:', checkoutState.checkout?.total?.subtotal);
-      console.log('========================================');
-    }
-  }, [checkoutState]);
-  
-  // Calculate expected amount from price data immediately (used as fallback)
+  // Calculate expected amount from price data (used as fallback)
   const calculatedAmount = React.useMemo(() => {
     if (price) {
       const baseAmount = price.unit_amount / 100;
@@ -44,27 +28,38 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
     return null;
   }, [price, coupon]);
 
-  // ✅ ALL hooks must be called BEFORE any early returns (React Rules of Hooks)
-  // Read amount from checkout session object (per Stripe React SDK)
-  // Stripe React SDK structure: checkout.total.total.minorUnitsAmount (amount in cents)
-  // Reference: node_modules/@stripe/stripe-js/dist/stripe-js/checkout.d.ts
-  // StripeCheckoutSession.total: StripeCheckoutTotalSummary
-  // StripeCheckoutTotalSummary.total: StripeCheckoutAmount
-  // StripeCheckoutAmount.minorUnitsAmount: number (amount in cents)
-
-  // NOW early returns are safe (all hooks have been called)
+  // Loading state
   if (checkoutState.type === 'loading') {
     return (
-      <div className="flex items-center justify-center p-10">
-        <div className="text-slate-400">Loading checkout...</div>
+      <div className="w-full max-w-md animate-fade-in-up">
+        <div className="bg-portfolio-bg-dark/90 backdrop-blur-sm p-8 rounded-2xl border border-portfolio-border shadow-2xl">
+          <div className="flex flex-col items-center gap-4 py-8">
+            <div className="w-12 h-12 border-4 border-portfolio-accent-mauve border-t-transparent rounded-full animate-spin" />
+            <p className="text-portfolio-text-secondary">Loading checkout...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // Error state
   if (checkoutState.type === 'error') {
     return (
-      <div className="p-8 text-center text-red-400 bg-red-900/20 rounded-lg border border-red-900/50">
-        Error: {checkoutState.error.message}
+      <div className="w-full max-w-md animate-fade-in-up">
+        <div className="bg-portfolio-bg-dark/90 backdrop-blur-sm p-8 rounded-2xl border border-red-500/30 shadow-2xl">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-red-400 mb-2">Unable to load checkout</h3>
+            <p className="text-portfolio-text-secondary text-sm mb-4">
+              {checkoutState.error.message || 'An unexpected error occurred.'}
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="text-portfolio-accent-mauve hover:text-portfolio-accent-mauve/80 text-sm underline"
+            >
+              Try again
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -74,18 +69,22 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
     const { checkout } = checkoutState;
     setIsSubmitting(true);
+    setMessage(null);
 
-    // Email is automatically set from the customer object when session is created
-    // No need to validate or update email - Stripe handles it automatically
     const confirmResult = await checkout.confirm();
 
-    // This point will only be reached if there is an immediate error when
-    // confirming the payment. Otherwise, your customer will be redirected to
-    // your `return_url`. For some payment methods like iDEAL, your customer will
-    // be redirected to an intermediate site first to authorize the payment, then
-    // redirected to the `return_url`.
     if (confirmResult.type === 'error') {
-      setMessage(confirmResult.error.message);
+      // Show user-friendly error message
+      let errorMessage = confirmResult.error.message;
+      
+      // Make technical errors more user-friendly
+      if (errorMessage?.includes('card')) {
+        errorMessage = 'There was an issue with your card. Please check your details and try again.';
+      } else if (errorMessage?.includes('network') || errorMessage?.includes('connection')) {
+        errorMessage = 'Connection issue. Please check your internet and try again.';
+      }
+      
+      setMessage(errorMessage || 'Payment could not be processed. Please try again.');
     }
 
     setIsSubmitting(false);
@@ -93,18 +92,12 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
   const { checkout } = checkoutState;
   
-  // Read amount from checkout session object (per Stripe React SDK type definitions)
-  // Correct path: checkout.total.total.minorUnitsAmount (amount in cents as number)
-  // Fallback to calculated amount from price data if checkout total not available
+  // Read amount from checkout session
   const amountInCents = checkout?.total?.total?.minorUnitsAmount ?? null;
-  
-  // Determine display amount: use checkout amount if available, otherwise calculated fallback
   const displayAmount = amountInCents !== null 
     ? amountInCents / 100 
     : (calculatedAmount ?? 0);
   
-  // Format with proper comma separators using Intl.NumberFormat
-  // Use currency from checkout object (StripeCheckoutSession.currency: string)
   const currency = checkout?.currency?.toUpperCase() || 'USD';
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -112,55 +105,59 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(displayAmount);
-  
-  // Debug logging
-  console.log('CheckoutForm Debug:', {
-    checkoutStateType: checkoutState.type,
-    amountInCents,
-    currency: checkout?.currency,
-    displayAmount,
-    formattedAmount,
-    calculatedAmount,
-    usingCheckoutAmount: amountInCents !== null,
-    priceData: price ? { unit_amount: price.unit_amount, coupon: coupon?.amount_off } : null
-  });
 
   return (
-    <div className="max-w-md mx-auto p-8 bg-slate-900 rounded-lg border border-slate-800 shadow-xl">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Amount Due - Display from checkout session object */}
-        <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 text-center">
-          <div className="text-slate-400 text-sm mb-2">Amount Due</div>
-          <div className="text-4xl font-bold text-emerald-400">{formattedAmount}</div>
-        </div>
-        
-        <div>
-          <h4 className="mb-3 text-lg font-semibold text-slate-200">Payment</h4>
-          <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-            <PaymentElement id="payment-element" />
+    <div className="w-full max-w-md animate-fade-in-up">
+      <div className="bg-portfolio-bg-dark/90 backdrop-blur-sm p-8 rounded-2xl border border-portfolio-border shadow-2xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Amount Display */}
+          <div className="text-center py-4 bg-portfolio-bg-primary rounded-xl border border-portfolio-border">
+            <span className="text-portfolio-text-secondary text-sm block mb-1">Amount Due</span>
+            <span className="text-4xl font-bold text-portfolio-accent-mauve">{formattedAmount}</span>
           </div>
-        </div>
+          
+          {/* Payment Element */}
+          <div className="space-y-2">
+            <h4 className="font-agency text-lg text-portfolio-text-primary tracking-wide">Payment Details</h4>
+            <div className="bg-portfolio-bg-primary p-4 rounded-xl border border-portfolio-border">
+              <PaymentElement 
+                id="payment-element"
+                options={{
+                  layout: 'tabs'
+                }}
+              />
+            </div>
+          </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          id="submit"
-          className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-600 disabled:cursor-not-allowed text-slate-900 font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-emerald-500/20 flex items-center justify-center gap-2"
-        >
-          {isSubmitting ? (
-            <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            `Pay ${formattedAmount} now`
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-portfolio-accent-mauve hover:bg-portfolio-accent-mauve/80 text-portfolio-bg-dark font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-glow flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-5 h-5 border-2 border-portfolio-bg-dark border-t-transparent rounded-full animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              `Pay ${formattedAmount}`
+            )}
+          </button>
+
+          {/* Error Message */}
+          {message && (
+            <div className="p-4 text-sm text-center bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">
+              {message}
+            </div>
           )}
-        </button>
 
-        {/* Show any error or success messages */}
-        {message && (
-          <div id="payment-message" className="p-4 text-sm text-center bg-red-900/20 border border-red-900/50 rounded-lg text-red-400">
-            {message}
-          </div>
-        )}
-      </form>
+          {/* Security Note */}
+          <p className="text-xs text-center text-portfolio-text-secondary/70">
+            Your payment is secured with industry-standard encryption.
+          </p>
+        </form>
+      </div>
     </div>
   );
 };

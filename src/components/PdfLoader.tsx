@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { PdfViewer } from './PdfViewer';
-import { Loader2 } from 'lucide-react';
 
 type Section =
   | 'contract'
@@ -16,13 +15,17 @@ type PdfLoaderProps = {
   initialSection: Section;
   emitEvent: (name: string, payload?: unknown) => void;
   isPaymentSection: boolean;
+  onConfirm?: () => void;
+  onDownload?: () => void;
 };
 
 export const PdfLoader: React.FC<PdfLoaderProps> = ({
   initialPdfUrl,
   initialSection,
   emitEvent,
-  isPaymentSection
+  isPaymentSection,
+  onConfirm,
+  onDownload
 }) => {
   const [pdfBytes, setPdfBytes] = useState<ArrayBuffer | null>(null);
   const [pdfError, setPdfError] = useState(false);
@@ -37,13 +40,22 @@ export const PdfLoader: React.FC<PdfLoaderProps> = ({
   }, [initialPdfUrl, isPaymentSection]);
 
   if (pdfError) {
-    return <div className="p-8 text-center text-red-400">Failed to load PDF document.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-portfolio-bg-primary p-4">
+        <div className="text-center max-w-md p-6 bg-portfolio-bg-dark rounded-xl border border-red-500/30">
+          <p className="text-red-400">Failed to load document. Please refresh and try again.</p>
+        </div>
+      </div>
+    );
   }
   
   if (!pdfBytes) {
     return (
-      <div className="flex justify-center p-10">
-        <Loader2 className="animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-portfolio-bg-primary">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-portfolio-accent-mauve border-t-transparent rounded-full animate-spin" />
+          <p className="text-portfolio-text-secondary text-sm">Loading document...</p>
+        </div>
       </div>
     );
   }
@@ -54,6 +66,8 @@ export const PdfLoader: React.FC<PdfLoaderProps> = ({
       pdfUrl={initialPdfUrl}
       initialSection={initialSection}
       emitEvent={emitEvent}
+      onConfirm={onConfirm}
+      onDownload={onDownload}
     />
   );
 };
