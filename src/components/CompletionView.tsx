@@ -4,13 +4,11 @@ import { JobData } from '@/lib/data';
 type CompletionViewProps = {
   data: JobData;
   completionType: 'completion1' | 'completion2';
-  onNavigateToBalance?: () => void;
 };
 
 export const CompletionView: React.FC<CompletionViewProps> = ({
   data,
-  completionType,
-  onNavigateToBalance
+  completionType
 }) => {
   // Format currency helper
   const formatCurrency = (amount: number) => {
@@ -81,25 +79,12 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
               </div>
             </div>
 
-            {/* Optional: Pay balance now button */}
+            {/* Instructions for final payment */}
             {data.price2 && (
               <div className="mt-6 pt-6 border-t border-slate-700">
-                <p className="text-slate-400 text-sm mb-3">
-                  Want to pay your final balance now?
+                <p className="text-slate-400 text-sm">
+                  Please return to the payments site and login to make your final payment.
                 </p>
-                <button
-                  onClick={() => {
-                    if (onNavigateToBalance) {
-                      onNavigateToBalance();
-                    } else {
-                      // Fallback: reload page which should route to balance
-                      window.location.reload();
-                    }
-                  }}
-                  className="inline-block px-6 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-lg transition-colors text-sm border border-emerald-600/30 cursor-pointer"
-                >
-                  Pay Final Balance →
-                </button>
               </div>
             )}
           </div>

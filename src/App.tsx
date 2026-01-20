@@ -178,7 +178,6 @@ export default function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<'complete' | 'open' | null>(null);
   const [sessionPaymentNumber, setSessionPaymentNumber] = useState<1 | 2 | null>(null);
-  const [forcedSection, setForcedSection] = useState<'balance' | null>(null); // Force navigation to balance from completion1
   
   // Effect 1: Detect session_id on mount (runs once, before data loads)
   useEffect(() => {
@@ -459,14 +458,9 @@ export default function App() {
   
   let initialSection: 'contract' | 'invoice' | 'payment1' | 'completion1' | 'balance' | 'payment2' | 'completion2' = 'contract';
 
-  // CRITICAL FIX: Check for forced section first (e.g., button click from completion1)
-  if (forcedSection) {
-    initialSection = forcedSection;
-    console.log(`📍 Routing: Forced section → ${forcedSection}`);
-  }
   // CRITICAL FIX: Check session status first (Stripe best practice)
   // Handle both 'complete' (success) and 'open' (failed/canceled) statuses
-  else if (sessionId && sessionStatus) {
+  if (sessionId && sessionStatus) {
     if (sessionStatus === 'complete') {
       // Payment succeeded - route to completion view based on payment_number
       if (sessionPaymentNumber === 1) {
@@ -681,12 +675,6 @@ export default function App() {
           <CompletionView
             data={data}
             completionType={initialSection === 'completion1' ? 'completion1' : 'completion2'}
-            onNavigateToBalance={() => {
-              // Force navigation to balance section
-              setForcedSection('balance');
-              // Clear forced section after a moment to allow normal routing
-              setTimeout(() => setForcedSection(null), 100);
-            }}
           />
         ) : null}
       </main>
