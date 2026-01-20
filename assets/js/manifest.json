@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "johnson-bright-horizons": {
-      "file_path": "assets/jobs/uid-fti-422.json",
-      "job_id": "uid-fti-422",
-      "login_keyword": "bright-horizons",
-      "login_name": "Johnson"
-    }
-  },
-  "generated_at": "2026-01-20T19:13:01.829334Z"
+  "jobs": {},
+  "generated_at": "2026-01-20T20:43:26.540423Z"
 }
