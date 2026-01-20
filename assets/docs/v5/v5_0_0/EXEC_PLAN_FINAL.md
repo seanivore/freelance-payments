@@ -2,7 +2,7 @@
 
 **Created**: 2026-01-14  
 **Status**: Pre-Implementation Checklist Complete - Ready for Phase 1  
-**Location**: `assets/docs/v5/EXEC_PLAN_FINAL.md`
+**Location**: `assets/docs/v5/v5_0_0/EXEC_PLAN_FINAL.md`
 
 ## Executive Summary
 

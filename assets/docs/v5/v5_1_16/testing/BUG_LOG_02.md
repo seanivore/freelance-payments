@@ -1,3 +1,230 @@
+
+**SOLUTION for BUG_02_001**
+
+1. Remove the button to continue to make next payment 
+2. Replace with language added "Please return to the payments site and login to make your final payment." 
+
+**SOLUTION for BUG_02_002**
+
+  1. If there is an obvious fix that will not upset other working functionality, then make it now. However, this is not a big issue because as of now the completed JSON job file is so very quickly removed from the project directory — it happens just one push, made for whatever reason, following the user-exit-events.yml workflow running triggered from payment_2 checkout session completion, with Completion2 shown to user. Therefore we do not want to risk any major changes that could put overall, tested functionality, as risk. 
+
+  2. We should then clean up the assets/docs/... directory. We want to organize all of the documents from finalizing the build, all testing into, and then update our documentation. The following change have been made. 
+
+     - Created assets/docs/v5/v5_0_0/... directory 
+     - Placed most original planning and documentation there 
+       `assets/docs/v5/v5_0_0/AI_CONTEXT_PRIMER.md`
+       `assets/docs/v5/v5_0_0/CURRENT_STATE.md`
+       `assets/docs/v5/v5_0_0/EXEC_PLAN_FINAL.md`
+       `assets/docs/v5/v5_0_0/NECESSARY_CONTEXT.md`
+       `assets/docs/v5/v5_0_0/PROJECT_OVERVIEW.md`
+     - Created assets/docs/v5/v5_1_16/... directory 
+     - Moved the Stripe checkout sessions quickstart guide there and testing directory there 
+       `assets/docs/v5/v5_1_16/QUICKSTART_CHECKOUT_SESSIONS/...` 
+       `assets/docs/v5/v5_1_16/testing/...`
+     - Created assets/docs/v5/v5_2_0/... directory 
+
+  3. The following changes, review of old files, and planning file updates need to be made. 
+
+     - Transform this document `assets/docs/v5/v5_1_16/testing/BUG_LOG_02.md` into a new main log document `assets/docs/v5/v5_1_16/testing/LOG_02.md` with whatever action steps were taken after my writing this, given the notes above and the rest of this step's changes to be made 
+     - Review our original documentation to identify and confirm if we've completed everything and then consolidate things into the following noted new documents. If there is anything else that remains that I didn't cover in the rest of the bullets below, please don't hesitate to create other documents in the new versioning directory at `assets/docs/v4/v5_2_0/...`
+
+     **OLD**
+     `assets/docs/v5/v5_0_0/AI_CONTEXT_PRIMER.md`
+     `assets/docs/v5/v5_0_0/CURRENT_STATE.md`
+     `assets/docs/v5/v5_0_0/EXEC_PLAN_FINAL.md`
+     `assets/docs/v5/v5_0_0/NECESSARY_CONTEXT.md`
+     `assets/docs/v5/v5_0_0/PROJECT_OVERVIEW.md`
+
+     - Create a new file that should be our main source of technical documentation that will also be able to serve as the one-stop-shop content priming for future AI agents working on this project. We'll want to be sure that they will fully understand the project's architecture, with all of it quirks and novelty — pulling from the originally planned architecture from `assets/docs/RESOURCES/OG_JSON_ARCH_PORTFOLIO.md`, from our previous most-up-to-date-but-not-complete `assets/docs/v5/v5_0_0/AI_CONTEXT_PRIMER.md` — and also include our development philosophy and other forward planning — that you recapped well in `assets/docs/v5/v5_0_0/EXEC_PLAN_FINAL.md` pulling from `assets/docs/v5/v5_0_0/CURRENT_STATE.md` and `assets/docs/v5/v5_0_0/NECESSARY_CONTEXT.md` — and then lets be sure to define the role of every file in the project directory — which we can use as a way to also clean up the directory, for which I've pasted the current project directory structure below — and then let's also map out the user flow, how data flows, how setup of new jobs works, and end-to-end job lifespan — anything else important from `assets/docs/v5/v5_0_0/PROJECT_OVERVIEW.md` — whatever is necessary to pickup this project and make any new fixes or addition of features, etc. making sure that it can be understood from a variety of different perspectives. 
+
+     **NEW**
+     `assets/docs/PAYMENTS_PLATFORM.md`
+
+     - And then, when going through the old documentation, anything else that is left to do, including the current details for visual design updates that were planned but not yet finished. Please make sure any previously communicated emphasis from the prior documentation, in addition to an emphasis on the fact that this platform is a place where clients who are paying me for high-bar design work — usually clients identify me because my visual work stands out — and thus we can't send them through a platform that doesn't speak to that, particularly because it is something that they will use before work on their projects even starts, giving them a strong first impression should be our goal. Please address any changes that have already been mentioned, as well as any that you expect will be needed or will help set the project apart, creating that great first impression. I did really like the original homepage we had because of the visual effect following the mouse — the original description starts here `assets/docs/v1/v1_DEV_PLAN.md` referencing this CSS for the rest of the august.style portfolio aesthetic `assets/docs/v1/EXAMPLE_FILES/styles_example.css` and then further detailed in `assets/docs/v2/MODULAR_REFACTOR_PLANNING.md` under the heading "Design UI & UX Flow, Interrupted" — which seems like a good place to start. 
+     - Finally, as a **more legitimate long term solution to "BUG_02_002"** — and why all of this information started out being written here before turning into a huge detailed wrap-up — I'd like to have a guide, as detailed as possible, to send copies of the PDFs to the client user when they complete their payment_2, as well as an automated email thanking them for the payment_1 completion. We might want to take advantage of our current OAuth Google API setup, or maybe there is a better alternative, I'm not sure. It would need to include changing the "download/view" confirmation gating step on InvoiceView and BalanceView to just "Clicking continue acknowledges you've viewed these documents. You'll be taken to make your first payment and a copy of your documents will be available to download in the thank you email received in response to you payment." Something along those lines. We'll still have a download button for them at those phases but it can be off to the side and not called attention to. We should also note that the final payment_2 email should send actual attached PDFs with the email because when that final payment is made, the system immediately starts the process of archiving the job details inside the payments platform. This will ensure that the client 100% has their documents clearing my end of any liability before the job is closed out in the platform, without us needed to make any changes to the current system other than those noted. Any other necessary details and as much detail as possible is greatly appreciated. 
+
+     **NEW** 
+     `assets/docs/v5/v5_2_0/DESIGN_UPDATES.md` 
+     `assets/docs/v5/v5_2_0/IMPL_EMAIL_PDFS.md`
+
+**details on the bug testing can be found below the project tree**
+
+```
+├── _config.yml
+├── .env
+├── .env.local
+├── .example.env
+├── .gitattributes
+├── .gitconfig-smart-push.sh
+├── .github
+│   ├── scripts
+│   │   ├── orchestration
+│   │   │   ├── admin_push.py
+│   │   │   ├── user_behavior.py
+│   │   │   └── user_exit_events.py
+│   │   └── utils
+│   │       └── json_io.py
+│   └── workflows
+│       ├── admin-push.yml
+│       └── user-exit-events.yml
+├── .gitignore
+├── .vercel
+│   ├── project.json
+│   └── README.txt
+├── 404.html
+├── api
+│   ├── create-checkout-session.js
+│   ├── google
+│   │   ├── auth.js
+│   │   └── callback.js
+│   ├── session-status.js
+│   ├── sign-contract.js
+│   ├── track-event.js
+│   └── webhook.js
+├── assets
+│   ├── css
+│   │   ├── input.css
+│   │   └── styles.css
+│   ├── docs
+│   │   ├── GUIDE_uid-xxx-xxx.json.md
+│   │   ├── RESOURCES
+│   │   ├── uid-ovc-774.json
+│   │   ├── uid-xxx-xxx.json
+│   │   ├── v1
+│   │   ├── v2
+│   │   ├── v3
+│   │   ├── v4
+│   │   └── v5
+│   │       ├── v5_0_0
+│   │       │   ├── AI_CONTEXT_PRIMER.md
+│   │       │   ├── CURRENT_STATE.md
+│   │       │   ├── EXEC_PLAN_FINAL.md
+│   │       │   ├── NECESSARY_CONTEXT.md
+│   │       │   └── PROJECT_OVERVIEW.md
+│   │       └── v5_1_16
+│   │           ├── QUICKSTART_CHECKOUT_SESSIONS
+│   │           │   ├── App.jsx
+│   │           │   ├── build_checkout_page_session_api_guide.md
+│   │           │   ├── checkoutForm.jsx
+│   │           │   ├── complete.jsx
+│   │           │   ├── POST_API_CHECKOUT_SESSION_CREATE.md
+│   │           │   └── server.js
+│   │           └── testing
+│   │               ├── BUG_01_015.md
+│   │               ├── BUG_01_016.md
+│   │               ├── BUG_02_001-vercel-logs.json
+│   │               ├── BUG_LOG_02.md
+│   │               ├── LOG_01.md
+│   │               ├── TEST_uid-ilt-036.md
+│   │               ├── test-log-01-uid-bnp-832-vercel-log.json
+│   │               ├── uid-jxr-848.json
+│   │               ├── uid-ngq-236.json
+│   │               ├── uid-nsq-976.json
+│   │               ├── uid-pex-655.json
+│   │               ├── uid-tmw-100.json
+│   │               ├── uid-tst-001.json
+│   │               ├── uid-tst-002.json
+│   │               ├── uid-tst-003.json
+│   │               ├── uid-unc-480.json
+│   │               ├── vercel_api_logs_events.json
+│   │               └── vercel_error_logs.json
+│   ├── favicon
+│   │   ├── apple-touch-icon.png
+│   │   ├── favicon-96x96.png
+│   │   ├── favicon.ico
+│   │   ├── favicon.svg
+│   │   ├── site.webmanifest
+│   │   ├── web-app-manifest-192x192.png
+│   │   └── web-app-manifest-512x512.png
+│   ├── font
+│   │   ├── AgencyFB-RegularCompressed.otf
+│   │   └── AgencyFB-RegularCondensed.otf
+│   ├── jobs
+│   │   └── .gitkeep
+│   ├── js
+│   │   ├── checkout-controller.js
+│   │   ├── completion-controller.js
+│   │   ├── contract-controller.js
+│   │   ├── event-tracker.js
+│   │   ├── flow-manager.js
+│   │   ├── glow-effect.js
+│   │   ├── invoice-controller.js
+│   │   ├── manifest.json
+│   │   └── payment-lookup.js
+│   ├── media
+│   ├── pdf
+│   │   ├── balance
+│   │   │   ├── .gitkeep
+│   │   │   ├── bal-bnp-832.pdf
+│   │   │   ├── bal-oac-784.pdf
+│   │   │   └── bal-qee-576.pdf
+│   │   ├── contract
+│   │   │   ├── .gitkeep
+│   │   │   ├── kon-bnp-832.pdf
+│   │   │   ├── kon-oac-784.pdf
+│   │   │   └── kon-qee-576.pdf
+│   │   └── invoice
+│   │       ├── .gitkeep
+│   │       ├── inv-bnp-832.pdf
+│   │       ├── inv-oac-784.pdf
+│   │       └── inv-qee-576.pdf
+│   ├── scripts
+│   │   └── workflow_id.py
+│   └── templates
+│       ├── bal-xxx-xxx.pdf
+│       ├── bal-xxx-xxx.txt
+│       ├── inv-xxx-xxx.pdf
+│       ├── inv-xxx-xxx.txt
+│       ├── kon-xxx-xxx.pdf
+│       └── kon-xxx-xxx.txt
+├── CNAME
+├── dist
+├── index.html
+├── job.html
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── src
+│   ├── App.tsx
+│   ├── components
+│   │   ├── BalanceView.tsx
+│   │   ├── CheckoutForm.tsx
+│   │   ├── CompletionView.tsx
+│   │   ├── ContractView.tsx
+│   │   ├── DatePicker.tsx
+│   │   ├── GateBar.tsx
+│   │   ├── InvoiceView.tsx
+│   │   ├── PaymentView.tsx
+│   │   ├── PdfLoader.tsx
+│   │   ├── PdfViewer.tsx
+│   │   ├── PenCanvas.tsx
+│   │   ├── SignatureModal.tsx
+│   │   ├── Toolbar.tsx
+│   │   └── ui
+│   │       ├── button.tsx
+│   │       ├── calendar.tsx
+│   │       └── popover.tsx
+│   ├── config
+│   │   └── pdfViewer.config.json
+│   ├── index.css
+│   ├── index.tsx
+│   ├── job.tsx
+│   ├── lib
+│   │   ├── api.ts
+│   │   ├── data.ts
+│   │   ├── pdf-utils.ts
+│   │   ├── stripe.ts
+│   │   └── utils.ts
+│   └── vite-env.d.ts
+├── tailwind.config.js
+├── tsconfig.json
+├── tsconfig.node.json
+├── vercel.json
+└── vite.config.ts
+```
+
+
+---
 BUG_02_001 — First user session, Completion1 button doesn't move user forward 
 
 TEST FILE: uid-qee-576.json
@@ -173,9 +400,9 @@ job-BIx_agM0.js:50 ✅ Flushed 2 event(s) to API
 ===
 
 ---
-BUG_02_002 — Completed user returning not served Complete2 
+BUG_02_002 — Completed user returning not served Complete2 **NOT SURE how relevant this is given the rest of the testing and the current accurate expected behavior**
 
-Possibly because of it not loading the updated JSON. 
+Possibly because of it not loading the updated JSON. The JSON was updated accurately, but console log displayed says that it is not. Accurate JSON available remote, not pulled locally. However, as things stand the job's JSON is only available at all for a limited amount of time. 
 
 TEST FILE: uid-oac-784.json
 LOGIN KEYS: Mobile -- town-seams 
@@ -328,6 +555,7 @@ Because of this expected behavior, there doesn't seem to be reason to overemphas
 
 ===
 
+---
 TEST FILE: uid-qee-576.json
 LOGIN KEYS: Miller -- last-resort 
 TEST STATE: Completed through payment_1 with accurate events recorded to JSON 
@@ -336,6 +564,8 @@ TEST STATE: Completed through payment_1 with accurate events recorded to JSON
 2. User was routed to balance accurately then made payment_2
 3. User used card that was declined accurately and new card allowed payment to process 
 4. User was redirected to Completion2 accurately 
+5. Changes were pulled locally, this file was updated and then pushed 
+6. Changes were pulled locally, this time meaning the job was deleted from the directory and Stripe catalog product archived 
 
 --console logs from session--
 
