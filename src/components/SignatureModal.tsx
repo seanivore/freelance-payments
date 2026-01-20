@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Check, CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { Check } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   Drawer,
@@ -11,8 +10,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from './ui/drawer';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
 
 interface SignatureModalProps {
@@ -27,21 +24,22 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   onSign
 }) => {
   const [legalName, setLegalName] = useState('');
-  const [signedDate, setSignedDate] = useState<Date>(new Date());
-  const [calendarOpen, setCalendarOpen] = useState(false);
+  // Default to today's date in YYYY-MM-DD format for native input
+  const [signedDate, setSignedDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
 
   const handleSave = () => {
     if (legalName && signedDate) {
-      // Format date as YYYY-MM-DD for the API
-      const formattedDate = format(signedDate, 'yyyy-MM-dd');
-      onSign(legalName, formattedDate);
+      onSign(legalName, signedDate);
       // Reset form
       setLegalName('');
-      setSignedDate(new Date());
+      setSignedDate(new Date().toISOString().split('T')[0]);
     }
   };
 
-  const isValid = legalName.trim().length > 0 && signedDate !== null;
+  const isValid = legalName.trim().length > 0 && signedDate.length > 0;
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -76,43 +74,21 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
               />
             </div>
 
-            {/* Date Input */}
+            {/* Date Input - Native input for best mobile UX */}
             <div className="space-y-2">
               <label 
+                htmlFor="signed-date"
                 className="text-sm font-medium text-portfolio-text-secondary"
               >
                 Date
               </label>
-              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="w-full bg-portfolio-bg-primary border border-portfolio-border rounded-lg px-4 py-3 text-portfolio-text-primary transition-all duration-300 focus:outline-none focus:border-portfolio-accent-mauve focus:shadow-glow flex items-center justify-between"
-                  >
-                    <span>{signedDate ? format(signedDate, 'PPP') : 'Select date'}</span>
-                    <CalendarIcon className="h-4 w-4 text-portfolio-text-secondary" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  className="w-auto p-0 bg-portfolio-bg-dark border-portfolio-border" 
-                  align="center"
-                  side="top"
-                  sideOffset={8}
-                >
-                  <Calendar
-                    mode="single"
-                    selected={signedDate}
-                    onSelect={(date) => {
-                      if (date) {
-                        setSignedDate(date);
-                        setCalendarOpen(false);
-                      }
-                    }}
-                    initialFocus
-                    className="rounded-md"
-                  />
-                </PopoverContent>
-              </Popover>
+              <input
+                id="signed-date"
+                type="date"
+                value={signedDate}
+                onChange={(e) => setSignedDate(e.target.value)}
+                className="w-full bg-portfolio-bg-primary border border-portfolio-border rounded-lg px-4 py-3 text-portfolio-text-primary transition-all duration-300 focus:outline-none focus:border-portfolio-accent-mauve focus:shadow-glow"
+              />
             </div>
 
             {/* Legal Notice */}

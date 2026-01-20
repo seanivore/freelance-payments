@@ -116,30 +116,28 @@ GET https://payments.august.style/assets/media/pdf-viewer-bg-art-2.webp 404 (Not
 
 ---
 
-### BUG_03_006 - Desktop Date Picker Doesn't Open Calendar
+### BUG_03_006 - Date Picker Calendar Too Wide on Mobile (Revisited)
 
 **Date**: 2026-01-20  
 **Status**: FIXED  
-**Severity**: Low (UX/legitimacy issue)
+**Severity**: Low (UX issue)
 
-**Issue**: On desktop browsers, the date input field for signing the contract doesn't visually open a calendar picker when clicked. It defaults to "today" which is helpful, but users can't easily see or interact with a calendar to select a different date, reducing the perceived legitimacy of the signing flow.
+**Issue**: The native iOS date picker was overflowing the drawer width on mobile (originally reported as BUG_03_003). An attempted fix replaced the native picker with a custom Calendar component, but this caused worse UX issues - the calendar layout was broken with day headers misaligned ("Su" in one column, "MoTuWeThFrSa" crammed together).
 
-**Expected**: Clicking the date field should open an interactive calendar picker  
-**Actual**: Native `<input type="date">` on desktop requires clicking a small calendar icon; not intuitive
+**Expected**: Date picker should fit within drawer and be touch-friendly on mobile  
+**Actual**: Custom calendar had broken layout; native picker was overflowing drawer
 
-**Root Cause**: Native HTML `<input type="date">` has inconsistent UX across browsers. On Chrome desktop, users must click a small calendar icon inside the input rather than the field itself.
+**Root Cause**: The custom Calendar component (react-day-picker) wasn't properly styled/constrained. Meanwhile, the original native iOS picker is touch-optimized and beautiful - it just needed proper drawer constraints.
 
 **Fix Implemented**:
-1. Replaced native `<input type="date">` with custom Popover + Calendar component
-2. Full-width clickable button displays formatted date (e.g., "January 20th, 2026")
-3. Calendar icon on right side indicates interactivity
-4. Calendar popover opens above the button on click
-5. Styled Calendar component with portfolio dark theme colors
-6. Calendar auto-closes on date selection
+1. **Reverted** to native `<input type="date">` (best mobile UX)
+2. Kept drawer constraints (`max-h-[90vh] overflow-y-auto`) to contain the picker
+3. Native picker auto-selects today's date and provides excellent touch UX on iOS
+
+**Note**: On desktop, the native date input requires clicking a small calendar icon, but this is acceptable given the superior mobile experience. The drawer constraints ensure the native iOS picker stays within bounds.
 
 **Files Modified**:
-- `src/components/SignatureModal.tsx`: Replaced native input with Popover/Calendar
-- `src/components/ui/calendar.tsx`: Added portfolio dark theme styling
+- `src/components/SignatureModal.tsx`: Reverted to native date input
 
 ---
 
@@ -310,7 +308,7 @@ The JSON was updated at 09:26:50 but Vercel never redeployed because of `[skip c
 | BUG_03_003 | Low | **FIXED** | Drawer viewport constraints |
 | BUG_03_004 | Low | **FIXED** | Glow effect timing/intensity |
 | BUG_03_005 | **CRITICAL** | **FIXED** | `[skip ci]` prevents Vercel redeploy |
-| BUG_03_006 | Low | **FIXED** | Native date input UX inconsistency |
+| BUG_03_006 | Low | **FIXED** | Reverted to native date picker with drawer constraints |
 | BUG_03_007 | Low | **FIXED** | Toolbar styling refinements |
 
 ---
@@ -322,7 +320,7 @@ The JSON was updated at 09:26:50 but Vercel never redeployed because of `[skip c
 3. **BUG_03_003**: Added viewport constraints to SignatureModal drawer
 4. **BUG_03_004**: Improved glow effect intensity, timing, and proximity detection
 5. **BUG_03_005**: Removed `[skip ci]` and added Vercel deploy hook trigger
-6. **BUG_03_006**: Replaced native date input with styled Popover/Calendar component
+6. **BUG_03_006**: Reverted to native date input (best mobile UX) with drawer constraints
 7. **BUG_03_007**: Updated toolbar styling with semi-transparency, refined border, and drop shadow
 
 ## Next Steps
