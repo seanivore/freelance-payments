@@ -57,13 +57,13 @@
             "contract_signed": "2026-01-20T09:25:02.616Z",
             "invoice": "2026-01-20T09:26:04.583Z",
             "payment_1": "2026-01-20T09:26:04.584Z",
-            "balance": null,
-            "payment_2": null
+            "balance": "2026-01-20T15:33:11.934Z",
+            "payment_2": "2026-01-20T15:33:11.936Z"
         }
     },
     "product": {
         "name": "Art & Soul Company Website",
-        "active": true,
+        "active": false,
         "description": "The website for Art & Soul, a company that sells art and soul products.",
         "id": "uid-ovc-774",
         "login_name": "Rose",
@@ -121,7 +121,7 @@
         "count": 2,
         "currency": "usd",
         "unit_amount": 3850000,
-        "active": true,
+        "active": false,
         "billing_scheme": "per_unit",
         "pay_by": "before project launch",
         "pay_days": 14,
