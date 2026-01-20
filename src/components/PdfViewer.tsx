@@ -90,7 +90,17 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     
     try {
       const page = await pdfDoc.getPage(pageNum);
-      const viewport = page.getViewport({ scale });
+      
+      // Calculate responsive scale based on viewport width
+      // Get the container width (account for padding)
+      const containerWidth = Math.min(window.innerWidth - 16, 896); // max-w-4xl = 896px, 16px for padding
+      const originalViewport = page.getViewport({ scale: 1 });
+      
+      // Calculate scale to fit width, but don't exceed the configured scale
+      const fitWidthScale = containerWidth / originalViewport.width;
+      const responsiveScale = Math.min(scale, fitWidthScale);
+      
+      const viewport = page.getViewport({ scale: responsiveScale });
 
       const pdfCtx = canvas.getContext('2d', { alpha: false });
       if (!pdfCtx) {
@@ -270,7 +280,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     
     for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
       canvases.push(
-        <div key={pageNum} className="flex justify-center">
+        <div key={pageNum} className="flex justify-center overflow-hidden">
           <canvas
             ref={(el) => {
               if (el) {
@@ -279,7 +289,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
                 canvasRefs.current.delete(pageNum);
               }
             }}
-            className="shadow-paper"
+            className="shadow-paper max-w-full h-auto"
             style={{
               backgroundColor: '#faf9f6',
             }}
@@ -337,8 +347,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       </div>
 
       {/* PDF Content Area */}
-      <div className="relative z-0 py-6 px-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="relative z-0 py-6 px-2 sm:px-4">
+        <div className="max-w-4xl mx-auto w-full overflow-hidden">
           <div className="flex flex-col gap-4">
             {renderCanvasElements()}
           </div>

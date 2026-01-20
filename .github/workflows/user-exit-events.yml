@@ -109,14 +109,16 @@ jobs:
           
           # Commit if there are changes
           if ! git diff --cached --quiet; then
-            git commit -m "Update user behavior stats [skip ci]"
+            git commit -m "Update user behavior stats"
             
             # Push with simple retry
             MAX_RETRIES=3
+            PUSH_SUCCESS=false
             for i in $(seq 1 $MAX_RETRIES); do
               if git push origin freelance-payments; then
                 echo "✅ Successfully pushed changes"
-                exit 0
+                PUSH_SUCCESS=true
+                break
               else
                 echo "⚠️  Push failed, attempt $i/$MAX_RETRIES"
                 if [ $i -lt $MAX_RETRIES ]; then
@@ -131,8 +133,26 @@ jobs:
               fi
             done
             
-            echo "❌ Failed to push after $MAX_RETRIES attempts"
-            exit 1
+            if [ "$PUSH_SUCCESS" = false ]; then
+              echo "❌ Failed to push after $MAX_RETRIES attempts"
+              exit 1
+            fi
+            
+            # Signal that we need to trigger deploy
+            echo "NEEDS_DEPLOY=true" >> $GITHUB_ENV
           else
             echo "ℹ️  No changes to commit"
+          fi
+
+      - name: Trigger Vercel Deploy
+        if: env.NEEDS_DEPLOY == 'true'
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
+            echo "🚀 Triggering Vercel deployment..."
+            curl -X POST "$VERCEL_DEPLOY_HOOK" || echo "⚠️  Deploy hook failed, Vercel may still deploy from push"
+            echo "✅ Deploy hook triggered"
+          else
+            echo "ℹ️  No VERCEL_DEPLOY_HOOK secret configured - relying on push-triggered deploy"
           fi

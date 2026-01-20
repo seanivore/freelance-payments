@@ -29,6 +29,10 @@ export default defineConfig({
           src: 'assets/jobs',
           dest: 'assets'
         },
+        {
+          src: 'assets/media',
+          dest: 'assets'
+        },
         // Only copy PDF directory if it contains files (handles empty directories gracefully)
         ...(hasPdfFiles('assets/pdf') ? [{
           src: 'assets/pdf/**/*',

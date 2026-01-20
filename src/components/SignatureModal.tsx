@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from './ui/button';
 import {
   Drawer,
@@ -10,6 +11,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from './ui/drawer';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
 
 interface SignatureModalProps {
@@ -24,23 +27,26 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   onSign
 }) => {
   const [legalName, setLegalName] = useState('');
-  const [signedDate, setSignedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [signedDate, setSignedDate] = useState<Date>(new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const handleSave = () => {
     if (legalName && signedDate) {
-      onSign(legalName, signedDate);
+      // Format date as YYYY-MM-DD for the API
+      const formattedDate = format(signedDate, 'yyyy-MM-dd');
+      onSign(legalName, formattedDate);
       // Reset form
       setLegalName('');
-      setSignedDate(new Date().toISOString().split('T')[0]);
+      setSignedDate(new Date());
     }
   };
 
-  const isValid = legalName.trim().length > 0 && signedDate.length > 0;
+  const isValid = legalName.trim().length > 0 && signedDate !== null;
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent>
-        <div className="mx-auto w-full max-w-md">
+      <DrawerContent className="max-h-[90vh] overflow-y-auto">
+        <div className="mx-auto w-full max-w-md px-4">
           <DrawerHeader className="text-center">
             <DrawerTitle className="font-agency text-2xl tracking-wide">
               Sign Contract
@@ -73,18 +79,40 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
             {/* Date Input */}
             <div className="space-y-2">
               <label 
-                htmlFor="signed-date"
                 className="text-sm font-medium text-portfolio-text-secondary"
               >
                 Date
               </label>
-              <input
-                id="signed-date"
-                type="date"
-                value={signedDate}
-                onChange={(e) => setSignedDate(e.target.value)}
-                className="w-full bg-portfolio-bg-primary border border-portfolio-border rounded-lg px-4 py-3 text-portfolio-text-primary transition-all duration-300 focus:outline-none focus:border-portfolio-accent-mauve focus:shadow-glow"
-              />
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full bg-portfolio-bg-primary border border-portfolio-border rounded-lg px-4 py-3 text-portfolio-text-primary transition-all duration-300 focus:outline-none focus:border-portfolio-accent-mauve focus:shadow-glow flex items-center justify-between"
+                  >
+                    <span>{signedDate ? format(signedDate, 'PPP') : 'Select date'}</span>
+                    <CalendarIcon className="h-4 w-4 text-portfolio-text-secondary" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="w-auto p-0 bg-portfolio-bg-dark border-portfolio-border" 
+                  align="center"
+                  side="top"
+                  sideOffset={8}
+                >
+                  <Calendar
+                    mode="single"
+                    selected={signedDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSignedDate(date);
+                        setCalendarOpen(false);
+                      }
+                    }}
+                    initialFocus
+                    className="rounded-md"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Legal Notice */}

@@ -16,7 +16,7 @@ function LoginApp() {
   // Mouse glow effect state
   const containerRef = useRef<HTMLDivElement>(null);
   const [glowPosition, setGlowPosition] = useState({ x: 0, y: 0 });
-  const [glowIntensity, setGlowIntensity] = useState(0.15);
+  const [glowIntensity, setGlowIntensity] = useState(0.35);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Detect touch device
@@ -29,6 +29,14 @@ function LoginApp() {
     if (!containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
+    
+    // Check if near the card (within 100px)
+    const nearCard = 
+      e.clientX >= rect.left - 100 &&
+      e.clientX <= rect.right + 100 &&
+      e.clientY >= rect.top - 100 &&
+      e.clientY <= rect.bottom + 100;
+    
     const isInside =
       e.clientX >= rect.left &&
       e.clientX <= rect.right &&
@@ -38,20 +46,22 @@ function LoginApp() {
     setGlowPosition({ x: e.clientX, y: e.clientY });
     
     if (isInside) {
-      // Calculate distance from center for edge intensity
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const distance = Math.sqrt(
-        Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2)
+      // Inside the card - brightest
+      setGlowIntensity(0.55);
+    } else if (nearCard) {
+      // Near the card - calculate gradual intensity based on distance
+      const distanceToCard = Math.min(
+        Math.abs(e.clientX - rect.left),
+        Math.abs(e.clientX - rect.right),
+        Math.abs(e.clientY - rect.top),
+        Math.abs(e.clientY - rect.bottom)
       );
-      const maxDistance = Math.sqrt(
-        Math.pow(rect.width / 2, 2) + Math.pow(rect.height / 2, 2)
-      );
-      // Intensity increases near edges (0.3 to 0.6)
-      const newIntensity = 0.3 + (distance / maxDistance) * 0.3;
-      setGlowIntensity(newIntensity);
+      // Gradual transition from 0.55 (at edge) to 0.35 (at 100px away)
+      const proximityIntensity = 0.55 - (distanceToCard / 100) * 0.2;
+      setGlowIntensity(Math.max(0.35, proximityIntensity));
     } else {
-      setGlowIntensity(0.15);
+      // Far from card - base intensity (still visible)
+      setGlowIntensity(0.35);
     }
   }, []);
 
@@ -131,16 +141,16 @@ function LoginApp() {
         <div
           className="fixed pointer-events-none -z-10"
           style={{
-            width: '500px',
-            height: '500px',
+            width: '600px',
+            height: '600px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(201, 156, 173, 0.5) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(201, 156, 173, 0.6) 0%, rgba(201, 156, 173, 0.2) 40%, transparent 70%)',
             transform: 'translate(-50%, -50%)',
             left: glowPosition.x,
             top: glowPosition.y,
             opacity: glowIntensity,
-            filter: 'blur(80px)',
-            transition: 'opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+            filter: 'blur(60px)',
+            transition: 'opacity 100ms ease-out',
           }}
         />
       )}
@@ -151,9 +161,9 @@ function LoginApp() {
         className="w-full max-w-md relative z-10 flex flex-col items-center animate-fade-in-up"
       >
         <div 
-          className="w-full p-8 rounded-2xl border border-portfolio-border bg-portfolio-bg-dark/80 backdrop-blur-xl shadow-2xl"
+          className="w-full p-8 rounded-2xl border border-portfolio-border bg-portfolio-bg-dark/80 backdrop-blur-xl shadow-2xl transition-shadow duration-100 ease-out"
           style={{
-            boxShadow: `0 0 60px rgba(201, 156, 173, ${glowIntensity * 0.3})`,
+            boxShadow: `0 0 ${40 + glowIntensity * 40}px rgba(201, 156, 173, ${glowIntensity * 0.4})`,
           }}
         >
           {/* Header */}
