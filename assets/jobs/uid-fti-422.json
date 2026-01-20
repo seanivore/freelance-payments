@@ -1,171 +1,171 @@
 {
-  "project": "Bright Horizons Psychiatry Client Portal & Website",
-  "contract": {
-    "work_start": "2026-01-20",
-    "work_end": "2026-02-10",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-20T12:33:35.509838Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Bright Horizons Psychiatry Client Portal & Website",
     "contract": {
-      "id": "kon-fti-422",
-      "pdf": "assets/pdf/contract/kon-fti-422.pdf",
-      "file_id": "1XM8_bFy-IYBHIGdCbsmCSr5KIyVSsuld8a7bEZhBvCo",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-fti-422.pdf",
-      "sha256": "e111c06b9137145416e91e7ae9a33c73fed10206dc9d804ddd6561341e968a64",
-      "created": "2026-01-20T12:33:42.990877Z"
+        "work_start": "2026-01-20",
+        "work_end": "2026-02-10",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-20T12:33:35.509838Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-fti-422",
-      "pdf": "assets/pdf/invoice/inv-fti-422.pdf",
-      "file_id": "1dMfrHbSEzIlaBn5g7IBB-s2Le_sRxacr_bazaAJSP_I",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-fti-422.pdf",
-      "sha256": "34f99546bb843e9cfe2a957ec89848b46603d25e275d2c02732119807dc8bf47",
-      "created": "2026-01-20T12:33:49.069402Z"
+    "docs": {
+        "contract": {
+            "id": "kon-fti-422",
+            "pdf": "assets/pdf/contract/kon-fti-422.pdf",
+            "file_id": "1XM8_bFy-IYBHIGdCbsmCSr5KIyVSsuld8a7bEZhBvCo",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-fti-422.pdf",
+            "sha256": "e111c06b9137145416e91e7ae9a33c73fed10206dc9d804ddd6561341e968a64",
+            "created": "2026-01-20T12:33:42.990877Z"
+        },
+        "invoice": {
+            "id": "inv-fti-422",
+            "pdf": "assets/pdf/invoice/inv-fti-422.pdf",
+            "file_id": "1dMfrHbSEzIlaBn5g7IBB-s2Le_sRxacr_bazaAJSP_I",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-fti-422.pdf",
+            "sha256": "34f99546bb843e9cfe2a957ec89848b46603d25e275d2c02732119807dc8bf47",
+            "created": "2026-01-20T12:33:49.069402Z"
+        },
+        "balance": {
+            "id": "bal-fti-422",
+            "pdf": "assets/pdf/balance/bal-fti-422.pdf",
+            "file_id": "1JF1hq5QOX0FAvNDzwIVcnhqfOBT5J4KJ7Di6HMDndLU",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-fti-422.pdf",
+            "sha256": "bb8fa6464ff5673cacf8d22a6585436541779c44eed9e74ee3cfbfb8b35105a3",
+            "created": "2026-01-20T12:33:54.691125Z"
+        }
     },
-    "balance": {
-      "id": "bal-fti-422",
-      "pdf": "assets/pdf/balance/bal-fti-422.pdf",
-      "file_id": "1JF1hq5QOX0FAvNDzwIVcnhqfOBT5J4KJ7Di6HMDndLU",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-fti-422.pdf",
-      "sha256": "bb8fa6464ff5673cacf8d22a6585436541779c44eed9e74ee3cfbfb8b35105a3",
-      "created": "2026-01-20T12:33:54.691125Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-20T12:33:35.509838Z",
-      "product": "uid-fti-422",
-      "price_1": "price_1Sre7n9fljwH26CPdwjzsmrY",
-      "price_2": "price_1Sre7n9fljwH26CPQiwc7x0w",
-      "customer": "cus-fti-422",
-      "coupon": "cou-fti-422"
+    "state": {
+        "objects": {
+            "created": "2026-01-20T12:33:35.509838Z",
+            "product": "uid-fti-422",
+            "price_1": "price_1Sre7n9fljwH26CPdwjzsmrY",
+            "price_2": "price_1Sre7n9fljwH26CPQiwc7x0w",
+            "customer": "cus-fti-422",
+            "coupon": "cou-fti-422"
+        },
+        "client_status": {
+            "logged_in": "2026-01-20T14:50:09.493Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Client Payment Portal & Website Development",
-    "active": true,
-    "description": "Development of a client payment portal and website for Bright Horizons Psychiatry.",
-    "id": "uid-fti-422",
-    "login_name": "Johnson",
-    "login_keyword": "bright-horizons",
-    "service_usd": 5520000,
-    "total_payments": 2,
-    "discount_usd": 20000,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Dr. Sarah Johnson",
-    "business": "Bright Horizons Psychiatry",
-    "title": "Psychiatrist",
-    "email": "s.johnson@brighthorizonspsychiatry.com",
-    "phone": "555-555-5555",
-    "id": "cus-fti-422",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02108",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 20000,
-    "applies_to": {
-      "products": [
-        "uid-fti-422"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-fti-422",
-    "max_redemptions": 1,
-    "name": "BRIGHT-HORIZONS"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 2760000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-fti-422"
-      ]
+        "name": "Client Payment Portal & Website Development",
+        "active": true,
+        "description": "Development of a client payment portal and website for Bright Horizons Psychiatry.",
+        "id": "uid-fti-422",
+        "login_name": "Johnson",
+        "login_keyword": "bright-horizons",
+        "service_usd": 5520000,
+        "total_payments": 2,
+        "discount_usd": 20000,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1Sre7n9fljwH26CPdwjzsmrY"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 2760000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-fti-422"
-      ]
+    "customer": {
+        "name": "Dr. Sarah Johnson",
+        "business": "Bright Horizons Psychiatry",
+        "title": "Psychiatrist",
+        "email": "s.johnson@brighthorizonspsychiatry.com",
+        "phone": "555-555-5555",
+        "id": "cus-fti-422",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02108",
+            "country": "US"
+        }
     },
-    "id": "price_1Sre7n9fljwH26CPQiwc7x0w"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-fti-422"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Sre7n9fljwH26CPdwjzsmrY",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-fti-422?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Sre7n9fljwH26CPQiwc7x0w",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-fti-422?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Development of a client payment portal and website for Bright Horizons Psychiatry.",
-  "project_scope_full": "Development of a client payment portal and website for Bright Horizons Psychiatry. The client, Dr. Sarah Johnson, is a psychiatrist who needs a website and client payment portal for her practice. The website will be used to provide information about her practice and services, and the client payment portal will be used to collect payments from her clients."
+    "coupon": {
+        "amount_off": 20000,
+        "applies_to": {
+            "products": [
+                "uid-fti-422"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-fti-422",
+        "max_redemptions": 1,
+        "name": "BRIGHT-HORIZONS"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 2760000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-fti-422"
+            ]
+        },
+        "id": "price_1Sre7n9fljwH26CPdwjzsmrY"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 2760000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-fti-422"
+            ]
+        },
+        "id": "price_1Sre7n9fljwH26CPQiwc7x0w"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-fti-422"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Sre7n9fljwH26CPdwjzsmrY",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-fti-422?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Sre7n9fljwH26CPQiwc7x0w",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-fti-422?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Development of a client payment portal and website for Bright Horizons Psychiatry.",
+    "project_scope_full": "Development of a client payment portal and website for Bright Horizons Psychiatry. The client, Dr. Sarah Johnson, is a psychiatrist who needs a website and client payment portal for her practice. The website will be used to provide information about her practice and services, and the client payment portal will be used to collect payments from her clients."
 }
