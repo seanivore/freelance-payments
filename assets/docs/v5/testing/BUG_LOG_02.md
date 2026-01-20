@@ -317,3 +317,68 @@ Note before pushing, on GitHub repo is shown with the previous test that was mar
 The JSON uid-oac-784.json was also updated to Product active = false, however because there were no events or other workflow push made since those JSON changes were made live, the Stripe catalog product was not archived yet. These changes haven't been pulled to local yet. This also means that the uid-oac-784.json still exists locally as that is not deleted until two pushes after the update because the JSON file is updated when the system recognizes that there is no matching Stripe catalog product and the JSON is marked not active. This is all expected and accurate behavior. 
 
 Now that these details have been recorded and this file saved to the repo locally, I will push these changes. 
+
+---
+
+Pleasantly surprised to see that in the same push the JSON marked "inactive" because of payment completion had the Stripe catalog product archived and then the JSON job was also deleted from the directory. All changes were pulled locally. 
+
+This means that the attempt to login for TEST JOB uid-oac-784.json was no longer possible. 
+
+Because of this expected behavior, there doesn't seem to be reason to overemphasize the need for a user login after making all payments to be redirected to the Completion2 page again, because after one push following the event tracking updates of a user making final payments, the JSON for that job will no longer be available and login no longer possible. 
+
+===
+
+TEST FILE: uid-qee-576.json
+LOGIN KEYS: Miller -- last-resort 
+TEST STATE: Completed through payment_1 with accurate events recorded to JSON 
+
+1. User logged in and went to make payment_2
+2. User was routed to balance accurately then made payment_2
+3. User used card that was declined accurately and new card allowed payment to process 
+4. User was redirected to Completion2 accurately 
+
+--console logs from session--
+
+  GET https://payments.august.style/uid-qee-576?session_id=cs_test_a1yWJBrlegr7kEXpvYZH3meNRCca7J3ZBRa3ujVMcwg20puHZHjiuEBx68 404 (Not Found)
+(anonymous) @ js.stripe.com/clover/stripe.js:1
+o @ js.stripe.com/clover/stripe.js:1
+(anonymous) @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+Promise.then
+(anonymous) @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+(anonymous) @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+u._fetch @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+u.enqueue @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+u.enqueueOne @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+Ie @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+(anonymous) @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+(anonymous) @ js.stripe.com/v3/fin…a9cf67e9caca22.js:1
+l @ job-BIx_agM0.js:50
+pv @ index-CwGdK3tu.js:8
+(anonymous) @ index-CwGdK3tu.js:8
+Bi @ index-CwGdK3tu.js:8
+Qc @ index-CwGdK3tu.js:8
+Pc @ index-CwGdK3tu.js:9
+Z1 @ index-CwGdK3tu.js:9
+job-BIx_agM0.js:50 Vite: job.tsx loaded
+job-BIx_agM0.js:50 Detected session_id: cs_test_a1yWJBrlegr7kEXpvYZH3meNRCca7J3ZBRa3ujVMcwg20puHZHjiuEBx68 (from URL)
+job-BIx_agM0.js:1 ✅ Loaded job data for uid-qee-576: {logged_in: '2026-01-19T22:44:33.081Z', contract_signed: '2026-01-19T22:44:49.200Z', invoice: '2026-01-19T22:44:54.091Z', payment_1: '2026-01-19T22:44:54.091Z', balance: null, …}
+job-BIx_agM0.js:50 🔍 State Management Debug: {sessionId: 'cs_test_a1yWJBrlegr7kEXpvYZH3meNRCca7J3ZBRa3ujVMcwg20puHZHjiuEBx68', client_status: {…}}
+job-BIx_agM0.js:50 📍 Routing: payment_1 completed + balance available → balance
+job-BIx_agM0.js:50 ✅ Final routing decision: balance
+job-BIx_agM0.js:50 Event: contract_loaded {page: 1, totalPages: 1}
+job-BIx_agM0.js:49 All 1 canvases ready, starting render...
+job-BIx_agM0.js:49 renderAllPages: Starting render for 1 pages
+job-BIx_agM0.js:49 Rendering page 1...
+job-BIx_agM0.js:49 Page 1 viewport: {width: 612, height: 792, scale: 1}
+job-BIx_agM0.js:49 Canvas 1 dimensions: {internal: {…}, display: {…}, outputScale: 2}
+job-BIx_agM0.js:49 Starting render for page 1...
+job-BIx_agM0.js:49 Page 1 render completed
+job-BIx_agM0.js:49 Page 1 rendered successfully
+job-BIx_agM0.js:50 📋 Session status: complete {status: 'complete', payment_status: 'paid', payment_intent_id: 'pi_3SrSNW9fljwH26CP1EN0SCc3', payment_intent_status: 'succeeded', amount_total: 5400000, …}
+job-BIx_agM0.js:50 ✅ Payment 2 completed - adding to event buffer
+job-BIx_agM0.js:50 📤 Flushing payment event immediately...
+job-BIx_agM0.js:50 🔍 State Management Debug: {sessionId: 'cs_test_a1yWJBrlegr7kEXpvYZH3meNRCca7J3ZBRa3ujVMcwg20puHZHjiuEBx68', client_status: {…}}
+job-BIx_agM0.js:50 📍 Routing: Session complete, payment_2 → completion2
+job-BIx_agM0.js:50 ✅ Final routing decision: completion2
+job-BIx_agM0.js:50 ⏭️  Session already processed, skipping...
+job-BIx_agM0.js:50 ✅ Flushed 2 event(s) to API
