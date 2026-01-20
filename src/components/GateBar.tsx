@@ -42,8 +42,9 @@ export const GateBar: React.FC<GateBarProps> = ({
 
   return (
     <div 
-      className="bg-portfolio-bg-dark border-b-2"
+      className="border-b-2"
       style={{
+        backgroundColor: 'rgb(15 15 15 / 95%)',
         borderColor: 'rgb(192 189 189 / 34%)',
         filter: 'drop-shadow(2px 4px 6px #0f0f0f47)',
       }}
