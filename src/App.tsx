@@ -473,7 +473,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-portfolio-bg-primary text-portfolio-text-primary font-sans">
+    <div className="min-h-screen text-portfolio-text-primary font-sans" style={{ backgroundColor: 'rgb(31 31 31 / 0.2)' }}>
       {/* Main Content - No header, views handle their own backgrounds */}
       <main>
         {initialSection === 'contract' ? (
