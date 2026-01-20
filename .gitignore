@@ -46,3 +46,6 @@ rusty-tags.vi
 assets/docs/RESOURCES/stripe.js
 dist/
 
+# Testing screenshots (local only, named IMG-*)
+**/testing/IMG-*
+

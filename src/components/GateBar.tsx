@@ -41,7 +41,13 @@ export const GateBar: React.FC<GateBarProps> = ({
   const message = SECTION_MESSAGES[section] || '';
 
   return (
-    <div className="bg-portfolio-bg-dark/95 backdrop-blur-sm border-b border-portfolio-border">
+    <div 
+      className="bg-portfolio-bg-dark/80 border-b-2"
+      style={{
+        borderColor: 'rgb(192 189 189 / 34%)',
+        filter: 'drop-shadow(2px 4px 6px #0f0f0f47)',
+      }}
+    >
       <div className="max-w-4xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Left side: Message */}

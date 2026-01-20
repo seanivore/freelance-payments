@@ -273,6 +273,34 @@ The JSON was updated at 09:26:50 but Vercel never redeployed because of `[skip c
 
 ---
 
+### BUG_03_007 - PDF Viewer Toolbar Styling Polish
+
+**Date**: 2026-01-20  
+**Status**: FIXED  
+**Severity**: Low (visual polish)
+
+**Issue**: The GateBar toolbar in the PDF viewer needed visual refinement for a more polished, floating appearance with better depth and semi-transparency.
+
+**Images**:
+- `IMG-BUG_03_006-before-desktop_view-1.webp` - Before toolbar styling
+- `IMG-BUG_03_006-before-desktop_view-2.webp` - Before on desktop
+- `IMG-BUG_03_006-before-mobile_view-1.webp` - Before on mobile
+- `IMG-BUG_03_006-after-desktop_view-1.webp` - After CSS fixes applied
+
+**CSS Changes Applied** (user-specified via Inspector):
+
+1. **Background opacity**: Changed from `bg-portfolio-bg-dark/95` to `bg-portfolio-bg-dark/80`
+2. **Removed backdrop blur**: Removed `backdrop-blur-sm` class (cleaner semi-transparent look)
+3. **Border styling**: Changed from `border-b border-portfolio-border` to:
+   - `border-b-2` (2px width)
+   - `borderColor: 'rgb(192 189 189 / 34%)'` (lighter, lower opacity)
+4. **Drop shadow**: Added `filter: drop-shadow(2px 4px 6px #0f0f0f47)` for floating effect
+
+**Files Modified**:
+- `src/components/GateBar.tsx`: Toolbar styling only
+
+---
+
 ## Summary
 
 | Bug | Severity | Status | Root Cause |
@@ -283,6 +311,7 @@ The JSON was updated at 09:26:50 but Vercel never redeployed because of `[skip c
 | BUG_03_004 | Low | **FIXED** | Glow effect timing/intensity |
 | BUG_03_005 | **CRITICAL** | **FIXED** | `[skip ci]` prevents Vercel redeploy |
 | BUG_03_006 | Low | **FIXED** | Native date input UX inconsistency |
+| BUG_03_007 | Low | **FIXED** | Toolbar styling refinements |
 
 ---
 
@@ -294,6 +323,7 @@ The JSON was updated at 09:26:50 but Vercel never redeployed because of `[skip c
 4. **BUG_03_004**: Improved glow effect intensity, timing, and proximity detection
 5. **BUG_03_005**: Removed `[skip ci]` and added Vercel deploy hook trigger
 6. **BUG_03_006**: Replaced native date input with styled Popover/Calendar component
+7. **BUG_03_007**: Updated toolbar styling with semi-transparency, refined border, and drop shadow
 
 ## Next Steps
 
