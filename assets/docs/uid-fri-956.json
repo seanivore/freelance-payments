@@ -1,8 +1,8 @@
 {
-    "project": null,
+    "project": "Clay-more Etsy Store AI Automations",
     "contract": {
-        "work_start": null,
-        "work_end": null,
+        "work_start": "2026-01-20",
+        "work_end": "2026-02-20",
         "legal_jurisdiction": "Massachusetts",
         "maintenance_period_months": 3,
         "maintenance_monthly_fee": 150,
@@ -62,57 +62,57 @@
         }
     },
     "product": {
-        "name": null,
+        "name": "Automating Store Listings, Payments, and Inventory",
         "active": true,
-        "description": null,
-        "id": null,
-        "login_name": null,
-        "login_keyword": null,
-        "service_usd": 0,
+        "description": "Automating store listings, payments, and inventory for an Etsy store.",
+        "id": "uid-fri-956",
+        "login_name": "Clayton",
+        "login_keyword": "more-ceramics",
+        "service_usd": 2350000,
         "total_payments": 2,
-        "discount_usd": 0,
+        "discount_usd": 50000,
         "type": "service",
         "unit_label": "Payment"
     },
     "customer": {
-        "name": null,
-        "business": null,
-        "title": null,
-        "email": null,
-        "phone": null,
-        "id": null,
+        "name": "Clayton Jovial",
+        "business": "Clay-more Ceramics",
+        "title": "Owner",
+        "email": "jovial@claymoreceramics.com",
+        "phone": "818-209-8867",
+        "id": "cus-fri-956",
         "address": {
-            "city": null,
-            "line1": null,
-            "state": null,
-            "postal_code": null,
-            "country": null
+            "city": "Los Angeles",
+            "line1": "123 Main St",
+            "state": "CA",
+            "postal_code": "90001",
+            "country": "US"
         }
     },
     "coupon": {
-        "amount_off": 0,
+        "amount_off": 50000,
         "applies_to": {
             "products": [
-                null
+                "uid-fri-956"
             ]
         },
         "currency": "usd",
         "duration": "once",
-        "id": null,
+        "id": "cou-fri-956",
         "max_redemptions": 1,
-        "name": null
+        "name": "BUY-MORE-CLAY"
     },
     "price1": {
         "count": 1,
         "currency": "usd",
-        "unit_amount": 0,
+        "unit_amount": 1175000,
         "active": true,
         "billing_scheme": "per_unit",
         "pay_by": "start of work",
         "nickname": "Initial Payment",
         "product": {
             "products": [
-                null
+                "uid-fri-956"
             ]
         },
         "id": ""
@@ -120,7 +120,7 @@
     "price2": {
         "count": 2,
         "currency": "usd",
-        "unit_amount": 0,
+        "unit_amount": 1175000,
         "active": true,
         "billing_scheme": "per_unit",
         "pay_by": "before project launch",
@@ -129,7 +129,7 @@
         "nickname": "Final Payment",
         "product": {
             "products": [
-                null
+                "uid-fri-956"
             ]
         },
         "id": ""
@@ -137,7 +137,7 @@
     "checkout_session_1": {
         "discounts": [
             {
-                "coupon": null
+                "coupon": "cou-fri-956"
             }
         ],
         "line_items": [
@@ -147,7 +147,7 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/[uid-xxx-xxx]?session_id={CHECKOUT_SESSION_ID}",
+        "return_url": "https://payments.august.style/uid-fri-956?session_id={CHECKOUT_SESSION_ID}",
         "ui_mode": "custom"
     },
     "checkout_session_2": {
@@ -163,9 +163,9 @@
             }
         ],
         "mode": "payment",
-        "return_url": "https://payments.august.style/[uid-xxx-xxx]?session_id={CHECKOUT_SESSION_ID}",
+        "return_url": "https://payments.august.style/uid-fri-956?session_id={CHECKOUT_SESSION_ID}",
         "ui_mode": "custom"
     },
-    "project_scope_summary": null,
-    "project_scope_full": null
+    "project_scope_summary": "Automating store listings, payments, and inventory for an Etsy store.",
+    "project_scope_full": "Automating store listings, payments, and inventory for an Etsy store. This will include the following: Automating store listings, payments, and inventory for an Etsy store. We will build an AI powered automation that uses SERP research to inform the description updates it writes. The automation will also handle inventory management and payment processing. This will be a web application that runs on a schedule and updates the store listings automatically. It will also handle payment processing and inventory management. The automation will be built using Python and will use the following tools: SERP API, OpenAI API, Stripe API, and Etsy API."
 }
