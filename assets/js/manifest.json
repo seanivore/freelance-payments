@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-20T04:16:21.057862Z"
+  "jobs": {
+    "rose-art-soul": {
+      "file_path": "assets/jobs/uid-ovc-774.json",
+      "job_id": "uid-ovc-774",
+      "login_keyword": "art-soul",
+      "login_name": "Rose"
+    }
+  },
+  "generated_at": "2026-01-20T08:02:00.519926Z"
 }
