@@ -1,171 +1,171 @@
 {
-  "project": "Nerd Dates iOS App Development",
-  "contract": {
-    "work_start": "2026-01-21",
-    "work_end": "2026-02-21",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-21T10:54:56.199697Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Nerd Dates iOS App Development",
     "contract": {
-      "id": "kon-yvc-829",
-      "pdf": "assets/pdf/contract/kon-yvc-829.pdf",
-      "file_id": "1ocWFNP0njEOqjgksXGpZrUfG9MVq5Hm9NN5YLRLlqq0",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-yvc-829.pdf",
-      "sha256": "ae14a97cbb529c61b659347d30934c27ed00d5c2e54abe4d61a862042436c940",
-      "created": "2026-01-21T10:55:24.664169Z"
+        "work_start": "2026-01-21",
+        "work_end": "2026-02-21",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-21T10:54:56.199697Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-yvc-829",
-      "pdf": "assets/pdf/invoice/inv-yvc-829.pdf",
-      "file_id": "106GX3jVLN0FwUOftjKKrTYaF9HziQ9vAx7R6TTY7XTM",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-yvc-829.pdf",
-      "sha256": "b1d4b22dbf4c8f74b30e72271fdc78562bda54285b5098a55b4365f7fc93b8b8",
-      "created": "2026-01-21T10:55:30.175264Z"
+    "docs": {
+        "contract": {
+            "id": "kon-yvc-829",
+            "pdf": "assets/pdf/contract/kon-yvc-829.pdf",
+            "file_id": "1ocWFNP0njEOqjgksXGpZrUfG9MVq5Hm9NN5YLRLlqq0",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-yvc-829.pdf",
+            "sha256": "ae14a97cbb529c61b659347d30934c27ed00d5c2e54abe4d61a862042436c940",
+            "created": "2026-01-21T10:55:24.664169Z"
+        },
+        "invoice": {
+            "id": "inv-yvc-829",
+            "pdf": "assets/pdf/invoice/inv-yvc-829.pdf",
+            "file_id": "106GX3jVLN0FwUOftjKKrTYaF9HziQ9vAx7R6TTY7XTM",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-yvc-829.pdf",
+            "sha256": "b1d4b22dbf4c8f74b30e72271fdc78562bda54285b5098a55b4365f7fc93b8b8",
+            "created": "2026-01-21T10:55:30.175264Z"
+        },
+        "balance": {
+            "id": "bal-yvc-829",
+            "pdf": "assets/pdf/balance/bal-yvc-829.pdf",
+            "file_id": "132jO2WMCWsmmkgSEGLortkuyj9oowua-ppWDPMHdZbE",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-yvc-829.pdf",
+            "sha256": "ebfe73eb5b73f19f781db17c43a1f8c69cb5921e2e5510dfc7f36b6831ff517e",
+            "created": "2026-01-21T10:55:35.523784Z"
+        }
     },
-    "balance": {
-      "id": "bal-yvc-829",
-      "pdf": "assets/pdf/balance/bal-yvc-829.pdf",
-      "file_id": "132jO2WMCWsmmkgSEGLortkuyj9oowua-ppWDPMHdZbE",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-yvc-829.pdf",
-      "sha256": "ebfe73eb5b73f19f781db17c43a1f8c69cb5921e2e5510dfc7f36b6831ff517e",
-      "created": "2026-01-21T10:55:35.523784Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-21T10:54:56.199697Z",
-      "product": "uid-yvc-829",
-      "price_1": "price_1Srz3s9fljwH26CPByiOn0Wg",
-      "price_2": "price_1Srz3s9fljwH26CPWXwQ6apG",
-      "customer": "cus-yvc-829",
-      "coupon": "cou-yvc-829"
+    "state": {
+        "objects": {
+            "created": "2026-01-21T10:54:56.199697Z",
+            "product": "uid-yvc-829",
+            "price_1": "price_1Srz3s9fljwH26CPByiOn0Wg",
+            "price_2": "price_1Srz3s9fljwH26CPWXwQ6apG",
+            "customer": "cus-yvc-829",
+            "coupon": "cou-yvc-829"
+        },
+        "client_status": {
+            "logged_in": "2026-01-21T13:18:44.844Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "iOS App Development",
-    "active": true,
-    "description": "Development and launch of iOS app for Nerd Dates.",
-    "id": "uid-yvc-829",
-    "login_name": "Dewey",
-    "login_keyword": "nerd-dates",
-    "service_usd": 10500000,
-    "total_payments": 2,
-    "discount_usd": 12500,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Chad Dewey",
-    "business": "Dewey's Development LLC",
-    "title": "CEO",
-    "email": "chad@deweydevelopment.com",
-    "phone": "617-555-1212",
-    "id": "cus-yvc-829",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02101",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 12500,
-    "applies_to": {
-      "products": [
-        "uid-yvc-829"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-yvc-829",
-    "max_redemptions": 1,
-    "name": "NERD-DATES-COUPON"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 5250000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-yvc-829"
-      ]
+        "name": "iOS App Development",
+        "active": true,
+        "description": "Development and launch of iOS app for Nerd Dates.",
+        "id": "uid-yvc-829",
+        "login_name": "Dewey",
+        "login_keyword": "nerd-dates",
+        "service_usd": 10500000,
+        "total_payments": 2,
+        "discount_usd": 12500,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1Srz3s9fljwH26CPByiOn0Wg"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 5250000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-yvc-829"
-      ]
+    "customer": {
+        "name": "Chad Dewey",
+        "business": "Dewey's Development LLC",
+        "title": "CEO",
+        "email": "chad@deweydevelopment.com",
+        "phone": "617-555-1212",
+        "id": "cus-yvc-829",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02101",
+            "country": "US"
+        }
     },
-    "id": "price_1Srz3s9fljwH26CPWXwQ6apG"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-yvc-829"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Srz3s9fljwH26CPByiOn0Wg",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-yvc-829?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Srz3s9fljwH26CPWXwQ6apG",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-yvc-829?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Development and launch of iOS app for Nerd Dates.",
-  "project_scope_full": "Development and launch of iOS app for Nerd Dates. This is a test job JSON file. It is used to test the system. This value on the JSON file is about the project scope. It is much longer than the summary."
+    "coupon": {
+        "amount_off": 12500,
+        "applies_to": {
+            "products": [
+                "uid-yvc-829"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-yvc-829",
+        "max_redemptions": 1,
+        "name": "NERD-DATES-COUPON"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 5250000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-yvc-829"
+            ]
+        },
+        "id": "price_1Srz3s9fljwH26CPByiOn0Wg"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 5250000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-yvc-829"
+            ]
+        },
+        "id": "price_1Srz3s9fljwH26CPWXwQ6apG"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-yvc-829"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Srz3s9fljwH26CPByiOn0Wg",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-yvc-829?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Srz3s9fljwH26CPWXwQ6apG",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-yvc-829?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Development and launch of iOS app for Nerd Dates.",
+    "project_scope_full": "Development and launch of iOS app for Nerd Dates. This is a test job JSON file. It is used to test the system. This value on the JSON file is about the project scope. It is much longer than the summary."
 }
