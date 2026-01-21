@@ -54,7 +54,7 @@ A **freelance payment collection micro-site** (`payments.august.style`) that aut
 │              BACKEND API (Vercel Functions)                      │
 │  - /api/create-checkout-session.js → Creates Stripe session      │
 │  - /api/track-event.js → Receives events, dispatches workflow    │
-│  - /api/webhook.js → Receives Stripe events, dispatches workflow │
+│  - /api/webhook.js → Receives Stripe events (log only)           │
 │  - /api/session-status.js → Returns checkout session status      │
 └──────────────────────────────────────────────────────────────────┘
                           ↕
@@ -485,8 +485,7 @@ const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}
 
 **When Events Are Flushed**:
 1. **10-minute inactivity** - Timer resets on user activity (mouse, keyboard, scroll, touch)
-2. **Payment completion** - Immediate flush via `flushOnPayment()` callback
-3. **Browser unload** - `beforeunload`, `pagehide`, `visibilitychange` events (uses `fetch` with `keepalive: true`)
+2. **Browser unload** - `beforeunload`, `pagehide`, `visibilitychange` events (uses `fetch` with `keepalive: true`)
 
 **API Call** (`src/App.tsx` → `api/track-event.js`):
 ```typescript
@@ -587,9 +586,8 @@ POST /api/track-event
 
 **Webhook** (`api/webhook.js`):
 - Server-side, reliable, handles async payments
-- Updates JSON files via GitHub Actions
-- Used for backend persistence
-- Ensures updates even if user closes browser
+- Logs completion for audit/debugging
+- Does not dispatch workflow (events are persisted via frontend batch)
 
 **Session-Status Endpoint** (`api/session-status.js`):
 - Client-side, immediate feedback
@@ -798,6 +796,10 @@ npm run build
 
 ## Common Tasks & Debugging
 
+### Using `git smart-push`
+
+Use `git smart-push` for local pushes. It stashes any local changes, rebases from remote, restores the stash, then pushes. If stash pop conflicts, resolve and rerun.
+
 ### Adding a New Job
 
 1. **Create JSON file**: Copy `assets/docs/uid-xxx-xxx.json` template to `assets/jobs/uid-xxx-xxx.json`
@@ -818,7 +820,7 @@ npm run build
 5. **JSON File**: Check `assets/jobs/uid-xxx-xxx.json` for updated timestamps
 
 **Common Issues**:
-- **No API calls**: Check `flushEvents()` is being called (inactivity timer, payment completion, unload)
+- **No API calls**: Check `flushEvents()` is being called (inactivity timer, unload)
 - **CORS errors**: Check `api/track-event.js` CORS headers, verify `apiUrl()` points to Vercel backend
 - **Workflow not running**: Check GitHub token, workflow file syntax, payload format
 - **Events not batched**: Verify `event_type: 'batch'` and `event_data: [array]` in API call
@@ -875,9 +877,10 @@ npm run build
 2. **Gate Logic**: Check `state.client_status` timestamps in order to determine current gate
 3. **Optimistic UI**: Update state immediately, sync backend in background
 4. **One Action Per Gate**: Each gate has exactly one primary action button
-5. **Event Tracking**: Buffer events, flush after 10min inactivity
-6. **Type Safety**: Use TypeScript types everywhere, catch errors early
-7. **Planning Over Debugging**: Understand before coding, plan before executing
+5. **Event Tracking**: Buffer events, flush after 10min inactivity or unload
+6. **Smart Push**: Use `git smart-push` for local pushes (stash → rebase → restore → push)
+7. **Type Safety**: Use TypeScript types everywhere, catch errors early
+8. **Planning Over Debugging**: Understand before coding, plan before executing
 
 ---
 

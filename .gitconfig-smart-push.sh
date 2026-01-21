@@ -2,6 +2,10 @@
 # git smart-push: Simple, linear pull → apply → push
 
 echo "🔄 git smart-push: Simple workflow"
+echo "   - Stash local changes (if any)"
+echo "   - Pull with rebase"
+echo "   - Restore stash"
+echo "   - Push"
 echo ""
 
 echo "📋 Step 1: Checking local changes..."

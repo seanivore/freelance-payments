@@ -98,9 +98,9 @@ _Updated 2026-01-13 for v5 schema_
         "id": null, // required, uid-xxx-xxx admin bash command 'uid' created
         "login_name": null, // required, client last name for client login
         "login_keyword": null, // required, keyword for client login
-        "service_usd": null, // required, total service deliverable cost in pennies
+        "service_usd": 0, // required, total service deliverable cost in pennies
         "total_payments": 2, // provided
-        "discount_usd": null, // required, discount in pennies or 0 if none
+        "discount_usd": 0, // required, discount in pennies or 0 if none
         "type": "service", // provided
         "unit_label": "Payment" // provided
     },
@@ -135,7 +135,7 @@ _Updated 2026-01-13 for v5 schema_
     "price1": { // creates Stripe price object for initial payment
         "count": 1, // provided
         "currency": "usd", // provided
-        "unit_amount": null, // full initial payment, before discount, in pennies
+        "unit_amount": 0, // full initial payment, before discount, in pennies
         "active": true, // provided
         "billing_scheme": "per_unit", // provided
         "pay_by": "start of work", // provided
@@ -150,7 +150,7 @@ _Updated 2026-01-13 for v5 schema_
     "price2": { // creates Stripe price object for final payment
         "count": 2, // provided
         "currency": "usd", // provided
-        "unit_amount": null, // balance payment, before discount, in pennies
+        "unit_amount": 0, // balance payment, before discount, in pennies
         "active": true, // provided
         "billing_scheme": "per_unit", // provided
         "pay_by": "before project launch", // provided

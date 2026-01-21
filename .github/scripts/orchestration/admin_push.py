@@ -1409,20 +1409,29 @@ def git_commit_and_push(message: str) -> bool:
     try:
         subprocess.run(['git', 'config', '--local', 'user.email', 'action@github.com'], check=True)
         subprocess.run(['git', 'config', '--local', 'user.name', 'GitHub Action'], check=True)
-
-        # Ensure we are on the correct branch and up to date
-        current_branch = subprocess.run(
-            ['git', 'branch', '--show-current'],
-            capture_output=True,
-            text=True,
-            check=True
-        ).stdout.strip()
-        if current_branch != 'freelance-payments':
-            subprocess.run(['git', 'checkout', 'freelance-payments'], check=True)
-
-        subprocess.run(['git', 'fetch', 'origin', 'freelance-payments'], check=True)
-        subprocess.run(['git', 'pull', '--rebase', 'origin', 'freelance-payments'], check=True)
-
+        
+        status_result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True, check=True)
+        has_unstaged = bool(status_result.stdout.strip())
+        
+        if has_unstaged:
+            stash_result = subprocess.run(['git', 'stash', '--include-untracked'], check=False, capture_output=True, text=True)
+            if stash_result.returncode != 0 and 'No local changes' not in stash_result.stdout:
+                print(f"Warning: git stash failed: {stash_result.stderr}", file=sys.stderr)
+            
+            pull_result = subprocess.run(['git', 'pull', '--rebase'], check=False, capture_output=True, text=True)
+            if pull_result.returncode != 0:
+                print(f"Warning: git pull --rebase had issues: {pull_result.stderr}", file=sys.stderr)
+            
+            stash_pop_result = subprocess.run(['git', 'stash', 'pop'], check=False, capture_output=True, text=True)
+            if stash_pop_result.returncode != 0:
+                if 'No stash entries' not in stash_pop_result.stderr:
+                    print(f"❌ Critical Error: git stash pop caused conflicts: {stash_pop_result.stderr}", file=sys.stderr)
+                    print("⚠️  Aborting commit to prevent corruption.", file=sys.stderr)
+                    # Abort: Do NOT commit conflict markers
+                    return False
+        else:
+            subprocess.run(['git', 'pull', '--rebase'], check=False)
+        
         subprocess.run(['git', 'add', '-A'], check=True)
         
         result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True, check=True)
