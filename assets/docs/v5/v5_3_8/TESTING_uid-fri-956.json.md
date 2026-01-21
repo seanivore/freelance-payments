@@ -1,4 +1,4 @@
-# Testing uid-fir-956.json
+# Testing uid-fri-956.json
 
 **TEST JOB STATE:** New job, user first login 
 **LOGIN NAME-KEYWORD:** Clayton more-ceramics

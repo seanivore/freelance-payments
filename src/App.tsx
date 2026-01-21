@@ -91,9 +91,7 @@ export default function App() {
     resetTimer();
   }, [resetTimer]);
 
-  const flushOnPayment = useCallback(() => {
-    flushEvents();
-  }, [flushEvents]);
+  // Single-batch policy: only flush on inactivity/unload to avoid split sessions.
 
   // Activity Listeners & Unload Handler
   useEffect(() => {
@@ -235,7 +233,6 @@ export default function App() {
               };
             });
             
-            flushOnPayment();
           }
         }
       })
@@ -243,7 +240,7 @@ export default function App() {
         console.error('Error fetching session status:', err);
         processedSessionRef.current = null;
       });
-  }, [sessionId, data?.state?.client_status?.payment_1, data?.state?.client_status?.payment_2, flushOnPayment, trackEvent]);
+  }, [sessionId, data?.state?.client_status?.payment_1, data?.state?.client_status?.payment_2, trackEvent]);
 
   // Memoized emitEvent callback
   const emitEvent = useCallback((name: string, payload?: unknown) => {
