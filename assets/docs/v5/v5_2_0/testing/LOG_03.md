@@ -1,3 +1,16 @@
+# Previous Bug Logs 
+
+- `assets/docs/v5/v5_1_16/testing/LOG_01.md`
+- `assets/docs/v5/v5_1_16/testing/LOG_02.md`
+- `assets/docs/v5/v5_2_0/testing/LOG_03.md` (this one) 
+
+And then these two are the most recent, not in the logs yet. 
+
+- `assets/docs/v5/v5_2_0/testing/BUG_03_008.md`
+- `assets/docs/v5/v5_2_0/testing/BUG_03_009.md` 
+
+---
+
 # Testing Log 03 - v5.2.0 Visual Design & UX Improvements
 
 **Created**: 2026-01-20 
