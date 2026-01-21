@@ -1,17 +1,5 @@
 {
   "jobs": {
-    "joann-breath-work-meditation-retreat": {
-      "file_path": "assets/jobs/uid-awe-596.json",
-      "job_id": "uid-awe-596",
-      "login_keyword": "breath-work-meditation-retreat",
-      "login_name": "JoAnn"
-    },
-    "paul-science-channel": {
-      "file_path": "assets/jobs/uid-gdf-021.json",
-      "job_id": "uid-gdf-021",
-      "login_keyword": "science-channel",
-      "login_name": "Paul"
-    },
     "dewey-nerd-dates": {
       "file_path": "assets/jobs/uid-yvc-829.json",
       "job_id": "uid-yvc-829",
@@ -19,5 +7,5 @@
       "login_name": "Dewey"
     }
   },
-  "generated_at": "2026-01-21T12:57:40.145419Z"
+  "generated_at": "2026-01-21T14:02:00.242801Z"
 }
