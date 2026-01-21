@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "golden-boyfriend-retriever": {
-      "file_path": "assets/jobs/uid-fbi-985.json",
-      "job_id": "uid-fbi-985",
-      "login_keyword": "boyfriend-retriever",
-      "login_name": "Golden"
-    }
-  },
-  "generated_at": "2026-01-21T04:46:17.586070Z"
+  "jobs": {},
+  "generated_at": "2026-01-21T05:38:40.120439Z"
 }
