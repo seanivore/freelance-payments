@@ -48,8 +48,29 @@ jobs:
           JOB_ID: ${{ github.event.inputs.job_id }}
           PAYLOAD_JSON: ${{ github.event.inputs.payload_json }}
         run: |
+          echo "🧾 Job ID: $JOB_ID"
+          python - <<'PY'
+          import json, os, hashlib
+          payload = os.environ.get("PAYLOAD_JSON", "")
+          try:
+              data = json.loads(payload)
+              count = len(data) if isinstance(data, list) else 0
+          except Exception:
+              count = 0
+          print(f"🧮 Payload event count: {count}")
+          print(f"🔐 Payload sha256: {hashlib.sha256(payload.encode('utf-8')).hexdigest()}")
+          PY
+
           # Store payload for potential re-processing
           echo "$PAYLOAD_JSON" > /tmp/event_payload.json
+          
+          # Ensure we're on the branch and up to date before processing
+          if ! git branch --show-current | grep -q freelance-payments; then
+            git checkout freelance-payments || git checkout -b freelance-payments origin/freelance-payments
+          fi
+          git fetch origin freelance-payments
+          git pull --rebase origin freelance-payments
+          
           python .github/scripts/orchestration/user_exit_events.py || EXIT_CODE=$?
           if [ "${EXIT_CODE:-0}" -eq 2 ]; then
             echo "⚠️  Merge conflict detected - will resolve in commit step"
@@ -63,18 +84,6 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # CRITICAL FIX for BUG_01_010: Improved git operations to prevent conflicts
-          # Strategy: Fetch latest, merge/rebase cleanly, handle conflicts by re-processing
-          
-          # Ensure we're on the branch (not detached HEAD)
-          # If we're in detached HEAD state, checkout the branch
-          if ! git branch --show-current | grep -q freelance-payments; then
-            git checkout freelance-payments || git checkout -b freelance-payments origin/freelance-payments
-          fi
-          
-          # Fetch latest changes
-          git fetch origin freelance-payments
-          
           # Check if we have local changes to commit
           if git diff --quiet && git diff --cached --quiet; then
             echo "ℹ️  No local changes to commit"
@@ -83,61 +92,13 @@ jobs:
           
           # Stage our changes
           git add assets/jobs/*.json
-          
-          # Try to merge latest remote changes
-          # Use merge (not rebase) to preserve our commit history
-          if ! git merge origin/freelance-payments --no-edit; then
-            echo "⚠️  Merge conflict detected - resolving by re-processing events"
-            
-            # Abort the merge
-            git merge --abort
-            
-            # Reset to remote state to get clean file
-            git reset --hard origin/freelance-payments
-            
-            # Re-run the Python script with latest file state and stored payload
-            # This will re-read the file and apply our events on top of latest state
-            echo "Re-processing events with latest file state..."
-            if [ -f /tmp/event_payload.json ]; then
-              export PAYLOAD_JSON=$(cat /tmp/event_payload.json)
-            fi
-            python .github/scripts/orchestration/user_exit_events.py
-            
-            # Stage changes again
-            git add assets/jobs/*.json
-          fi
-          
+
           # Commit if there are changes
           if ! git diff --cached --quiet; then
             git commit -m "Update user behavior stats"
-            
-            # Push with simple retry
-            MAX_RETRIES=3
-            PUSH_SUCCESS=false
-            for i in $(seq 1 $MAX_RETRIES); do
-              if git push origin freelance-payments; then
-                echo "✅ Successfully pushed changes"
-                PUSH_SUCCESS=true
-                break
-              else
-                echo "⚠️  Push failed, attempt $i/$MAX_RETRIES"
-                if [ $i -lt $MAX_RETRIES ]; then
-                  # Fetch latest and try again
-                  git fetch origin freelance-payments
-                  git rebase origin/freelance-payments || {
-                    echo "❌ Rebase failed - aborting"
-                    git rebase --abort || true
-                    exit 1
-                  }
-                fi
-              fi
-            done
-            
-            if [ "$PUSH_SUCCESS" = false ]; then
-              echo "❌ Failed to push after $MAX_RETRIES attempts"
-              exit 1
-            fi
-            
+            git push origin freelance-payments
+            echo "✅ Successfully pushed changes"
+
             # Signal that we need to trigger deploy
             echo "NEEDS_DEPLOY=true" >> $GITHUB_ENV
           else

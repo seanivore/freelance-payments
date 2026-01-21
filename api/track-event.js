@@ -3,7 +3,7 @@
  * Tracks user events (contract loaded, scrolled, invoice viewed, downloads, etc.)
  * 
  * POST /api/track-event
- * Body: { job_id: string, event_type: string, event_data: object }
+ * Body: { job_id: string, event_type: "batch", event_data: Array<{type: string; timestamp: string; data: any}> }
  * 
  * Queues events for batch processing to update state.client_status in JSON files (v4 schema)
  */
@@ -66,25 +66,12 @@ export default async (req, res) => {
       return res.status(400).json({ error: 'job_id is required' });
     }
 
-    if (!event_type) {
-      return res.status(400).json({ error: 'event_type is required' });
+    if (event_type !== 'batch') {
+      return res.status(400).json({ error: 'event_type must be "batch"' });
     }
 
-    // Valid event types
-    const validEventTypes = [
-      'logged_in',
-      'contract_loaded',
-      'contract_signed',
-      'downloaded_docs',
-      'invoice',
-      'balance',
-      'payment_1',
-      'payment_2',
-      'batch'
-    ];
-
-    if (!validEventTypes.includes(event_type)) {
-      return res.status(400).json({ error: `Invalid event_type. Must be one of: ${validEventTypes.join(', ')}` });
+    if (!Array.isArray(event_data) || event_data.length === 0) {
+      return res.status(400).json({ error: 'event_data must be a non-empty array' });
     }
 
     // Trigger GitHub Actions workflow to update state
@@ -94,19 +81,7 @@ export default async (req, res) => {
 
     if (githubToken) {
       try {
-        // Handle batch events (array) or single events
-        let eventsArray;
-        if (event_type === 'batch') {
-          // event_data is already an array of events
-          eventsArray = Array.isArray(event_data) ? event_data : [];
-        } else {
-          // Single event - wrap it in an array
-          eventsArray = [{
-            type: event_type,
-            timestamp: new Date().toISOString(),
-            data: event_data || {}
-          }];
-        }
+        const eventsArray = event_data;
 
         // Dispatch single workflow run with all events
         const githubResponse = await fetch(
@@ -144,7 +119,8 @@ export default async (req, res) => {
     // Return success (event will be processed by GitHub Actions)
     res.status(200).json({
       success: true,
-      message: 'Event tracked and queued for processing'
+      message: 'Event tracked and queued for processing',
+      event_count: event_data.length
     });
 
   } catch (error) {

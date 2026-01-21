@@ -253,22 +253,22 @@ setData(prev => ({
 - Sets `return_url` template: `https://payments.august.style/${job_id}?session_id={CHECKOUT_SESSION_ID}`
 - Includes `payment_number` in metadata for routing logic
 
-**`api/track-event.js`** - Event Tracking Endpoint
-- Receives batched events from frontend
-- Validates `job_id`, `event_type`, `event_data`
+**`api/track-event.js`** - Event Tracking Endpoint (Single Workflow Dispatcher)
+- Receives batched events from frontend only (`event_type: "batch"`)
+- Validates `job_id` and event array payload
 - Dispatches `user-exit-events.yml` GitHub Actions workflow
-- Single workflow dispatch per batch (prevents multiple simultaneous runs)
+- Single workflow dispatch per batch (prevents duplicate runs per session)
 
-**`api/webhook.js`** - Stripe Webhook Handler
+**`api/webhook.js`** - Stripe Webhook Handler (Log Only)
 - Receives Stripe `checkout.session.completed` events
 - Verifies webhook signature
-- Dispatches `user-exit-events.yml` workflow with payment event
-- Ensures backend updates even if user closes browser
+- Logs completion for audit/debugging
+- Does **not** dispatch workflows (events are persisted via frontend batch)
 
-**`api/session-status.js`** - Checkout Session Status Endpoint
+**`api/session-status.js`** - Checkout Session Status Endpoint (Read-Only)
 - GET endpoint: `/api/session-status?session_id=cs_xxx`
 - Returns: `status`, `payment_status`, `payment_intent_id`, `amount_total`, `metadata`
-- Used by frontend to verify payment completion on return URL
+- Used by frontend to verify payment completion on return URL (no workflow dispatch)
 
 **`api/google/auth.js`** - Google OAuth Consent URL
 - Generates OAuth consent URL for initial authentication
@@ -504,9 +504,9 @@ POST /api/track-event
 
 ### Processing Phase (Backend → GitHub Actions)
 
-**File**: `api/track-event.js`
+**File**: `api/track-event.js` (single workflow dispatcher)
 
-1. **Receives batch** - Validates `job_id`, `event_type`, `event_data`
+1. **Receives batch** - Validates `job_id` and event array payload
 2. **Dispatches workflow** - Calls GitHub Actions API:
    ```javascript
    POST /repos/{owner}/{repo}/actions/workflows/user-exit-events.yml/dispatches
@@ -518,7 +518,7 @@ POST /api/track-event
    }
    ```
 
-**File**: `.github/workflows/user-exit-events.yml`
+**File**: `.github/workflows/user-exit-events.yml` (single workflow entry)
 
 1. **Workflow triggered** - Receives `job_id` and `payload_json`
 2. **Sets environment variables**:
@@ -664,9 +664,9 @@ POST /api/track-event
 
 ### `user-exit-events.yml`
 
-**Trigger**: Dispatched by `/api/track-event` or `/api/webhook`
+**Trigger**: Dispatched by `/api/track-event` only
 
-**Purpose**: Updates JSON files with user events and state changes
+**Purpose**: Updates JSON files with user events and state changes from a single batched payload
 
 **Flow**:
 1. Receive `job_id` and `payload_json` (array of events)
