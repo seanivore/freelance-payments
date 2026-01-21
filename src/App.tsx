@@ -18,6 +18,7 @@ export default function App() {
   const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const processedSessionRef = useRef<string | null>(null);
+  const loggedInQueuedRef = useRef(false);
 
   // Initial Data Fetch
   useEffect(() => {
@@ -37,43 +38,79 @@ export default function App() {
   // --- Event Buffering Logic ---
   const isFlushingRef = useRef(false);
   
+  const hashPayload = (payload: string) => {
+    let hash = 0;
+    for (let i = 0; i < payload.length; i += 1) {
+      hash = ((hash << 5) - hash) + payload.charCodeAt(i);
+      hash |= 0;
+    }
+    return `${hash}`;
+  };
+
+  const shouldSkipFlush = (events: Array<{type: string; timestamp: string; data: any}>) => {
+    try {
+      const payload = JSON.stringify(events);
+      const hash = hashPayload(payload);
+      const now = Date.now();
+      const last = sessionStorage.getItem('event_flush_last');
+      if (last) {
+        const parsed = JSON.parse(last);
+        if (parsed.hash === hash && now - parsed.at < 30000) {
+          return true;
+        }
+      }
+      sessionStorage.setItem('event_flush_last', JSON.stringify({ hash, at: now }));
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  const sendEvents = useCallback(async (events: Array<{type: string; timestamp: string; data: any}>, keepalive = false) => {
+    if (events.length === 0) return;
+    if (shouldSkipFlush(events)) return;
+
+    const jobId = window.location.pathname.substring(1);
+    if (!jobId || jobId === '/') return;
+
+    const response = await fetch(apiUrl('/api/track-event'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        job_id: jobId,
+        event_type: 'batch',
+        event_data: events
+      }),
+      keepalive
+    });
+
+    if (!response.ok) {
+      if (response.status === 405 || response.status === 404) {
+        console.warn("Event tracking skipped: Backend API not available on static host.");
+      } else {
+        console.error("Event tracking failed:", response.statusText);
+      }
+    }
+  }, []);
+
   const flushEvents = useCallback(async () => {
     if (isFlushingRef.current) return;
     
     const buffer = eventBufferRef.current;
     if (buffer.length === 0) return;
-    
-    const jobId = window.location.pathname.substring(1);
-    if (!jobId || jobId === '/') return;
 
     isFlushingRef.current = true;
     const eventsToSend = [...buffer];
     eventBufferRef.current = [];
 
     try {
-      const response = await fetch(apiUrl('/api/track-event'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          job_id: jobId,
-          event_type: 'batch',
-          event_data: eventsToSend
-        })
-      });
-
-      if (!response.ok) {
-        if (response.status === 405 || response.status === 404) {
-          console.warn("Event tracking skipped: Backend API not available on static host.");
-        } else {
-          console.error("Event tracking failed:", response.statusText);
-        }
-      }
+      await sendEvents(eventsToSend);
     } catch (error) {
       console.error("Event tracking error:", error);
     } finally {
       isFlushingRef.current = false;
     }
-  }, []);
+  }, [sendEvents]);
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -83,6 +120,10 @@ export default function App() {
   }, [flushEvents]);
 
   const trackEvent = useCallback((type: string, data: any = {}) => {
+    if (type === 'logged_in') {
+      if (loggedInQueuedRef.current) return;
+      loggedInQueuedRef.current = true;
+    }
     eventBufferRef.current.push({
       type,
       timestamp: new Date().toISOString(),
@@ -109,16 +150,7 @@ export default function App() {
       const jobId = window.location.pathname.substring(1);
       if (jobId && jobId !== '/') {
         const eventsToSend = [...eventBufferRef.current];
-        fetch(apiUrl('/api/track-event'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            job_id: jobId,
-            event_type: 'batch',
-            event_data: eventsToSend
-          }),
-          keepalive: true
-        }).catch(() => {});
+        sendEvents(eventsToSend, true).catch(() => {});
       }
     };
     
@@ -141,7 +173,7 @@ export default function App() {
       window.removeEventListener('pagehide', handleUnload);
       window.removeEventListener('beforeunload', handleUnload);
     };
-  }, [resetTimer]);
+  }, [resetTimer, sendEvents]);
 
   // --- Handle Stripe Return ---
   const [sessionId, setSessionId] = useState<string | null>(null);
