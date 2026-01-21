@@ -302,7 +302,7 @@ Run if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
 ℹ️  No VERCEL_DEPLOY_HOOK secret configured - relying on push-triggered deploy
 ```
 + **NOTE:** On the front end of GitHub, top of the repo where it shows the most recent commit, it says: 
-  - github-actions[bot] 
+  - github-actions bot 
   - Update user behavior stats 
   - Commit 071e938 
   - It shows `state.client_status.balance` updated with timestamp 
