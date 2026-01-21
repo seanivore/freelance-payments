@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-21T01:49:54.792534Z"
+  "jobs": {
+    "clayton-more-ceramics": {
+      "file_path": "assets/jobs/uid-fri-956.json",
+      "job_id": "uid-fri-956",
+      "login_keyword": "more-ceramics",
+      "login_name": "Clayton"
+    }
+  },
+  "generated_at": "2026-01-21T02:07:15.162960Z"
 }
