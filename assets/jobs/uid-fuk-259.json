@@ -1,171 +1,171 @@
 {
-  "project": "Rodent Fight Club iOS Game UX/UI Design",
-  "contract": {
-    "work_start": "2026-01-24",
-    "work_end": "2026-02-24",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-24T12:32:07.355168Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Rodent Fight Club iOS Game UX/UI Design",
     "contract": {
-      "id": "kon-fuk-259",
-      "pdf": "assets/pdf/contract/kon-fuk-259.pdf",
-      "file_id": "1ek550KXoRh0h1bVJ9uXgfOfZ3PMS5gWXceVl6g-g9gc",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-fuk-259.pdf",
-      "sha256": "9eb9bfcc795979d4c5c0560db5b69a554990c7dea51de6123bc2a97a2655525a",
-      "created": "2026-01-24T12:32:14.726099Z"
+        "work_start": "2026-01-24",
+        "work_end": "2026-02-24",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-24T12:32:07.355168Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-fuk-259",
-      "pdf": "assets/pdf/invoice/inv-fuk-259.pdf",
-      "file_id": "1OdezX9mtcAuKTb5DR7VtaytKjz2YfE8pcFLLqtW-ClM",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-fuk-259.pdf",
-      "sha256": "9fd406674b138667d26120a1e3e583bbca1cffefa7e13e8669ac34bc5924b4ec",
-      "created": "2026-01-24T12:32:19.583585Z"
+    "docs": {
+        "contract": {
+            "id": "kon-fuk-259",
+            "pdf": "assets/pdf/contract/kon-fuk-259.pdf",
+            "file_id": "1ek550KXoRh0h1bVJ9uXgfOfZ3PMS5gWXceVl6g-g9gc",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-fuk-259.pdf",
+            "sha256": "9eb9bfcc795979d4c5c0560db5b69a554990c7dea51de6123bc2a97a2655525a",
+            "created": "2026-01-24T12:32:14.726099Z"
+        },
+        "invoice": {
+            "id": "inv-fuk-259",
+            "pdf": "assets/pdf/invoice/inv-fuk-259.pdf",
+            "file_id": "1OdezX9mtcAuKTb5DR7VtaytKjz2YfE8pcFLLqtW-ClM",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-fuk-259.pdf",
+            "sha256": "9fd406674b138667d26120a1e3e583bbca1cffefa7e13e8669ac34bc5924b4ec",
+            "created": "2026-01-24T12:32:19.583585Z"
+        },
+        "balance": {
+            "id": "bal-fuk-259",
+            "pdf": "assets/pdf/balance/bal-fuk-259.pdf",
+            "file_id": "1w2qo-m6VoepObHctjcT6hjCNZ1OHyfCe5s4YbTcAW9I",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-fuk-259.pdf",
+            "sha256": "9b9b6957e755443f6bfd742e4c4a5523ffe98a04df5a8679af01e18fea3ba5bc",
+            "created": "2026-01-24T12:32:25.590019Z"
+        }
     },
-    "balance": {
-      "id": "bal-fuk-259",
-      "pdf": "assets/pdf/balance/bal-fuk-259.pdf",
-      "file_id": "1w2qo-m6VoepObHctjcT6hjCNZ1OHyfCe5s4YbTcAW9I",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-fuk-259.pdf",
-      "sha256": "9b9b6957e755443f6bfd742e4c4a5523ffe98a04df5a8679af01e18fea3ba5bc",
-      "created": "2026-01-24T12:32:25.590019Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-24T12:32:07.355168Z",
-      "product": "uid-fuk-259",
-      "price_1": "price_1St60Z9fljwH26CPUzf4pUED",
-      "price_2": "price_1St60Z9fljwH26CPgYBsCIDv",
-      "customer": "cus-fuk-259",
-      "coupon": "cou-fuk-259"
+    "state": {
+        "objects": {
+            "created": "2026-01-24T12:32:07.355168Z",
+            "product": "uid-fuk-259",
+            "price_1": "price_1St60Z9fljwH26CPUzf4pUED",
+            "price_2": "price_1St60Z9fljwH26CPgYBsCIDv",
+            "customer": "cus-fuk-259",
+            "coupon": "cou-fuk-259"
+        },
+        "client_status": {
+            "logged_in": "2026-01-24T12:34:21.271Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Mobile Game User Design",
-    "active": true,
-    "description": "Design the user interface and experience for the Rodent Fight Club iOS game",
-    "id": "uid-fuk-259",
-    "login_name": "Keegan",
-    "login_keyword": "rodent-fight-club",
-    "service_usd": 5242000,
-    "total_payments": 2,
-    "discount_usd": 25000,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Kyle Keegan",
-    "business": "Keegan Co.",
-    "title": "CEO",
-    "email": "kyle.keegan@keegan.com",
-    "phone": "424-295-4444",
-    "id": "cus-fuk-259",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02108",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 25000,
-    "applies_to": {
-      "products": [
-        "uid-fuk-259"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-fuk-259",
-    "max_redemptions": 1,
-    "name": "KEGAN"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 2621000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-fuk-259"
-      ]
+        "name": "Mobile Game User Design",
+        "active": true,
+        "description": "Design the user interface and experience for the Rodent Fight Club iOS game",
+        "id": "uid-fuk-259",
+        "login_name": "Keegan",
+        "login_keyword": "rodent-fight-club",
+        "service_usd": 5242000,
+        "total_payments": 2,
+        "discount_usd": 25000,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1St60Z9fljwH26CPUzf4pUED"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 2621000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-fuk-259"
-      ]
+    "customer": {
+        "name": "Kyle Keegan",
+        "business": "Keegan Co.",
+        "title": "CEO",
+        "email": "kyle.keegan@keegan.com",
+        "phone": "424-295-4444",
+        "id": "cus-fuk-259",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02108",
+            "country": "US"
+        }
     },
-    "id": "price_1St60Z9fljwH26CPgYBsCIDv"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-fuk-259"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St60Z9fljwH26CPUzf4pUED",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-fuk-259?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St60Z9fljwH26CPgYBsCIDv",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-fuk-259?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Design the user interface and experience for the Rodent Fight Club iOS game",
-  "project_scope_full": "Design the user interface and experience for the Rodent Fight Club iOS game. The game is a simple, fun, and addictive mobile game where the player controls a rat and fights other rats to win."
+    "coupon": {
+        "amount_off": 25000,
+        "applies_to": {
+            "products": [
+                "uid-fuk-259"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-fuk-259",
+        "max_redemptions": 1,
+        "name": "KEGAN"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 2621000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-fuk-259"
+            ]
+        },
+        "id": "price_1St60Z9fljwH26CPUzf4pUED"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 2621000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-fuk-259"
+            ]
+        },
+        "id": "price_1St60Z9fljwH26CPgYBsCIDv"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-fuk-259"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St60Z9fljwH26CPUzf4pUED",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-fuk-259?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St60Z9fljwH26CPgYBsCIDv",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-fuk-259?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Design the user interface and experience for the Rodent Fight Club iOS game",
+    "project_scope_full": "Design the user interface and experience for the Rodent Fight Club iOS game. The game is a simple, fun, and addictive mobile game where the player controls a rat and fights other rats to win."
 }
