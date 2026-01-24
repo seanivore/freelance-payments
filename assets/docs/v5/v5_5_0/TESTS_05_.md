@@ -64,3 +64,37 @@ uid-yvc-829:1 Blocked aria-hidden on an element because its descendant retained 
 Element with focus: <button.inline-flex items-center justify-center whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 bg-portfolio-accent-mauve hover:bg-portfolio-accent-mauve/80 text-portfolio-bg-dark font-semibold px-4 py-2 rounded-lg transition-all duration-300>
 Ancestor with aria-hidden: <div#root> <div id=​"root" data-aria-hidden=​"true" aria-hidden=​"true">​…​</div>​
 ```
+
+---
+
+## Continuing Test - `uid-yvc-829.json`
+
+- **TESTING FLOW**
+  - User will log in on mobile, sign contract, view invoice but not acknowledge it
+  - User exit the site
+
+- **EXPECTED BEHAVIOR**
+  - One `/api/track-event` call for event `contract_signed`
+  - Activates `user-exit-events.yml` workflow adding timestamp to `state.client_status.contract_signed`
+  - No other events and no additional API calls for this session
+  - Otherwise normal UI functionality
+
+### ACTUAL BEHAVIOR
+
+- **BUG_05_002** Modal jump off screen when clicking into either text input field on iOS
+  - This behavior is the same as BUG_05_001, but it is happening with the name and date fields instead of the date field
+  - Meaning I don't think it is related to that aria-hidden attribute, but good we fixed that
+  - `assets/docs/v5/v5_5_0/testing/IMG_BUG_05_002-1.jpg` loads like this
+  - `assets/docs/v5/v5_5_0/testing/IMG_BUG_05_002-2.jpg` when you clicked into the name field
+  - I'm not sure what it is trying to display below the modal on mobile; possibly keeping the bottom of it aligned to the top of the keyboard
+  - But there is just the big gap instead; you can't scroll down in the modal though you can see it cut off the bottom of the modal
+  - Pulling the modal back down makes it think the user is trying to swipe it closed, I think
+  - It seems like it is used to showing the full modal, but now it has some kind of padding it needs to show when active or when 'focused'
+
+* **THOUGHTS**
+  - Please just review all related code to the modal functioning
+  - It seems like this bug arose from changing the date selector so many times
+  - I think in one of the updates something wasn't cleaned up or was added in error
+  - Or just write all the associated code for that functionality and UI view as new code
+  - Is there a padding that or something that can become visible when "focused"?
+  - Other ideas?
