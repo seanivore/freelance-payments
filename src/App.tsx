@@ -19,6 +19,15 @@ export default function App() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const processedSessionRef = useRef<string | null>(null);
   const loggedInQueuedRef = useRef(false);
+  // Track client_status for deduplication (updated when data changes)
+  const clientStatusRef = useRef<JobData['state']['client_status'] | null>(null);
+
+  // Keep clientStatusRef in sync with data for event deduplication
+  useEffect(() => {
+    if (data?.state?.client_status) {
+      clientStatusRef.current = data.state.client_status;
+    }
+  }, [data?.state?.client_status]);
 
   // Initial Data Fetch
   useEffect(() => {
@@ -119,15 +128,36 @@ export default function App() {
     }, INACTIVITY_LIMIT);
   }, [flushEvents]);
 
-  const trackEvent = useCallback((type: string, data: any = {}) => {
+  const trackEvent = useCallback((type: string, eventData: any = {}) => {
+    // Check if event is already recorded in client_status (skip if already processed)
+    const status = clientStatusRef.current;
+    if (status) {
+      // Map event types to client_status keys
+      const statusKeyMap: Record<string, keyof typeof status> = {
+        'logged_in': 'logged_in',
+        'contract_signed': 'contract_signed',
+        'invoice': 'invoice',
+        'payment_1': 'payment_1',
+        'balance': 'balance',
+        'payment_2': 'payment_2'
+      };
+      const statusKey = statusKeyMap[type];
+      if (statusKey && status[statusKey]) {
+        // Already recorded in JSON, skip
+        return;
+      }
+    }
+    
+    // Additional guard for logged_in (session-level dedup)
     if (type === 'logged_in') {
       if (loggedInQueuedRef.current) return;
       loggedInQueuedRef.current = true;
     }
+    
     eventBufferRef.current.push({
       type,
       timestamp: new Date().toISOString(),
-      data
+      data: eventData
     });
     resetTimer();
   }, [resetTimer]);
@@ -150,6 +180,8 @@ export default function App() {
       const jobId = window.location.pathname.substring(1);
       if (jobId && jobId !== '/') {
         const eventsToSend = [...eventBufferRef.current];
+        // Clear buffer immediately to prevent double-sends
+        eventBufferRef.current = [];
         sendEvents(eventsToSend, true).catch(() => {});
       }
     };
@@ -276,11 +308,6 @@ export default function App() {
 
   // Memoized emitEvent callback
   const emitEvent = useCallback((name: string, payload?: unknown) => {
-    if (name === 'contract_loaded') {
-      trackEvent('contract_loaded', payload);
-      return;
-    }
-    
     let eventType = name;
     if (name === 'sign') {
       eventType = 'contract_signed';
