@@ -152,9 +152,13 @@ Run if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
 ℹ️  No VERCEL_DEPLOY_HOOK secret configured - relying on push-triggered deploy
 ```
 
+- **NOTE:** There is no "push-triggered" deploy that happens or has ever happened here in the past; also we removed the deploy hook almost immediately; this means that if this is the cause for the deployment not getting the updated JSON, then it is surprising we didn't see this more often earlier. We did see it often, but it is possible this point right here is where it could be fixed.
+
 ---
 
 ## Continuing Test, Invoice - `uid-yvc-829.json`
+
+### Acknowledgment of Invoice
 
 - **TESTING FLOW**
   - User will log in on desktop, view and acknowledge invoice
@@ -169,17 +173,53 @@ Run if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
 ### Actual Behavior
 
 - **BUG_05_003** User loaded and set to contract instead of invoice page
-  - This means the workflow triggered from contract_signed event is not grabbing the updated JSON file with the contract_signed timestamp
-  - However, it is notable that the deployment links to the proper commit 5cd44b5
-  - But based on the sequence of events, it seems like it links to that commit, before that commit is complete — **is that possible?**
-  - Because **AFTER** deployment, then the GitHub Action Workflow runs
-  - In the workflow it edited the JSON and **THEN** it commits to the same commit; 5cd44b5
-  - How legitimate is the sequence I see versus what actually happens? Because it seems strange that, if the commit that the deployment (which includes running `npm run build`) is ALWAYS after the build runs in the deploy, then how is it ever getting the accurate JSON file that was updated in that exact same commit? Or wait, how does `npm run build` work regarding what JSON it grabs? Because I just ran it on my own terminal, but I haven't pulled the latest changes from the repo yet so it is not updated with the latest changes. I guess I'll run a deployment now. Which should work regardless and we'll have to try the experiment again.
-
-- **Console Log**
+  - Console log
 
 ```plaintext
 uid-yvc-829:1  GET https://payments.august.style/uid-yvc-829 404 (Not Found)
 job-6Iq9Yn9s.js:59 Vite: job.tsx loaded
 job-6Iq9Yn9s.js:1 ✅ Loaded job data for uid-yvc-829: {logged_in: '2026-01-21T13:18:44.844Z', contract_signed: null, invoice: null, payment_1: null, balance: null, …}
 ```
+
+- This means the workflow triggered from contract_signed event is not grabbing the updated JSON file with the contract_signed timestamp
+- However, it is notable that the deployment links to the proper commit 5cd44b5
+- But based on the sequence of events, it seems like it links to that commit, before that commit is complete — **is that possible?**
+- Because **AFTER** deployment, then the GitHub Action Workflow runs
+- In the workflow it edited the JSON and **THEN** it commits to the same commit; 5cd44b5
+- How legitimate is the sequence I see versus what actually happens? Because it seems strange that, if the commit that the deployment (which includes running `npm run build`) is ALWAYS after the build runs in the deploy, then how is it ever getting the accurate JSON file that was updated in that exact same commit? Or wait, how does `npm run build` work regarding what JSON it grabs? Because I just ran it on my own terminal, but I haven't pulled the latest changes from the repo yet so it is not updated with the latest changes. I guess I'll run a deployment now. Which should work regardless and we'll have to try the experiment again.
+- Console log
+
+```plaintext
+  GET https://payments.august.style/uid-yvc-829 404 (Not Found)
+S @ assets/main-BgpHDfX3.js:1
+await in S
+pv @ index-C8XLP5Y7.js:8
+(anonymous) @ index-C8XLP5Y7.js:8
+Bi @ index-C8XLP5Y7.js:8
+Qc @ index-C8XLP5Y7.js:8
+Pc @ index-C8XLP5Y7.js:9
+Z1 @ index-C8XLP5Y7.js:9
+job-6Iq9Yn9s.js:59 Vite: job.tsx loaded
+job-6Iq9Yn9s.js:1 ✅ Loaded job data for uid-yvc-829: {logged_in: '2026-01-21T13:18:44.844Z', contract_signed: '2026-01-24T05:56:14.936Z', invoice: null, payment_1: null, balance: null, …}
+```
+
+- So correct, this time it had the proper JSON in the deployment
+- The question remains if it is always grabbing the proper JSON file from the commit that was deployed because if the deployment really does run before the edited JSON is commited, then it would be grabbing the old JSON file instead of the new one
+
+### Actually Acknowledge Invoice This Time
+
+- **TEST FLOW**
+
+- This time we'll actually acknowledge the invoice and be routed to payment_1, then exit
+- We'll exit and it should trigger one API call for one event and start the workflow
+- It should then add the timestamp to `state.client_status.invoice`
+
+- **If this is caused by the JSON being updated after the deployment, then when logging in next, we'll be sent to invoice again**
+
+- A `OPTIONS /api/track-event` ran but no `POST /api/track-event` request was made — I don't know the difference other than every POST has an option show before it, but this is the first i've seen an option without a post
+- Does `track-event.js` file not get called? We acknowledged the invoice, but the event was not recorded because the API call was not completed
+
+- **Main questions:**
+
+* Does the sequence of events of `API call -> deployment -> GitHub Action Workflow run -> JSON file update -> commit -> push` happen in that order? Or is it possible for the GitHub Action Workflow to run before the deployment is complete? It seems like it has worked sometimes in the past, but based on the sequence of events, it appears like it should _NEVER_ have worked.
+* How does the flow of the workflow work now? Does Vercel deploy always need to happen before GitHub action workflow runs? If it does, then maybe we do need the deploy hook back. Either we we should address that there _IS_ no push-triggered deploy that is in the logs.
