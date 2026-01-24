@@ -16,8 +16,8 @@ This log tracks bugs and fixes during v5 testing. Follow these conventions:
 # Testing Log 04 - v5.4.0 Single-Batch Validation
 
 **Created**: 2026-01-21  
-**Last Updated**: 2026-01-21  
-**Status**: In Progress - bugs identified, fixes pending
+**Last Updated**: 2026-01-23  
+**Status**: Complete - all bugs fixed
 
 **Focus**:
 - Single-batch policy verification
@@ -169,3 +169,149 @@ This log tracks bugs and fixes during v5 testing. Follow these conventions:
 ### TESTING `uid-fri-956.json` — Two-Batch Behavior and Commit UI Mismatch
 - **Source**: `assets/docs/v5/v5_3_8/TESTING_uid-fri-956.json.md`
 - **Summary**: Successful end-to-end run but events split into two batches; GitHub Actions UI linked to prior commits while actual commits/deploys were correct.
+
+---
+
+## Test Job: `uid-yvc-829.json`
+
+**Login**: Dewey — nerd-dates
+
+### BUG_04_005 — iOS Date Picker Wider Than Viewport (Persistent)
+
+**Date**: 2026-01-21  
+**Status**: FIXED  
+**Severity**: Medium (UX issue on mobile)
+
+**Expected**: Date picker fits within drawer/viewport on iOS.  
+**Actual**: Native iOS date picker still overflows viewport despite previous fix attempts.
+
+**Evidence**:
+- `assets/docs/v5/v5_4_0/testing/IMG-BUG_04_005-1.PNG`
+- `assets/docs/v5/v5_4_0/testing/IMG-BUG_04_005-2.PNG`
+
+**History**:
+1. Native iOS picker overflowed → switched to custom Calendar component (react-day-picker)
+2. Custom calendar had broken layout (day headers misaligned: "Su" separate, "MoTuWeThFrSa" crammed)
+3. Reverted to native picker with drawer constraints → still overflowing
+4. Multiple attempts to fix with `w-screen max-w-none` and similar → still overflowing
+
+**Root Cause Analysis**:
+- Native iOS date picker is system UI that cannot be reliably constrained
+- Custom calendar components have their own layout issues
+- The fundamental problem is trying to fit a complex picker into a mobile drawer
+
+**Fix Implemented**:
+- Replaced date picker entirely with a simple text input
+- Pre-filled with today's date in readable format ("Jan 23, 2026")
+- Aligns with "signing" UX where typing the date feels more authentic
+- Removed calendar button and `openDatePicker` function
+- Simplified drawer styling (removed complex width overrides)
+
+**Files Modified**:
+- `src/components/SignatureModal.tsx`: Replaced `<input type="date">` with `<input type="text">`, removed calendar button
+
+**Test Plan**:
+- iOS Safari: open signature modal, verify date input is simple text field
+- Desktop Chrome: same verification
+- Confirm date is pre-filled with today's date in readable format
+
+---
+
+### BUG_04_006 — Unnecessary Events Triggering API Calls
+
+**Date**: 2026-01-21  
+**Status**: FIXED  
+**Severity**: Low (wasted API calls, no data impact)
+
+**Expected**: Only meaningful events trigger `/api/track-event` calls (logged_in, contract_signed, invoice, payment_1, balance, payment_2).  
+**Actual**: `contract_loaded` and already-processed events trigger API calls that result in "skipped" workflow logs.
+
+**Evidence**:
+- Vercel logs: `✅ Dispatched workflow with 2 event(s) for job uid-yvc-829`
+- Workflow logs: `ℹ️ Skipping contract_loaded - informational event only`
+- Workflow logs: `⏭️ Skipping payment_2 - already processed at 2026-01-21T13:00:20.133Z`
+
+**Root Cause**:
+- `contract_loaded` was an informational event added during testing/debugging
+- Events already recorded in `client_status` were still being queued and sent
+- No frontend filtering before sending to API
+
+**Fix Implemented**:
+1. Removed `contract_loaded` event entirely:
+   - Removed from `PdfViewer.tsx` (no longer emits on PDF load)
+   - Removed from `App.tsx` `emitEvent` handler
+   - Removed from `user_exit_events.py` handler
+2. Added client_status check in `trackEvent`:
+   - Before queueing, checks if event type already has a timestamp in `clientStatusRef`
+   - Skips events that are already recorded (prevents sending events that will be skipped)
+3. Clear buffer after unload send:
+   - Prevents edge-case double-sends on rapid page transitions
+
+**Files Modified**:
+- `src/components/PdfViewer.tsx`: Removed `contract_loaded` emit and `hasEmittedLoadedRef`
+- `src/App.tsx`: Removed `contract_loaded` case, added `clientStatusRef` and dedup check in `trackEvent`, clear buffer in unload handler
+- `.github/scripts/orchestration/user_exit_events.py`: Removed `contract_loaded` handler
+
+**Test Plan**:
+- Complete a user flow and verify only one API call per session exit
+- Verify no "skipped" or "informational only" events in workflow logs
+- Confirm all 6 meaningful events still work: logged_in, contract_signed, invoice, payment_1, balance, payment_2
+
+---
+
+### BUG_04_007 — Desktop Date Picker UI Issues
+
+**Date**: 2026-01-21  
+**Status**: FIXED  
+**Severity**: Low (visual issues)
+
+**Expected**: Date picker displays correctly on desktop with single calendar icon, drawer centered.  
+**Actual**: Drawer modal left-aligned, two calendar icons visible (native input icon + custom button).
+
+**Evidence**:
+- `assets/docs/v5/v5_4_0/testing/IMG-BUG_04_007-1.png`
+- `assets/docs/v5/v5_4_0/testing/IMG-BUG_04_007-2.png`
+
+**Root Cause**:
+- Previous fix added a custom calendar button alongside the native date input's built-in icon
+- Drawer width overrides (`w-screen max-w-none sm:max-w-md`) caused alignment issues
+
+**Fix Implemented**:
+- Same fix as BUG_04_005: replaced date picker with text input
+- Removed calendar button entirely (no more double icons)
+- Simplified drawer styling to standard `max-w-md` (proper centering)
+
+**Files Modified**:
+- `src/components/SignatureModal.tsx`: Same changes as BUG_04_005
+
+**Test Plan**:
+- Desktop Chrome: open signature modal, verify no calendar icons, drawer centered
+- Verify date input is pre-filled and editable
+
+---
+
+## Summary
+
+| Bug | Severity | Status | Root Cause | Fix |
+|-----|----------|--------|------------|-----|
+| BUG_04_001 | Low | FIXED | Desktop date picker icon not triggering | Added showPicker() helper |
+| BUG_04_002 | Low | FIXED | iOS picker overflow | Drawer width constraints |
+| BUG_04_003 | Low | FIXED | Duplicate event batches | Hash + timestamp dedupe |
+| BUG_04_004 | Medium | FIXED | smart-push conflict handling | Abort on job JSON conflicts |
+| BUG_04_005 | Medium | FIXED | Native date picker unreliable | Replaced with text input |
+| BUG_04_006 | Low | FIXED | Unnecessary events sent | Removed contract_loaded, added dedup |
+| BUG_04_007 | Low | FIXED | Double icons, drawer alignment | Text input, simplified drawer |
+
+## Key Changes (BUG_04_005, BUG_04_006, BUG_04_007)
+
+### Date Input Redesign
+- Replaced native date picker with simple text input
+- Pre-filled with today's date in "Jan 23, 2026" format
+- Better UX for "signing" authenticity
+- Works consistently on iOS and desktop
+
+### Event System Cleanup
+- Only 6 meaningful events tracked: `logged_in`, `contract_signed`, `invoice`, `payment_1`, `balance`, `payment_2`
+- Events already in `client_status` are not re-queued
+- `contract_loaded` removed entirely (was informational only)
+- Single API call per session exit guaranteed
