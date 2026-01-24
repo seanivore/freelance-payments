@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Calendar, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   Drawer,
@@ -18,35 +18,30 @@ interface SignatureModalProps {
   onSign: (legalName: string, signedDate: string) => void;
 }
 
+// Format date as "Jan 23, 2026" for display
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+};
+
 export const SignatureModal: React.FC<SignatureModalProps> = ({
   isOpen,
   onClose,
   onSign
 }) => {
   const [legalName, setLegalName] = useState('');
-  // Default to today's date in YYYY-MM-DD format for native input
-  const [signedDate, setSignedDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  });
-  const dateInputRef = useRef<HTMLInputElement | null>(null);
-
-  const openDatePicker = () => {
-    const input = dateInputRef.current;
-    if (!input) return;
-    if (typeof (input as HTMLInputElement).showPicker === 'function') {
-      (input as HTMLInputElement).showPicker();
-    } else {
-      input.focus();
-    }
-  };
+  // Pre-fill with today's date in readable format
+  const [signedDate, setSignedDate] = useState(() => formatDate(new Date()));
 
   const handleSave = () => {
     if (legalName && signedDate) {
       onSign(legalName, signedDate);
       // Reset form
       setLegalName('');
-      setSignedDate(new Date().toISOString().split('T')[0]);
+      setSignedDate(formatDate(new Date()));
     }
   };
 
@@ -54,8 +49,8 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="max-h-[90vh] overflow-y-auto w-screen max-w-none sm:max-w-md">
-        <div className="mx-auto w-full max-w-none px-4 sm:max-w-md">
+      <DrawerContent className="max-h-[90vh] overflow-y-auto">
+        <div className="mx-auto w-full max-w-md px-4">
           <DrawerHeader className="text-center">
             <DrawerTitle className="font-agency text-2xl tracking-wide">
               Sign Contract
@@ -85,7 +80,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
               />
             </div>
 
-            {/* Date Input - Native input for best mobile UX */}
+            {/* Date Input - Text input for signing authenticity */}
             <div className="space-y-2">
               <label 
                 htmlFor="signed-date"
@@ -93,25 +88,14 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
               >
                 Date
               </label>
-              <div className="relative">
-                <input
-                  ref={dateInputRef}
-                  id="signed-date"
-                  type="date"
-                  value={signedDate}
-                  onChange={(e) => setSignedDate(e.target.value)}
-                  onClick={openDatePicker}
-                  className="w-full bg-portfolio-bg-primary border border-portfolio-border rounded-lg px-4 py-3 pr-12 text-portfolio-text-primary transition-all duration-300 focus:outline-none focus:border-portfolio-accent-mauve focus:shadow-glow"
-                />
-                <button
-                  type="button"
-                  onClick={openDatePicker}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-portfolio-text-secondary hover:text-portfolio-text-primary"
-                  aria-label="Open date picker"
-                >
-                  <Calendar className="h-4 w-4" />
-                </button>
-              </div>
+              <input
+                id="signed-date"
+                type="text"
+                value={signedDate}
+                onChange={(e) => setSignedDate(e.target.value)}
+                className="w-full bg-portfolio-bg-primary border border-portfolio-border rounded-lg px-4 py-3 text-portfolio-text-primary transition-all duration-300 focus:outline-none focus:border-portfolio-accent-mauve focus:shadow-glow"
+                placeholder={formatDate(new Date())}
+              />
             </div>
 
             {/* Legal Notice */}
