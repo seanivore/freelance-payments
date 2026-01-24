@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-24T12:32:07.355168Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-fuk-259",
+      "pdf": "assets/pdf/contract/kon-fuk-259.pdf",
+      "file_id": "1ek550KXoRh0h1bVJ9uXgfOfZ3PMS5gWXceVl6g-g9gc",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-fuk-259.pdf",
+      "sha256": "9eb9bfcc795979d4c5c0560db5b69a554990c7dea51de6123bc2a97a2655525a",
+      "created": "2026-01-24T12:32:14.726099Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-fuk-259",
+      "pdf": "assets/pdf/invoice/inv-fuk-259.pdf",
+      "file_id": "1OdezX9mtcAuKTb5DR7VtaytKjz2YfE8pcFLLqtW-ClM",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-fuk-259.pdf",
+      "sha256": "9fd406674b138667d26120a1e3e583bbca1cffefa7e13e8669ac34bc5924b4ec",
+      "created": "2026-01-24T12:32:19.583585Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-fuk-259",
+      "pdf": "assets/pdf/balance/bal-fuk-259.pdf",
+      "file_id": "1w2qo-m6VoepObHctjcT6hjCNZ1OHyfCe5s4YbTcAW9I",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-fuk-259.pdf",
+      "sha256": "9b9b6957e755443f6bfd742e4c4a5523ffe98a04df5a8679af01e18fea3ba5bc",
+      "created": "2026-01-24T12:32:25.590019Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-24T12:32:07.355168Z",
+      "product": "uid-fuk-259",
+      "price_1": "price_1St60Z9fljwH26CPUzf4pUED",
+      "price_2": "price_1St60Z9fljwH26CPgYBsCIDv",
+      "customer": "cus-fuk-259",
+      "coupon": "cou-fuk-259"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-fuk-259"
       ]
     },
-    "id": ""
+    "id": "price_1St60Z9fljwH26CPUzf4pUED"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-fuk-259"
       ]
     },
-    "id": ""
+    "id": "price_1St60Z9fljwH26CPgYBsCIDv"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1St60Z9fljwH26CPUzf4pUED",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1St60Z9fljwH26CPgYBsCIDv",
         "quantity": 1
       }
     ],

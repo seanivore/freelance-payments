@@ -1,11 +1,23 @@
 {
   "jobs": {
-    "dewey-nerd-dates": {
-      "file_path": "assets/jobs/uid-yvc-829.json",
-      "job_id": "uid-yvc-829",
-      "login_keyword": "nerd-dates",
-      "login_name": "Dewey"
+    "keegan-rodent-fight-club": {
+      "file_path": "assets/jobs/uid-fuk-259.json",
+      "job_id": "uid-fuk-259",
+      "login_keyword": "rodent-fight-club",
+      "login_name": "Keegan"
+    },
+    "elsworth-houseplant-boutique": {
+      "file_path": "assets/jobs/uid-pqu-327.json",
+      "job_id": "uid-pqu-327",
+      "login_keyword": "houseplant-boutique",
+      "login_name": "Elsworth"
+    },
+    "kelvin-tokenized-social-media": {
+      "file_path": "assets/jobs/uid-ugz-557.json",
+      "job_id": "uid-ugz-557",
+      "login_keyword": "tokenized-social-media",
+      "login_name": "Kelvin"
     }
   },
-  "generated_at": "2026-01-24T10:14:57.948577Z"
+  "generated_at": "2026-01-24T12:32:55.561328Z"
 }
