@@ -70,16 +70,16 @@ Each step updates the JSON file via GitHub Actions. The next login routes to the
 
 ## Stack
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 18 + TypeScript + Vite |
-| Styling | Tailwind CSS + shadcn/ui |
-| Payments | Stripe Checkout (Custom UI) |
-| PDF | pdfjs-dist (render) + Google Docs API (generate) |
-| Backend | Vercel Serverless Functions |
-| Automation | GitHub Actions |
-| Hosting | GitHub Pages + Vercel |
-| "Database" | JSON files in Git |
+| Layer      | Technology                                       |
+|------------|--------------------------------------------------|
+| Frontend   | React 18 + TypeScript + Vite                     |
+| Styling    | Tailwind CSS + shadcn/ui                         |
+| Payments   | Stripe Checkout (Custom UI)                      |
+| PDF        | pdfjs-dist (render) + Google Docs API (generate) |
+| Backend    | Vercel Serverless Functions                      |
+| Automation | GitHub Actions                                   |
+| Hosting    | GitHub Pages + Vercel                            |
+| "Database" | JSON files in Git                                |
 
 ## Why This Architecture?
 

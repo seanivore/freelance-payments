@@ -35,14 +35,14 @@ This log tracks bugs and fixes during v5 testing. Follow these conventions:
 
 ### All Events Validated Successfully
 
-| Event | Mobile | Desktop | Workflow | JSON Updated |
-|-------|--------|---------|----------|--------------|
-| `logged_in` | ✅ | ✅ | #149, #150 | ✅ |
-| `contract_signed` | ✅ | ✅ | #151, #152 | ✅ |
-| `invoice` | ✅ | ✅ | #153, #154 | ✅ |
-| `payment_1` | ✅ | ✅ | #155, #156 | ✅ |
-| `balance` | ✅ | ✅ | #157, #158 | ✅ |
-| `payment_2` | ✅ | ✅ | #159, #160 | ✅ |
+| Event             | Mobile | Desktop | Workflow   | JSON Updated |
+|-------------------|--------|---------|------------|--------------|
+| `logged_in`       | ✅     | ✅       | #149, #150 | ✅           |
+| `contract_signed` | ✅     | ✅       | #151, #152 | ✅           |
+| `invoice`         | ✅     | ✅       | #153, #154 | ✅           |
+| `payment_1`       | ✅     | ✅       | #155, #156 | ✅           |
+| `balance`         | ✅     | ✅       | #157, #158 | ✅           |
+| `payment_2`       | ✅     | ✅       | #159, #160 | ✅           |
 
 ### Key Validations
 
@@ -155,20 +155,20 @@ else if (client_status.balance && !client_status.payment_2) {
 
 ## Workflow Run Summary
 
-| Run # | Job ID | Event | Timestamp |
-|-------|--------|-------|-----------|
-| #149 | uid-fuk-259 | logged_in | 2026-01-24T12:34:21.271Z |
-| #150 | uid-pqu-327 | logged_in | 2026-01-24T12:48:24.511Z |
-| #151 | uid-fuk-259 | contract_signed | 2026-01-24T13:02:38.076Z |
-| #152 | uid-pqu-327 | contract_signed | 2026-01-24T13:02:38.076Z |
-| #153 | uid-fuk-259 | invoice | 2026-01-24T13:15:24.241Z |
-| #154 | uid-pqu-327 | invoice | 2026-01-24T13:20:15.546Z |
-| #155 | uid-fuk-259 | payment_1 | 2026-01-24T13:26:09.457Z |
-| #156 | uid-pqu-327 | payment_1 | 2026-01-24T13:31:53.790Z |
-| #157 | uid-fuk-259 | balance | 2026-01-24T13:36:36.065Z |
-| #158 | uid-pqu-327 | balance | 2026-01-24T13:39:50.041Z |
-| #159 | uid-pqu-327 | payment_2 | 2026-01-24T13:43:49.264Z |
-| #160 | uid-fuk-259 | payment_2 | 2026-01-24T13:46:27.833Z |
+| Run # | Job ID      | Event           | Timestamp                |
+|-------|-------------|-----------------|--------------------------|
+| #149  | uid-fuk-259 | logged_in       | 2026-01-24T12:34:21.271Z |
+| #150  | uid-pqu-327 | logged_in       | 2026-01-24T12:48:24.511Z |
+| #151  | uid-fuk-259 | contract_signed | 2026-01-24T13:02:38.076Z |
+| #152  | uid-pqu-327 | contract_signed | 2026-01-24T13:02:38.076Z |
+| #153  | uid-fuk-259 | invoice         | 2026-01-24T13:15:24.241Z |
+| #154  | uid-pqu-327 | invoice         | 2026-01-24T13:20:15.546Z |
+| #155  | uid-fuk-259 | payment_1       | 2026-01-24T13:26:09.457Z |
+| #156  | uid-pqu-327 | payment_1       | 2026-01-24T13:31:53.790Z |
+| #157  | uid-fuk-259 | balance         | 2026-01-24T13:36:36.065Z |
+| #158  | uid-pqu-327 | balance         | 2026-01-24T13:39:50.041Z |
+| #159  | uid-pqu-327 | payment_2       | 2026-01-24T13:43:49.264Z |
+| #160  | uid-fuk-259 | payment_2       | 2026-01-24T13:46:27.833Z |
 
 ---
 
