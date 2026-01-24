@@ -177,6 +177,45 @@ Use `navigator.sendBeacon` with `text/plain` content type for unload scenarios:
 
 ---
 
+### BUG_05_005 — Duplicate Payment Event Triggers Second Workflow
+
+**Date**: 2026-01-24  
+**Status**: FIXED  
+**Severity**: Medium (causes unnecessary workflow run)
+
+**Expected**: After completing payment, only one `payment_1` event should be sent, triggering one workflow run.  
+**Actual**: Two workflow runs occurred - first with `[invoice, payment_1]`, second with `[payment_1]` (marked as "already processed").
+
+**Test Flow**:
+1. User acknowledges invoice → `invoice` event buffered
+2. User completes payment → returns from Stripe
+3. Session status check runs → `trackEvent('payment_1')` called → event buffered
+4. User exits → both events sent → Workflow #146 runs
+5. User returns to site (or page reloads) → session status check runs again
+6. `trackEvent('payment_1')` called again (local state shows `payment_1: null` because JSON not re-fetched)
+7. User exits → `payment_1` sent again → Workflow #147 runs (skips as "already processed")
+
+**Root Cause**:
+The deduplication in `trackEvent` only checked `clientStatusRef` (which reflects the JSON data) and `loggedInQueuedRef` (for logged_in only). When a user returns from Stripe:
+1. The session status check calls `trackEvent('payment_1')`
+2. `clientStatusRef.current.payment_1` is still `null` (JSON not re-fetched)
+3. The event passes the check and gets buffered
+4. If the user navigates or the page reloads, the same check runs again
+
+**Fix Implemented**:
+Added `sentEventsRef` - a Set that tracks which event types have been queued in the current browser session:
+1. Before adding any event to the buffer, check if it's already in `sentEventsRef`
+2. After adding an event, add its type to `sentEventsRef`
+3. This prevents the same event type from being queued twice in a single session
+
+**Files Modified**:
+- `src/App.tsx`: Added `sentEventsRef` and check in `trackEvent`
+
+**Also Fixed**:
+Removed premature `trackEvent` call in `createCheckoutSession` - payment events should only be tracked on successful return from Stripe, not when starting checkout (prevents false positives if user abandons checkout).
+
+---
+
 ## Observations
 
 ### Event System Validation (Pending Full Test)

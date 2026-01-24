@@ -21,6 +21,8 @@ export default function App() {
   const loggedInQueuedRef = useRef(false);
   // Track client_status for deduplication (updated when data changes)
   const clientStatusRef = useRef<JobData['state']['client_status'] | null>(null);
+  // Track events that have been queued/sent in this session to prevent duplicates
+  const sentEventsRef = useRef<Set<string>>(new Set());
 
   // Keep clientStatusRef in sync with data for event deduplication
   useEffect(() => {
@@ -146,6 +148,11 @@ export default function App() {
   }, [flushEvents]);
 
   const trackEvent = useCallback((type: string, eventData: any = {}) => {
+    // Check if event was already queued/sent in this session
+    if (sentEventsRef.current.has(type)) {
+      return;
+    }
+    
     // Check if event is already recorded in client_status (skip if already processed)
     const status = clientStatusRef.current;
     if (status) {
@@ -170,6 +177,9 @@ export default function App() {
       if (loggedInQueuedRef.current) return;
       loggedInQueuedRef.current = true;
     }
+    
+    // Mark this event as sent for this session
+    sentEventsRef.current.add(type);
     
     eventBufferRef.current.push({
       type,
