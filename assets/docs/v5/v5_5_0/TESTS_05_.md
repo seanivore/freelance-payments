@@ -98,3 +98,88 @@ Ancestor with aria-hidden: <div#root> <div id=​"root" data-aria-hidden=​"tru
   - Or just write all the associated code for that functionality and UI view as new code
   - Is there a padding that or something that can become visible when "focused"?
   - Other ideas?
+
+---
+
+## Continuing Test, Contract - `uid-yvc-829.json`
+
+### Contract Signed
+
+- **TESTING FLOW**
+  - User will log in on mobile, sign contract, view invoice but not acknowledge it
+  - User exit the site
+
+- **EXPECTED BEHAVIOR**
+  - One `/api/track-event` call for event `contract_signed`
+  - Activates `user-exit-events.yml` workflow adding timestamp to `state.client_status.contract_signed`
+  - No other events and no additional API calls for this session
+  - Otherwise normal UI functionality
+
+### Workflow Logs for Contract Signed Event
+
+1. **VERCEL API CALL:** `/api/track-event` ✅ Dispatched workflow with 1 event(s) for job uid-yvc-829
+2. **VERCEL DEPLOYMENT:** 8dQ7Kduvyu9GQdG35DPK7QcNDz3D
+3. **Deployment Commit:** 5cd44b5
+
+- Shows update to `contract.signatures.client.legal_name` and `contract.signatures.client.signed_date`
+- Shows update to `state.client_status.contract_signed`
+
+4. **GitHub Action Workflow:** one workflow running; exit events processed phase
+
+```plaintext
+Processing 1 events for uid-yvc-829...
+  ✓ Updated contract_signed: 2026-01-24T05:56:14.936Z
+  ✓ Updated contract signature legal_name: Dewey Tester
+  ✓ Updated contract signature signed_date: Jan 24, 2026
+✅ Successfully updated assets/jobs/uid-yvc-829.json
+```
+
+5. **GitHub Action Workflow:** changes commited
+
+```plaintext
+Run git config --global user.name 'github-actions[bot]'
+[freelance-payments 5cd44b5] Update user behavior stats
+ 1 file changed, 162 insertions(+), 162 deletions(-)
+To https://github.com/seanivore/freelance-payments
+   77b6441..5cd44b5  freelance-payments -> freelance-payments
+✅ Successfully pushed changes
+```
+
+6. **GitHub Action Workflow:** trigger Vercel deploy
+
+```plaintext
+Run if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
+ℹ️  No VERCEL_DEPLOY_HOOK secret configured - relying on push-triggered deploy
+```
+
+---
+
+## Continuing Test, Invoice - `uid-yvc-829.json`
+
+- **TESTING FLOW**
+  - User will log in on desktop, view and acknowledge invoice
+  - User exit the site on payment_1 load
+
+- **EXPECTED BEHAVIOR**
+  - One `/api/track-event` call for event `invoice`
+  - Activates `user-exit-events.yml` workflow adding timestamp to `state.client_status.invoice`
+  - No other events and no additional API calls for this session
+  - Otherwise normal UI functionality
+
+### Actual Behavior
+
+- **BUG_05_003** User loaded and set to contract instead of invoice page
+  - This means the workflow triggered from contract_signed event is not grabbing the updated JSON file with the contract_signed timestamp
+  - However, it is notable that the deployment links to the proper commit 5cd44b5
+  - But based on the sequence of events, it seems like it links to that commit, before that commit is complete — **is that possible?**
+  - Because **AFTER** deployment, then the GitHub Action Workflow runs
+  - In the workflow it edited the JSON and **THEN** it commits to the same commit; 5cd44b5
+  - How legitimate is the sequence I see versus what actually happens? Because it seems strange that, if the commit that the deployment (which includes running `npm run build`) is ALWAYS after the build runs in the deploy, then how is it ever getting the accurate JSON file that was updated in that exact same commit? Or wait, how does `npm run build` work regarding what JSON it grabs? Because I just ran it on my own terminal, but I haven't pulled the latest changes from the repo yet so it is not updated with the latest changes. I guess I'll run a deployment now. Which should work regardless and we'll have to try the experiment again.
+
+- **Console Log**
+
+```plaintext
+uid-yvc-829:1  GET https://payments.august.style/uid-yvc-829 404 (Not Found)
+job-6Iq9Yn9s.js:59 Vite: job.tsx loaded
+job-6Iq9Yn9s.js:1 ✅ Loaded job data for uid-yvc-829: {logged_in: '2026-01-21T13:18:44.844Z', contract_signed: null, invoice: null, payment_1: null, balance: null, …}
+```
