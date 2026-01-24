@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-24T12:32:07.355168Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Kevin Keegan",
+                "signed_date": "Jan 24, 2026"
             }
         }
     },
@@ -54,7 +54,7 @@
         },
         "client_status": {
             "logged_in": "2026-01-24T12:34:21.271Z",
-            "contract_signed": null,
+            "contract_signed": "2026-01-24T13:02:38.076Z",
             "invoice": null,
             "payment_1": null,
             "balance": null,
