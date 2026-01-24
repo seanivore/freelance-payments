@@ -55,8 +55,8 @@
         "client_status": {
             "logged_in": "2026-01-21T13:18:44.844Z",
             "contract_signed": "2026-01-24T05:56:14.936Z",
-            "invoice": null,
-            "payment_1": null,
+            "invoice": "2026-01-24T08:43:56.069Z",
+            "payment_1": "2026-01-24T08:43:56.069Z",
             "balance": null,
             "payment_2": null
         }
@@ -106,7 +106,7 @@
         "count": 1,
         "currency": "usd",
         "unit_amount": 5250000,
-        "active": true,
+        "active": false,
         "billing_scheme": "per_unit",
         "pay_by": "start of work",
         "nickname": "Initial Payment",
