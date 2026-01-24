@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-24T12:32:08.540724Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Joan Elsworth",
+                "signed_date": "Jan 24, 2025"
             }
         }
     },
@@ -54,7 +54,7 @@
         },
         "client_status": {
             "logged_in": "2026-01-24T12:48:24.511Z",
-            "contract_signed": null,
+            "contract_signed": "2026-01-24T13:08:42.159Z",
             "invoice": null,
             "payment_1": null,
             "balance": null,
