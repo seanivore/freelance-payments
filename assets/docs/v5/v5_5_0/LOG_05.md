@@ -15,7 +15,7 @@ This log tracks bugs and fixes during v5 testing. Follow these conventions:
 # Testing Log 05 - v5.5.0 Event Cleanup Validation
 
 **Created**: 2026-01-23  
-**Last Updated**: 2026-01-23  
+**Last Updated**: 2026-01-24  
 **Status**: In Progress
 
 **Focus**:
@@ -107,6 +107,73 @@ Added `repositionInputs={false}` to the Drawer component in SignatureModal.tsx. 
 - iOS Safari: Open signature modal, tap on name and date fields, verify no jumping
 - Verify keyboard appears normally and modal stays in place
 - Desktop: Verify drawer still opens/closes normally
+
+---
+
+### BUG_05_003 — Stale JSON After Event Processing (Deployment Timing)
+
+**Date**: 2026-01-24  
+**Status**: FIXED  
+**Severity**: High (causes user to see wrong page state)
+
+**Expected**: After signing contract and exiting, user should see invoice page on next login.  
+**Actual**: User saw contract page again because the deployed JSON didn't have the `contract_signed` timestamp.
+
+**Root Cause**:
+Race condition between Vercel deployment and GitHub Actions workflow:
+1. User triggers `contract_signed` event → API dispatches `user-exit-events.yml`
+2. Vercel auto-deploys on the initial push (before workflow runs)
+3. GitHub Actions workflow updates JSON and commits
+4. But Vercel already deployed with the old JSON
+
+The `user-exit-events.yml` workflow was missing a dedicated GitHub Pages deployment step after committing JSON changes. Unlike `admin-push.yml` which has a two-job structure (process → deploy), `user-exit-events.yml` only had the processing step.
+
+**Fix Implemented**:
+Restructured `user-exit-events.yml` to mirror `admin-push.yml`:
+1. Added `deploy` job that runs after `process-events` job
+2. `process-events` job now builds the site and uploads artifact
+3. `deploy` job deploys to GitHub Pages using `actions/deploy-pages@v4`
+4. Both jobs are conditional on changes being committed
+
+**Files Modified**:
+- `.github/workflows/user-exit-events.yml`: Added two-job structure with GitHub Pages deployment
+
+---
+
+### BUG_05_004 — Invoice Event Not Sent (OPTIONS Without POST)
+
+**Date**: 2026-01-24  
+**Status**: FIXED  
+**Severity**: High (event not recorded)
+
+**Expected**: When user acknowledges invoice and exits, `invoice` event should be sent via POST to `/api/track-event`.  
+**Actual**: Only OPTIONS preflight request observed, no POST request made.
+
+**Root Cause**:
+CORS preflight race condition with `fetch` + `keepalive`:
+1. User acknowledges invoice → `invoice` event queued
+2. User exits page → `handleUnload` fires
+3. `sendEvents` called with `keepalive: true`
+4. Browser sends OPTIONS preflight to cross-origin API
+5. **Page unloads before OPTIONS response arrives** → POST never sent
+
+The `keepalive` flag only keeps the POST alive after page unload, but doesn't help if the preflight hasn't completed.
+
+**Fix Implemented**:
+Use `navigator.sendBeacon` with `text/plain` content type for unload scenarios:
+1. `sendBeacon` is specifically designed for unload scenarios
+2. Using `text/plain` avoids CORS preflight (it's a "simple" content type)
+3. Server parses JSON from the text/plain body
+4. Falls back to `fetch` with `keepalive` if `sendBeacon` fails
+
+**Files Modified**:
+- `src/App.tsx`: Updated `sendEvents` to use `sendBeacon` with `text/plain` for unload
+- `api/track-event.js`: Added handling for `text/plain` content type (parses JSON from body)
+
+**Technical Details**:
+- `sendBeacon` returns `true` if the request was successfully queued
+- `text/plain` is a "simple" content type per CORS spec, no preflight needed
+- Server checks `Content-Type` header and parses accordingly
 
 ---
 

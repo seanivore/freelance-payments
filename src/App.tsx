@@ -75,22 +75,39 @@ export default function App() {
     }
   };
 
-  const sendEvents = useCallback(async (events: Array<{type: string; timestamp: string; data: any}>, keepalive = false) => {
+  const sendEvents = useCallback(async (events: Array<{type: string; timestamp: string; data: any}>, useBeacon = false) => {
     if (events.length === 0) return;
     if (shouldSkipFlush(events)) return;
 
     const jobId = window.location.pathname.substring(1);
     if (!jobId || jobId === '/') return;
 
+    const payload = JSON.stringify({
+      job_id: jobId,
+      event_type: 'batch',
+      event_data: events
+    });
+
+    // Use sendBeacon for unload scenarios - it's more reliable than fetch with keepalive
+    // because it survives page unload. We use text/plain to avoid CORS preflight.
+    if (useBeacon && navigator.sendBeacon) {
+      // Use text/plain to avoid CORS preflight - server parses JSON from body
+      const blob = new Blob([payload], { type: 'text/plain' });
+      const sent = navigator.sendBeacon(apiUrl('/api/track-event'), blob);
+      if (!sent) {
+        console.warn('sendBeacon failed, falling back to fetch');
+        // Fall through to fetch
+      } else {
+        return; // Successfully queued via beacon
+      }
+    }
+
+    // Regular fetch for non-unload scenarios or beacon fallback
     const response = await fetch(apiUrl('/api/track-event'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        job_id: jobId,
-        event_type: 'batch',
-        event_data: events
-      }),
-      keepalive
+      body: payload,
+      keepalive: useBeacon // Use keepalive as fallback for beacon
     });
 
     if (!response.ok) {
@@ -479,16 +496,13 @@ export default function App() {
   }
 
   // Function to create checkout session
+  // NOTE: We do NOT track payment events here - only on successful return from Stripe
+  // This prevents false positives if user abandons checkout or payment fails
   const createCheckoutSession = async (paymentNumber: 1 | 2) => {
     setIsCreatingSession(true);
     try {
       const jobId = window.location.pathname.substring(1);
       const returnUrl = `${window.location.origin}/${jobId}?session_id={CHECKOUT_SESSION_ID}`;
-      
-      trackEvent(`payment_${paymentNumber}` as 'payment_1' | 'payment_2', {
-        payment_number: paymentNumber,
-        session_id: 'pending'
-      });
       
       const response = await fetch(apiUrl('/api/create-checkout-session'), {
         method: 'POST',
@@ -509,13 +523,6 @@ export default function App() {
 
       const session = await response.json();
       if (session.client_secret) {
-        const paymentEventIndex = eventBufferRef.current.findIndex(
-          e => e.type === `payment_${paymentNumber}` && e.data.session_id === 'pending'
-        );
-        if (paymentEventIndex !== -1) {
-          eventBufferRef.current[paymentEventIndex].data.session_id = session.session_id;
-        }
-        
         setClientSecret(session.client_secret);
       } else {
         throw new Error('No client_secret in response');

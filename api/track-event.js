@@ -59,7 +59,20 @@ export default async (req, res) => {
   }
 
   try {
-    const { job_id, event_type, event_data } = req.body;
+    // Handle both application/json and text/plain (from sendBeacon)
+    // sendBeacon uses text/plain to avoid CORS preflight, but body is still JSON
+    let body = req.body;
+    const contentType = req.headers['content-type'] || '';
+    
+    if (contentType.includes('text/plain') && typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch (parseError) {
+        return res.status(400).json({ error: 'Invalid JSON in text/plain body' });
+      }
+    }
+    
+    const { job_id, event_type, event_data } = body;
 
     // Validate required fields
     if (!job_id) {
