@@ -19,10 +19,12 @@ This log tracks bugs and fixes during v5 testing. Follow these conventions:
 **Status**: In Progress
 
 **Focus**:
+
 - Validate single-batch event policy (no unnecessary API calls)
 - Validate drawer modal fixes on iOS
 
 **Test Files**:
+
 - `uid-yvc-829.json` — Dewey (nerd-dates)
 
 ---
@@ -41,10 +43,12 @@ This log tracks bugs and fixes during v5 testing. Follow these conventions:
 **Actual**: Modal jumps off screen when tapping the date field on iOS. Pulling the modal back down closes it.
 
 **Evidence**:
+
 - `assets/docs/v5/v5_5_0/testing/IMG_BUG_05_001-1.jpg` - Where user clicked
 - `assets/docs/v5/v5_5_0/testing/IMG_BUG_05_001-2.jpg` - Modal jumped up off screen
 
 **Console Error**:
+
 ```
 Blocked aria-hidden on an element because its descendant retained focus.
 Ancestor with aria-hidden: <div#root> <div id="root" data-aria-hidden="true" aria-hidden="true">
@@ -52,12 +56,14 @@ Ancestor with aria-hidden: <div#root> <div id="root" data-aria-hidden="true" ari
 
 **Root Cause**:
 The `vaul` drawer library's `shouldScaleBackground={true}` (default) causes two issues:
+
 1. Sets `aria-hidden="true"` on the root element when drawer is open
 2. When iOS tries to focus a text input, it conflicts with the drawer's gesture handling and the aria-hidden state
 3. iOS scroll/zoom behavior to focus inputs fights with the drawer's transform
 
 **Fix Implemented**:
 Added `shouldScaleBackground={false}` to the Drawer component in SignatureModal.tsx. This:
+
 - Disables the background scaling animation
 - Prevents `aria-hidden` from being applied to the root element
 - Allows iOS to handle text input focus normally
@@ -65,9 +71,11 @@ Added `shouldScaleBackground={false}` to the Drawer component in SignatureModal.
 **Trade-off**: We lose the subtle background scaling effect when the drawer opens, but this is a minor visual detail compared to fixing the broken input experience on iOS.
 
 **Files Modified**:
+
 - `src/components/SignatureModal.tsx`: Added `shouldScaleBackground={false}` to Drawer
 
 **Test Plan**:
+
 - iOS Safari: Open signature modal, tap on name and date fields, verify no jumping
 - Desktop: Verify drawer still opens/closes normally
 
@@ -83,11 +91,13 @@ Added `shouldScaleBackground={false}` to the Drawer component in SignatureModal.
 **Actual**: Modal jumps up off screen when tapping either the name or date field on iOS. Large gap appears below modal. Pulling modal back down closes it.
 
 **Evidence**:
+
 - `assets/docs/v5/v5_5_0/testing/IMG_BUG_05_002-1.jpg` - Modal loads normally
 - `assets/docs/v5/v5_5_0/testing/IMG_BUG_05_002-2.jpg` - Modal jumps up when clicking into name field, gap appears below
 
 **Root Cause**:
 The `vaul` drawer library has automatic input repositioning (`repositionInputs={true}` by default) that tries to adjust the drawer position when the iOS keyboard opens. This repositioning fights with iOS's native keyboard handling, causing:
+
 1. Modal to jump up excessively
 2. Large gap between modal and keyboard
 3. Swipe-to-close gesture triggered when user tries to pull modal back down
@@ -96,14 +106,17 @@ The `shouldScaleBackground={false}` fix from BUG_05_001 addressed the aria-hidde
 
 **Fix Implemented**:
 Added `repositionInputs={false}` to the Drawer component in SignatureModal.tsx. This:
+
 - Disables vaul's automatic keyboard repositioning
 - Lets iOS handle keyboard appearance natively
 - Prevents the modal from jumping when inputs are focused
 
 **Files Modified**:
+
 - `src/components/SignatureModal.tsx`: Added `repositionInputs={false}` to Drawer
 
 **Test Plan**:
+
 - iOS Safari: Open signature modal, tap on name and date fields, verify no jumping
 - Verify keyboard appears normally and modal stays in place
 - Desktop: Verify drawer still opens/closes normally
@@ -121,6 +134,7 @@ Added `repositionInputs={false}` to the Drawer component in SignatureModal.tsx. 
 
 **Root Cause**:
 Race condition between Vercel deployment and GitHub Actions workflow:
+
 1. User triggers `contract_signed` event → API dispatches `user-exit-events.yml`
 2. Vercel auto-deploys on the initial push (before workflow runs)
 3. GitHub Actions workflow updates JSON and commits
@@ -130,12 +144,14 @@ The `user-exit-events.yml` workflow was missing a dedicated GitHub Pages deploym
 
 **Fix Implemented**:
 Restructured `user-exit-events.yml` to mirror `admin-push.yml`:
+
 1. Added `deploy` job that runs after `process-events` job
 2. `process-events` job now builds the site and uploads artifact
 3. `deploy` job deploys to GitHub Pages using `actions/deploy-pages@v4`
 4. Both jobs are conditional on changes being committed
 
 **Files Modified**:
+
 - `.github/workflows/user-exit-events.yml`: Added two-job structure with GitHub Pages deployment
 
 ---
@@ -151,6 +167,7 @@ Restructured `user-exit-events.yml` to mirror `admin-push.yml`:
 
 **Root Cause**:
 CORS preflight race condition with `fetch` + `keepalive`:
+
 1. User acknowledges invoice → `invoice` event queued
 2. User exits page → `handleUnload` fires
 3. `sendEvents` called with `keepalive: true`
@@ -161,16 +178,19 @@ The `keepalive` flag only keeps the POST alive after page unload, but doesn't he
 
 **Fix Implemented**:
 Use `navigator.sendBeacon` with `text/plain` content type for unload scenarios:
+
 1. `sendBeacon` is specifically designed for unload scenarios
 2. Using `text/plain` avoids CORS preflight (it's a "simple" content type)
 3. Server parses JSON from the text/plain body
 4. Falls back to `fetch` with `keepalive` if `sendBeacon` fails
 
 **Files Modified**:
+
 - `src/App.tsx`: Updated `sendEvents` to use `sendBeacon` with `text/plain` for unload
 - `api/track-event.js`: Added handling for `text/plain` content type (parses JSON from body)
 
 **Technical Details**:
+
 - `sendBeacon` returns `true` if the request was successfully queued
 - `text/plain` is a "simple" content type per CORS spec, no preflight needed
 - Server checks `Content-Type` header and parses accordingly
@@ -187,6 +207,7 @@ Use `navigator.sendBeacon` with `text/plain` content type for unload scenarios:
 **Actual**: Two workflow runs occurred - first with `[invoice, payment_1]`, second with `[payment_1]` (marked as "already processed").
 
 **Test Flow**:
+
 1. User acknowledges invoice → `invoice` event buffered
 2. User completes payment → returns from Stripe
 3. Session status check runs → `trackEvent('payment_1')` called → event buffered
@@ -197,6 +218,7 @@ Use `navigator.sendBeacon` with `text/plain` content type for unload scenarios:
 
 **Root Cause**:
 The deduplication in `trackEvent` only checked `clientStatusRef` (which reflects the JSON data) and `loggedInQueuedRef` (for logged_in only). When a user returns from Stripe:
+
 1. The session status check calls `trackEvent('payment_1')`
 2. `clientStatusRef.current.payment_1` is still `null` (JSON not re-fetched)
 3. The event passes the check and gets buffered
@@ -204,11 +226,13 @@ The deduplication in `trackEvent` only checked `clientStatusRef` (which reflects
 
 **Fix Implemented**:
 Added `sentEventsRef` - a Set that tracks which event types have been queued in the current browser session:
+
 1. Before adding any event to the buffer, check if it's already in `sentEventsRef`
 2. After adding an event, add its type to `sentEventsRef`
 3. This prevents the same event type from being queued twice in a single session
 
 **Files Modified**:
+
 - `src/App.tsx`: Added `sentEventsRef` and check in `trackEvent`
 
 **Also Fixed**:
@@ -226,6 +250,7 @@ Removed premature `trackEvent` call in `createCheckoutSession` - payment events 
 **Actual**: On desktop, no event was sent (no OPTIONS, no POST). On mobile, it worked correctly.
 
 **Notes**:
+
 - Different behavior between desktop and mobile is unusual
 - May be related to how different browsers handle `sendBeacon` or page unload events
 - Could also be timing-related with checkout session loading
@@ -277,6 +302,7 @@ else if (client_status.balance && !client_status.payment_2) {
 ```
 
 **Files Modified**:
+
 - `src/App.tsx`: Fixed routing condition to check `!client_status.balance`
 
 ---
@@ -284,6 +310,7 @@ else if (client_status.balance && !client_status.payment_2) {
 ## Observations
 
 ### Event System Validation (Pending Full Test)
+
 - User logged in twice (mobile + desktop), viewed contract, opened signature modal, cancelled
 - No `/api/track-event` calls observed (as expected - `logged_in` already recorded, no other trackable events)
 - Full flow test pending to confirm single-batch behavior on actual state changes

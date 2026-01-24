@@ -448,3 +448,16 @@ Z1 @ index-C8XLP5Y7.js:9
 job-Gle3uAtI.js:59 Vite: job.tsx loaded
 job-Gle3uAtI.js:1 ✅ Loaded job data for uid-yvc-829: {logged_in: '2026-01-21T13:18:44.844Z', contract_signed: '2026-01-24T05:56:14.936Z', invoice: '2026-01-24T08:43:56.069Z', payment_1: '2026-01-24T08:43:56.069Z', balance: '2026-01-24T10:01:39.007Z', …}
 ```
+
+### Login And Make Payment_2 Attempt #2
+
+- **EXPECTED BEHAVIOR**
+  - User logs in and is routed directly to payment2
+  - Makes last payment and exits
+  - One `/api/track-event` call for event `payment_2`
+  - Activates `user-exit-events.yml` workflow adding timestamp to `state.client_status.payment_2`
+  - No other events and no additional API calls for this session
+  - Otherwise normal UI functionality
+
+- **BUG_05_008**
+- No events were triggered and no timestamps were added to the JSON file

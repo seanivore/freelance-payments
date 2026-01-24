@@ -268,18 +268,22 @@ export default function App() {
     fetch(apiUrl(`/api/session-status?session_id=${sessionId}`))
       .then(res => res.json())
       .then(sessionData => {
+        console.log('📊 Session status response:', sessionData);
         setSessionStatus(sessionData.status as 'complete' | 'open');
         
         const paymentNumber = sessionData.metadata?.payment_number 
           ? parseInt(sessionData.metadata.payment_number, 10) as 1 | 2
           : null;
+        console.log('📊 Parsed paymentNumber:', paymentNumber);
         setSessionPaymentNumber(paymentNumber);
         
         if (sessionData.status === 'complete') {
           const s = data.state.client_status;
+          console.log('📊 client_status:', s);
           
           const payment1AlreadyRecorded = !!s.payment_1;
           const payment2AlreadyRecorded = !!s.payment_2;
+          console.log('📊 payment1AlreadyRecorded:', payment1AlreadyRecorded, 'payment2AlreadyRecorded:', payment2AlreadyRecorded);
           
           let paymentType: 'payment_1' | 'payment_2' | null = null;
           let updates: Partial<typeof s> = {};
@@ -293,6 +297,7 @@ export default function App() {
             const timestamp = new Date().toISOString();
             updates = { payment_2: timestamp };
           } else if (!paymentNumber) {
+            console.log('📊 paymentNumber is null, checking fallback conditions');
             if (s.invoice && !payment1AlreadyRecorded) {
               paymentType = 'payment_1';
               const timestamp = new Date().toISOString();
@@ -304,7 +309,10 @@ export default function App() {
             }
           }
           
+          console.log('📊 paymentType:', paymentType, 'updates:', updates);
+          
           if (paymentType && Object.keys(updates).length > 0) {
+            console.log('📊 Calling trackEvent for:', paymentType);
             trackEvent(paymentType, {
               payment_number: paymentType === 'payment_1' ? 1 : 2,
               session_id: sessionId
@@ -324,6 +332,8 @@ export default function App() {
               };
             });
             
+          } else {
+            console.log('📊 NOT calling trackEvent - paymentType:', paymentType, 'updates empty:', Object.keys(updates).length === 0);
           }
         }
       })
