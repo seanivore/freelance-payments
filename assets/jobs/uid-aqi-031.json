@@ -1,0 +1,171 @@
+{
+  "project": "Golden Dudes Dating App, Find Your Golden Retriever-Type Man",
+  "contract": {
+    "work_start": "2026-01-24",
+    "work_end": "2026-03-24",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": null
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
+    "contract": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "invoice": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "balance": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    }
+  },
+  "state": {
+    "objects": {
+      "created": null,
+      "product": null,
+      "price_1": null,
+      "price_2": null,
+      "customer": null,
+      "coupon": null
+    },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "iOS Dating App Development",
+    "active": true,
+    "description": "Development and launch of iOS dating app for Emily Davis Media",
+    "id": "uid-aqi-031",
+    "login_name": "Davis",
+    "login_keyword": "dating-golden-dudes",
+    "service_usd": 1342000,
+    "total_payments": 2,
+    "discount_usd": 67100,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Emily Davis",
+    "business": "Emily Davis Media",
+    "title": "Founder & CEO",
+    "email": "emily@emilydavismedia.com",
+    "phone": "617-555-0123",
+    "id": "cus-aqi-031",
+    "address": {
+      "city": "Boston",
+      "line1": "123 Main St",
+      "state": "MA",
+      "postal_code": "02111",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 67100,
+    "applies_to": {
+      "products": [
+        "uid-aqi-031"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-aqi-031",
+    "max_redemptions": 1,
+    "name": "DATES-DISCOUNT"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 671000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
+    "product": {
+      "products": [
+        "uid-aqi-031"
+      ]
+    },
+    "id": ""
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 671000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-aqi-031"
+      ]
+    },
+    "id": ""
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-aqi-031"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-aqi-031?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-aqi-031?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Development and launch of iOS dating app for Emily Davis Media",
+  "project_scope_full": "The client wants to develop and launch an iOS dating app for Golden Dudes. The app will be a dating app for Golden Retriever-type men. The app will be developed using Swift and SwiftUI. The app will be launched on the App Store. The app will be developed in collaboration with the client."
+}
