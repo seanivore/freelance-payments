@@ -73,6 +73,43 @@ Added `shouldScaleBackground={false}` to the Drawer component in SignatureModal.
 
 ---
 
+### BUG_05_002 — Modal Still Jumps When Focusing Any Text Input on iOS
+
+**Date**: 2026-01-24  
+**Status**: FIXED  
+**Severity**: Medium (blocks form input on iOS)
+
+**Expected**: Tapping on any text input in signature modal focuses the field normally without modal movement.  
+**Actual**: Modal jumps up off screen when tapping either the name or date field on iOS. Large gap appears below modal. Pulling modal back down closes it.
+
+**Evidence**:
+- `assets/docs/v5/v5_5_0/testing/IMG_BUG_05_002-1.jpg` - Modal loads normally
+- `assets/docs/v5/v5_5_0/testing/IMG_BUG_05_002-2.jpg` - Modal jumps up when clicking into name field, gap appears below
+
+**Root Cause**:
+The `vaul` drawer library has automatic input repositioning (`repositionInputs={true}` by default) that tries to adjust the drawer position when the iOS keyboard opens. This repositioning fights with iOS's native keyboard handling, causing:
+1. Modal to jump up excessively
+2. Large gap between modal and keyboard
+3. Swipe-to-close gesture triggered when user tries to pull modal back down
+
+The `shouldScaleBackground={false}` fix from BUG_05_001 addressed the aria-hidden issue but not the repositioning conflict.
+
+**Fix Implemented**:
+Added `repositionInputs={false}` to the Drawer component in SignatureModal.tsx. This:
+- Disables vaul's automatic keyboard repositioning
+- Lets iOS handle keyboard appearance natively
+- Prevents the modal from jumping when inputs are focused
+
+**Files Modified**:
+- `src/components/SignatureModal.tsx`: Added `repositionInputs={false}` to Drawer
+
+**Test Plan**:
+- iOS Safari: Open signature modal, tap on name and date fields, verify no jumping
+- Verify keyboard appears normally and modal stays in place
+- Desktop: Verify drawer still opens/closes normally
+
+---
+
 ## Observations
 
 ### Event System Validation (Pending Full Test)
