@@ -35,50 +35,56 @@ Three bugs with interconnected root causes:
 
 Replace the native date picker with a simple text input. This aligns with the "signing" UX where typing the date feels more authentic than clicking a calendar.
 
-**File: [src/components/SignatureModal.tsx](src/components/SignatureModal.tsx)**
+**File: [src/components/SignatureModal.tsx](../../../../../.cursor/plans/src/components/SignatureModal.tsx)**
 
 - Change `<input type="date">` to `<input type="text">`
 - Pre-fill with today's date in readable format: "Jan 23, 2026"
 - Remove the calendar button and `openDatePicker` function
 - Remove `dateInputRef` (no longer needed)
 - Add placeholder showing expected format
+
 ```tsx
 // Before: type="date" with calendar button
 // After: type="text" pre-filled with formatted date
 const formatDate = (date: Date) => {
-  return date.toLocaleDateString('en-US', { 
-    month: 'short', day: 'numeric', year: 'numeric' 
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 };
 const [signedDate, setSignedDate] = useState(() => formatDate(new Date()));
 ```
 
-
 ### 2. Event Cleanup (BUG_04_006)
 
 Remove `contract_loaded` event entirely and prevent already-recorded events from being queued.
 
-**File: [src/components/PdfViewer.tsx](src/components/PdfViewer.tsx)**
+**File: [src/components/PdfViewer.tsx](../../../../../.cursor/plans/src/components/PdfViewer.tsx)**
 
 - Remove line 170: `emitEvent?.('contract_loaded', { page: 1, totalPages: doc.numPages });`
 
-**File: [src/App.tsx](src/App.tsx)**
+**File: [src/App.tsx](../../../../../.cursor/plans/src/App.tsx)**
 
 - Remove `contract_loaded` case from `emitEvent` (lines 279-282)
 - Add check in `trackEvent` to skip events already in `data.state.client_status`
 - Clear buffer after unload send to prevent edge-case double-sends
+
 ```tsx
 // In trackEvent, before adding to buffer:
 const clientStatus = data?.state?.client_status;
 if (clientStatus) {
-  const statusKey = type === 'contract_signed' ? 'contract_signed' 
-    : type === 'invoice' ? 'invoice' : type;
+  const statusKey =
+    type === "contract_signed"
+      ? "contract_signed"
+      : type === "invoice"
+        ? "invoice"
+        : type;
   if (clientStatus[statusKey]) return; // Already recorded
 }
 ```
 
-
-**File: [.github/scripts/orchestration/user_exit_events.py](.github/scripts/orchestration/user_exit_events.py)**
+**File: [.github/scripts/orchestration/user_exit_events.py](../../../../../.cursor/plans/.github/scripts/orchestration/user_exit_events.py)**
 
 - Remove `contract_loaded` handler (lines 107-111) - cleanup only, not strictly required
 
