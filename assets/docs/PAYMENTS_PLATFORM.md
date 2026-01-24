@@ -1,8 +1,8 @@
 # Payments Platform - Complete Technical Documentation
 
-**Last Updated**: 2026-01-19  
-**Version**: v5.1.16 (React + Vite + TypeScript)  
-**Status**: Production Ready - End-to-End Testing Complete
+**Last Updated**: 2026-01-24  
+**Version**: v5.6.0 (React + Vite + TypeScript)  
+**Status**: Production Ready - Full End-to-End Testing Complete
 
 ---
 
@@ -485,7 +485,7 @@ const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}
 
 **When Events Are Flushed**:
 1. **10-minute inactivity** - Timer resets on user activity (mouse, keyboard, scroll, touch)
-2. **Browser unload** - `beforeunload`, `pagehide`, `visibilitychange` events (uses `fetch` with `keepalive: true`)
+2. **Browser unload** - `beforeunload`, `pagehide`, `visibilitychange` events (uses `navigator.sendBeacon` with `text/plain` to avoid CORS preflight)
 
 **API Call** (`src/App.tsx` → `api/track-event.js`):
 ```typescript
@@ -585,16 +585,17 @@ POST /api/track-event
 ### Webhook vs Session-Status Endpoint
 
 **Webhook** (`api/webhook.js`):
-- Server-side, reliable, handles async payments
-- Logs completion for audit/debugging
-- Does not dispatch workflow (events are persisted via frontend batch)
+- Server-side, reliable notification of payment completion
+- Logs completion for audit/debugging purposes
+- Does **not** dispatch workflows (events are persisted via frontend batch on page exit)
+- Serves as a backup verification mechanism
 
 **Session-Status Endpoint** (`api/session-status.js`):
-- Client-side, immediate feedback
-- Shows status on return page
-- Used for UI feedback only
+- Client-side, immediate feedback on return from Stripe
+- Returns session status, payment status, and metadata
+- Used for UI routing and optimistic state updates
 
-**Both are needed**: Webhook ensures backend updates even if user closes browser. Session-status provides immediate UI feedback.
+**Design Note**: The frontend handles all event tracking via the exit-event pattern. The webhook exists for logging/auditing but doesn't trigger state changes to avoid duplicate event processing.
 
 ---
 
@@ -664,9 +665,11 @@ POST /api/track-event
 
 **Trigger**: Dispatched by `/api/track-event` only
 
-**Purpose**: Updates JSON files with user events and state changes from a single batched payload
+**Purpose**: Updates JSON files with user events and deploys to GitHub Pages
 
-**Flow**:
+**Two-Job Structure** (mirrors `admin-push.yml`):
+
+**Job 1: `process-events`**
 1. Receive `job_id` and `payload_json` (array of events)
 2. Read JSON file: `assets/jobs/{job_id}.json`
 3. Process each event, update JSON:
@@ -675,6 +678,14 @@ POST /api/track-event
    - Deactivate prices/products after payments
 4. Write JSON file
 5. Commit and push changes (with git rebase to prevent conflicts)
+6. Run `npm run build` to generate static assets
+7. Upload artifact for deployment
+
+**Job 2: `deploy`** (runs after `process-events`)
+1. Download artifact from previous job
+2. Deploy to GitHub Pages using `actions/deploy-pages@v4`
+
+**Why Two Jobs?**: Ensures the deployed site always has the latest JSON data. Without this, Vercel might deploy stale data before the workflow finishes updating JSON.
 
 **Concurrency**: `cancel-in-progress: false` (queues instead of cancels) - prevents multiple simultaneous runs
 
@@ -877,8 +888,8 @@ Use `git smart-push` for local pushes. It stashes any local changes, rebases fro
 2. **Gate Logic**: Check `state.client_status` timestamps in order to determine current gate
 3. **Optimistic UI**: Update state immediately, sync backend in background
 4. **One Action Per Gate**: Each gate has exactly one primary action button
-5. **Event Tracking**: Buffer events, flush after 10min inactivity or unload
-6. **Smart Push**: Use `git smart-push` for local pushes (stash → rebase → restore → push)
+5. **Event Tracking**: Buffer events, flush on inactivity or page exit (using `sendBeacon` for reliability)
+6. **Single Event Policy**: Each event type tracked exactly once per user session
 7. **Type Safety**: Use TypeScript types everywhere, catch errors early
 8. **Planning Over Debugging**: Understand before coding, plan before executing
 
@@ -886,10 +897,9 @@ Use `git smart-push` for local pushes. It stashes any local changes, rebases fro
 
 ## Related Documentation
 
-- **Testing Logs**: `assets/docs/v5/v5_1_16/testing/LOG_01.md`, `LOG_02.md`
-- **Bug Logs**: `assets/docs/v5/v5_1_16/testing/BUG_*.md`
+- **Testing Logs**: `assets/docs/v5/v5_6_0/LOG_06.md` (latest), `assets/docs/v5/v5_5_0/LOG_05.md`
+- **Bug Logs**: `assets/docs/v5/v5_5_0/TESTS_05_.md`, `assets/docs/v5/v5_4_0/testing/TESTS_04_.md`
 - **Design Updates**: `assets/docs/v5/v5_2_0/DESIGN_UPDATES.md`
-- **Email PDF Implementation**: `assets/docs/v5/v5_2_0/IMPL_EMAIL_PDFS.md`
 - **Original Architecture**: `assets/docs/RESOURCES/OG_JSON_ARCH_PORTFOLIO.md`
 
 ---
