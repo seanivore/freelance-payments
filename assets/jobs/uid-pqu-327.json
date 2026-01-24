@@ -1,171 +1,171 @@
 {
-  "project": "E-Commerce Digital Platform Architecture for Joan's Houseplant Boutique",
-  "contract": {
-    "work_start": "2026-01-24",
-    "work_end": "2026-02-24",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-24T12:32:08.540724Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "E-Commerce Digital Platform Architecture for Joan's Houseplant Boutique",
     "contract": {
-      "id": "kon-pqu-327",
-      "pdf": "assets/pdf/contract/kon-pqu-327.pdf",
-      "file_id": "1nEYNMG-qihjAbfrMrbfpu3NCfYvqup_JZCVIrFxv1I4",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-pqu-327.pdf",
-      "sha256": "817764bcd479d14151aa1f33e76faf7e9a0a58ed639b6a77f307ea6cb7a7e6a0",
-      "created": "2026-01-24T12:32:45.968042Z"
+        "work_start": "2026-01-24",
+        "work_end": "2026-02-24",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-24T12:32:08.540724Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-pqu-327",
-      "pdf": "assets/pdf/invoice/inv-pqu-327.pdf",
-      "file_id": "1Hk3MEVpyYFQ3jtF7u36q9lUrwqcG_-132n6Q7SmqPr8",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-pqu-327.pdf",
-      "sha256": "111b17a6843b01fee63c94de6e83e083c153d27d1f9b165dcc175455d4efaec9",
-      "created": "2026-01-24T12:32:50.221631Z"
+    "docs": {
+        "contract": {
+            "id": "kon-pqu-327",
+            "pdf": "assets/pdf/contract/kon-pqu-327.pdf",
+            "file_id": "1nEYNMG-qihjAbfrMrbfpu3NCfYvqup_JZCVIrFxv1I4",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-pqu-327.pdf",
+            "sha256": "817764bcd479d14151aa1f33e76faf7e9a0a58ed639b6a77f307ea6cb7a7e6a0",
+            "created": "2026-01-24T12:32:45.968042Z"
+        },
+        "invoice": {
+            "id": "inv-pqu-327",
+            "pdf": "assets/pdf/invoice/inv-pqu-327.pdf",
+            "file_id": "1Hk3MEVpyYFQ3jtF7u36q9lUrwqcG_-132n6Q7SmqPr8",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-pqu-327.pdf",
+            "sha256": "111b17a6843b01fee63c94de6e83e083c153d27d1f9b165dcc175455d4efaec9",
+            "created": "2026-01-24T12:32:50.221631Z"
+        },
+        "balance": {
+            "id": "bal-pqu-327",
+            "pdf": "assets/pdf/balance/bal-pqu-327.pdf",
+            "file_id": "1dBPhln1x6pe8Hi3z5eiZxZHOQvqTiik7RMXUBiTcFJM",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-pqu-327.pdf",
+            "sha256": "de1166cae89cfec70aa994bf2071f345b3b0b131f085c3c2d45712344636da75",
+            "created": "2026-01-24T12:32:55.560038Z"
+        }
     },
-    "balance": {
-      "id": "bal-pqu-327",
-      "pdf": "assets/pdf/balance/bal-pqu-327.pdf",
-      "file_id": "1dBPhln1x6pe8Hi3z5eiZxZHOQvqTiik7RMXUBiTcFJM",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-pqu-327.pdf",
-      "sha256": "de1166cae89cfec70aa994bf2071f345b3b0b131f085c3c2d45712344636da75",
-      "created": "2026-01-24T12:32:55.560038Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-24T12:32:08.540724Z",
-      "product": "uid-pqu-327",
-      "price_1": "price_1St60a9fljwH26CPvXPxfheR",
-      "price_2": "price_1St60b9fljwH26CPcCfjbcRe",
-      "customer": "cus-pqu-327",
-      "coupon": "cou-pqu-327"
+    "state": {
+        "objects": {
+            "created": "2026-01-24T12:32:08.540724Z",
+            "product": "uid-pqu-327",
+            "price_1": "price_1St60a9fljwH26CPvXPxfheR",
+            "price_2": "price_1St60b9fljwH26CPcCfjbcRe",
+            "customer": "cus-pqu-327",
+            "coupon": "cou-pqu-327"
+        },
+        "client_status": {
+            "logged_in": "2026-01-24T12:48:24.511Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "E-Commerce Digital Platform Architecture",
-    "active": true,
-    "description": "Develop and launch a custom e-commerce platform for Joan's Houseplant Boutique",
-    "id": "uid-pqu-327",
-    "login_name": "Elsworth",
-    "login_keyword": "houseplant-boutique",
-    "service_usd": 1124400,
-    "total_payments": 2,
-    "discount_usd": 40000,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Joan Elsworth",
-    "business": "Elsworth Co.",
-    "title": "CEO",
-    "email": "joan.elsworth@elsworth.com",
-    "phone": "424-295-4444",
-    "id": "cus-pqu-327",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02108",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 40000,
-    "applies_to": {
-      "products": [
-        "uid-pqu-327"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-pqu-327",
-    "max_redemptions": 1,
-    "name": "ELSWORTH"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 562200,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-pqu-327"
-      ]
+        "name": "E-Commerce Digital Platform Architecture",
+        "active": true,
+        "description": "Develop and launch a custom e-commerce platform for Joan's Houseplant Boutique",
+        "id": "uid-pqu-327",
+        "login_name": "Elsworth",
+        "login_keyword": "houseplant-boutique",
+        "service_usd": 1124400,
+        "total_payments": 2,
+        "discount_usd": 40000,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1St60a9fljwH26CPvXPxfheR"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 562200,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-pqu-327"
-      ]
+    "customer": {
+        "name": "Joan Elsworth",
+        "business": "Elsworth Co.",
+        "title": "CEO",
+        "email": "joan.elsworth@elsworth.com",
+        "phone": "424-295-4444",
+        "id": "cus-pqu-327",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02108",
+            "country": "US"
+        }
     },
-    "id": "price_1St60b9fljwH26CPcCfjbcRe"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-pqu-327"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St60a9fljwH26CPvXPxfheR",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-pqu-327?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St60b9fljwH26CPcCfjbcRe",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-pqu-327?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Develop and launch a custom e-commerce platform for Joan's Houseplant Boutique",
-  "project_scope_full": "Develop and launch a custom e-commerce platform for Joan's Houseplant Boutique. The platform will allow Joan to sell her houseplants online and manage her inventory and orders."
+    "coupon": {
+        "amount_off": 40000,
+        "applies_to": {
+            "products": [
+                "uid-pqu-327"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-pqu-327",
+        "max_redemptions": 1,
+        "name": "ELSWORTH"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 562200,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-pqu-327"
+            ]
+        },
+        "id": "price_1St60a9fljwH26CPvXPxfheR"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 562200,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-pqu-327"
+            ]
+        },
+        "id": "price_1St60b9fljwH26CPcCfjbcRe"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-pqu-327"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St60a9fljwH26CPvXPxfheR",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-pqu-327?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St60b9fljwH26CPcCfjbcRe",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-pqu-327?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Develop and launch a custom e-commerce platform for Joan's Houseplant Boutique",
+    "project_scope_full": "Develop and launch a custom e-commerce platform for Joan's Houseplant Boutique. The platform will allow Joan to sell her houseplants online and manage her inventory and orders."
 }
