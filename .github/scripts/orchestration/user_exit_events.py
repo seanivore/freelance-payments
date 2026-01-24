@@ -103,12 +103,6 @@ def process_exit_events():
                 client_status['logged_in'] = e_time
                 updates_made = True
                 print(f"  ✓ Updated logged_in: {e_time}")
-        
-        elif e_type == 'contract_loaded':
-            # contract_loaded events don't update state, just log for analytics
-            # Skip silently to avoid "No state changes required" message
-            print(f"  ℹ️  Skipping contract_loaded - informational event only")
-            continue
                 
         elif e_type == 'contract_signed':
             if client_status.get('contract_signed'):
