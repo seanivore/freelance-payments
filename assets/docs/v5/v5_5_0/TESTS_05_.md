@@ -367,4 +367,15 @@ job-6Iq9Yn9s.js:1 ✅ Loaded job data for uid-yvc-829: {logged_in: '2026-01-21T1
 
 ### Thoughts
 
-- The addition of 'NPM RUN BUILD' to the workflow seems to have worked. But the fix to get the 'invoice' event to flush when I exited after acknowledging it did not work. However, when I went and did the next event, too, by making payment_1, then exited, it did flush both events as expected. But, after that it triggered a second payment_1 event and passed it as "already processed" — this second API call created an entire second workflow run in GitHub Actions which we do not want to happen. I thought was had fixed this already but it doesn't seem to have applied to all cases.
+- **OVERVIEW**
+
+* The addition of 'NPM RUN BUILD' to the workflow seems to have worked. But the fix to get the 'invoice' event to flush when I exited after acknowledging it did not work. However, when I went and did the next event, too, by making payment_1, then exited, it did flush both events as expected. But, after that it triggered a second payment_1 event and passed it as "already processed" — this second API call created an entire second workflow run in GitHub Actions which we do not want to happen. I thought was had fixed this already but it doesn't seem to have applied to all cases.
+
+- **UNEXPECTED**
+
+* Weird — pushing to save this file and it appears that last push only saved edits to `.github/workflows/user-exit-events.yml` and `assets/docs/v5/v5_5_0/TESTS_05_.md` — but that was it. I noticed because when saving the changes to this file in a push it saved changes to `api/track-event.js`, `assets/docs/v5/v5_5_0/LOG_05.md` , `assets/docs/v5/v5_5_0/TESTS_05_.md`, and `src/App.tsx` — which all should have gone through before my testing.
+
+- **NEXT**
+
+* I'll share these just to make sure that, if there is behavior that wasn't addressed in those files last fix, then we can address those cases too.
+* Looks like I'll have to retest to see if something like the "invoice" event going through properly by it self is still an issue.
