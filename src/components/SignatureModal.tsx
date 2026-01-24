@@ -48,7 +48,7 @@ export const SignatureModal: React.FC<SignatureModalProps> = ({
   const isValid = legalName.trim().length > 0 && signedDate.length > 0;
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} shouldScaleBackground={false}>
       <DrawerContent className="max-h-[90vh] overflow-y-auto">
         <div className="mx-auto w-full max-w-md px-4">
           <DrawerHeader className="text-center">
