@@ -379,3 +379,72 @@ job-6Iq9Yn9s.js:1 ✅ Loaded job data for uid-yvc-829: {logged_in: '2026-01-21T1
 
 * I'll share these just to make sure that, if there is behavior that wasn't addressed in those files last fix, then we can address those cases too.
 * Looks like I'll have to retest to see if something like the "invoice" event going through properly by it self is still an issue.
+
+---
+
+## One Event Triggered, Balance - `uid-yvc-829.json`
+
+### Acknowledgment of Balance
+
+- **TESTING FLOW**
+  - User will log in on desktop, view and acknowledge balance
+  - User exit the site on complete load
+
+- **EXPECTED BEHAVIOR**
+  - One `/api/track-event` call for event `balance`
+  - Activates `user-exit-events.yml` workflow adding timestamp to `state.client_status.balance`
+  - No other events and no additional API calls for this session
+  - Otherwise normal UI functionality
+
+- **ACTUAL BEHAVIOR**
+  - Just like with the invoice event, the balance event did not trigger a workflow run and no timestamp was added to the JSON file
+  - No POST request but also no OPTIONS request was made; there was NO event triggered at all **BAD**
+  - The checkout session loaded after acknowledging the balance
+  - I didn't make the payment_2 and instead just closed the browser
+
+* **BUG_05_006** Balance Event Not Sent
+  - Seems similar to the invoice but no OPTIONS
+  - I can't help but wonder if it has something to do with the checkout session loading
+
+### Attempt #2: On Mobile
+
+- **TESTING FLOW**
+  - User will log in on mobile, view and acknowledge balance
+  - User exit the site on complete load
+
+* **NOTE:** This time it did trigger one POST API call event for the balance and everything was updated as expected
+  - We will need to test again to see what the deal is
+  - As things are now, we'll be able to see if the JSON was in the build when I log in next and should be routed straight to payment_2
+
+---
+
+## Last Event Remains, Payment_2 - `uid-yvc-829.json`
+
+### Login and Make Payment_2
+
+- **EXPECTED BEHAVIOR**
+  - User logs in and is routed directly to payment2
+  - Makes last payment and exits
+  - One `/api/track-event` call for event `payment_2`
+  - Activates `user-exit-events.yml` workflow adding timestamp to `state.client_status.payment_2`
+  - No other events and no additional API calls for this session
+  - Otherwise normal UI functionality
+
+- **BUG_05_007** Balance timestamp read, but user not sent to payment_2
+  - After logging in you can see in the console log that it saw that balance timestamp existed
+  - But it did not route to payment_2
+  - When it sees that balance was completed, it should make API call to create checkout session and user should go directly to payment page
+
+```plaintext
+  GET https://payments.august.style/uid-yvc-829 404 (Not Found)
+S @ assets/main-BgpHDfX3.js:1
+await in S
+pv @ index-C8XLP5Y7.js:8
+(anonymous) @ index-C8XLP5Y7.js:8
+Bi @ index-C8XLP5Y7.js:8
+Qc @ index-C8XLP5Y7.js:8
+Pc @ index-C8XLP5Y7.js:9
+Z1 @ index-C8XLP5Y7.js:9
+job-Gle3uAtI.js:59 Vite: job.tsx loaded
+job-Gle3uAtI.js:1 ✅ Loaded job data for uid-yvc-829: {logged_in: '2026-01-21T13:18:44.844Z', contract_signed: '2026-01-24T05:56:14.936Z', invoice: '2026-01-24T08:43:56.069Z', payment_1: '2026-01-24T08:43:56.069Z', balance: '2026-01-24T10:01:39.007Z', …}
+```

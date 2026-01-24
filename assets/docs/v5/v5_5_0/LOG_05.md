@@ -216,6 +216,71 @@ Removed premature `trackEvent` call in `createCheckoutSession` - payment events 
 
 ---
 
+### BUG_05_006 — Balance Event Not Sent (Desktop Only)
+
+**Date**: 2026-01-24  
+**Status**: PENDING INVESTIGATION  
+**Severity**: Medium
+
+**Expected**: After acknowledging balance and exiting, `balance` event should be sent.  
+**Actual**: On desktop, no event was sent (no OPTIONS, no POST). On mobile, it worked correctly.
+
+**Notes**:
+- Different behavior between desktop and mobile is unusual
+- May be related to how different browsers handle `sendBeacon` or page unload events
+- Could also be timing-related with checkout session loading
+- Needs further testing to reproduce and diagnose
+
+---
+
+### BUG_05_007 — User Not Routed to Payment2 Despite Balance Timestamp
+
+**Date**: 2026-01-24  
+**Status**: FIXED  
+**Severity**: High (blocks user flow)
+
+**Expected**: When user logs in with `balance` timestamp present but no `payment_2`, they should be routed to `payment2` view.  
+**Actual**: User was routed to `balance` view again, even though console showed `balance: '2026-01-24T10:01:39.007Z'`.
+
+**Root Cause**:
+Bug in the state-based routing logic in `App.tsx`. The routing checks were ordered incorrectly:
+
+```typescript
+else if (client_status.payment_1) {
+  // This block was entered because payment_1 has a timestamp
+  if (balanceAvailable) {
+    initialSection = 'balance';  // Always set to balance!
+  }
+}
+else if (client_status.balance && !client_status.payment_2) {
+  // This was never reached because the previous block caught it
+  initialSection = 'payment2';
+}
+```
+
+The `payment_1` check didn't account for whether `balance` was already acknowledged. It assumed "if payment_1 done, show balance view" without checking if balance was already done.
+
+**Fix Implemented**:
+Changed the condition from `client_status.payment_1` to `client_status.payment_1 && !client_status.balance`:
+
+```typescript
+else if (client_status.payment_1 && !client_status.balance) {
+  // Only show balance view if balance NOT yet acknowledged
+  if (balanceAvailable) {
+    initialSection = 'balance';
+  }
+}
+else if (client_status.balance && !client_status.payment_2) {
+  // Now this is reached when balance is done but payment_2 is not
+  initialSection = 'payment2';
+}
+```
+
+**Files Modified**:
+- `src/App.tsx`: Fixed routing condition to check `!client_status.balance`
+
+---
+
 ## Observations
 
 ### Event System Validation (Pending Full Test)

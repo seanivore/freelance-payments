@@ -484,12 +484,14 @@ export default function App() {
     else if (client_status.invoice && !client_status.payment_1) {
       initialSection = 'payment1';
     }
-    else if (client_status.payment_1) {
+    else if (client_status.payment_1 && !client_status.balance) {
+      // Payment 1 done, but balance not yet acknowledged
       const balanceAvailable = !!(data.price2?.id);
       
       if (balanceAvailable) {
         initialSection = 'balance';
       } else {
+        // No second payment needed - go to completion
         if (sessionId && sessionStatus === 'complete' && sessionPaymentNumber === 1) {
           initialSection = 'completion1';
         } else {
@@ -498,6 +500,7 @@ export default function App() {
       }
     }
     else if (client_status.balance && !client_status.payment_2) {
+      // Balance acknowledged, but payment 2 not yet made
       initialSection = 'payment2';
     }
     else if (client_status.payment_2) {
