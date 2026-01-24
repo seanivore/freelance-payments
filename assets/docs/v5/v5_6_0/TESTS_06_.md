@@ -27,7 +27,7 @@
 ### New Test Files 
 
 + `uid-fuk-259.json` - Keegan; rodent-fight-club
-+ `uid-pqu-327.json` - Joan; houseplant-boutique
++ `uid-pqu-327.json` - Elsworth; houseplant-boutique
 + `uid-ugz-557.json` - Kelvin; tokenized-social-media
 
 ---
@@ -49,3 +49,15 @@
 
 ### Actual Behavior
 
++ **Mobile**
+
+  1. User logs in, starts contract, cancels and exits 
+  2. Vercel has 1 POST API call "✅ Dispatched workflow with 1 event(s) for job uid-fuk-259" 
+  3. Vercel deployment (Bjz8YdJJ95BNC6zt5g2fJAwekMZS) with commit 32f7132 
+  4. Commit shows JSON accurately updated with timestamp for `state.client_status.logged_in` 
+  5. GitHub Action "User Exit Events #149" is "Processing 1 events for uid-fuk-259" 
+  6. GitHub Action event "Updated logged_in: 2026-01-24T12:34:21.271Z" and "Successfully pushed changes" before `NPM RUN BUILD`
+
++ **Desktop**
+  1. User logs in, starts contract, cancels and exits 
+  2. Nothing happens in incognito Chrome window 
