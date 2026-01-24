@@ -42,7 +42,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const loadedBytesRef = useRef<ArrayBuffer | null>(null);
-  const hasEmittedLoadedRef = useRef(false);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const renderedPagesRef = useRef<Set<number>>(new Set());
   const pdfBytesForSigningRef = useRef<ArrayBuffer | null>(null);
@@ -64,7 +63,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       setPdfData(clonedBuffer);
       setIsLoading(true);
       setPdfError(null);
-      hasEmittedLoadedRef.current = false;
       renderedPagesRef.current.clear();
       
       openPdfFromBytes(initialPdfBytes)
@@ -77,7 +75,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           setIsLoading(false);
           loadedBytesRef.current = null;
           pdfBytesForSigningRef.current = null;
-          hasEmittedLoadedRef.current = false;
         });
     }
   }, [initialPdfBytes]);
@@ -165,10 +162,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
       const docTask = getDocument({ data: bytes });
       const doc = await docTask.promise;
       setPdfDoc(doc);
-      if (!hasEmittedLoadedRef.current) {
-        hasEmittedLoadedRef.current = true;
-        emitEvent?.('contract_loaded', { page: 1, totalPages: doc.numPages });
-      }
     } catch (err) {
       console.error('Error loading PDF:', err);
       throw err;
