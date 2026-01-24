@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-24T16:27:15.727601Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-awi-104",
+      "pdf": "assets/pdf/contract/kon-awi-104.pdf",
+      "file_id": "14S1LhWgnHAT8q3b4IWCUtcYEQsRYPQQ17FHVKDblobY",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-awi-104.pdf",
+      "sha256": "65dcdb71f3326eacf35d0a606b016bd96206dc36f4a37ad201cdcbbac0e7db36",
+      "created": "2026-01-24T16:28:34.496114Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-awi-104",
+      "pdf": "assets/pdf/invoice/inv-awi-104.pdf",
+      "file_id": "1aQk4AFr5abTUi8AGtGSb3fb8FVuU2scbYVOYpjD4Ha8",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-awi-104.pdf",
+      "sha256": "de323f4d788cab12e44dc063de089f6895dd36ea20a9bdc7ed84a55186f61ba4",
+      "created": "2026-01-24T16:28:39.730365Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-awi-104",
+      "pdf": "assets/pdf/balance/bal-awi-104.pdf",
+      "file_id": "1Wh753R38hmmDcXVvYIvGniAuTt3QmEpl3CU-HZUqPaI",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-awi-104.pdf",
+      "sha256": "f3b5e7da33f833442588e90da807ead17c7061608c9e2c74c34cfc0605235ac0",
+      "created": "2026-01-24T16:28:44.313818Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-24T16:27:15.727601Z",
+      "product": "uid-awi-104",
+      "price_1": "price_1St9g89fljwH26CPvIUSEJJT",
+      "price_2": "price_1St9g89fljwH26CPPOBuPNOP",
+      "customer": "cus-awi-104",
+      "coupon": "cou-awi-104"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-awi-104"
       ]
     },
-    "id": ""
+    "id": "price_1St9g89fljwH26CPvIUSEJJT"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-awi-104"
       ]
     },
-    "id": ""
+    "id": "price_1St9g89fljwH26CPPOBuPNOP"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1St9g89fljwH26CPvIUSEJJT",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1St9g89fljwH26CPPOBuPNOP",
         "quantity": 1
       }
     ],

@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-24T16:27:18.239865Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-aqi-031",
+      "pdf": "assets/pdf/contract/kon-aqi-031.pdf",
+      "file_id": "11xBmG_YJML1Zd2nipBAh-nzRTZ1E1Z32OGtI3RMCi3Q",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-aqi-031.pdf",
+      "sha256": "276f56206f7a68a607f21d31081845c63cd24ced174f7791a2082387748108ab",
+      "created": "2026-01-24T16:28:18.851207Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-aqi-031",
+      "pdf": "assets/pdf/invoice/inv-aqi-031.pdf",
+      "file_id": "1SJZo-aWMP5W93an1-qJzaE-Dkm4GAL9rw7J95opRugE",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-aqi-031.pdf",
+      "sha256": "8de2ebea28d03773ef7bf5130e9c38864fea2f7725e71456ed98a63f5df151e3",
+      "created": "2026-01-24T16:28:23.654942Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-aqi-031",
+      "pdf": "assets/pdf/balance/bal-aqi-031.pdf",
+      "file_id": "1JZZI2wtn6KWvQrUMnwGFo4pmhIzeVSIrZeZLyo1J9VI",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-aqi-031.pdf",
+      "sha256": "0d961ee0459690fd1c9c7ef13047e19d46206c4e85088a8a6ba369153068698c",
+      "created": "2026-01-24T16:28:29.485323Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-24T16:27:18.239865Z",
+      "product": "uid-aqi-031",
+      "price_1": "price_1St9gA9fljwH26CP5cPnbo8g",
+      "price_2": "price_1St9gA9fljwH26CPLQ2AaeSQ",
+      "customer": "cus-aqi-031",
+      "coupon": "cou-aqi-031"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-aqi-031"
       ]
     },
-    "id": ""
+    "id": "price_1St9gA9fljwH26CP5cPnbo8g"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-aqi-031"
       ]
     },
-    "id": ""
+    "id": "price_1St9gA9fljwH26CPLQ2AaeSQ"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1St9gA9fljwH26CP5cPnbo8g",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1St9gA9fljwH26CPLQ2AaeSQ",
         "quantity": 1
       }
     ],
