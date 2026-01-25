@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-25T21:51:45.829413Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-glv-173",
+      "pdf": "assets/pdf/contract/kon-glv-173.pdf",
+      "file_id": "10uQ0twyL4SMnVdmWsTiKyEbcmy_fxfQdCELqv0o4fyg",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-glv-173.pdf",
+      "sha256": "243337cc2b9d157d0b8900e89a3071ac04e66400c059c8d0c517f43e4700bc3f",
+      "created": "2026-01-25T21:52:08.257450Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-glv-173",
+      "pdf": "assets/pdf/invoice/inv-glv-173.pdf",
+      "file_id": "1zDLMtqzvJ1WXkCpxZTcbzgBykFw2KgXbIAQgOkfc8uo",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-glv-173.pdf",
+      "sha256": "b0d2e7822aeeafcf6c8365cdeaff86f64e11cb809e9e6835aa06360853f29970",
+      "created": "2026-01-25T21:52:13.508527Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-glv-173",
+      "pdf": "assets/pdf/balance/bal-glv-173.pdf",
+      "file_id": "1wqQ_GouLQJ6_d543ZOI_4OWm2yXpNDDLnORzXL2sUzI",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-glv-173.pdf",
+      "sha256": "da408b9b084da877ffbd37ed33578710aa296cd3480f86375df6d4550881160a",
+      "created": "2026-01-25T21:52:17.970668Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-25T21:51:45.829413Z",
+      "product": "uid-glv-173",
+      "price_1": "price_1StbDi9fljwH26CPEcfW4aUM",
+      "price_2": "price_1StbDi9fljwH26CPkxuQqKuu",
+      "customer": "cus-glv-173",
+      "coupon": "cou-glv-173"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-glv-173"
       ]
     },
-    "id": ""
+    "id": "price_1StbDi9fljwH26CPEcfW4aUM"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-glv-173"
       ]
     },
-    "id": ""
+    "id": "price_1StbDi9fljwH26CPkxuQqKuu"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1StbDi9fljwH26CPEcfW4aUM",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1StbDi9fljwH26CPkxuQqKuu",
         "quantity": 1
       }
     ],

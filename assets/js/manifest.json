@@ -6,18 +6,18 @@
       "login_keyword": "dating-golden-dudes",
       "login_name": "Davis"
     },
-    "law-etsy-law": {
-      "file_path": "assets/jobs/uid-ati-984.json",
-      "job_id": "uid-ati-984",
-      "login_keyword": "etsy-law",
-      "login_name": "Law"
+    "vargas-e-commerce-app": {
+      "file_path": "assets/jobs/uid-glv-173.json",
+      "job_id": "uid-glv-173",
+      "login_keyword": "e-commerce-app",
+      "login_name": "Vargas"
     },
-    "kline-astro-travel-buddy": {
-      "file_path": "assets/jobs/uid-azi-892.json",
-      "job_id": "uid-azi-892",
-      "login_keyword": "astro-travel-buddy",
-      "login_name": "Kline"
+    "williams-web3-blockchain-app": {
+      "file_path": "assets/jobs/uid-swh-609.json",
+      "job_id": "uid-swh-609",
+      "login_keyword": "web3-blockchain-app",
+      "login_name": "Williams"
     }
   },
-  "generated_at": "2026-01-25T20:43:31.347623Z"
+  "generated_at": "2026-01-25T21:52:17.972093Z"
 }
