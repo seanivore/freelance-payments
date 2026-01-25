@@ -1,0 +1,171 @@
+{
+  "project": "React Native E-commerce App Development",
+  "contract": {
+    "work_start": "2026-01-25",
+    "work_end": "2026-03-25",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": null
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
+    "contract": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "invoice": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "balance": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    }
+  },
+  "state": {
+    "objects": {
+      "created": null,
+      "product": null,
+      "price_1": null,
+      "price_2": null,
+      "customer": null,
+      "coupon": null
+    },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "E-Commerce App",
+    "active": true,
+    "description": "Development and launch of e-commerce app for Leo Vargas",
+    "id": "uid-glv-173",
+    "login_name": "Vargas",
+    "login_keyword": "e-commerce-app",
+    "service_usd": 11200000,
+    "total_payments": 2,
+    "discount_usd": 560000,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Leo Vargas",
+    "business": "Leo Vargas",
+    "title": "Founder & CEO",
+    "email": "leo@leovargas.com",
+    "phone": "617-555-0123",
+    "id": "cus-glv-173",
+    "address": {
+      "city": "Boston",
+      "line1": "123 Main St",
+      "state": "MA",
+      "postal_code": "02111",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 560000,
+    "applies_to": {
+      "products": [
+        "uid-glv-173"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-glv-173",
+    "max_redemptions": 1,
+    "name": "E-COMMERCE-DISCOUNT"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 5600000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
+    "product": {
+      "products": [
+        "uid-glv-173"
+      ]
+    },
+    "id": ""
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 5600000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-glv-173"
+      ]
+    },
+    "id": ""
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-glv-173"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-glv-173?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-glv-173?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Development and launch of e-commerce app for Leo Vargas",
+  "project_scope_full": "Development and launch of e-commerce app for Leo Vargas. The app will be a e-commerce app for the client. The app will be developed using React Native and Expo. The app will be launched on the App Store. The app will be developed in collaboration with the client."
+}
