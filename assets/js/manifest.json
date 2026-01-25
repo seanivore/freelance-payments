@@ -1,11 +1,5 @@
 {
   "jobs": {
-    "manley-manley-energy-updates": {
-      "file_path": "assets/jobs/uid-abi-192.json",
-      "job_id": "uid-abi-192",
-      "login_keyword": "manley-energy-updates",
-      "login_name": "Manley"
-    },
     "davis-dating-golden-dudes": {
       "file_path": "assets/jobs/uid-aqi-031.json",
       "job_id": "uid-aqi-031",
@@ -25,5 +19,5 @@
       "login_name": "Kline"
     }
   },
-  "generated_at": "2026-01-25T20:29:53.145536Z"
+  "generated_at": "2026-01-25T20:43:31.347623Z"
 }
