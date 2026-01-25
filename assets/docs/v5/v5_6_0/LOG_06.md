@@ -340,97 +340,64 @@ Payment events must be tracked **after** successful Stripe confirmation, not bef
 
 ---
 
-## FIX: Persist Event Buffer to sessionStorage
+## FIX: Persist Event Buffer to sessionStorage (REMOVED)
 
-**Applied**: 2026-01-25
+**Applied**: 2026-01-25  
+**Status**: REMOVED (caused performance issues)
 
-**Problem**: The `eventBufferRef` was an in-memory React ref that reset when the component remounted (e.g., on back-button navigation). Events buffered before navigation were lost.
+**Original Problem**: The `eventBufferRef` was an in-memory React ref that reset when the component remounted (e.g., on back-button navigation). Events buffered before navigation were lost.
 
-**Solution**: Persist the event buffer and sent-events set to `sessionStorage`:
+**Original Solution**: Persist the event buffer and sent-events set to `sessionStorage`.
 
-```typescript
-// Initialize from sessionStorage (survives back navigation)
-const getPersistedBuffer = (): Array<{type: string; timestamp: string; data: any}> => {
-  try {
-    const stored = sessionStorage.getItem(STORAGE_KEY_BUFFER);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-};
+**Why It Was Removed**: 
+- Synchronous `sessionStorage` operations blocked the main thread
+- JSON parsing/stringifying on every event caused significant slowdown
+- Page loads went from ~1 second to 10+ seconds
 
-// Persist after each event is added
-const persistBuffer = useCallback(() => {
-  try {
-    sessionStorage.setItem(STORAGE_KEY_BUFFER, JSON.stringify(eventBufferRef.current));
-  } catch {
-    // sessionStorage may be full or unavailable
-  }
-}, []);
-```
-
-**Changes Made**:
-1. Added `getPersistedBuffer()` and `getPersistedSentEvents()` to initialize refs from sessionStorage
-2. Added `persistBuffer()` and `persistSentEvents()` to save state after changes
-3. Call `persistBuffer()` after adding events in `trackEvent()`
-4. Call `persistBuffer()` after clearing buffer in `flushEvents()` and `handleUnload()`
-5. Clear `STORAGE_KEY_BUFFER` from sessionStorage in `handleUnload()` after sending
-
-**Why This Works**:
-- `sessionStorage` persists across same-tab navigation (including back button)
-- `sessionStorage` is cleared when the tab closes (so events don't accumulate across sessions)
-- Events are now recovered even if user navigates away and back
+**Replacement Solution**: 
+- `popstate` event listener flushes buffered events on back-button navigation
+- Unified flush on payment completion ensures all events are sent together
+- See "FIX: Back-Button Event Preservation via `popstate`" below
 
 ---
 
-## FIX: Payment Events Sent Immediately (Not Buffered)
+## FIX: Payment Events Sent Immediately (UPDATED to Unified Flush)
 
-**Applied**: 2026-01-25
+**Applied**: 2026-01-25  
+**Updated**: 2026-01-25 (changed to unified flush)
 
-**Problem**: Payment events (`payment_1`, `payment_2`) were being added to the buffer like other events. This meant:
-1. They could get mixed with other events in the same flush
-2. If user closed tab immediately after payment, the event might not be sent
-3. Could cause "duplicate payment" workflow issues if payment event was in buffer AND triggered separately
+**Original Problem**: Payment events (`payment_1`, `payment_2`) were being added to the buffer like other events, risking loss if user closed tab.
 
-**Solution**: Payment events are now sent **immediately** via `fetch()` on Stripe return, completely bypassing the buffer:
+**Original Solution**: Payment events sent separately via `fetch()` on Stripe return.
+
+**Updated Solution**: Payment events now trigger a **unified flush** of ALL buffered events plus the payment event in a single batch:
 
 ```typescript
 // In the session status handler:
 if (paymentType && Object.keys(updates).length > 0) {
-  // Mark as sent to prevent duplicates
+  console.log('📊 Payment complete! Flushing ALL events immediately');
   sentEventsRef.current.add(paymentType);
-  persistSentEvents();
   
-  // Send immediately via fetch (not beacon, not buffered)
-  const paymentEvent = {
-    type: paymentType,
-    timestamp: new Date().toISOString(),
-    data: { payment_number: ..., session_id: ... }
-  };
+  // Grab all buffered events
+  const bufferedEvents = [...eventBufferRef.current];
+  eventBufferRef.current = []; // Clear buffer
   
-  // Fire and forget - don't await, don't block UI
-  sendEvents([paymentEvent], false).catch(err => {
-    console.error('Failed to send payment event:', err);
+  // Combine with payment event
+  const allEvents = [...bufferedEvents, paymentEvent];
+  console.log('📊 Sending all events in one batch:', allEvents.map(e => e.type));
+  
+  // Send everything together
+  sendEvents(allEvents, false).catch(err => {
+    console.error('Failed to send events:', err);
   });
 }
 ```
 
-**Event Flow Now**:
-
-| Event | When Sent | Method |
-|-------|-----------|--------|
-| `logged_in` | On page exit | Buffer → sendBeacon |
-| `contract_signed` | On page exit | Buffer → sendBeacon |
-| `invoice` | On page exit | Buffer → sendBeacon |
-| `payment_1` | **Immediately on Stripe return** | Direct fetch |
-| `balance` | On page exit | Buffer → sendBeacon |
-| `payment_2` | **Immediately on Stripe return** | Direct fetch |
-
-**Why This Is Correct**:
-1. **Security**: Payment must be recorded immediately - can't risk losing it if user closes tab
-2. **Isolation**: Payment events are completely separate from buffered events
-3. **No duplicates**: `sentEventsRef` prevents the same event from being sent twice
-4. **Expected behavior**: Users will see 2 API calls for payment_1 flow (buffered events + payment_1) and 2 for payment_2 flow (balance + payment_2)
+**Why Unified Flush Is Better**:
+1. **Single API call**: All events (logged_in, contract_signed, invoice, payment_1) sent together
+2. **Single workflow**: Only one GitHub Actions workflow triggered per payment flow
+3. **No race conditions**: No risk of workflow cancellations from rapid-fire individual events
+4. **Security maintained**: Payment event still sent immediately on Stripe return, just bundled with others
 
 ---
 
@@ -487,7 +454,7 @@ This is why `invoice` was skipped - it was pending when `payment_1` came in and 
 ## Slowness Investigation
 
 **Reported**: 2026-01-25  
-**Status**: Under Investigation
+**Status**: FIXED
 
 **Symptoms**:
 - Page loads very slowly (10+ seconds)
@@ -495,16 +462,147 @@ This is why `invoice` was skipped - it was pending when `payment_1` came in and 
 - Spinner showing for extended time
 - Affects both mobile (iPad) and desktop
 
-**Ruled Out**:
-- User's internet (200+ Mbps confirmed)
-- Image sizes (42-66KB, tiny)
-- sessionStorage operations (minimal)
-- JSON fetch (simple with cache busting)
+**Root Cause Identified**: `sessionStorage` Persistence
 
-**Possible Causes**:
-1. Vercel cold start (first request after inactivity)
-2. unpkg CDN slowness (PDF worker loaded from there)
-3. GitHub Pages CDN issues
-4. Build artifact size (job bundle is 552KB)
+The `sessionStorage` persistence added to preserve event buffers across back-button navigation was causing significant performance degradation:
 
-**Note**: The `visibilitychange` fix may help with perceived slowness since it was causing extra API calls during load.
+1. **Synchronous reads on mount**: `getPersistedBuffer()` and `getPersistedSentEvents()` called `sessionStorage.getItem()` synchronously during component initialization
+2. **Synchronous writes on every event**: `persistBuffer()` and `persistSentEvents()` called `sessionStorage.setItem()` after every event addition
+3. **JSON parsing/stringifying**: Large event arrays being serialized/deserialized repeatedly
+4. **Main thread blocking**: All sessionStorage operations are synchronous and block the main thread
+
+**Fix Applied**: Removed all sessionStorage persistence
+
+```typescript
+// REMOVED:
+const STORAGE_KEY_BUFFER = 'payments_event_buffer';
+const STORAGE_KEY_SENT = 'payments_sent_events';
+const getPersistedBuffer = () => { ... };
+const getPersistedSentEvents = () => { ... };
+const persistBuffer = useCallback(() => { ... }, []);
+const persistSentEvents = useCallback(() => { ... }, []);
+
+// RESTORED: Simple in-memory refs
+const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>([]);
+const sentEventsRef = useRef<Set<string>>(new Set());
+```
+
+**Tradeoff**: Events no longer survive back-button navigation in memory. However, this is mitigated by:
+
+1. **`popstate` listener**: Added to detect back-button navigation and flush buffered events immediately
+2. **Unified payment flush**: All buffered events are flushed together with the payment event on Stripe return
+3. **Deduplication**: `sentEventsRef` prevents duplicate events within the same session
+
+**Blue Background Flash Fix**:
+
+Changed default body background in HTML files from `bg-slate-950` (dark blue) to match app theme:
+
+```html
+<!-- Before -->
+<body class="bg-slate-950">
+
+<!-- After -->
+<body style="background-color: #1f1f1f;">
+```
+
+Applied to: `index.html`, `job.html`, `404.html`
+
+**Result**: Page loads returned to normal speed. Background no longer flashes blue during load.
+
+---
+
+## FIX: Back-Button Event Preservation via `popstate`
+
+**Applied**: 2026-01-25
+
+**Problem**: After removing sessionStorage persistence (for performance), events would be lost if user navigated back.
+
+**Solution**: Added `popstate` event listener to flush buffered events on back-button navigation:
+
+```typescript
+const handlePopState = () => {
+  if (eventBufferRef.current.length === 0) return;
+  const eventsToSend = [...eventBufferRef.current];
+  eventBufferRef.current = [];
+  sendEvents(eventsToSend, true).catch(() => {});
+};
+
+window.addEventListener('popstate', handlePopState);
+```
+
+**Why This Works**:
+- `popstate` fires when user navigates via browser back/forward buttons
+- Events are flushed before the page potentially unloads or re-renders
+- Combined with the unified payment flush, ensures no events are lost
+
+---
+
+## FIX: Unified Event Flush on Payment Completion
+
+**Applied**: 2026-01-25
+
+**Problem**: Payment events were sent separately from buffered events, causing multiple workflow triggers.
+
+**Solution**: On successful Stripe return, ALL buffered events are combined with the payment event and sent in a single batch:
+
+```typescript
+if (paymentType && Object.keys(updates).length > 0) {
+  console.log('📊 Payment complete! Flushing ALL events immediately');
+  sentEventsRef.current.add(paymentType);
+  
+  // Grab all buffered events
+  const bufferedEvents = [...eventBufferRef.current];
+  eventBufferRef.current = []; // Clear buffer
+  
+  // Combine with payment event
+  const allEvents = [...bufferedEvents, paymentEvent];
+  console.log('📊 Sending all events in one batch:', allEvents.map(e => e.type));
+  
+  // Send everything together
+  sendEvents(allEvents, false).catch(err => {
+    console.error('Failed to send events:', err);
+  });
+}
+```
+
+**Result**: 
+- Single API call per payment flow (e.g., `logged_in` + `contract_signed` + `invoice` + `payment_1` all in one batch)
+- Single GitHub Actions workflow trigger per payment
+- No more workflow cancellations due to rapid-fire individual events
+
+---
+
+## Final Event Flow Architecture (v5.6.0)
+
+| Event | When Tracked | When Sent | Method |
+|-------|--------------|-----------|--------|
+| `logged_in` | On initial JSON load | With payment OR on exit | Buffer → batch |
+| `contract_signed` | On signature submit | With payment OR on exit | Buffer → batch |
+| `invoice` | On invoice acknowledge | With payment OR on exit | Buffer → batch |
+| `payment_1` | On Stripe return (success) | **Immediately** | Direct fetch (includes all buffered) |
+| `balance` | On balance acknowledge | With payment_2 OR on exit | Buffer → batch |
+| `payment_2` | On Stripe return (success) | **Immediately** | Direct fetch (includes all buffered) |
+
+**Exit Triggers** (for non-payment events):
+- `pagehide` event (page unload)
+- `beforeunload` event (tab close)
+- `popstate` event (back button)
+
+**NOT used** (removed for performance):
+- ~~`visibilitychange`~~ (too aggressive, caused premature flushes)
+- ~~`sessionStorage` persistence~~ (caused slowness)
+
+---
+
+## v5.6.0 Final Status
+
+**All Issues Resolved**:
+- ✅ BUG_05_001 through BUG_05_007 - Closed
+- ✅ BUG_06_001 - Missing events (fixed via unified flush)
+- ✅ BUG_06_002/003/004 - Expected behavior documented
+- ✅ BUG_06_005 - Individual event flushing (fixed via visibilitychange removal)
+- ✅ UX Exit Button - Changed to "Log Out" button
+- ✅ Performance Slowdown - Fixed via sessionStorage removal
+- ✅ Blue Background Flash - Fixed via HTML background color
+
+**Ready for Production**: All core functionality tested and working on both mobile and desktop.

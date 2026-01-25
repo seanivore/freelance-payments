@@ -1,6 +1,6 @@
 # Payments Platform - Complete Technical Documentation
 
-**Last Updated**: 2026-01-24  
+**Last Updated**: 2026-01-25  
 **Version**: v5.6.0 (React + Vite + TypeScript)  
 **Status**: Production Ready - Full End-to-End Testing Complete
 
@@ -465,48 +465,50 @@ CLIENT COMPLETED PROJECT PAYMENTS AND FLOW
 
 **File**: `src/App.tsx`
 
-Events are collected in an event buffer backed by `sessionStorage` (survives back-button navigation):
+Events are collected in an in-memory buffer (React ref):
 
 ```typescript
-// Buffer persisted to sessionStorage
-const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>(getPersistedBuffer());
+// In-memory buffer (reset on page reload)
+const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>([]);
 
-// Persist after each event
-const persistBuffer = useCallback(() => {
-  sessionStorage.setItem(STORAGE_KEY_BUFFER, JSON.stringify(eventBufferRef.current));
-}, []);
+// Deduplication set (prevents same event being sent twice in session)
+const sentEventsRef = useRef<Set<string>>(new Set());
 ```
 
 **Events Tracked** (Two Categories):
 
-**Buffered Events** (sent on page exit):
+**Buffered Events** (sent on page exit OR with payment):
 - `logged_in`: On initial JSON load (if timestamp null)
 - `contract_signed`: On signature submission (includes `legal_name`, `signed_date`)
 - `invoice`: On invoice acknowledge/continue
 - `balance`: On balance acknowledge/continue
 
-**Immediate Events** (sent instantly, not buffered):
+**Immediate Events** (sent instantly with all buffered events):
 - `payment_1`: On payment 1 completion (Stripe return URL)
 - `payment_2`: On payment 2 completion (Stripe return URL)
 
-**Event Buffering**: 
-- **Non-payment events** (`logged_in`, `contract_signed`, `invoice`, `balance`): Buffered in sessionStorage, flushed together on page exit
-- **Payment events** (`payment_1`, `payment_2`): Sent **immediately** on Stripe return (not buffered) for security - ensures payment is recorded even if user closes tab
+**Event Buffering Strategy**: 
+- **Non-payment events** (`logged_in`, `contract_signed`, `invoice`, `balance`): Buffered in memory, flushed on page exit OR combined with payment event
+- **Payment events** (`payment_1`, `payment_2`): Trigger immediate flush of ALL buffered events plus the payment event in a single batch
+
+**Note**: sessionStorage persistence was removed in v5.6.0 due to performance issues (synchronous operations blocking main thread). Back-button navigation is handled via `popstate` listener which flushes events before potential page unload.
 
 ### Flush Phase (Frontend → Backend)
 
-**Two Flush Strategies**:
+**Unified Flush Strategy**:
 
-1. **Payment Events** (`payment_1`, `payment_2`) - **Immediate Send**
-   - Sent via `fetch()` immediately on Stripe return
-   - NOT buffered - ensures payment is recorded even if user closes tab
-   - Separate API call from other events (by design, for security)
+1. **Payment Completion** (`payment_1`, `payment_2`) - **Immediate Unified Flush**
+   - On successful Stripe return, ALL buffered events are combined with the payment event
+   - Sent as a single batch via `fetch()` 
+   - Ensures all events (logged_in, contract_signed, invoice, payment_1) go in ONE API call
+   - Single GitHub Actions workflow trigger per payment flow
 
-2. **All Other Events** (`logged_in`, `contract_signed`, `invoice`, `balance`) - **Buffered Flush**
-   - Stored in sessionStorage-backed buffer (survives back-button navigation)
-   - Flushed together as single batch on:
-     - **10-minute inactivity** - Timer resets on user activity
-     - **Browser unload** - `beforeunload`, `pagehide`, `visibilitychange` (uses `navigator.sendBeacon` with `text/plain`)
+2. **Page Exit** (non-payment scenarios) - **Buffered Flush**
+   - If user exits without completing payment, buffered events flush on:
+     - **`pagehide`** - Page unload (uses `navigator.sendBeacon` with `text/plain`)
+     - **`beforeunload`** - Tab/window close
+     - **`popstate`** - Back button navigation (flushes before potential re-render)
+   - **NOT used**: `visibilitychange` (removed - too aggressive, caused premature flushes)
 
 **API Call** (`src/App.tsx` → `api/track-event.js`):
 ```typescript
@@ -910,12 +912,13 @@ Use `git smart-push` for local pushes. It stashes any local changes, rebases fro
 3. **Optimistic UI**: Update state immediately, sync backend in background
 4. **One Action Per Gate**: Each gate has exactly one primary action button
 5. **Event Tracking**: 
-   - Non-payment events: Buffer in sessionStorage, flush on exit (using `sendBeacon`)
-   - Payment events: Send immediately on Stripe return (not buffered, for security)
-6. **Single Event Policy**: Each event type tracked exactly once per user session
-7. **Buffer Persistence**: Event buffer stored in sessionStorage to survive back-button navigation
-7. **Type Safety**: Use TypeScript types everywhere, catch errors early
-8. **Planning Over Debugging**: Understand before coding, plan before executing
+   - Non-payment events: Buffer in memory, flush on exit OR with payment
+   - Payment events: Trigger unified flush of ALL events (buffered + payment) in single batch
+6. **Single Event Policy**: Each event type tracked exactly once per user session (via `sentEventsRef`)
+7. **Back-Button Handling**: `popstate` listener flushes buffered events on back navigation
+8. **Performance**: No sessionStorage persistence (removed due to main thread blocking)
+9. **Type Safety**: Use TypeScript types everywhere, catch errors early
+10. **Planning Over Debugging**: Understand before coding, plan before executing
 
 ---
 
