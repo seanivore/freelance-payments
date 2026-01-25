@@ -22,14 +22,14 @@ This document outlines how to set up a completely separate development environme
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    PRODUCTION ENVIRONMENT                        │
-│                                                                  │
-│  Repo: freelance-payments                                        │
-│  Frontend: payments.august.style (GitHub Pages)                  │
+│                    PRODUCTION ENVIRONMENT                       │
+│                                                                 │
+│  Repo: freelance-payments                                       │
+│  Frontend: payments.august.style (GitHub Pages)                 │
 │  Backend: freelance-payments-neon.vercel.app (Vercel)           │
 │  Stripe: Live keys (sk_live_*, pk_live_*)                       │
-│  Data: Real client JSON files                                    │
-│                                                                  │
+│  Data: Real client JSON files                                   │
+│                                                                 │
 │  ⚠️  ONLY receives tested, stable code                          │
 └─────────────────────────────────────────────────────────────────┘
 
@@ -55,8 +55,10 @@ This document outlines how to set up a completely separate development environme
 **On GitHub**:
 1. Go to https://github.com/new
 2. Repository name: `freelance-payments-dev`
-3. Keep it private (test data, but no secrets)
+3. **Keep it PUBLIC** (required for GitHub Pages on free tier)
 4. Don't initialize with README (we'll push existing code)
+
+> ⚠️ **Why public?** GitHub Pages is only available for public repositories on the free tier. Private repos require GitHub Pro or higher. The dev repo won't contain secrets (those go in GitHub Secrets) and test data isn't sensitive.
 
 **Locally**:
 ```bash
@@ -178,11 +180,11 @@ dig dev.payments.august.style
 ### Step 5: Set Up GitHub Pages for Dev Repo
 
 1. Go to: https://github.com/seanivore/freelance-payments-dev/settings/pages
-2. Source: Deploy from a branch
-3. Branch: `freelance-payments` (or `main` if you rename it)
-4. Folder: `/ (root)`
-5. Custom domain: `dev.payments.august.style`
-6. Enforce HTTPS: ✅
+2. **Source: GitHub Actions** (NOT "Deploy from a branch")
+3. Custom domain: `dev.payments.august.style`
+4. Enforce HTTPS: ✅
+
+> ⚠️ **Why GitHub Actions?** The production repo uses `actions/upload-pages-artifact` and `actions/deploy-pages` in the workflows to deploy. This is the "GitHub Actions" source option, not branch-based deployment. Using the same method ensures the dev environment behaves identically to production.
 
 ---
 
