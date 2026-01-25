@@ -1,6 +1,6 @@
 import React from 'react';
 import { JobData } from '@/lib/data';
-import { Download, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Download, CheckCircle2, ArrowRight, X } from 'lucide-react';
 
 type CompletionViewProps = {
   data: JobData;
@@ -112,6 +112,20 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
                   Download Invoice
                 </button>
               </div>
+
+              {/* Exit Button */}
+              <div className="mt-8 pt-6 border-t border-portfolio-border">
+                <button
+                  onClick={() => window.close()}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-accent-mauve/20 hover:bg-portfolio-accent-mauve/30 text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-accent-mauve/30"
+                >
+                  <X className="w-5 h-5 text-portfolio-accent-mauve" />
+                  Close This Window
+                </button>
+                <p className="text-portfolio-text-secondary/60 text-xs text-center mt-2">
+                  You can safely close this tab. Return anytime to make your final payment.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -206,7 +220,7 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
 
             {/* Contact Info */}
             <div className="mt-8 pt-6 border-t border-portfolio-border text-center">
-              <p className="text-portfolio-text-secondary/80 text-sm">
+              <p className="text-portfolio-text-secondary/80 text-sm mb-4">
                 Questions about your service?{' '}
                 <a 
                   href="mailto:sean@august.style" 
@@ -214,6 +228,18 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
                 >
                   sean@august.style
                 </a>
+              </p>
+              
+              {/* Exit Button */}
+              <button
+                onClick={() => window.close()}
+                className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-accent-mauve/20 hover:bg-portfolio-accent-mauve/30 text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-accent-mauve/30"
+              >
+                <X className="w-5 h-5 text-portfolio-accent-mauve" />
+                Close This Window
+              </button>
+              <p className="text-portfolio-text-secondary/60 text-xs text-center mt-2">
+                You can safely close this tab. Thank you for your business!
               </p>
             </div>
           </div>

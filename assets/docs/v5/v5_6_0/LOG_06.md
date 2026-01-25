@@ -198,14 +198,236 @@ else if (client_status.balance && !client_status.payment_2) {
 
 ---
 
-## Conclusion
+## Conclusion (Initial Testing)
 
-**v5.6.0 is production ready.** All event tracking, state management, and routing logic is working correctly. The platform successfully handles:
+**v5.6.0 initial testing passed.** All event tracking, state management, and routing logic worked correctly in controlled step-by-step testing.
 
-- Simultaneous users on different devices
-- All 6 client status events tracked exactly once
-- Correct page routing based on state
-- GitHub Pages deployment after JSON updates
-- Mobile and desktop parity
+---
 
-No bugs identified during v5.6.0 testing.
+# External User Testing - 2026-01-25
+
+**Test Files**:
+- `uid-awi-104.json` — Markham (simple-gardener) — External tester
+- `uid-ugz-557.json` — Kelvin (tokenized-social-media) — Self-test
+
+---
+
+## BUG_06_001 — Missing `contract_signed` and `invoice` Events (Markham)
+
+**Reported**: 2026-01-25  
+**Status**: Under Investigation
+
+**Observed Behavior**:
+- User went through entire payment_1 flow (contract → invoice → payment)
+- First API call contained only `logged_in` event
+- Second API call contained only `payment_1` event
+- `contract_signed` and `invoice` events were **never sent**
+
+**JSON State After Test**:
+```json
+"client_status": {
+  "logged_in": "2026-01-25T19:06:05.259Z",
+  "contract_signed": null,  // MISSING
+  "invoice": null,          // MISSING
+  "payment_1": "2026-01-25T19:10:14.171Z",
+  "balance": "2026-01-25T19:25:59.749Z",
+  "payment_2": "2026-01-25T19:26:42.385Z"
+}
+```
+
+**User Notes**: 
+- User noted no exit button on Completion1 page
+- User pressed back button multiple times trying to exit
+
+**Analysis**:
+The events were likely buffered but lost due to one of these scenarios:
+1. **Back navigation cleared buffer**: When user pressed back multiple times, React re-rendered and the `eventBufferRef` may have been reset
+2. **Stripe redirect timing**: The redirect to Stripe checkout may have occurred before the buffer was flushed
+3. **Session storage dedup false positive**: The `shouldSkipFlush` hash check may have incorrectly skipped the flush
+
+**Root Cause Hypothesis**:
+The `payment_1` event is tracked on Stripe return and immediately triggers a flush via `sendBeacon`. However, the earlier events (`contract_signed`, `invoice`) were still in the buffer waiting for inactivity timeout. The Stripe redirect (page unload) should have flushed them, but something prevented this.
+
+---
+
+## BUG_06_002 — Split API Calls for payment_2 Flow (Expected Behavior)
+
+**Reported**: 2026-01-25  
+**Status**: EXPECTED BEHAVIOR - NOT A BUG
+
+**Observed Behavior**:
+- First API call: `balance` event
+- Second API call: `payment_2` event
+
+**Analysis**:
+This is **correct and expected** behavior for security:
+- `balance` event flushes when user exits the balance page (navigates to Stripe)
+- `payment_2` event flushes when user returns from Stripe with successful payment
+
+**Why This Is Correct**:
+Payment events must be tracked **after** successful Stripe confirmation, not before. If we batched them together, a user could trigger the payment event without actually completing payment.
+
+---
+
+## BUG_06_003 — Split API Calls for payment_1 Flow (Partial Expected Behavior)
+
+**Reported**: 2026-01-25  
+**Status**: PARTIALLY EXPECTED
+
+**Observed Behavior** (Kelvin test):
+- First API call: 3 events (`logged_in`, `contract_signed`, `invoice`)
+- Second API call: 1 event (`payment_1`)
+
+**Analysis**:
+- The first batch is correct - all pre-payment events flushed together on Stripe redirect
+- The second batch (`payment_1`) is correct - tracked after Stripe return
+
+**Note**: This is the expected behavior. BUG_06_001 (Markham) shows what happens when the first batch fails to send.
+
+---
+
+## BUG_06_004 — Split API Calls for payment_2 Flow (Duplicate of BUG_06_002)
+
+**Status**: EXPECTED BEHAVIOR - Same as BUG_06_002
+
+---
+
+## UX Issue — No Exit Button on Completion Pages
+
+**Reported**: 2026-01-25  
+**Status**: FIXED
+
+**Issue**: Users had no clear way to exit after completing payment. This led to back-button navigation which may have contributed to event loss.
+
+**Fix Applied**: Added "Close This Window" button to both `CompletionView` completion1 and completion2 sections.
+
+```typescript
+// Added to CompletionView.tsx
+<button
+  onClick={() => window.close()}
+  className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-accent-mauve/20 hover:bg-portfolio-accent-mauve/30 text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-accent-mauve/30"
+>
+  <X className="w-5 h-5 text-portfolio-accent-mauve" />
+  Close This Window
+</button>
+```
+
+---
+
+## Summary of Findings
+
+### Expected Behavior (Document for Users)
+- **Payment events always send separately**: `payment_1` and `payment_2` events are tracked on Stripe return and flush immediately. This is by design for payment security.
+- **Pre-payment events batch together**: `logged_in`, `contract_signed`, `invoice` should all flush together when user navigates to Stripe checkout.
+- **Balance event sends separately**: `balance` flushes when navigating to payment_2 checkout.
+
+### Actual Bug to Investigate
+- **BUG_06_001**: Why did `contract_signed` and `invoice` events fail to send for Markham but worked for Kelvin?
+  - Both users went through the same flow
+  - Kelvin's events batched correctly (3 events in first call)
+  - Markham's events were lost (only `logged_in` in first call)
+
+### Potential Causes for BUG_06_001
+1. **Browser differences**: Different browsers handle `sendBeacon` differently
+2. **Network timing**: Slow network may have caused beacon to fail silently
+3. **Back button behavior**: Pressing back multiple times may have caused state issues
+4. **Session storage collision**: The dedup hash may have incorrectly matched
+
+### Next Steps
+1. ✅ Add exit buttons to completion pages (UX improvement)
+2. ✅ Persist event buffer to sessionStorage (survives back-button navigation)
+3. Test with network throttling to see if timing affects delivery
+
+---
+
+## FIX: Persist Event Buffer to sessionStorage
+
+**Applied**: 2026-01-25
+
+**Problem**: The `eventBufferRef` was an in-memory React ref that reset when the component remounted (e.g., on back-button navigation). Events buffered before navigation were lost.
+
+**Solution**: Persist the event buffer and sent-events set to `sessionStorage`:
+
+```typescript
+// Initialize from sessionStorage (survives back navigation)
+const getPersistedBuffer = (): Array<{type: string; timestamp: string; data: any}> => {
+  try {
+    const stored = sessionStorage.getItem(STORAGE_KEY_BUFFER);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+// Persist after each event is added
+const persistBuffer = useCallback(() => {
+  try {
+    sessionStorage.setItem(STORAGE_KEY_BUFFER, JSON.stringify(eventBufferRef.current));
+  } catch {
+    // sessionStorage may be full or unavailable
+  }
+}, []);
+```
+
+**Changes Made**:
+1. Added `getPersistedBuffer()` and `getPersistedSentEvents()` to initialize refs from sessionStorage
+2. Added `persistBuffer()` and `persistSentEvents()` to save state after changes
+3. Call `persistBuffer()` after adding events in `trackEvent()`
+4. Call `persistBuffer()` after clearing buffer in `flushEvents()` and `handleUnload()`
+5. Clear `STORAGE_KEY_BUFFER` from sessionStorage in `handleUnload()` after sending
+
+**Why This Works**:
+- `sessionStorage` persists across same-tab navigation (including back button)
+- `sessionStorage` is cleared when the tab closes (so events don't accumulate across sessions)
+- Events are now recovered even if user navigates away and back
+
+---
+
+## FIX: Payment Events Sent Immediately (Not Buffered)
+
+**Applied**: 2026-01-25
+
+**Problem**: Payment events (`payment_1`, `payment_2`) were being added to the buffer like other events. This meant:
+1. They could get mixed with other events in the same flush
+2. If user closed tab immediately after payment, the event might not be sent
+3. Could cause "duplicate payment" workflow issues if payment event was in buffer AND triggered separately
+
+**Solution**: Payment events are now sent **immediately** via `fetch()` on Stripe return, completely bypassing the buffer:
+
+```typescript
+// In the session status handler:
+if (paymentType && Object.keys(updates).length > 0) {
+  // Mark as sent to prevent duplicates
+  sentEventsRef.current.add(paymentType);
+  persistSentEvents();
+  
+  // Send immediately via fetch (not beacon, not buffered)
+  const paymentEvent = {
+    type: paymentType,
+    timestamp: new Date().toISOString(),
+    data: { payment_number: ..., session_id: ... }
+  };
+  
+  // Fire and forget - don't await, don't block UI
+  sendEvents([paymentEvent], false).catch(err => {
+    console.error('Failed to send payment event:', err);
+  });
+}
+```
+
+**Event Flow Now**:
+
+| Event | When Sent | Method |
+|-------|-----------|--------|
+| `logged_in` | On page exit | Buffer → sendBeacon |
+| `contract_signed` | On page exit | Buffer → sendBeacon |
+| `invoice` | On page exit | Buffer → sendBeacon |
+| `payment_1` | **Immediately on Stripe return** | Direct fetch |
+| `balance` | On page exit | Buffer → sendBeacon |
+| `payment_2` | **Immediately on Stripe return** | Direct fetch |
+
+**Why This Is Correct**:
+1. **Security**: Payment must be recorded immediately - can't risk losing it if user closes tab
+2. **Isolation**: Payment events are completely separate from buffered events
+3. **No duplicates**: `sentEventsRef` prevents the same event from being sent twice
+4. **Expected behavior**: Users will see 2 API calls for payment_1 flow (buffered events + payment_1) and 2 for payment_2 flow (balance + payment_2)

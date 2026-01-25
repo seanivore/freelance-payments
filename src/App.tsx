@@ -14,7 +14,30 @@ export default function App() {
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   
   // --- Event Tracking State ---
-  const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>([]);
+  // IMPORTANT: We persist the event buffer to sessionStorage so it survives back-button navigation
+  const STORAGE_KEY_BUFFER = 'event_buffer';
+  const STORAGE_KEY_SENT = 'sent_events';
+  
+  // Initialize buffer from sessionStorage (survives back navigation)
+  const getPersistedBuffer = (): Array<{type: string; timestamp: string; data: any}> => {
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY_BUFFER);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  };
+  
+  const getPersistedSentEvents = (): Set<string> => {
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY_SENT);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  };
+  
+  const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>(getPersistedBuffer());
   const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const processedSessionRef = useRef<string | null>(null);
@@ -22,7 +45,24 @@ export default function App() {
   // Track client_status for deduplication (updated when data changes)
   const clientStatusRef = useRef<JobData['state']['client_status'] | null>(null);
   // Track events that have been queued/sent in this session to prevent duplicates
-  const sentEventsRef = useRef<Set<string>>(new Set());
+  const sentEventsRef = useRef<Set<string>>(getPersistedSentEvents());
+  
+  // Persist buffer to sessionStorage whenever it changes
+  const persistBuffer = useCallback(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY_BUFFER, JSON.stringify(eventBufferRef.current));
+    } catch {
+      // sessionStorage may be full or unavailable
+    }
+  }, []);
+  
+  const persistSentEvents = useCallback(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY_SENT, JSON.stringify([...sentEventsRef.current]));
+    } catch {
+      // sessionStorage may be full or unavailable
+    }
+  }, []);
 
   // Keep clientStatusRef in sync with data for event deduplication
   useEffect(() => {
@@ -130,6 +170,7 @@ export default function App() {
     isFlushingRef.current = true;
     const eventsToSend = [...buffer];
     eventBufferRef.current = [];
+    persistBuffer(); // Clear persisted buffer
 
     try {
       await sendEvents(eventsToSend);
@@ -138,7 +179,7 @@ export default function App() {
     } finally {
       isFlushingRef.current = false;
     }
-  }, [sendEvents]);
+  }, [sendEvents, persistBuffer]);
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -180,14 +221,16 @@ export default function App() {
     
     // Mark this event as sent for this session
     sentEventsRef.current.add(type);
+    persistSentEvents();
     
     eventBufferRef.current.push({
       type,
       timestamp: new Date().toISOString(),
       data: eventData
     });
+    persistBuffer(); // Persist to sessionStorage so it survives back navigation
     resetTimer();
-  }, [resetTimer]);
+  }, [resetTimer, persistBuffer, persistSentEvents]);
 
   // Single-batch policy: only flush on inactivity/unload to avoid split sessions.
 
@@ -209,6 +252,10 @@ export default function App() {
         const eventsToSend = [...eventBufferRef.current];
         // Clear buffer immediately to prevent double-sends
         eventBufferRef.current = [];
+        // Clear persisted buffer since we're sending now
+        try {
+          sessionStorage.removeItem(STORAGE_KEY_BUFFER);
+        } catch { /* ignore */ }
         sendEvents(eventsToSend, true).catch(() => {});
       }
     };
@@ -312,10 +359,30 @@ export default function App() {
           console.log('📊 paymentType:', paymentType, 'updates:', updates);
           
           if (paymentType && Object.keys(updates).length > 0) {
-            console.log('📊 Calling trackEvent for:', paymentType);
-            trackEvent(paymentType, {
-              payment_number: paymentType === 'payment_1' ? 1 : 2,
-              session_id: sessionId
+            console.log('📊 Sending payment event IMMEDIATELY (not buffered):', paymentType);
+            
+            // IMPORTANT: Payment events are sent IMMEDIATELY, not buffered.
+            // This ensures payment is recorded even if user closes tab right after.
+            // Other events (logged_in, contract_signed, invoice, balance) stay in buffer
+            // and flush on exit.
+            
+            // Mark as sent to prevent duplicates
+            sentEventsRef.current.add(paymentType);
+            persistSentEvents();
+            
+            // Send immediately via fetch (not beacon, not buffered)
+            const paymentEvent = {
+              type: paymentType,
+              timestamp: new Date().toISOString(),
+              data: {
+                payment_number: paymentType === 'payment_1' ? 1 : 2,
+                session_id: sessionId
+              }
+            };
+            
+            // Fire and forget - don't await, don't block UI
+            sendEvents([paymentEvent], false).catch(err => {
+              console.error('Failed to send payment event:', err);
             });
             
             setData(prev => {
@@ -341,7 +408,7 @@ export default function App() {
         console.error('Error fetching session status:', err);
         processedSessionRef.current = null;
       });
-  }, [sessionId, data?.state?.client_status?.payment_1, data?.state?.client_status?.payment_2, trackEvent]);
+  }, [sessionId, data?.state?.client_status?.payment_1, data?.state?.client_status?.payment_2, sendEvents, persistSentEvents]);
 
   // Memoized emitEvent callback
   const emitEvent = useCallback((name: string, payload?: unknown) => {
