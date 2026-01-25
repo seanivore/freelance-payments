@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-25T21:51:45.829413Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Vargas Test",
+                "signed_date": "Jan 25, 2026"
             }
         }
     },
@@ -54,8 +54,8 @@
         },
         "client_status": {
             "logged_in": "2026-01-25T22:33:01.222Z",
-            "contract_signed": null,
-            "invoice": null,
+            "contract_signed": "2026-01-25T23:04:02.087Z",
+            "invoice": "2026-01-25T23:04:08.062Z",
             "payment_1": null,
             "balance": null,
             "payment_2": null
