@@ -1,171 +1,171 @@
 {
-  "project": "Tokenized Social Media Platform for Developers",
-  "contract": {
-    "work_start": "2026-01-24",
-    "work_end": "2026-02-24",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-24T12:32:06.161902Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Tokenized Social Media Platform for Developers",
     "contract": {
-      "id": "kon-ugz-557",
-      "pdf": "assets/pdf/contract/kon-ugz-557.pdf",
-      "file_id": "121hDIKEatFHlZM3Tv7DOLuytuYqK0x7CGlXYf3NEupo",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-ugz-557.pdf",
-      "sha256": "969d6df57eac699e4df778bb90df6391699552d1e4ea6e52f093e5c4ce53d0fb",
-      "created": "2026-01-24T12:32:30.769772Z"
+        "work_start": "2026-01-24",
+        "work_end": "2026-02-24",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-24T12:32:06.161902Z"
+            },
+            "client": {
+                "legal_name": "Test Kelvin",
+                "signed_date": "Jan 25, 2026"
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-ugz-557",
-      "pdf": "assets/pdf/invoice/inv-ugz-557.pdf",
-      "file_id": "1Bf3r2LQs6RbxM53M6Zp8uIpxsn8ZkzFhOJxlgXS3owA",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-ugz-557.pdf",
-      "sha256": "d3747ad1575245b7662d29d6246b143cddb5b6f7ff98e79cbab1a27484494f29",
-      "created": "2026-01-24T12:32:35.375724Z"
+    "docs": {
+        "contract": {
+            "id": "kon-ugz-557",
+            "pdf": "assets/pdf/contract/kon-ugz-557.pdf",
+            "file_id": "121hDIKEatFHlZM3Tv7DOLuytuYqK0x7CGlXYf3NEupo",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-ugz-557.pdf",
+            "sha256": "969d6df57eac699e4df778bb90df6391699552d1e4ea6e52f093e5c4ce53d0fb",
+            "created": "2026-01-24T12:32:30.769772Z"
+        },
+        "invoice": {
+            "id": "inv-ugz-557",
+            "pdf": "assets/pdf/invoice/inv-ugz-557.pdf",
+            "file_id": "1Bf3r2LQs6RbxM53M6Zp8uIpxsn8ZkzFhOJxlgXS3owA",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-ugz-557.pdf",
+            "sha256": "d3747ad1575245b7662d29d6246b143cddb5b6f7ff98e79cbab1a27484494f29",
+            "created": "2026-01-24T12:32:35.375724Z"
+        },
+        "balance": {
+            "id": "bal-ugz-557",
+            "pdf": "assets/pdf/balance/bal-ugz-557.pdf",
+            "file_id": "1qJxaJQ5C2JeZ-LE0hHUea6u1I4rhQ7Fe-CtiFNRjG6k",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-ugz-557.pdf",
+            "sha256": "1ed45c90a77db52f1f7299628f86bc7fd55686ee47b657fcf2f06a849b37dcad",
+            "created": "2026-01-24T12:32:39.891647Z"
+        }
     },
-    "balance": {
-      "id": "bal-ugz-557",
-      "pdf": "assets/pdf/balance/bal-ugz-557.pdf",
-      "file_id": "1qJxaJQ5C2JeZ-LE0hHUea6u1I4rhQ7Fe-CtiFNRjG6k",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-ugz-557.pdf",
-      "sha256": "1ed45c90a77db52f1f7299628f86bc7fd55686ee47b657fcf2f06a849b37dcad",
-      "created": "2026-01-24T12:32:39.891647Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-24T12:32:06.161902Z",
-      "product": "uid-ugz-557",
-      "price_1": "price_1St60Y9fljwH26CPwnlHaiU2",
-      "price_2": "price_1St60Y9fljwH26CPccOopdDL",
-      "customer": "cus-ugz-557",
-      "coupon": "cou-ugz-557"
+    "state": {
+        "objects": {
+            "created": "2026-01-24T12:32:06.161902Z",
+            "product": "uid-ugz-557",
+            "price_1": "price_1St60Y9fljwH26CPwnlHaiU2",
+            "price_2": "price_1St60Y9fljwH26CPccOopdDL",
+            "customer": "cus-ugz-557",
+            "coupon": "cou-ugz-557"
+        },
+        "client_status": {
+            "logged_in": "2026-01-25T19:36:53.894Z",
+            "contract_signed": "2026-01-25T19:37:10.806Z",
+            "invoice": "2026-01-25T19:37:24.871Z",
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Tokenized Social Media Platform",
-    "active": true,
-    "description": "Develop and launch a tokenized social media platform for developers",
-    "id": "uid-ugz-557",
-    "login_name": "Kelvin",
-    "login_keyword": "tokenized-social-media",
-    "service_usd": 11000000,
-    "total_payments": 2,
-    "discount_usd": 45500,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Jeremiah Kelvin",
-    "business": "Kelvin Co.",
-    "title": "CEO",
-    "email": "jeremiah.kelvin@kelvin.com",
-    "phone": "424-295-4444",
-    "id": "cus-ugz-557",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02108",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 45500,
-    "applies_to": {
-      "products": [
-        "uid-ugz-557"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-ugz-557",
-    "max_redemptions": 1,
-    "name": "KELVIN"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 5500000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-ugz-557"
-      ]
+        "name": "Tokenized Social Media Platform",
+        "active": true,
+        "description": "Develop and launch a tokenized social media platform for developers",
+        "id": "uid-ugz-557",
+        "login_name": "Kelvin",
+        "login_keyword": "tokenized-social-media",
+        "service_usd": 11000000,
+        "total_payments": 2,
+        "discount_usd": 45500,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1St60Y9fljwH26CPwnlHaiU2"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 5500000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-ugz-557"
-      ]
+    "customer": {
+        "name": "Jeremiah Kelvin",
+        "business": "Kelvin Co.",
+        "title": "CEO",
+        "email": "jeremiah.kelvin@kelvin.com",
+        "phone": "424-295-4444",
+        "id": "cus-ugz-557",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02108",
+            "country": "US"
+        }
     },
-    "id": "price_1St60Y9fljwH26CPccOopdDL"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-ugz-557"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St60Y9fljwH26CPwnlHaiU2",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-ugz-557?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St60Y9fljwH26CPccOopdDL",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-ugz-557?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Develop and launch a tokenized social media platform for developers",
-  "project_scope_full": "Develop and launch a tokenized social media platform for developers. The platform will allow developers to create and manage their social media accounts and content."
+    "coupon": {
+        "amount_off": 45500,
+        "applies_to": {
+            "products": [
+                "uid-ugz-557"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-ugz-557",
+        "max_redemptions": 1,
+        "name": "KELVIN"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 5500000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-ugz-557"
+            ]
+        },
+        "id": "price_1St60Y9fljwH26CPwnlHaiU2"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 5500000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-ugz-557"
+            ]
+        },
+        "id": "price_1St60Y9fljwH26CPccOopdDL"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-ugz-557"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St60Y9fljwH26CPwnlHaiU2",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-ugz-557?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St60Y9fljwH26CPccOopdDL",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-ugz-557?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Develop and launch a tokenized social media platform for developers",
+    "project_scope_full": "Develop and launch a tokenized social media platform for developers. The platform will allow developers to create and manage their social media accounts and content."
 }
