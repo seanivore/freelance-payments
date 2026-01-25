@@ -18,24 +18,12 @@
       "login_keyword": "etsy-law",
       "login_name": "Law"
     },
-    "markham-simple-gardener": {
-      "file_path": "assets/jobs/uid-awi-104.json",
-      "job_id": "uid-awi-104",
-      "login_keyword": "simple-gardener",
-      "login_name": "Markham"
-    },
     "kline-astro-travel-buddy": {
       "file_path": "assets/jobs/uid-azi-892.json",
       "job_id": "uid-azi-892",
       "login_keyword": "astro-travel-buddy",
       "login_name": "Kline"
-    },
-    "kelvin-tokenized-social-media": {
-      "file_path": "assets/jobs/uid-ugz-557.json",
-      "job_id": "uid-ugz-557",
-      "login_keyword": "tokenized-social-media",
-      "login_name": "Kelvin"
     }
   },
-  "generated_at": "2026-01-25T18:38:40.927655Z"
+  "generated_at": "2026-01-25T20:02:53.987208Z"
 }
