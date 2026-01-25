@@ -1,6 +1,6 @@
 import React from 'react';
 import { JobData } from '@/lib/data';
-import { Download, CheckCircle2, ArrowRight, X } from 'lucide-react';
+import { Download, CheckCircle2, ArrowRight, LogOut } from 'lucide-react';
 
 type CompletionViewProps = {
   data: JobData;
@@ -113,17 +113,17 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
                 </button>
               </div>
 
-              {/* Exit Button */}
+              {/* Log Out */}
               <div className="mt-8 pt-6 border-t border-portfolio-border">
                 <button
-                  onClick={() => window.close()}
+                  onClick={() => window.location.href = '/'}
                   className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-accent-mauve/20 hover:bg-portfolio-accent-mauve/30 text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-accent-mauve/30"
                 >
-                  <X className="w-5 h-5 text-portfolio-accent-mauve" />
-                  Close This Window
+                  <LogOut className="w-5 h-5 text-portfolio-accent-mauve" />
+                  Log Out
                 </button>
                 <p className="text-portfolio-text-secondary/60 text-xs text-center mt-2">
-                  You can safely close this tab. Return anytime to make your final payment.
+                  Return anytime to make your final payment.
                 </p>
               </div>
             </div>
@@ -218,7 +218,7 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
               )}
             </div>
 
-            {/* Contact Info */}
+            {/* Contact Info & Safe to Close */}
             <div className="mt-8 pt-6 border-t border-portfolio-border text-center">
               <p className="text-portfolio-text-secondary/80 text-sm mb-4">
                 Questions about your service?{' '}
@@ -230,16 +230,16 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
                 </a>
               </p>
               
-              {/* Exit Button */}
+              {/* Log Out */}
               <button
-                onClick={() => window.close()}
+                onClick={() => window.location.href = '/'}
                 className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-accent-mauve/20 hover:bg-portfolio-accent-mauve/30 text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-accent-mauve/30"
               >
-                <X className="w-5 h-5 text-portfolio-accent-mauve" />
-                Close This Window
+                <LogOut className="w-5 h-5 text-portfolio-accent-mauve" />
+                Log Out
               </button>
               <p className="text-portfolio-text-secondary/60 text-xs text-center mt-2">
-                You can safely close this tab. Thank you for your business!
+                Thank you for your business!
               </p>
             </div>
           </div>
