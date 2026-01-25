@@ -21,7 +21,8 @@ This platform processes real payments, generates legal documents, and manages co
 - Frontend reads state and routes to the correct view — no server-side session management
 
 **3. Exit-Event Architecture**
-- User actions buffered in-memory, flushed only on page exit or inactivity
+- User actions buffered in-memory, flushed on page exit or with payment completion
+- Payment completion triggers unified flush of ALL events in single batch
 - Single API call triggers single workflow run — no duplicate processing
 - `navigator.sendBeacon` ensures events survive page close
 
