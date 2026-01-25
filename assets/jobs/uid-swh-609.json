@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-25T21:51:46.849422Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Will Williamson",
+                "signed_date": "Jan 26, 2026"
             }
         }
     },
@@ -54,7 +54,7 @@
         },
         "client_status": {
             "logged_in": "2026-01-25T22:01:18.655Z",
-            "contract_signed": null,
+            "contract_signed": "2026-01-25T22:02:04.789Z",
             "invoice": null,
             "payment_1": null,
             "balance": null,
