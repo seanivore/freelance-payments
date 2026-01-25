@@ -1,171 +1,171 @@
 {
-  "project": "Etsy Shop Backend Automation and Management Platform",
-  "contract": {
-    "work_start": "2026-01-24",
-    "work_end": "2026-03-24",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-24T16:27:20.827787Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Etsy Shop Backend Automation and Management Platform",
     "contract": {
-      "id": "kon-ati-984",
-      "pdf": "assets/pdf/contract/kon-ati-984.pdf",
-      "file_id": "1wbRYTW4jxWhx_1l5RartQzq4iUcd91pOqVvvJmYHiKk",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-ati-984.pdf",
-      "sha256": "98699c2b4f118b1d3e34e75f9dec97d7aa0e0cdecec534d8859f8af1638e4cc2",
-      "created": "2026-01-24T16:28:02.893434Z"
+        "work_start": "2026-01-24",
+        "work_end": "2026-03-24",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-24T16:27:20.827787Z"
+            },
+            "client": {
+                "legal_name": "Law Test",
+                "signed_date": "Jan 25, 2026"
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-ati-984",
-      "pdf": "assets/pdf/invoice/inv-ati-984.pdf",
-      "file_id": "1c02PnVhO4xO37JjWwHZNofh2zQuoDHlfwEOAI6jpqc4",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-ati-984.pdf",
-      "sha256": "19d611a30ecc6013c61011f11de5fb3435fabbd4f7449210d34a7be6b17116fc",
-      "created": "2026-01-24T16:28:08.574206Z"
+    "docs": {
+        "contract": {
+            "id": "kon-ati-984",
+            "pdf": "assets/pdf/contract/kon-ati-984.pdf",
+            "file_id": "1wbRYTW4jxWhx_1l5RartQzq4iUcd91pOqVvvJmYHiKk",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-ati-984.pdf",
+            "sha256": "98699c2b4f118b1d3e34e75f9dec97d7aa0e0cdecec534d8859f8af1638e4cc2",
+            "created": "2026-01-24T16:28:02.893434Z"
+        },
+        "invoice": {
+            "id": "inv-ati-984",
+            "pdf": "assets/pdf/invoice/inv-ati-984.pdf",
+            "file_id": "1c02PnVhO4xO37JjWwHZNofh2zQuoDHlfwEOAI6jpqc4",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-ati-984.pdf",
+            "sha256": "19d611a30ecc6013c61011f11de5fb3435fabbd4f7449210d34a7be6b17116fc",
+            "created": "2026-01-24T16:28:08.574206Z"
+        },
+        "balance": {
+            "id": "bal-ati-984",
+            "pdf": "assets/pdf/balance/bal-ati-984.pdf",
+            "file_id": "15KK62jC0BFZ_EDLsx2ULuDY4j_4YMUSQPEko-tJ-5eI",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-ati-984.pdf",
+            "sha256": "096bf29332f7d72ce9af0a9635c6a005c2a2dff79196aec498eee02529afa397",
+            "created": "2026-01-24T16:28:13.654275Z"
+        }
     },
-    "balance": {
-      "id": "bal-ati-984",
-      "pdf": "assets/pdf/balance/bal-ati-984.pdf",
-      "file_id": "15KK62jC0BFZ_EDLsx2ULuDY4j_4YMUSQPEko-tJ-5eI",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-ati-984.pdf",
-      "sha256": "096bf29332f7d72ce9af0a9635c6a005c2a2dff79196aec498eee02529afa397",
-      "created": "2026-01-24T16:28:13.654275Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-24T16:27:20.827787Z",
-      "product": "uid-ati-984",
-      "price_1": "price_1St9gD9fljwH26CPuw3bn5QR",
-      "price_2": "price_1St9gD9fljwH26CPsFrtpQoe",
-      "customer": "cus-ati-984",
-      "coupon": "cou-ati-984"
+    "state": {
+        "objects": {
+            "created": "2026-01-24T16:27:20.827787Z",
+            "product": "uid-ati-984",
+            "price_1": "price_1St9gD9fljwH26CPuw3bn5QR",
+            "price_2": "price_1St9gD9fljwH26CPsFrtpQoe",
+            "customer": "cus-ati-984",
+            "coupon": "cou-ati-984"
+        },
+        "client_status": {
+            "logged_in": "2026-01-25T20:51:32.840Z",
+            "contract_signed": "2026-01-25T20:51:48.917Z",
+            "invoice": "2026-01-25T20:51:51.053Z",
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Automating Etsy Shop Inventory & Sales Management",
-    "active": true,
-    "description": "Savannah Law is a law firm that sells legal services online. They want to automate the inventory and sales management of their Etsy shop.",
-    "id": "uid-ati-984",
-    "login_name": "Law",
-    "login_keyword": "etsy-law",
-    "service_usd": 831100,
-    "total_payments": 2,
-    "discount_usd": 83110,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Savannah Law",
-    "business": "Savannah Law",
-    "title": "Founder & CEO",
-    "email": "savannah@savannahlaw.com",
-    "phone": "617-555-0123",
-    "id": "cus-ati-984",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02111",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 83110,
-    "applies_to": {
-      "products": [
-        "uid-ati-984"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-ati-984",
-    "max_redemptions": 1,
-    "name": "LAW-DISCOUNT"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 415550,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-ati-984"
-      ]
+        "name": "Automating Etsy Shop Inventory & Sales Management",
+        "active": true,
+        "description": "Savannah Law is a law firm that sells legal services online. They want to automate the inventory and sales management of their Etsy shop.",
+        "id": "uid-ati-984",
+        "login_name": "Law",
+        "login_keyword": "etsy-law",
+        "service_usd": 831100,
+        "total_payments": 2,
+        "discount_usd": 83110,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1St9gD9fljwH26CPuw3bn5QR"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 415550,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-ati-984"
-      ]
+    "customer": {
+        "name": "Savannah Law",
+        "business": "Savannah Law",
+        "title": "Founder & CEO",
+        "email": "savannah@savannahlaw.com",
+        "phone": "617-555-0123",
+        "id": "cus-ati-984",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02111",
+            "country": "US"
+        }
     },
-    "id": "price_1St9gD9fljwH26CPsFrtpQoe"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-ati-984"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St9gD9fljwH26CPuw3bn5QR",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-ati-984?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St9gD9fljwH26CPsFrtpQoe",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-ati-984?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Automating Etsy Shop Inventory & Sales Management",
-  "project_scope_full": "Savannah Law is a law firm that sells legal services online. They want to automate the inventory and sales management of their Etsy shop. We will use a team of agents to automate the inventory and sales management of their Etsy shop. The agents will be able to manage the inventory and sales of the Etsy shop, and will be able to manage the inventory and sales of the Etsy shop. The agents will be able to manage the inventory and sales of the Etsy shop, and will be able to manage the inventory and sales of the Etsy shop. The agents will be able to manage the inventory and sales of the Etsy shop, and will be able to manage the inventory and sales of the Etsy shop."
+    "coupon": {
+        "amount_off": 83110,
+        "applies_to": {
+            "products": [
+                "uid-ati-984"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-ati-984",
+        "max_redemptions": 1,
+        "name": "LAW-DISCOUNT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 415550,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-ati-984"
+            ]
+        },
+        "id": "price_1St9gD9fljwH26CPuw3bn5QR"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 415550,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-ati-984"
+            ]
+        },
+        "id": "price_1St9gD9fljwH26CPsFrtpQoe"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-ati-984"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St9gD9fljwH26CPuw3bn5QR",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-ati-984?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St9gD9fljwH26CPsFrtpQoe",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-ati-984?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Automating Etsy Shop Inventory & Sales Management",
+    "project_scope_full": "Savannah Law is a law firm that sells legal services online. They want to automate the inventory and sales management of their Etsy shop. We will use a team of agents to automate the inventory and sales management of their Etsy shop. The agents will be able to manage the inventory and sales of the Etsy shop, and will be able to manage the inventory and sales of the Etsy shop. The agents will be able to manage the inventory and sales of the Etsy shop, and will be able to manage the inventory and sales of the Etsy shop. The agents will be able to manage the inventory and sales of the Etsy shop, and will be able to manage the inventory and sales of the Etsy shop."
 }
