@@ -431,3 +431,80 @@ if (paymentType && Object.keys(updates).length > 0) {
 2. **Isolation**: Payment events are completely separate from buffered events
 3. **No duplicates**: `sentEventsRef` prevents the same event from being sent twice
 4. **Expected behavior**: Users will see 2 API calls for payment_1 flow (buffered events + payment_1) and 2 for payment_2 flow (balance + payment_2)
+
+---
+
+## BUG_06_005 — Events Flushing Individually Instead of Batched
+
+**Reported**: 2026-01-25  
+**Status**: FIXED
+
+**Symptoms**:
+- Each event (`logged_in`, `contract_signed`, `invoice`, `payment_1`) triggered separate API calls
+- GitHub Actions workflow for `invoice` was cancelled with: "Canceling since a higher priority waiting request for user-events-uid-swh-609 exists"
+- Page loading very slowly (10+ seconds with spinner)
+- Background showing ugly blue before image loads
+
+**Root Cause**: `visibilitychange` event listener
+
+The `handleVisibilityChange` function was calling `handleUnload()` whenever `document.visibilityState === 'hidden'`. This fires:
+- During slow page loads when browser is busy
+- When switching tabs
+- During internal React navigation
+- When the page is "backgrounded" for any reason
+
+This caused events to flush prematurely and individually instead of batching.
+
+**Fix Applied**: Removed `visibilitychange` listener entirely
+
+```typescript
+// REMOVED:
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'hidden' && !unloadHandled) {
+    handleUnload();
+  }
+};
+window.addEventListener('visibilitychange', handleVisibilityChange);
+
+// NOW: Only listen for actual page unload events
+window.addEventListener('pagehide', handleUnload);
+window.addEventListener('beforeunload', handleUnload);
+```
+
+**GitHub Actions Limitation Discovered**:
+
+`cancel-in-progress: false` only protects **running** workflows, not **pending** ones. When multiple workflows are queued quickly:
+- 1 can be running
+- 1 can be pending
+- Any additional workflows **cancel the pending one**
+
+This is why `invoice` was skipped - it was pending when `payment_1` came in and cancelled it.
+
+**Solution**: Events must batch properly so only 1-2 workflows trigger per session (buffered events + payment event), never 4+ individual workflows.
+
+---
+
+## Slowness Investigation
+
+**Reported**: 2026-01-25  
+**Status**: Under Investigation
+
+**Symptoms**:
+- Page loads very slowly (10+ seconds)
+- Blue background visible before image loads
+- Spinner showing for extended time
+- Affects both mobile (iPad) and desktop
+
+**Ruled Out**:
+- User's internet (200+ Mbps confirmed)
+- Image sizes (42-66KB, tiny)
+- sessionStorage operations (minimal)
+- JSON fetch (simple with cache busting)
+
+**Possible Causes**:
+1. Vercel cold start (first request after inactivity)
+2. unpkg CDN slowness (PDF worker loaded from there)
+3. GitHub Pages CDN issues
+4. Build artifact size (job bundle is 552KB)
+
+**Note**: The `visibilitychange` fix may help with perceived slowness since it was causing extra API calls during load.
