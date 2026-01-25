@@ -64,3 +64,4 @@
   - But this has been "fixed SO MANY TIMES that it really needs to be SO SUPER THOROUGHLY inspected like reading the entire files for every file related because so often we find that there is code duplicating an action that is lower on the list because when AI updates files it uses GREP and doesn't read entire files 
   - Could that be the case here? 
   - Looks like we need to ONLY USE USER EVENT FLUSHING and nothing else, no payment completion as replacement 
+  - Also lets get an exit button on the completion pages that closes their browser tab or window 
