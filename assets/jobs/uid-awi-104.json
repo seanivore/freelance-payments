@@ -1,171 +1,171 @@
 {
-  "project": "Simple Gardener's YouTube Channel Management & Automation",
-  "contract": {
-    "work_start": "2026-01-24",
-    "work_end": "2026-03-24",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-24T16:27:15.727601Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Simple Gardener's YouTube Channel Management & Automation",
     "contract": {
-      "id": "kon-awi-104",
-      "pdf": "assets/pdf/contract/kon-awi-104.pdf",
-      "file_id": "14S1LhWgnHAT8q3b4IWCUtcYEQsRYPQQ17FHVKDblobY",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-awi-104.pdf",
-      "sha256": "65dcdb71f3326eacf35d0a606b016bd96206dc36f4a37ad201cdcbbac0e7db36",
-      "created": "2026-01-24T16:28:34.496114Z"
+        "work_start": "2026-01-24",
+        "work_end": "2026-03-24",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-24T16:27:15.727601Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-awi-104",
-      "pdf": "assets/pdf/invoice/inv-awi-104.pdf",
-      "file_id": "1aQk4AFr5abTUi8AGtGSb3fb8FVuU2scbYVOYpjD4Ha8",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-awi-104.pdf",
-      "sha256": "de323f4d788cab12e44dc063de089f6895dd36ea20a9bdc7ed84a55186f61ba4",
-      "created": "2026-01-24T16:28:39.730365Z"
+    "docs": {
+        "contract": {
+            "id": "kon-awi-104",
+            "pdf": "assets/pdf/contract/kon-awi-104.pdf",
+            "file_id": "14S1LhWgnHAT8q3b4IWCUtcYEQsRYPQQ17FHVKDblobY",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-awi-104.pdf",
+            "sha256": "65dcdb71f3326eacf35d0a606b016bd96206dc36f4a37ad201cdcbbac0e7db36",
+            "created": "2026-01-24T16:28:34.496114Z"
+        },
+        "invoice": {
+            "id": "inv-awi-104",
+            "pdf": "assets/pdf/invoice/inv-awi-104.pdf",
+            "file_id": "1aQk4AFr5abTUi8AGtGSb3fb8FVuU2scbYVOYpjD4Ha8",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-awi-104.pdf",
+            "sha256": "de323f4d788cab12e44dc063de089f6895dd36ea20a9bdc7ed84a55186f61ba4",
+            "created": "2026-01-24T16:28:39.730365Z"
+        },
+        "balance": {
+            "id": "bal-awi-104",
+            "pdf": "assets/pdf/balance/bal-awi-104.pdf",
+            "file_id": "1Wh753R38hmmDcXVvYIvGniAuTt3QmEpl3CU-HZUqPaI",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-awi-104.pdf",
+            "sha256": "f3b5e7da33f833442588e90da807ead17c7061608c9e2c74c34cfc0605235ac0",
+            "created": "2026-01-24T16:28:44.313818Z"
+        }
     },
-    "balance": {
-      "id": "bal-awi-104",
-      "pdf": "assets/pdf/balance/bal-awi-104.pdf",
-      "file_id": "1Wh753R38hmmDcXVvYIvGniAuTt3QmEpl3CU-HZUqPaI",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-awi-104.pdf",
-      "sha256": "f3b5e7da33f833442588e90da807ead17c7061608c9e2c74c34cfc0605235ac0",
-      "created": "2026-01-24T16:28:44.313818Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-24T16:27:15.727601Z",
-      "product": "uid-awi-104",
-      "price_1": "price_1St9g89fljwH26CPvIUSEJJT",
-      "price_2": "price_1St9g89fljwH26CPPOBuPNOP",
-      "customer": "cus-awi-104",
-      "coupon": "cou-awi-104"
+    "state": {
+        "objects": {
+            "created": "2026-01-24T16:27:15.727601Z",
+            "product": "uid-awi-104",
+            "price_1": "price_1St9g89fljwH26CPvIUSEJJT",
+            "price_2": "price_1St9g89fljwH26CPPOBuPNOP",
+            "customer": "cus-awi-104",
+            "coupon": "cou-awi-104"
+        },
+        "client_status": {
+            "logged_in": "2026-01-25T19:06:05.259Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "YouTube Channel Management & Automation",
-    "active": true,
-    "description": "Simple Gardener is a YouTube channel that teaches people how to garden. They want to automate the management and automation of their YouTube channel.",
-    "id": "uid-awi-104",
-    "login_name": "Markham",
-    "login_keyword": "simple-gardener",
-    "service_usd": 432100,
-    "total_payments": 2,
-    "discount_usd": 16200,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Kayden Markham",
-    "business": "Simple Gardener",
-    "title": "Founder & CEO",
-    "email": "kayden@simplegardener.com",
-    "phone": "617-555-0123",
-    "id": "cus-awi-104",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02111",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 16200,
-    "applies_to": {
-      "products": [
-        "uid-awi-104"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-awi-104",
-    "max_redemptions": 1,
-    "name": null
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 232100,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-awi-104"
-      ]
+        "name": "YouTube Channel Management & Automation",
+        "active": true,
+        "description": "Simple Gardener is a YouTube channel that teaches people how to garden. They want to automate the management and automation of their YouTube channel.",
+        "id": "uid-awi-104",
+        "login_name": "Markham",
+        "login_keyword": "simple-gardener",
+        "service_usd": 432100,
+        "total_payments": 2,
+        "discount_usd": 16200,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1St9g89fljwH26CPvIUSEJJT"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 200000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-awi-104"
-      ]
+    "customer": {
+        "name": "Kayden Markham",
+        "business": "Simple Gardener",
+        "title": "Founder & CEO",
+        "email": "kayden@simplegardener.com",
+        "phone": "617-555-0123",
+        "id": "cus-awi-104",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02111",
+            "country": "US"
+        }
     },
-    "id": "price_1St9g89fljwH26CPPOBuPNOP"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-awi-104"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St9g89fljwH26CPvIUSEJJT",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-awi-104?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St9g89fljwH26CPPOBuPNOP",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-awi-104?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "YouTube Channel Management & Automation",
-  "project_scope_full": "Simple Gardener is a YouTube channel that teaches people how to garden. They want to automate the management and automation of their YouTube channel. We will use a team of agents to manage and automate the YouTube channel. The agents will be able to manage the YouTube channel, and will be able to automate the YouTube channel. The agents will be able to manage the YouTube channel, and will be able to automate the YouTube channel. The agents will be able to manage the YouTube channel, and will be able to automate the YouTube channel."
+    "coupon": {
+        "amount_off": 16200,
+        "applies_to": {
+            "products": [
+                "uid-awi-104"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-awi-104",
+        "max_redemptions": 1,
+        "name": null
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 232100,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-awi-104"
+            ]
+        },
+        "id": "price_1St9g89fljwH26CPvIUSEJJT"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 200000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-awi-104"
+            ]
+        },
+        "id": "price_1St9g89fljwH26CPPOBuPNOP"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-awi-104"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St9g89fljwH26CPvIUSEJJT",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-awi-104?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St9g89fljwH26CPPOBuPNOP",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-awi-104?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "YouTube Channel Management & Automation",
+    "project_scope_full": "Simple Gardener is a YouTube channel that teaches people how to garden. They want to automate the management and automation of their YouTube channel. We will use a team of agents to manage and automate the YouTube channel. The agents will be able to manage the YouTube channel, and will be able to automate the YouTube channel. The agents will be able to manage the YouTube channel, and will be able to automate the YouTube channel. The agents will be able to manage the YouTube channel, and will be able to automate the YouTube channel."
 }
