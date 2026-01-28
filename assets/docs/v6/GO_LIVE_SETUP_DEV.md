@@ -290,13 +290,13 @@ dig dev.payments.august.style
 
 **Environment Variables** (Settings → Environment Variables):
 
-| Variable | Value | Environment |
-|----------|-------|-------------|
-| `STRIPE_SECRET_KEY` | `sk_test_...` | All |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_test_...` | All |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_test_...` | All |
-| `GITHUB_TOKEN` | (your PAT) | All |
-| `GOOGLE_CREDENTIALS` | (same as prod) | All |
+| Variable                      | Value            | Environment |
+|-------------------------------|------------------|-------------|
+| `STRIPE_SECRET_KEY`           | `sk_test_...`    | All         |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_test_...`    | All         |
+| `STRIPE_WEBHOOK_SECRET`       | `whsec_test_...` | All         |
+| `GITHUB_TOKEN`                | (your PAT)       | All         |
+| `GOOGLE_CREDENTIALS`          | (same as prod)   | All         |
 
 ---
 
@@ -314,11 +314,11 @@ dig dev.payments.august.style
 
 Go to: https://github.com/seanivore/freelance-payments-dev/settings/secrets/actions
 
-| Secret | Value |
-|--------|-------|
-| `STRIPE_SECRET_KEY` | `sk_test_...` |
-| `GOOGLE_CREDENTIALS` | (same JSON as prod) |
-| `GOOGLE_DRIVE_FOLDER_ID` | (same as prod) |
+| Secret                   | Value               |
+|--------------------------|---------------------|
+| `STRIPE_SECRET_KEY`      | `sk_test_...`       |
+| `GOOGLE_CREDENTIALS`     | (same JSON as prod) |
+| `GOOGLE_DRIVE_FOLDER_ID` | (same as prod)      |
 
 ---
 
@@ -391,11 +391,11 @@ Complete this AFTER the dev environment is fully working.
 
 **Navigate to**: Vercel → freelance-payments → Settings → Environment Variables
 
-| Variable | Old (Test) | New (Live) |
-|----------|------------|------------|
-| `STRIPE_SECRET_KEY` | `sk_test_...` | `sk_live_...` |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_test_...` | `pk_live_...` |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_test_...` | `whsec_live_...` |
+| Variable                      | Old (Test)       | New (Live)       |
+|-------------------------------|------------------|------------------|
+| `STRIPE_SECRET_KEY`           | `sk_test_...`    | `sk_live_...`    |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | `pk_test_...`    | `pk_live_...`    |
+| `STRIPE_WEBHOOK_SECRET`       | `whsec_test_...` | `whsec_live_...` |
 
 **Important**: For the live repo, set these for ALL environments (Production, Preview, Development).
 
@@ -514,32 +514,32 @@ If something goes wrong:
 
 These are essential for the `job` command and system operation:
 
-| File | Purpose |
-|------|---------|
-| `assets/docs/uid-xxx-xxx.json` | Template for `job` command (line 97 of `new_job.py`) |
-| `assets/docs/GUIDE_uid-xxx-xxx.json.md` | Admin guide for creating jobs |
-| `assets/scripts/new_job.py` | Job creation script |
-| `assets/scripts/job.sh` | Shell wrapper for job creation |
-| `assets/scripts/workflow_id.py` | UID generation utility |
-| `assets/docs/PAYMENTS_PLATFORM.md` | System documentation |
+| File                                    | Purpose                                              |
+|-----------------------------------------|------------------------------------------------------|
+| `assets/docs/uid-xxx-xxx.json`          | Template for `job` command (line 97 of `new_job.py`) |
+| `assets/docs/GUIDE_uid-xxx-xxx.json.md` | Admin guide for creating jobs                        |
+| `assets/scripts/new_job.py`             | Job creation script                                  |
+| `assets/scripts/job.sh`                 | Shell wrapper for job creation                       |
+| `assets/scripts/workflow_id.py`         | UID generation utility                               |
+| `assets/docs/PAYMENTS_PLATFORM.md`      | System documentation                                 |
 
 ## Files to Keep ONLY in Dev Repo
 
-| Directory/File | Purpose |
-|----------------|---------|
-| `assets/docs/v1/` through `assets/docs/v5/` | Version history |
-| `assets/docs/v6/IMPL_*.md` | Implementation planning docs |
-| `assets/docs/RESOURCES/` | Reference materials |
-| `CHANGELOG.md` | Change tracking (create in dev) |
+| Directory/File                              | Purpose                         |
+|---------------------------------------------|---------------------------------|
+| `assets/docs/v1/` through `assets/docs/v5/` | Version history                 |
+| `assets/docs/v6/IMPL_*.md`                  | Implementation planning docs    |
+| `assets/docs/RESOURCES/`                    | Reference materials             |
+| `CHANGELOG.md`                              | Change tracking (create in dev) |
 
 ## Files That Differ Per Environment
 
-| File | Production Value | Development Value |
-|------|------------------|-------------------|
-| `CNAME` | `payments.august.style` | `dev.payments.august.style` |
-| `vercel.json` CORS | `https://payments.august.style` | `https://dev.payments.august.style` |
-| `src/lib/api.ts` | `freelance-payments-neon.vercel.app` | `freelance-payments-dev.vercel.app` |
-| `README.md` | Marketing-focused | Includes update workflow |
+| File               | Production Value                     | Development Value                   |
+|--------------------|--------------------------------------|-------------------------------------|
+| `CNAME`            | `payments.august.style`              | `dev.payments.august.style`         |
+| `vercel.json` CORS | `https://payments.august.style`      | `https://dev.payments.august.style` |
+| `src/lib/api.ts`   | `freelance-payments-neon.vercel.app` | `freelance-payments-dev.vercel.app` |
+| `README.md`        | Marketing-focused                    | Includes update workflow            |
 
 ---
 
@@ -690,13 +690,13 @@ Maintain detailed changelogs to ensure nothing is missed during updates.
 
 ## Changelog Categories
 
-| Tag | Description |
-|-----|-------------|
-| `[CODE]` | Changes to `src/`, `api/`, `.github/` |
-| `[CONFIG]` | Changes to `package.json`, `vite.config.ts`, etc. |
-| `[SCHEMA]` | Changes to JSON schema structure |
-| `[TEMPLATE]` | Changes to `assets/templates/` |
-| `[DOCS]` | Documentation updates |
+| Tag          | Description                                       |
+|--------------|---------------------------------------------------|
+| `[CODE]`     | Changes to `src/`, `api/`, `.github/`             |
+| `[CONFIG]`   | Changes to `package.json`, `vite.config.ts`, etc. |
+| `[SCHEMA]`   | Changes to JSON schema structure                  |
+| `[TEMPLATE]` | Changes to `assets/templates/`                    |
+| `[DOCS]`     | Documentation updates                             |
 
 ## Changelog Format
 
