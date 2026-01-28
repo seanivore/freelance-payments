@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-24T16:27:18.239865Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Davis Golden",
+                "signed_date": "Jan 28, 2026"
             }
         }
     },
@@ -54,8 +54,8 @@
         },
         "client_status": {
             "logged_in": "2026-01-28T21:39:47.930Z",
-            "contract_signed": null,
-            "invoice": null,
+            "contract_signed": "2026-01-28T21:39:32.335Z",
+            "invoice": "2026-01-28T21:39:35.651Z",
             "payment_1": "2026-01-28T21:39:48.441Z",
             "balance": null,
             "payment_2": null
