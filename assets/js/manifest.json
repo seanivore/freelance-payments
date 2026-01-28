@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "davis-dating-golden-dudes": {
-      "file_path": "assets/jobs/uid-aqi-031.json",
-      "job_id": "uid-aqi-031",
-      "login_keyword": "dating-golden-dudes",
-      "login_name": "Davis"
-    }
-  },
-  "generated_at": "2026-01-28T21:35:40.264375Z"
+  "jobs": {},
+  "generated_at": "2026-01-28T22:08:39.656797Z"
 }
