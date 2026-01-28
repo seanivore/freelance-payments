@@ -59,23 +59,23 @@ This document provides a complete, sequential guide for:
 
 ### URLs
 
-| Environment | Frontend | Backend |
-|-------------|----------|---------|
-| Production | https://payments.august.style | https://freelance-payments-neon.vercel.app |
-| Development | https://dev.payments.august.style | https://freelance-payments-dev.vercel.app |
+| Environment | Frontend                          | Backend                                    |
+|-------------|-----------------------------------|--------------------------------------------|
+| Production  | https://payments.august.style     | https://freelance-payments-neon.vercel.app |
+| Development | https://dev.payments.august.style | https://freelance-payments-dev.vercel.app  |
 
 ### Repositories
 
-| Environment | Repository |
-|-------------|------------|
-| Production | https://github.com/seanivore/freelance-payments |
+| Environment | Repository                                          |
+|-------------|-----------------------------------------------------|
+| Production  | https://github.com/seanivore/freelance-payments     |
 | Development | https://github.com/seanivore/freelance-payments-dev |
 
 ### Stripe
 
-| Environment | Mode | Dashboard |
-|-------------|------|-----------|
-| Production | Live | https://dashboard.stripe.com |
+| Environment | Mode | Dashboard                         |
+|-------------|------|-----------------------------------|
+| Production  | Live | https://dashboard.stripe.com      |
 | Development | Test | https://dashboard.stripe.com/test |
 
 ### Test Card (Dev Only)
@@ -216,12 +216,32 @@ rm -rf assets/pdf/balance/*.pdf
 rm assets/js/manifest.json
 ```
 
-### 3.2 Create Fresh Test JSON Files
+### 3.2 Set Up `test-job` Terminal Command
 
-Use the `job` command to create new test jobs:
+The existing `job` command is symlinked to the **live repo** and will always create jobs there. We need a separate `test-job` command for the dev repo.
+
+**Create the symlink**:
+```bash
+ln -s ~/Development/freelance-payments-dev/assets/scripts/job.sh ~/bin/test-job
+```
+
+**Verify it works**:
+```bash
+which test-job
+# Should show: /Users/seanivore/bin/test-job
+
+test-job --help
+# Should show the job creation options
+```
+
+> **How it works**: The `job.sh` script uses relative paths from its own location. So `job` (symlinked to live repo) creates jobs in the live repo, and `test-job` (symlinked to dev repo) creates jobs in the dev repo. Same script, different contexts.
+
+### 3.3 Create Fresh Test JSON Files
+
+Use the new `test-job` command to create test jobs in the dev repo:
 
 ```bash
-job -p "Test Project" -nme "Test Client" -c 500.00 -d 50.00
+test-job -p "Test Project" -nme "Test Client" -c 500.00 -d 50.00
 ```
 
 Or copy the template manually from `assets/docs/uid-xxx-xxx.json`.

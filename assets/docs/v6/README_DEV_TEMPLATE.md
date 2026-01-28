@@ -56,13 +56,15 @@ git push
 
 ### Creating Test Jobs
 
-Use the `job` command:
+Use the `test-job` command (symlinked to this dev repo):
 
 ```bash
-job -p "Test Project" -nme "Test Client" -c 500.00 -d 50.00
+test-job -p "Test Project" -nme "Test Client" -c 500.00 -d 50.00
 ```
 
 Then move the created JSON from `assets/docs/` to `assets/jobs/` and push.
+
+> **Note**: The `job` command creates jobs in the **live repo**. Use `test-job` for development. Both commands use the same script but are symlinked to different repos.
 
 ---
 
