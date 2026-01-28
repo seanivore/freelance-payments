@@ -1,171 +1,171 @@
 {
-  "project": "Golden Dudes Dating App, Find Your Golden Retriever-Type Man",
-  "contract": {
-    "work_start": "2026-01-24",
-    "work_end": "2026-03-24",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-24T16:27:18.239865Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Golden Dudes Dating App, Find Your Golden Retriever-Type Man",
     "contract": {
-      "id": "kon-aqi-031",
-      "pdf": "assets/pdf/contract/kon-aqi-031.pdf",
-      "file_id": "11xBmG_YJML1Zd2nipBAh-nzRTZ1E1Z32OGtI3RMCi3Q",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-aqi-031.pdf",
-      "sha256": "276f56206f7a68a607f21d31081845c63cd24ced174f7791a2082387748108ab",
-      "created": "2026-01-24T16:28:18.851207Z"
+        "work_start": "2026-01-24",
+        "work_end": "2026-03-24",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-24T16:27:18.239865Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-aqi-031",
-      "pdf": "assets/pdf/invoice/inv-aqi-031.pdf",
-      "file_id": "1SJZo-aWMP5W93an1-qJzaE-Dkm4GAL9rw7J95opRugE",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-aqi-031.pdf",
-      "sha256": "8de2ebea28d03773ef7bf5130e9c38864fea2f7725e71456ed98a63f5df151e3",
-      "created": "2026-01-24T16:28:23.654942Z"
+    "docs": {
+        "contract": {
+            "id": "kon-aqi-031",
+            "pdf": "assets/pdf/contract/kon-aqi-031.pdf",
+            "file_id": "11xBmG_YJML1Zd2nipBAh-nzRTZ1E1Z32OGtI3RMCi3Q",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-aqi-031.pdf",
+            "sha256": "276f56206f7a68a607f21d31081845c63cd24ced174f7791a2082387748108ab",
+            "created": "2026-01-24T16:28:18.851207Z"
+        },
+        "invoice": {
+            "id": "inv-aqi-031",
+            "pdf": "assets/pdf/invoice/inv-aqi-031.pdf",
+            "file_id": "1SJZo-aWMP5W93an1-qJzaE-Dkm4GAL9rw7J95opRugE",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-aqi-031.pdf",
+            "sha256": "8de2ebea28d03773ef7bf5130e9c38864fea2f7725e71456ed98a63f5df151e3",
+            "created": "2026-01-24T16:28:23.654942Z"
+        },
+        "balance": {
+            "id": "bal-aqi-031",
+            "pdf": "assets/pdf/balance/bal-aqi-031.pdf",
+            "file_id": "1JZZI2wtn6KWvQrUMnwGFo4pmhIzeVSIrZeZLyo1J9VI",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-aqi-031.pdf",
+            "sha256": "0d961ee0459690fd1c9c7ef13047e19d46206c4e85088a8a6ba369153068698c",
+            "created": "2026-01-24T16:28:29.485323Z"
+        }
     },
-    "balance": {
-      "id": "bal-aqi-031",
-      "pdf": "assets/pdf/balance/bal-aqi-031.pdf",
-      "file_id": "1JZZI2wtn6KWvQrUMnwGFo4pmhIzeVSIrZeZLyo1J9VI",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-aqi-031.pdf",
-      "sha256": "0d961ee0459690fd1c9c7ef13047e19d46206c4e85088a8a6ba369153068698c",
-      "created": "2026-01-24T16:28:29.485323Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-24T16:27:18.239865Z",
-      "product": "uid-aqi-031",
-      "price_1": "price_1St9gA9fljwH26CP5cPnbo8g",
-      "price_2": "price_1St9gA9fljwH26CPLQ2AaeSQ",
-      "customer": "cus-aqi-031",
-      "coupon": "cou-aqi-031"
+    "state": {
+        "objects": {
+            "created": "2026-01-24T16:27:18.239865Z",
+            "product": "uid-aqi-031",
+            "price_1": "price_1St9gA9fljwH26CP5cPnbo8g",
+            "price_2": "price_1St9gA9fljwH26CPLQ2AaeSQ",
+            "customer": "cus-aqi-031",
+            "coupon": "cou-aqi-031"
+        },
+        "client_status": {
+            "logged_in": "2026-01-28T21:39:47.930Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": "2026-01-28T21:39:48.441Z",
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "iOS Dating App Development",
-    "active": true,
-    "description": "Development and launch of iOS dating app for Emily Davis Media",
-    "id": "uid-aqi-031",
-    "login_name": "Davis",
-    "login_keyword": "dating-golden-dudes",
-    "service_usd": 1342000,
-    "total_payments": 2,
-    "discount_usd": 67100,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Emily Davis",
-    "business": "Emily Davis Media",
-    "title": "Founder & CEO",
-    "email": "emily@emilydavismedia.com",
-    "phone": "617-555-0123",
-    "id": "cus-aqi-031",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02111",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 67100,
-    "applies_to": {
-      "products": [
-        "uid-aqi-031"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-aqi-031",
-    "max_redemptions": 1,
-    "name": "DATES-DISCOUNT"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 671000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-aqi-031"
-      ]
+        "name": "iOS Dating App Development",
+        "active": true,
+        "description": "Development and launch of iOS dating app for Emily Davis Media",
+        "id": "uid-aqi-031",
+        "login_name": "Davis",
+        "login_keyword": "dating-golden-dudes",
+        "service_usd": 1342000,
+        "total_payments": 2,
+        "discount_usd": 67100,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1St9gA9fljwH26CP5cPnbo8g"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 671000,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-aqi-031"
-      ]
+    "customer": {
+        "name": "Emily Davis",
+        "business": "Emily Davis Media",
+        "title": "Founder & CEO",
+        "email": "emily@emilydavismedia.com",
+        "phone": "617-555-0123",
+        "id": "cus-aqi-031",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02111",
+            "country": "US"
+        }
     },
-    "id": "price_1St9gA9fljwH26CPLQ2AaeSQ"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-aqi-031"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St9gA9fljwH26CP5cPnbo8g",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-aqi-031?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1St9gA9fljwH26CPLQ2AaeSQ",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-aqi-031?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Development and launch of iOS dating app for Emily Davis Media",
-  "project_scope_full": "The client wants to develop and launch an iOS dating app for Golden Dudes. The app will be a dating app for Golden Retriever-type men. The app will be developed using Swift and SwiftUI. The app will be launched on the App Store. The app will be developed in collaboration with the client."
+    "coupon": {
+        "amount_off": 67100,
+        "applies_to": {
+            "products": [
+                "uid-aqi-031"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-aqi-031",
+        "max_redemptions": 1,
+        "name": "DATES-DISCOUNT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 671000,
+        "active": false,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-aqi-031"
+            ]
+        },
+        "id": "price_1St9gA9fljwH26CP5cPnbo8g"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 671000,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-aqi-031"
+            ]
+        },
+        "id": "price_1St9gA9fljwH26CPLQ2AaeSQ"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-aqi-031"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St9gA9fljwH26CP5cPnbo8g",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-aqi-031?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1St9gA9fljwH26CPLQ2AaeSQ",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-aqi-031?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Development and launch of iOS dating app for Emily Davis Media",
+    "project_scope_full": "The client wants to develop and launch an iOS dating app for Golden Dudes. The app will be a dating app for Golden Retriever-type men. The app will be developed using Swift and SwiftUI. The app will be launched on the App Store. The app will be developed in collaboration with the client."
 }
