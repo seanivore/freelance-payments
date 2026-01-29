@@ -1,11 +1,5 @@
 {
   "jobs": {
-    "spencer-ai-auto-serp": {
-      "file_path": "assets/jobs/uid-kxn-851.json",
-      "job_id": "uid-kxn-851",
-      "login_keyword": "ai-auto-serp",
-      "login_name": "Spencer"
-    },
     "smith-kitchen-and-bath": {
       "file_path": "assets/jobs/uid-xna-608.json",
       "job_id": "uid-xna-608",
@@ -13,5 +7,5 @@
       "login_name": "Smith"
     }
   },
-  "generated_at": "2026-01-29T10:36:24.900940Z"
+  "generated_at": "2026-01-29T10:51:09.998556Z"
 }
