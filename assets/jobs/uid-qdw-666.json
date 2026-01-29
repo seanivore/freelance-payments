@@ -1,171 +1,171 @@
 {
-  "project": "Portfolio Website for Quin Dexter Wallace",
-  "contract": {
-    "work_start": "2026-01-30",
-    "work_end": "2026-02-28",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-29T12:42:57.872817Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Portfolio Website for Quin Dexter Wallace",
     "contract": {
-      "id": "kon-qdw-666",
-      "pdf": "assets/pdf/contract/kon-qdw-666.pdf",
-      "file_id": "11xHIedhr1Gx4zIA5W1RsY6BvnLUOerTypAqBw5jjuMI",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-qdw-666.pdf",
-      "sha256": "33b041458a07923933be6e78c3548f9e4485f9fd0c5773c56df0932ab90ae3bc",
-      "created": "2026-01-29T12:43:04.284319Z"
+        "work_start": "2026-01-30",
+        "work_end": "2026-02-28",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-29T12:42:57.872817Z"
+            },
+            "client": {
+                "legal_name": "Quin Dexter Wallace",
+                "signed_date": "Jan 29, 2026"
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-qdw-666",
-      "pdf": "assets/pdf/invoice/inv-qdw-666.pdf",
-      "file_id": "1ny3iPkdmiTCPLJyZ5He_zgYMnInfF8TwKWVKl5cUzAk",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-qdw-666.pdf",
-      "sha256": "e20cc5e8e43dbf69149eadbcb1da1331e0121c56334a6556f6f137e2d7ab5d1c",
-      "created": "2026-01-29T12:43:08.966202Z"
+    "docs": {
+        "contract": {
+            "id": "kon-qdw-666",
+            "pdf": "assets/pdf/contract/kon-qdw-666.pdf",
+            "file_id": "11xHIedhr1Gx4zIA5W1RsY6BvnLUOerTypAqBw5jjuMI",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-qdw-666.pdf",
+            "sha256": "33b041458a07923933be6e78c3548f9e4485f9fd0c5773c56df0932ab90ae3bc",
+            "created": "2026-01-29T12:43:04.284319Z"
+        },
+        "invoice": {
+            "id": "inv-qdw-666",
+            "pdf": "assets/pdf/invoice/inv-qdw-666.pdf",
+            "file_id": "1ny3iPkdmiTCPLJyZ5He_zgYMnInfF8TwKWVKl5cUzAk",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-qdw-666.pdf",
+            "sha256": "e20cc5e8e43dbf69149eadbcb1da1331e0121c56334a6556f6f137e2d7ab5d1c",
+            "created": "2026-01-29T12:43:08.966202Z"
+        },
+        "balance": {
+            "id": "bal-qdw-666",
+            "pdf": "assets/pdf/balance/bal-qdw-666.pdf",
+            "file_id": "13z07qC3YD0pRcHJ5VJMlw1PqZSo4OKSM4DVyKDrqx2Y",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-qdw-666.pdf",
+            "sha256": "7a8027ae8f28c281188f9680a7bfb52338513f76970ecb3524bd80973a1e45e1",
+            "created": "2026-01-29T12:43:15.779393Z"
+        }
     },
-    "balance": {
-      "id": "bal-qdw-666",
-      "pdf": "assets/pdf/balance/bal-qdw-666.pdf",
-      "file_id": "13z07qC3YD0pRcHJ5VJMlw1PqZSo4OKSM4DVyKDrqx2Y",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-qdw-666.pdf",
-      "sha256": "7a8027ae8f28c281188f9680a7bfb52338513f76970ecb3524bd80973a1e45e1",
-      "created": "2026-01-29T12:43:15.779393Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-29T12:42:57.872817Z",
-      "product": "uid-qdw-666",
-      "price_1": "price_1SuuYo9fljwH26CPQ2ONj7zS",
-      "price_2": "price_1SuuYo9fljwH26CPVXsLvvq0",
-      "customer": "cus-qdw-666",
-      "coupon": "cou-qdw-666"
+    "state": {
+        "objects": {
+            "created": "2026-01-29T12:42:57.872817Z",
+            "product": "uid-qdw-666",
+            "price_1": "price_1SuuYo9fljwH26CPQ2ONj7zS",
+            "price_2": "price_1SuuYo9fljwH26CPVXsLvvq0",
+            "customer": "cus-qdw-666",
+            "coupon": "cou-qdw-666"
+        },
+        "client_status": {
+            "logged_in": "2026-01-29T12:46:25.981Z",
+            "contract_signed": "2026-01-29T12:46:40.991Z",
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Portfolio Website",
-    "active": true,
-    "description": "Quin Dexter Wallace needs a portfolio website for his web development business",
-    "id": "uid-qdw-666",
-    "login_name": "Wallace",
-    "login_keyword": "qdw-portfolio",
-    "service_usd": 50050,
-    "total_payments": 2,
-    "discount_usd": 2500,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Quin Dexter Wallace",
-    "business": "Quin Dexter Wallace",
-    "title": "Owner",
-    "email": "quin@qdw.com",
-    "phone": "555-555-5555",
-    "id": "cus-qdw-666",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02101",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 2500,
-    "applies_to": {
-      "products": [
-        "uid-qdw-666"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-qdw-666",
-    "max_redemptions": 1,
-    "name": "QDW-PORTFOLIO-DISCOUNT"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 25025,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-qdw-666"
-      ]
+        "name": "Portfolio Website",
+        "active": true,
+        "description": "Quin Dexter Wallace needs a portfolio website for his web development business",
+        "id": "uid-qdw-666",
+        "login_name": "Wallace",
+        "login_keyword": "qdw-portfolio",
+        "service_usd": 50050,
+        "total_payments": 2,
+        "discount_usd": 2500,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1SuuYo9fljwH26CPQ2ONj7zS"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 25025,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-qdw-666"
-      ]
+    "customer": {
+        "name": "Quin Dexter Wallace",
+        "business": "Quin Dexter Wallace",
+        "title": "Owner",
+        "email": "quin@qdw.com",
+        "phone": "555-555-5555",
+        "id": "cus-qdw-666",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02101",
+            "country": "US"
+        }
     },
-    "id": "price_1SuuYo9fljwH26CPVXsLvvq0"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-qdw-666"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1SuuYo9fljwH26CPQ2ONj7zS",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-qdw-666?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1SuuYo9fljwH26CPVXsLvvq0",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-qdw-666?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Quin Dexter Wallace needs a portfolio website for his web development business",
-  "project_scope_full": "Quin Dexter Wallace needs a portfolio website for his web development business. The website will be a modern, responsive portfolio website for his web development business. The website will be built using React and will be custom tailored to his needs. The website will be built using React and will be custom tailored to his needs."
+    "coupon": {
+        "amount_off": 2500,
+        "applies_to": {
+            "products": [
+                "uid-qdw-666"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-qdw-666",
+        "max_redemptions": 1,
+        "name": "QDW-PORTFOLIO-DISCOUNT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 25025,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-qdw-666"
+            ]
+        },
+        "id": "price_1SuuYo9fljwH26CPQ2ONj7zS"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 25025,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-qdw-666"
+            ]
+        },
+        "id": "price_1SuuYo9fljwH26CPVXsLvvq0"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-qdw-666"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1SuuYo9fljwH26CPQ2ONj7zS",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-qdw-666?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1SuuYo9fljwH26CPVXsLvvq0",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-qdw-666?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Quin Dexter Wallace needs a portfolio website for his web development business",
+    "project_scope_full": "Quin Dexter Wallace needs a portfolio website for his web development business. The website will be a modern, responsive portfolio website for his web development business. The website will be built using React and will be custom tailored to his needs. The website will be built using React and will be custom tailored to his needs."
 }
