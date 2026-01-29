@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-29T13:19:34.073928Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-egl-627",
+      "pdf": "assets/pdf/contract/kon-egl-627.pdf",
+      "file_id": "1buw-xjy5RomAypiDGJ75wkD5TN7IyIiYfbOCMj7ltz4",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-egl-627.pdf",
+      "sha256": "07e28a08406f64aad54507a8dcabeb1d623273331afd7b0bd337692bd90829de",
+      "created": "2026-01-29T13:19:43.219245Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-egl-627",
+      "pdf": "assets/pdf/invoice/inv-egl-627.pdf",
+      "file_id": "1kBLuGb4nmrr2JsEJBf53Vlt9rNA40kq4n58kaDrguMU",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-egl-627.pdf",
+      "sha256": "9a95e72fd7ded30f4af7fd980b1df6ad04154780edc1755c6cd9bc3d4bd070c4",
+      "created": "2026-01-29T13:19:48.978959Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-egl-627",
+      "pdf": "assets/pdf/balance/bal-egl-627.pdf",
+      "file_id": "1ic7xqGid_RMicXrxpab40b2yxzYbRjl0p1vMaUd6wzk",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-egl-627.pdf",
+      "sha256": "ba51f25e6d4b8f4e148eeb18626a7e120474c2a1b05b50ef8c57f1a0c28c031f",
+      "created": "2026-01-29T13:19:55.981728Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-29T13:19:34.073928Z",
+      "product": "uid-egl-627",
+      "price_1": "price_1Suv8E9fljwH26CPlfMhQfu9",
+      "price_2": "price_1Suv8E9fljwH26CPST6dyw9p",
+      "customer": "cus-egl-627",
+      "coupon": "cou-egl-627"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-egl-627"
       ]
     },
-    "id": ""
+    "id": "price_1Suv8E9fljwH26CPlfMhQfu9"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-egl-627"
       ]
     },
-    "id": ""
+    "id": "price_1Suv8E9fljwH26CPST6dyw9p"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Suv8E9fljwH26CPlfMhQfu9",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Suv8E9fljwH26CPST6dyw9p",
         "quantity": 1
       }
     ],

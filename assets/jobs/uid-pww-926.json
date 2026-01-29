@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-29T13:19:36.562646Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-pww-926",
+      "pdf": "assets/pdf/contract/kon-pww-926.pdf",
+      "file_id": "1TFSX-P_ihnqDJRBSw4lfFrOcyllKMo-SX2oh-h7xQhA",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-pww-926.pdf",
+      "sha256": "5cafadb829d001df5318d3d433f014fefd825023bab1c0b3b9fc29b8bb2590bf",
+      "created": "2026-01-29T13:20:00.931448Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-pww-926",
+      "pdf": "assets/pdf/invoice/inv-pww-926.pdf",
+      "file_id": "1jIOWp6WqpdwctNmViJqyllSMRDp1tHw7EIsCaeLp6gw",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-pww-926.pdf",
+      "sha256": "518ba12a26820e3f2ea31c1690bced7707d41adf39dd2fed34d78033e3c03ca1",
+      "created": "2026-01-29T13:20:05.875968Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-pww-926",
+      "pdf": "assets/pdf/balance/bal-pww-926.pdf",
+      "file_id": "1uMFDAeOcGzdmeCsta99B2VkyTTCLsNAWIzA0Id4Auh4",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-pww-926.pdf",
+      "sha256": "18ad20b0d1fa3e26a561f8bc25f5bd5fd6118e022dc9e2fb05eab4b8fcdeca58",
+      "created": "2026-01-29T13:20:12.016285Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-29T13:19:36.562646Z",
+      "product": "uid-pww-926",
+      "price_1": "price_1Suv8G9fljwH26CPESkqDxkH",
+      "price_2": "price_1Suv8H9fljwH26CPrxERrdmd",
+      "customer": "cus-pww-926",
+      "coupon": "cou-pww-926"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-pww-926"
       ]
     },
-    "id": ""
+    "id": "price_1Suv8G9fljwH26CPESkqDxkH"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-pww-926"
       ]
     },
-    "id": ""
+    "id": "price_1Suv8H9fljwH26CPrxERrdmd"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Suv8G9fljwH26CPESkqDxkH",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Suv8H9fljwH26CPrxERrdmd",
         "quantity": 1
       }
     ],
