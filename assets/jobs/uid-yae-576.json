@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-29T12:15:01.929125Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-yae-576",
+      "pdf": "assets/pdf/contract/kon-yae-576.pdf",
+      "file_id": "10SFLRhds1-AdA647z5vAowwyrNJGNQpmPd5DE-VWQ6E",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-yae-576.pdf",
+      "sha256": "9438728d2d9893a13ef1c0bff09b01560b72e4ee57489f96a2d46d687840eeb0",
+      "created": "2026-01-29T12:15:09.182005Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-yae-576",
+      "pdf": "assets/pdf/invoice/inv-yae-576.pdf",
+      "file_id": "1ecky559aQAtjT7elXZn4mDDdkYMn5IlkhNSFfNH-ieE",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-yae-576.pdf",
+      "sha256": "2e56866ef91a492b53a7e4d090a758837e4ce99c5b2365eef96ab6bd988b7180",
+      "created": "2026-01-29T12:15:15.064727Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-yae-576",
+      "pdf": "assets/pdf/balance/bal-yae-576.pdf",
+      "file_id": "1mOaC9Zjggke6mScMNF_REp-KzSdFtgNAvOT6N5AA2q0",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-yae-576.pdf",
+      "sha256": "0e90d5755eb20b25e8ff56b90ad298636ae6fa6177955be6efe4e579e5dca07e",
+      "created": "2026-01-29T12:15:19.538710Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-29T12:15:01.929125Z",
+      "product": "uid-yae-576",
+      "price_1": "price_1Suu7m9fljwH26CPlPzytYZH",
+      "price_2": "price_1Suu7m9fljwH26CP9J6JktoE",
+      "customer": "cus-yae-576",
+      "coupon": "cou-yae-576"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-yae-576"
       ]
     },
-    "id": ""
+    "id": "price_1Suu7m9fljwH26CPlPzytYZH"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-yae-576"
       ]
     },
-    "id": ""
+    "id": "price_1Suu7m9fljwH26CP9J6JktoE"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Suu7m9fljwH26CPlPzytYZH",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Suu7m9fljwH26CP9J6JktoE",
         "quantity": 1
       }
     ],

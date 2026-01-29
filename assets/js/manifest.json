@@ -1,4 +1,17 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-29T12:07:33.113174Z"
+  "jobs": {
+    "smith-liruns-furniture": {
+      "file_path": "assets/jobs/uid-lir-969.json",
+      "job_id": "uid-lir-969",
+      "login_keyword": "liruns-furniture",
+      "login_name": "Smith"
+    },
+    "jameson-yaes-baked-goods": {
+      "file_path": "assets/jobs/uid-yae-576.json",
+      "job_id": "uid-yae-576",
+      "login_keyword": "yaes-baked-goods",
+      "login_name": "Jameson"
+    }
+  },
+  "generated_at": "2026-01-29T12:15:34.516886Z"
 }
