@@ -58,12 +58,12 @@
             "invoice": "2026-01-29T10:47:45.806Z",
             "payment_1": "2026-01-29T10:48:11.410Z",
             "balance": null,
-            "payment_2": null
+            "payment_2": "2026-01-29T10:52:34.919Z"
         }
     },
     "product": {
         "name": "Custom Web Store Design",
-        "active": true,
+        "active": false,
         "description": "Daniel's Kitchen & Bath Remodeling Services needs a custom web store design for their kitchen and bath remodeling services",
         "id": "uid-xna-608",
         "login_name": "Smith",
@@ -121,7 +121,7 @@
         "count": 2,
         "currency": "usd",
         "unit_amount": 421100,
-        "active": true,
+        "active": false,
         "billing_scheme": "per_unit",
         "pay_by": "before project launch",
         "pay_days": 14,
