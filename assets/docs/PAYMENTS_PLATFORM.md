@@ -506,41 +506,54 @@ const sentEventsRef = useRef<Set<string>>(new Set());
 2. **Page Exit** (non-payment scenarios) - **Buffered Flush**
    - If user exits without completing payment, buffered events flush via multiple backup triggers
 
-### Flush Triggers (Multiple Layers of Backup)
+### Flush Triggers (Multiple Layers)
 
 | Trigger | When It Fires | Behavior | Purpose |
 |---------|---------------|----------|---------|
-| **Payment completion** | User completes Stripe payment | Immediate flush of ALL buffered events + payment event | Most important - ensures payment data is recorded |
-| **`pagehide` (persisted=false)** | User actually closes tab or navigates away | Flush via `sendBeacon` | Mobile-friendly exit detection |
-| **`pagehide` (persisted=true)** | User switches tabs (e.g., opens PDF) | **SKIP flush** - user might return | Prevents premature flushing on tab switches |
+| **Proactive flush on checkout load** | User clicks "Continue to Checkout" | Flush all buffered events via `fetch` | **Primary** - ensures pre-payment events are sent before Stripe redirect |
+| **Payment completion** | User completes Stripe payment | Send payment event (+ any remaining buffered) | Records payment confirmation |
+| **`pagehide`** | Page unload | Flush via `sendBeacon` | Backup for non-payment exits |
 | **`beforeunload`** | Tab/window closing | Flush via `sendBeacon` | Desktop backup |
 | **`popstate`** | Back button navigation | Flush via `sendBeacon` | Catches back-button exits |
 | **Inactivity timer (5 min)** | No user activity for 5 minutes | Flush via `fetch` | Safety net for abandoned sessions |
 
 **NOT used**: `visibilitychange` (removed - too aggressive, fired on slow page loads and tab switches)
 
+### Expected Event Flow (Two API Calls)
+
+| Step | User Action | What Happens |
+|------|-------------|--------------|
+| 1 | Login, sign contract, acknowledge invoice | Events buffered: `[logged_in, contract_signed, invoice]` |
+| 2 | Click "Continue to Checkout" | **Proactive flush** sends `[logged_in, contract_signed, invoice]` |
+| 3 | Fill in payment details, click Pay | Stripe processes payment |
+| 4 | Stripe redirects back | Fresh page load, payment confirmed |
+| 5 | Payment confirmed | **Payment flush** sends `[payment_1]` |
+
+**Result**: Two API calls (correct behavior)
+- **API Call 1**: `logged_in`, `contract_signed`, `invoice` (proactive flush on checkout load)
+- **API Call 2**: `payment_1` (after payment confirmation)
+
 ### Flush Scenarios
 
 | User Scenario | What Happens | Events Sent? |
 |---------------|--------------|--------------|
-| Opens PDF tab, comes back, completes payment | Payment completion triggers unified flush | ✅ All events in one batch |
-| Opens PDF tab, comes back, abandons session | Inactivity timer (5 min) flushes | ✅ Buffered events sent |
-| Opens PDF tab, closes original tab later | `pagehide(persisted=false)` flushes | ✅ Buffered events sent |
+| Completes full payment flow | Proactive flush + payment flush | ✅ Two batches as expected |
+| Opens PDF tab, comes back, completes payment | Proactive flush + payment flush | ✅ Two batches |
+| Abandons before clicking checkout | Inactivity timer (5 min) or pagehide | ✅ Buffered events sent |
 | Closes desktop browser tab | `beforeunload` flushes | ✅ Buffered events sent |
 | Clicks back button | `popstate` flushes | ✅ Buffered events sent |
 | Force-quits Safari app (swipe up to close) | No event fires - app terminated instantly | ❌ Events lost (unavoidable) |
 
 **Note on force-quit**: When a user force-quits an iOS app (swipes up from app switcher), the app is immediately terminated with no graceful shutdown. No browser events fire. This is unavoidable, but the routing logic is resilient - if `payment_1` exists, user will be routed to balance/payment_2 regardless of whether other events were recorded.
 
-### iOS Safari PDF Download Behavior
+### Why Proactive Flush (Not pagehide)
 
-On iOS Safari, the `download` attribute on `<a>` elements doesn't trigger a file download - instead, it opens the PDF in a new tab. This causes `pagehide` to fire on the original page.
+On iOS Safari, `pagehide` behavior is unreliable for pre-payment flushing:
+- Opening PDFs in new tabs triggers `pagehide`
+- Stripe redirects may set `persisted=true` (iOS tries to cache the page)
+- Fresh page loads after Stripe redirect lose any unflushed buffer
 
-**Solution**: We check `event.persisted` to distinguish tab switches from actual exits:
-- `persisted=true`: Page going to BFCache (user switching tabs) → Skip flush
-- `persisted=false`: Page being unloaded (user leaving) → Flush events
-
-This allows users to download/view PDFs without triggering premature event flushes.
+The proactive flush approach guarantees events are sent **before** any redirect complexity.
 
 **API Call** (`src/App.tsx` → `api/track-event.js`):
 ```typescript

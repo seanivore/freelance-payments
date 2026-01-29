@@ -203,40 +203,18 @@ export default function App() {
     
     activityEvents.forEach(e => window.addEventListener(e, handleActivity));
     
-    // BUG_06_00_002 FIX: Use event.persisted to distinguish tab switch from actual exit
-    // On iOS Safari, opening a PDF in a new tab fires pagehide on the original page.
-    // - persisted=true: Page going to BFCache (user switching tabs, might return)
-    // - persisted=false: Page being unloaded (user actually leaving)
-    // We only flush when persisted=false (actual exit), not on tab switches.
-    // The inactivity timer (5 min) serves as backup for abandoned sessions.
-
-    const handlePageHide = (event: PageTransitionEvent) => {
-      // Only flush if the page is actually being unloaded (not just cached)
-      // If persisted is true, the page is going to BFCache and user might return
-      if (event.persisted) {
-        console.log('📤 pagehide: persisted=true (BFCache), skipping flush');
-        return;
-      }
-
-      console.log('📤 pagehide: persisted=false (unloading), flushing events');
+    // Simple unload handler - flushes events when page is unloading
+    // The unloadHandled flag prevents double-flushes if both pagehide and beforeunload fire
+    let unloadHandled = false;
+    const handleUnload = () => {
+      if (unloadHandled) return;
       if (eventBufferRef.current.length === 0) return;
 
+      unloadHandled = true;
       const jobId = window.location.pathname.substring(1);
       if (jobId && jobId !== '/') {
         const eventsToSend = [...eventBufferRef.current];
         // Clear buffer immediately to prevent double-sends
-        eventBufferRef.current = [];
-        sendEvents(eventsToSend, true).catch(() => {});
-      }
-    };
-
-    // beforeunload as backup (more reliable on desktop)
-    const handleBeforeUnload = () => {
-      if (eventBufferRef.current.length === 0) return;
-
-      const jobId = window.location.pathname.substring(1);
-      if (jobId && jobId !== '/') {
-        const eventsToSend = [...eventBufferRef.current];
         eventBufferRef.current = [];
         sendEvents(eventsToSend, true).catch(() => {});
       }
@@ -256,14 +234,19 @@ export default function App() {
       sendEvents(eventsToSend, true).catch(() => {});
     };
 
-    // Event flush triggers (multiple layers of backup):
-    // 1. pagehide (persisted=false) - actual page unload on mobile
-    // 2. beforeunload - desktop tab close backup
+    // NOTE: We intentionally do NOT flush on visibilitychange anymore.
+    // visibilitychange fires too aggressively (slow page loads, tab switches, etc.)
+    // and was causing events to flush individually instead of batched.
+    // We rely on pagehide/beforeunload for actual page exits.
+
+    // Event flush triggers:
+    // 1. Proactive flush when checkout form loads (pre-payment events)
+    // 2. pagehide/beforeunload - page unload backup
     // 3. popstate - back button navigation
     // 4. Inactivity timer (5 min) - abandoned session safety net
-    // 5. Payment completion - immediate flush (handled elsewhere)
-    window.addEventListener('pagehide', handlePageHide);
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    // 5. Payment completion - payment event only (handled elsewhere)
+    window.addEventListener('pagehide', handleUnload);
+    window.addEventListener('beforeunload', handleUnload);
     window.addEventListener('popstate', handlePopState);
 
     resetTimer();
@@ -271,8 +254,8 @@ export default function App() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       activityEvents.forEach(e => window.removeEventListener(e, handleActivity));
-      window.removeEventListener('pagehide', handlePageHide);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleUnload);
+      window.removeEventListener('beforeunload', handleUnload);
       window.removeEventListener('popstate', handlePopState);
     };
   }, [resetTimer, sendEvents]);
@@ -371,16 +354,17 @@ export default function App() {
           console.log('📊 paymentType:', paymentType, 'updates:', updates);
           
           if (paymentType && Object.keys(updates).length > 0) {
-            console.log('📊 Payment complete! Flushing ALL events immediately');
-            
-            // IMPORTANT: On payment completion, we send EVERYTHING immediately:
-            // 1. All buffered events (logged_in, contract_signed, invoice OR balance)
-            // 2. The payment event itself
-            // This ensures all events are recorded before user can navigate away.
-            
+            console.log('📊 Payment complete! Sending payment event');
+
+            // Payment event flow:
+            // - Pre-payment events (logged_in, contract_signed, invoice/balance) were proactively
+            //   flushed when checkout form loaded (see createCheckoutSession)
+            // - Here we send ONLY the payment event, confirming payment was successful
+            // - If proactive flush failed, any remaining buffered events are sent here as fallback
+
             // Mark payment as sent to prevent duplicates
             sentEventsRef.current.add(paymentType);
-            
+
             // Create the payment event
             const paymentEvent = {
               type: paymentType,
@@ -390,13 +374,13 @@ export default function App() {
                 session_id: sessionId
               }
             };
-            
-            // Combine buffered events + payment event into one batch
+
+            // Include any remaining buffered events (fallback if proactive flush failed)
             const bufferedEvents = [...eventBufferRef.current];
             eventBufferRef.current = []; // Clear buffer
             const allEvents = [...bufferedEvents, paymentEvent];
-            
-            console.log('📊 Sending all events in one batch:', allEvents.map(e => e.type));
+
+            console.log('📊 Sending payment event (+ any remaining buffered):', allEvents.map(e => e.type));
             
             // Send all events together - one API call, one workflow
             sendEvents(allEvents, false).catch(err => {
@@ -631,6 +615,19 @@ export default function App() {
 
       const session = await response.json();
       if (session.client_secret) {
+        // PROACTIVE FLUSH: Send all buffered events (logged_in, contract_signed, invoice/balance)
+        // BEFORE the checkout form renders. This ensures pre-payment events are sent
+        // before the Stripe redirect, which on iOS Safari may not trigger pagehide properly.
+        // The payment event will be sent separately after payment confirmation.
+        if (eventBufferRef.current.length > 0) {
+          console.log('📤 Proactive flush before checkout:', eventBufferRef.current.map(e => e.type));
+          const eventsToSend = [...eventBufferRef.current];
+          eventBufferRef.current = [];
+          sendEvents(eventsToSend, false).catch(err => {
+            console.error('Failed to proactively flush events:', err);
+          });
+        }
+
         setClientSecret(session.client_secret);
       } else {
         throw new Error('No client_secret in response');

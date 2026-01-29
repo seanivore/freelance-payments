@@ -9,8 +9,8 @@ type CheckoutFormProps = {
   coupon?: { amount_off?: number };
 };
 
-export const CheckoutForm: React.FC<CheckoutFormProps> = ({ 
-  price, 
+export const CheckoutForm: React.FC<CheckoutFormProps> = ({
+  price,
   coupon
 }) => {
   const [message, setMessage] = useState<string | null>(null);
