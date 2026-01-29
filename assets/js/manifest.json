@@ -1,5 +1,11 @@
 {
   "jobs": {
+    "smith-djs-bakery": {
+      "file_path": "assets/jobs/uid-dnj-781.json",
+      "job_id": "uid-dnj-781",
+      "login_keyword": "djs-bakery",
+      "login_name": "Smith"
+    },
     "smith-liruns-furniture": {
       "file_path": "assets/jobs/uid-lir-969.json",
       "job_id": "uid-lir-969",
@@ -13,5 +19,5 @@
       "login_name": "Jameson"
     }
   },
-  "generated_at": "2026-01-29T12:15:34.516886Z"
+  "generated_at": "2026-01-29T12:33:22.566991Z"
 }

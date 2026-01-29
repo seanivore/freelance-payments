@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-29T12:33:04.453853Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-dnj-781",
+      "pdf": "assets/pdf/contract/kon-dnj-781.pdf",
+      "file_id": "1rDNPhs2wnq3efgKZlGszUAFIWRbg972qvsjhDowXKlw",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-dnj-781.pdf",
+      "sha256": "2b7057f32429f45d8566d55d8d0ba902094586ce9faa33793983cf8622f25017",
+      "created": "2026-01-29T12:33:10.915875Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-dnj-781",
+      "pdf": "assets/pdf/invoice/inv-dnj-781.pdf",
+      "file_id": "1dZpfPz4mYTR3tSbakr9SePlSpZ78eRbh4_HM1mj14Uw",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-dnj-781.pdf",
+      "sha256": "af2724ea63e242011766629f08c5f59c9e4e5b7b115886522dfda7ce89f9d292",
+      "created": "2026-01-29T12:33:17.172682Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-dnj-781",
+      "pdf": "assets/pdf/balance/bal-dnj-781.pdf",
+      "file_id": "1_0tMnqo5dH0PhrQmP5ZYt0rlOZIPQNABBF3HTRIL1Cg",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-dnj-781.pdf",
+      "sha256": "0b5f6a269f901959ee56ddadef7dff00a0a8e15496ff82eb70a65bf922a728bd",
+      "created": "2026-01-29T12:33:22.565699Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-29T12:33:04.453853Z",
+      "product": "uid-dnj-781",
+      "price_1": "price_1SuuPE9fljwH26CPm8hN8XR2",
+      "price_2": "price_1SuuPF9fljwH26CPmOLeUZqY",
+      "customer": "cus-dnj-781",
+      "coupon": "cou-dnj-781"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-dnj-781"
       ]
     },
-    "id": ""
+    "id": "price_1SuuPE9fljwH26CPm8hN8XR2"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-dnj-781"
       ]
     },
-    "id": ""
+    "id": "price_1SuuPF9fljwH26CPmOLeUZqY"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1SuuPE9fljwH26CPm8hN8XR2",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1SuuPF9fljwH26CPmOLeUZqY",
         "quantity": 1
       }
     ],
