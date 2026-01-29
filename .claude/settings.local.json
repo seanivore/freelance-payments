@@ -8,7 +8,10 @@
       "Bash(git commit:*)",
       "Bash(xargs:*)",
       "Bash(npx tsc:*)",
-      "Bash(python3 -m py_compile:*)"
+      "Bash(python3 -m py_compile:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash drop:*)",
+      "Bash(git restore:*)"
     ]
   }
 }
