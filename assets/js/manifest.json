@@ -1,11 +1,4 @@
 {
-  "jobs": {
-    "voss-tech-pro-shop": {
-      "file_path": "assets/jobs/uid-ave-761.json",
-      "job_id": "uid-ave-761",
-      "login_keyword": "tech-pro-shop",
-      "login_name": "Voss"
-    }
-  },
-  "generated_at": "2026-01-29T10:58:41.363205Z"
+  "jobs": {},
+  "generated_at": "2026-01-29T11:36:28.638769Z"
 }
