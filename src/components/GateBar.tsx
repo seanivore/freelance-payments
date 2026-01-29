@@ -72,7 +72,10 @@ export const GateBar: React.FC<GateBarProps> = ({
         <div className="flex items-center justify-between gap-4">
           {/* Left side: Message */}
           <div className="flex items-center gap-3 min-w-0">
-            <span className="font-agency text-2xl text-portfolio-text-primary tracking-wide truncate">
+            <span
+              className="font-agency text-portfolio-text-primary tracking-wide truncate normal-case"
+              style={{ fontSize: '1.3rem' }}
+            >
               {message}
             </span>
           </div>
