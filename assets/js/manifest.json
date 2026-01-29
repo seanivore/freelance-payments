@@ -1,22 +1,10 @@
 {
   "jobs": {
-    "smith-djs-bakery": {
-      "file_path": "assets/jobs/uid-dnj-781.json",
-      "job_id": "uid-dnj-781",
-      "login_keyword": "djs-bakery",
-      "login_name": "Smith"
-    },
     "linton-egl-website": {
       "file_path": "assets/jobs/uid-egl-627.json",
       "job_id": "uid-egl-627",
       "login_keyword": "egl-website",
       "login_name": "Linton"
-    },
-    "smith-liruns-furniture": {
-      "file_path": "assets/jobs/uid-lir-969.json",
-      "job_id": "uid-lir-969",
-      "login_keyword": "liruns-furniture",
-      "login_name": "Smith"
     },
     "williams-pww-social-media": {
       "file_path": "assets/jobs/uid-pww-926.json",
@@ -24,23 +12,11 @@
       "login_keyword": "pww-social-media",
       "login_name": "Williams"
     },
-    "wallace-qdw-portfolio": {
-      "file_path": "assets/jobs/uid-qdw-666.json",
-      "job_id": "uid-qdw-666",
-      "login_keyword": "qdw-portfolio",
-      "login_name": "Wallace"
-    },
     "smith-rex-youtube": {
       "file_path": "assets/jobs/uid-qyx-737.json",
       "job_id": "uid-qyx-737",
       "login_keyword": "rex-youtube",
       "login_name": "Smith"
-    },
-    "jameson-yaes-baked-goods": {
-      "file_path": "assets/jobs/uid-yae-576.json",
-      "job_id": "uid-yae-576",
-      "login_keyword": "yaes-baked-goods",
-      "login_name": "Jameson"
     },
     "mcfarland-ymf-ai-podcast": {
       "file_path": "assets/jobs/uid-ymf-021.json",
@@ -49,5 +25,5 @@
       "login_name": "McFarland"
     }
   },
-  "generated_at": "2026-01-29T13:20:44.978408Z"
+  "generated_at": "2026-01-29T14:34:13.257748Z"
 }
