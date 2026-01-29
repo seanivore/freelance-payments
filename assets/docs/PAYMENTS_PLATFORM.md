@@ -499,16 +499,48 @@ const sentEventsRef = useRef<Set<string>>(new Set());
 
 1. **Payment Completion** (`payment_1`, `payment_2`) - **Immediate Unified Flush**
    - On successful Stripe return, ALL buffered events are combined with the payment event
-   - Sent as a single batch via `fetch()` 
+   - Sent as a single batch via `fetch()`
    - Ensures all events (logged_in, contract_signed, invoice, payment_1) go in ONE API call
    - Single GitHub Actions workflow trigger per payment flow
 
 2. **Page Exit** (non-payment scenarios) - **Buffered Flush**
-   - If user exits without completing payment, buffered events flush on:
-     - **`pagehide`** - Page unload (uses `navigator.sendBeacon` with `text/plain`)
-     - **`beforeunload`** - Tab/window close
-     - **`popstate`** - Back button navigation (flushes before potential re-render)
-   - **NOT used**: `visibilitychange` (removed - too aggressive, caused premature flushes)
+   - If user exits without completing payment, buffered events flush via multiple backup triggers
+
+### Flush Triggers (Multiple Layers of Backup)
+
+| Trigger | When It Fires | Behavior | Purpose |
+|---------|---------------|----------|---------|
+| **Payment completion** | User completes Stripe payment | Immediate flush of ALL buffered events + payment event | Most important - ensures payment data is recorded |
+| **`pagehide` (persisted=false)** | User actually closes tab or navigates away | Flush via `sendBeacon` | Mobile-friendly exit detection |
+| **`pagehide` (persisted=true)** | User switches tabs (e.g., opens PDF) | **SKIP flush** - user might return | Prevents premature flushing on tab switches |
+| **`beforeunload`** | Tab/window closing | Flush via `sendBeacon` | Desktop backup |
+| **`popstate`** | Back button navigation | Flush via `sendBeacon` | Catches back-button exits |
+| **Inactivity timer (5 min)** | No user activity for 5 minutes | Flush via `fetch` | Safety net for abandoned sessions |
+
+**NOT used**: `visibilitychange` (removed - too aggressive, fired on slow page loads and tab switches)
+
+### Flush Scenarios
+
+| User Scenario | What Happens | Events Sent? |
+|---------------|--------------|--------------|
+| Opens PDF tab, comes back, completes payment | Payment completion triggers unified flush | ✅ All events in one batch |
+| Opens PDF tab, comes back, abandons session | Inactivity timer (5 min) flushes | ✅ Buffered events sent |
+| Opens PDF tab, closes original tab later | `pagehide(persisted=false)` flushes | ✅ Buffered events sent |
+| Closes desktop browser tab | `beforeunload` flushes | ✅ Buffered events sent |
+| Clicks back button | `popstate` flushes | ✅ Buffered events sent |
+| Force-quits Safari app (swipe up to close) | No event fires - app terminated instantly | ❌ Events lost (unavoidable) |
+
+**Note on force-quit**: When a user force-quits an iOS app (swipes up from app switcher), the app is immediately terminated with no graceful shutdown. No browser events fire. This is unavoidable, but the routing logic is resilient - if `payment_1` exists, user will be routed to balance/payment_2 regardless of whether other events were recorded.
+
+### iOS Safari PDF Download Behavior
+
+On iOS Safari, the `download` attribute on `<a>` elements doesn't trigger a file download - instead, it opens the PDF in a new tab. This causes `pagehide` to fire on the original page.
+
+**Solution**: We check `event.persisted` to distinguish tab switches from actual exits:
+- `persisted=true`: Page going to BFCache (user switching tabs) → Skip flush
+- `persisted=false`: Page being unloaded (user leaving) → Flush events
+
+This allows users to download/view PDFs without triggering premature event flushes.
 
 **API Call** (`src/App.tsx` → `api/track-event.js`):
 ```typescript

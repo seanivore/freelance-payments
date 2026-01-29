@@ -20,7 +20,7 @@ export default function App() {
   // since events are flushed on page exit anyway.
   
   const eventBufferRef = useRef<Array<{type: string; timestamp: string; data: any}>>([]);
-  const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes
+  const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes (safety net for abandoned sessions)
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const processedSessionRef = useRef<string | null>(null);
   const loggedInQueuedRef = useRef(false);
@@ -203,24 +203,40 @@ export default function App() {
     
     activityEvents.forEach(e => window.addEventListener(e, handleActivity));
     
-    // BUG_06_00_002 FIX: Use flush cooldown instead of boolean flag
+    // BUG_06_00_002 FIX: Use event.persisted to distinguish tab switch from actual exit
     // On iOS Safari, opening a PDF in a new tab fires pagehide on the original page.
-    // Using a timestamp-based cooldown prevents rapid consecutive flushes when
-    // tab-switching for PDF viewing, while still allowing eventual flushing.
-    // Events aren't lost - they stay in buffer until next flush opportunity.
-    let lastFlushTimestamp = 0;
-    const FLUSH_COOLDOWN_MS = 3000; // 3 second cooldown between flushes
+    // - persisted=true: Page going to BFCache (user switching tabs, might return)
+    // - persisted=false: Page being unloaded (user actually leaving)
+    // We only flush when persisted=false (actual exit), not on tab switches.
+    // The inactivity timer (5 min) serves as backup for abandoned sessions.
 
-    const handleUnload = () => {
-      // Skip if we just flushed recently (prevents rapid tab-switch flushes)
-      if (Date.now() - lastFlushTimestamp < FLUSH_COOLDOWN_MS) return;
+    const handlePageHide = (event: PageTransitionEvent) => {
+      // Only flush if the page is actually being unloaded (not just cached)
+      // If persisted is true, the page is going to BFCache and user might return
+      if (event.persisted) {
+        console.log('📤 pagehide: persisted=true (BFCache), skipping flush');
+        return;
+      }
+
+      console.log('📤 pagehide: persisted=false (unloading), flushing events');
       if (eventBufferRef.current.length === 0) return;
 
-      lastFlushTimestamp = Date.now();
       const jobId = window.location.pathname.substring(1);
       if (jobId && jobId !== '/') {
         const eventsToSend = [...eventBufferRef.current];
         // Clear buffer immediately to prevent double-sends
+        eventBufferRef.current = [];
+        sendEvents(eventsToSend, true).catch(() => {});
+      }
+    };
+
+    // beforeunload as backup (more reliable on desktop)
+    const handleBeforeUnload = () => {
+      if (eventBufferRef.current.length === 0) return;
+
+      const jobId = window.location.pathname.substring(1);
+      if (jobId && jobId !== '/') {
+        const eventsToSend = [...eventBufferRef.current];
         eventBufferRef.current = [];
         sendEvents(eventsToSend, true).catch(() => {});
       }
@@ -240,9 +256,14 @@ export default function App() {
       sendEvents(eventsToSend, true).catch(() => {});
     };
 
-    // Only listen for actual page unload events, not visibility changes
-    window.addEventListener('pagehide', handleUnload);
-    window.addEventListener('beforeunload', handleUnload);
+    // Event flush triggers (multiple layers of backup):
+    // 1. pagehide (persisted=false) - actual page unload on mobile
+    // 2. beforeunload - desktop tab close backup
+    // 3. popstate - back button navigation
+    // 4. Inactivity timer (5 min) - abandoned session safety net
+    // 5. Payment completion - immediate flush (handled elsewhere)
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('popstate', handlePopState);
 
     resetTimer();
@@ -250,8 +271,8 @@ export default function App() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       activityEvents.forEach(e => window.removeEventListener(e, handleActivity));
-      window.removeEventListener('pagehide', handleUnload);
-      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
     };
   }, [resetTimer, sendEvents]);

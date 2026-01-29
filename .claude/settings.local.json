@@ -4,7 +4,8 @@
       "Bash(npm run build:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nFix BUG_06_00_001: Events lost when downloading PDFs on iOS Safari\n\nRoot cause: iOS Safari fires pagehide when opening PDFs in new tabs,\nsetting unloadHandled=true. When page restores from BFCache, the flag\nstays true, blocking all subsequent event flushes.\n\nFix: Add pageshow listener to reset unloadHandled when page is restored\nfrom BFCache \\(event.persisted === true\\).\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git smart-push:*)"
+      "Bash(git smart-push:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
