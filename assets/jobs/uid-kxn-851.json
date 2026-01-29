@@ -1,0 +1,171 @@
+{
+  "project": "Josiah's Shopify Store Automations for Inventory Management",
+  "contract": {
+    "work_start": "2026-01-30",
+    "work_end": "2026-02-28",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": null
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
+    "contract": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "invoice": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "balance": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    }
+  },
+  "state": {
+    "objects": {
+      "created": null,
+      "product": null,
+      "price_1": null,
+      "price_2": null,
+      "customer": null,
+      "coupon": null
+    },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "Shopify Product Management Automations",
+    "active": true,
+    "description": "Josiah's Shopify Store needs a custom automation for their backend inventory management as well as an AI researched and generated SERP product description rewrites on-demand",
+    "id": "uid-kxn-851",
+    "login_name": "Spencer",
+    "login_keyword": "ai-auto-serp",
+    "service_usd": 1122500,
+    "total_payments": 2,
+    "discount_usd": 110000,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Josiah Spencer",
+    "business": "Josiah's Shopify Store",
+    "title": "Owner",
+    "email": "josiah@josephspencer.com",
+    "phone": "555-555-5555",
+    "id": "cus-kxn-851",
+    "address": {
+      "city": "Boston",
+      "line1": "123 Main St",
+      "state": "MA",
+      "postal_code": "02101",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 110000,
+    "applies_to": {
+      "products": [
+        "uid-kxn-851"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-kxn-851",
+    "max_redemptions": 1,
+    "name": "JOSIAH-SPENCER-DISCOUNT"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 561250,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
+    "product": {
+      "products": [
+        "uid-kxn-851"
+      ]
+    },
+    "id": ""
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 561250,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-kxn-851"
+      ]
+    },
+    "id": ""
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-kxn-851"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-kxn-851?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-kxn-851?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Josiah's Shopify Store needs a custom automation for their backend inventory management as well as an AI researched and generated SERP product description rewrites on-demand",
+  "project_scope_full": "Josiah's Shopify Store needs a custom automation for their backend inventory management as well as an AI researched and generated SERP product description rewrites on-demand. The automation will allow Josiah to easily manage their inventory, create new products, and update product descriptions on-demand. The automation will also allow Josiah to easily generate SERP product descriptions for their products using AI. The automation will be built using Shopify's API and will be custom tailored to Josiah's Shopify Store's needs."
+}

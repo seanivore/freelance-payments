@@ -59,10 +59,11 @@ This document provides a complete, sequential guide for:
 
 ### URLs
 
-| Environment | Frontend                          | Backend                                    |
-|-------------|-----------------------------------|--------------------------------------------|
-| Production  | https://payments.august.style     | https://freelance-payments-neon.vercel.app |
-| Development | https://dev.payments.august.style | https://freelance-payments-dev.vercel.app  |
+| Environment | Frontend                          | Backend                                     |
+|-------------|-----------------------------------|---------------------------------------------|
+| Production  | https://payments.august.style     | https://freelance-payments-neon.vercel.app  |
+| Development | https://dev.payments.august.style | https://freelance-payments-dev.vercel.app   |
+
 
 ### Repositories
 
@@ -89,35 +90,17 @@ ZIP: Any 5 digits (e.g., 12345)
 
 ---
 
-# Part 1: Pre-Setup Cleanup
+# Part 1: Pre-Setup Cleanup -- DONE ✅
 
-Before setting up environments, clean up obsolete files from the current repo.
-
-## Files Already Deleted (Obsolete)
-
-These legacy files from the pre-React vanilla JS version have been removed:
-
-- ~~`assets/js/checkout-controller.js`~~
-- ~~`assets/js/completion-controller.js`~~
-- ~~`assets/js/event-tracker.js`~~
-- ~~`assets/js/flow-manager.js`~~
-- ~~`assets/js/glow-effect.js`~~
-- ~~`assets/js/invoice-controller.js`~~
-- ~~`assets/js/payment-lookup.js`~~
-
-VSCode backup files also removed:
-
-- ~~`.vscode/backup-settings.json`~~
-- ~~`.vscode/backup-textMateRules.jsonc`~~
-- ~~`.vscode/textMateRules.md`~~
++ Removed obsolete files from the current repo. in `assets/js/...` and VSCode backup files.
 
 ---
 
-# Part 2: Set Up Development Repository (Do First)
+# Part 2: Set Up Development Repository (Do First) -- DONE ✅
 
 Complete this section before transitioning to live production.
 
-## Step 1: Create Development Repository
+## Step 1: Create Development Repository -- DONE ✅
 
 **On GitHub**:
 1. Go to https://github.com/new
@@ -129,33 +112,24 @@ Complete this section before transitioning to live production.
 
 **Locally**:
 ```bash
-# Navigate to parent directory
-cd ~/Development
-
-# Clone production repo as starting point
-git clone https://github.com/seanivore/freelance-payments.git freelance-payments-dev
-cd freelance-payments-dev
-
-# Change remote to new dev repo
-git remote set-url origin https://github.com/seanivore/freelance-payments-dev.git
-
 # Verify remote
 git remote -v
-# Should show: origin  https://github.com/seanivore/freelance-payments-dev.git
+# origin	https://github.com/seanivore/freelance-payments-dev.git (fetch)
+# origin	https://github.com/seanivore/freelance-payments-dev.git (push)
 ```
 
 ---
 
-## Step 2: Update Dev Repo Configuration
+## Step 2: Update Dev Repo Configuration -- DONE ✅
 
-### 2.1 Update CNAME for Dev Domain
+### 2.1 Update CNAME for Dev Domain -- DONE ✅
 
 **File**: `CNAME`
 ```
 dev.payments.august.style
 ```
 
-### 2.2 Update Vercel CORS Configuration
+### 2.2 Update Vercel CORS Configuration -- DONE ✅
 
 **File**: `vercel.json`
 
@@ -176,11 +150,10 @@ Change the CORS origin to dev domain:
 }
 ```
 
-### 2.3 Update API Base URL
+### 2.3 Update API Base URL -- DONE ✅
 
 **File**: `src/lib/api.ts`
 
-Update to point to dev Vercel:
 ```typescript
 const getApiBaseUrl = (): string => {
   if (import.meta.env.PROD) {
@@ -191,7 +164,7 @@ const getApiBaseUrl = (): string => {
 };
 ```
 
-### 2.4 Update Return URLs in Job Template
+### 2.4 Update Return URLs in Job Template -- DONE ✅
 
 **File**: `assets/docs/uid-xxx-xxx.json`
 
@@ -199,9 +172,9 @@ Search and replace `payments.august.style` → `dev.payments.august.style` in th
 
 ---
 
-## Step 3: Clean Up Dev Repo
+## Step 3: Clean Up Dev Repo -- DONE ✅
 
-### 3.1 Remove Production Client Data
+### 3.1 Remove Production Client Data -- DONE ✅
 
 ```bash
 # Remove all job JSON files (we'll create fresh test jobs)
@@ -216,7 +189,7 @@ rm -rf assets/pdf/balance/*.pdf
 rm assets/js/manifest.json
 ```
 
-### 3.2 Set Up `test-job` Terminal Command
+### 3.2 Set Up `test-job` Terminal Command -- DONE ✅
 
 The existing `job` command is symlinked to the **live repo** and will always create jobs there. We need a separate `test-job` command for the dev repo.
 
@@ -236,7 +209,7 @@ test-job --help
 
 > **How it works**: The `job.sh` script uses relative paths from its own location. So `job` (symlinked to live repo) creates jobs in the live repo, and `test-job` (symlinked to dev repo) creates jobs in the dev repo. Same script, different contexts.
 
-### 3.3 Create Fresh Test JSON Files
+### 3.3 Create Fresh Test JSON Files -- DONE ✅
 
 Use the new `test-job` command to create test jobs in the dev repo:
 
@@ -248,7 +221,7 @@ Or copy the template manually from `assets/docs/uid-xxx-xxx.json`.
 
 ---
 
-## Step 4: DNS for Dev Domain
+## Step 4: DNS for Dev Domain -- DONE ✅
 
 **Status**: Already configured in Cloudflare
 
@@ -268,7 +241,7 @@ dig dev.payments.august.style
 
 ---
 
-## Step 5: Set Up GitHub Pages for Dev Repo
+## Step 5: Set Up GitHub Pages for Dev Repo -- DONE ✅
 
 1. Go to: https://github.com/seanivore/freelance-payments-dev/settings/pages
 2. **Source: GitHub Actions** (NOT "Deploy from a branch")
@@ -279,7 +252,7 @@ dig dev.payments.august.style
 
 ---
 
-## Step 6: Create Vercel Project for Dev
+## Step 6: Create Vercel Project for Dev -- DONE ✅
 
 1. Go to: https://vercel.com/new
 2. Import `freelance-payments-dev` repository
@@ -300,7 +273,7 @@ dig dev.payments.august.style
 
 ---
 
-## Step 7: Create Stripe Webhook for Dev
+## Step 7: Create Stripe Webhook for Dev -- DONE ✅
 
 1. Go to: https://dashboard.stripe.com/test/webhooks
 2. Add endpoint
@@ -310,7 +283,7 @@ dig dev.payments.august.style
 
 ---
 
-## Step 8: Add GitHub Secrets for Dev Repo
+## Step 8: Add GitHub Secrets for Dev Repo -- DONE ✅
 
 Go to: https://github.com/seanivore/freelance-payments-dev/settings/secrets/actions
 
@@ -322,7 +295,7 @@ Go to: https://github.com/seanivore/freelance-payments-dev/settings/secrets/acti
 
 ---
 
-## Step 9: Push and Verify
+## Step 9: Push and Verify -- DONE ✅
 
 ```bash
 cd ~/Development/freelance-payments-dev
@@ -336,11 +309,11 @@ git push -u origin freelance-payments
 ```
 
 **Verification Checklist**:
-- [ ] GitHub Pages deploys to `dev.payments.august.style`
-- [ ] Vercel deploys to `freelance-payments-dev.vercel.app`
-- [ ] Create a test job, push, verify `admin-push.yml` runs
-- [ ] Login to test job, verify full flow works
-- [ ] Complete payment with test card `4242 4242 4242 4242`
+- [x] GitHub Pages deploys to `dev.payments.august.style`
+- [x] Vercel deploys to `freelance-payments-dev.vercel.app`
+- [x] Create a test job, push, verify `admin-push.yml` runs
+- [x] Login to test job, verify full flow works 
+- [x] Complete payment with test card `4242 4242 4242 4242`
 
 ---
 
@@ -351,10 +324,10 @@ Complete this AFTER the dev environment is fully working.
 ## Pre-Launch Testing
 
 ### Friend Testing
-- [ ] Create 2-3 test jobs for friends
-- [ ] Provide login credentials and test card
-- [ ] Have them complete full flow (contract → invoice → payment1 → balance → payment2)
-- [ ] Collect feedback on UX issues
+- [x] Create 2-3 test jobs for friends
+- [x] Provide login credentials and test card
+- [x] Have them complete full flow (contract → invoice → payment1 → balance → payment2)
+- [x] Collect feedback on UX issues
 
 ### Self-Testing
 - [ ] Complete full flow on mobile (record screen)
