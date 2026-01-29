@@ -172,7 +172,7 @@ function LoginApp() {
               Horvath Payments
             </h1>
             <p className="text-portfolio-text-secondary text-sm">
-              Login to access your contract and invoices.
+              Sign contract, make payments, and download documents.
             </p>
           </div>
 

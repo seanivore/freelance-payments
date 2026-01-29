@@ -20,15 +20,6 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({
     await onCreateCheckoutSession();
   };
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = data.docs.invoice.url;
-    link.download = data.docs.invoice.url.split('/').pop() || 'invoice.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // Show loading state while creating checkout session
   if (isCreatingSession) {
     return (
@@ -41,6 +32,10 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({
     );
   }
 
+  // Calculate payment1_due = max(0, price1.unit_amount - coupon.amount_off)
+  // This matches the {{payment1_due}} placeholder calculation in admin_push.py
+  const payment1Due = Math.max(0, data.price1.unit_amount - (data.coupon?.amount_off || 0));
+
   return (
     <PdfLoader
       initialPdfUrl={data.docs.invoice.url}
@@ -48,7 +43,7 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({
       emitEvent={emitEvent}
       isPaymentSection={false}
       onConfirm={handleConfirm}
-      onDownload={handleDownload}
+      paymentAmount={payment1Due}
     />
   );
 };

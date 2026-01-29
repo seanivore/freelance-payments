@@ -29,6 +29,28 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
     document.body.removeChild(link);
   };
 
+  const handleDownloadAll = () => {
+    // Extract job_id from URL (e.g., "uid-xxx-xxx")
+    const jobId = window.location.pathname.substring(1);
+
+    // Download combined PDF (all documents in one file)
+    if (data.docs.combined?.url) {
+      handleDownload(data.docs.combined.url, `${jobId}.pdf`);
+    } else {
+      // Fallback to individual downloads if combined not available
+      const cleanId = jobId.replace(/^uid-/, '');
+      handleDownload(data.docs.contract.url, `kon-${cleanId}.pdf`);
+      setTimeout(() => {
+        handleDownload(data.docs.invoice.url, `inv-${cleanId}.pdf`);
+      }, 500);
+      if (data.docs.balance?.url) {
+        setTimeout(() => {
+          handleDownload(data.docs.balance.url, `bal-${cleanId}.pdf`);
+        }, 1000);
+      }
+    }
+  };
+
   if (completionType === 'completion1') {
     // After Payment 1 - show once, then user goes to balance
     return (
@@ -94,23 +116,16 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
                 <h3 className="font-agency text-lg text-portfolio-text-primary tracking-wide text-center mb-4">
                   Save Your Documents
                 </h3>
-                <p className="text-portfolio-text-secondary/70 text-xs text-center mb-4">
-                  Download copies of your signed contract and invoice for your records.
+                <button
+                  onClick={handleDownloadAll}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-accent-mauve hover:bg-portfolio-accent-mauve/80 text-portfolio-bg-dark font-semibold rounded-lg transition-colors"
+                >
+                  <Download className="w-5 h-5" />
+                  Download PDFs
+                </button>
+                <p className="text-portfolio-text-secondary/70 text-xs text-center mt-2">
+                  Download the agreement and invoices.
                 </p>
-                <button
-                  onClick={() => handleDownload(data.docs.contract.url, 'contract.pdf')}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-bg-primary hover:bg-portfolio-bg-secondary text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-border"
-                >
-                  <Download className="w-5 h-5 text-portfolio-accent-mauve" />
-                  Download Contract
-                </button>
-                <button
-                  onClick={() => handleDownload(data.docs.invoice.url, 'invoice.pdf')}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-bg-primary hover:bg-portfolio-bg-secondary text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-border"
-                >
-                  <Download className="w-5 h-5 text-portfolio-accent-mauve" />
-                  Download Invoice
-                </button>
               </div>
 
               {/* Log Out */}
@@ -194,28 +209,15 @@ export const CompletionView: React.FC<CompletionViewProps> = ({
                 Your Documents
               </h3>
               <button
-                onClick={() => handleDownload(data.docs.contract.url, 'contract.pdf')}
-                className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-bg-primary hover:bg-portfolio-bg-secondary text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-border"
+                onClick={handleDownloadAll}
+                className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-accent-mauve hover:bg-portfolio-accent-mauve/80 text-portfolio-bg-dark font-semibold rounded-lg transition-colors"
               >
-                <Download className="w-5 h-5 text-portfolio-accent-mauve" />
-                Download Contract
+                <Download className="w-5 h-5" />
+                Download PDFs
               </button>
-              <button
-                onClick={() => handleDownload(data.docs.invoice.url, 'invoice.pdf')}
-                className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-bg-primary hover:bg-portfolio-bg-secondary text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-border"
-              >
-                <Download className="w-5 h-5 text-portfolio-accent-mauve" />
-                Download Invoice
-              </button>
-              {data.docs.balance?.url && (
-                <button
-                  onClick={() => handleDownload(data.docs.balance.url, 'balance.pdf')}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-portfolio-bg-primary hover:bg-portfolio-bg-secondary text-portfolio-text-primary rounded-lg transition-colors border border-portfolio-border"
-                >
-                  <Download className="w-5 h-5 text-portfolio-accent-mauve" />
-                  Download Balance Statement
-                </button>
-              )}
+              <p className="text-portfolio-text-secondary/70 text-xs text-center mt-2">
+                Download the agreement and invoices.
+              </p>
             </div>
 
             {/* Contact Info & Safe to Close */}

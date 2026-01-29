@@ -16,7 +16,8 @@ type PdfLoaderProps = {
   emitEvent: (name: string, payload?: unknown) => void;
   isPaymentSection: boolean;
   onConfirm?: () => void;
-  onDownload?: () => void;
+  customerName?: string;
+  paymentAmount?: number;
 };
 
 export const PdfLoader: React.FC<PdfLoaderProps> = ({
@@ -25,7 +26,8 @@ export const PdfLoader: React.FC<PdfLoaderProps> = ({
   emitEvent,
   isPaymentSection,
   onConfirm,
-  onDownload
+  customerName,
+  paymentAmount
 }) => {
   const [pdfBytes, setPdfBytes] = useState<ArrayBuffer | null>(null);
   const [pdfError, setPdfError] = useState(false);
@@ -61,13 +63,13 @@ export const PdfLoader: React.FC<PdfLoaderProps> = ({
   }
 
   return (
-    <PdfViewer 
+    <PdfViewer
       initialPdfBytes={pdfBytes}
-      pdfUrl={initialPdfUrl}
       initialSection={initialSection}
       emitEvent={emitEvent}
       onConfirm={onConfirm}
-      onDownload={onDownload}
+      customerName={customerName}
+      paymentAmount={paymentAmount}
     />
   );
 };

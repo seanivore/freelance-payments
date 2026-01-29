@@ -17,20 +17,20 @@ type Section =
 
 type PdfViewerProps = {
   initialPdfBytes?: ArrayBuffer | null;
-  pdfUrl?: string;
   emitEvent?: (name: string, payload?: unknown) => void;
   initialSection?: Section;
   onConfirm?: () => void;
-  onDownload?: () => void;
+  customerName?: string;
+  paymentAmount?: number;
 };
 
 export const PdfViewer: React.FC<PdfViewerProps> = ({
   initialPdfBytes = null,
-  pdfUrl,
   emitEvent,
   initialSection = 'contract',
   onConfirm,
-  onDownload: onDownloadProp
+  customerName,
+  paymentAmount
 }) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -226,20 +226,6 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
     setIsSignModalOpen(true);
   }
 
-  // Handle PDF download
-  function handleDownload() {
-    if (onDownloadProp) {
-      onDownloadProp();
-    } else if (pdfUrl) {
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = pdfUrl.split('/').pop() || 'document.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  }
-
   // Show error if PDF failed to load
   if (pdfError) {
     return (
@@ -335,7 +321,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
           section={section}
           onSign={handleOpenSignModal}
           onConfirm={onConfirm}
-          onDownload={handleDownload}
+          customerName={customerName}
+          paymentAmount={paymentAmount}
         />
       </div>
 

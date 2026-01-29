@@ -40,7 +40,7 @@ A freelancer sends their client a login link. The client:
 2. **Reviews an invoice** — Generated from Google Docs templates via API
 3. **Makes payment** — Stripe Checkout with custom UI
 4. **Returns later for final payment** — State persists across sessions
-5. **Downloads all documents** — Contract, invoice, balance PDF
+5. **Downloads all documents** — Single "Download PDFs" button downloads contract, invoice, and balance
 
 Each step updates the JSON file via GitHub Actions. The next login routes to the correct step automatically.
 

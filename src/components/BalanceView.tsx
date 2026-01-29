@@ -20,15 +20,6 @@ export const BalanceView: React.FC<BalanceViewProps> = ({
     await onCreateCheckoutSession();
   };
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = data.docs.balance.url;
-    link.download = data.docs.balance.url.split('/').pop() || 'balance.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // Show loading state while creating checkout session
   if (isCreatingSession) {
     return (
@@ -48,7 +39,7 @@ export const BalanceView: React.FC<BalanceViewProps> = ({
       emitEvent={emitEvent}
       isPaymentSection={false}
       onConfirm={handleConfirm}
-      onDownload={handleDownload}
+      paymentAmount={data.price2.unit_amount}
     />
   );
 };

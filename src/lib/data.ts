@@ -37,6 +37,7 @@ export type JobData = {
     contract: { url: string; id?: string; pdf?: string };
     invoice: { url: string; id?: string; pdf?: string };
     balance: { url: string; id?: string; pdf?: string };
+    combined?: { url: string; id?: string; pdf?: string };
   };
   product: {
     id: string;

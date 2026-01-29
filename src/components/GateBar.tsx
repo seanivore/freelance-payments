@@ -1,5 +1,4 @@
 import React from 'react';
-import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type Section =
@@ -15,30 +14,50 @@ type GateBarProps = {
   section: Section;
   onSign?: () => void;
   onConfirm?: () => void;
-  onDownload?: () => void;
+  customerName?: string;
+  paymentAmount?: number;
 };
 
-// Context-aware messaging for each section
-const SECTION_MESSAGES: Record<string, string> = {
-  contract: 'Contract for your review.',
-  invoice: 'Invoice for your records.',
-  balance: 'Balance statement for final payment.',
+// Format currency from cents
+const formatCurrency = (cents: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(cents / 100);
 };
 
 export const GateBar: React.FC<GateBarProps> = ({
   section,
   onSign,
   onConfirm,
-  onDownload,
+  customerName,
+  paymentAmount,
 }) => {
   // Only show for PDF viewing sections
   const isPdfSection = section === 'contract' || section === 'invoice' || section === 'balance';
-  
+
   if (!isPdfSection) {
     return null;
   }
 
-  const message = SECTION_MESSAGES[section] || '';
+  // Generate context-aware messages
+  const getMessage = () => {
+    if (section === 'contract') {
+      const firstName = customerName?.split(' ')[0] || '';
+      return firstName ? `Hi, ${firstName}.` : 'Contract for your review.';
+    }
+    if (section === 'invoice' && paymentAmount) {
+      return `You owe ${formatCurrency(paymentAmount)}`;
+    }
+    if (section === 'balance' && paymentAmount) {
+      return `${formatCurrency(paymentAmount)} remaining.`;
+    }
+    return '';
+  };
+
+  const message = getMessage();
 
   return (
     <div 
@@ -60,18 +79,6 @@ export const GateBar: React.FC<GateBarProps> = ({
 
           {/* Right side: Actions */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Download icon - always visible, subtle */}
-            {onDownload && (
-              <button
-                onClick={onDownload}
-                className="p-2 text-portfolio-text-secondary hover:text-portfolio-text-primary transition-colors rounded-lg hover:bg-white/5"
-                aria-label="Download document"
-                title="Download PDF"
-              >
-                <Download className="w-5 h-5" />
-              </button>
-            )}
-
             {/* Contract section: Sign button */}
             {section === 'contract' && onSign && (
               <Button
@@ -82,14 +89,13 @@ export const GateBar: React.FC<GateBarProps> = ({
               </Button>
             )}
 
-            {/* Invoice/Balance sections: Confirm button */}
+            {/* Invoice/Balance sections: Pay Now button */}
             {(section === 'invoice' || section === 'balance') && onConfirm && (
               <Button
                 onClick={onConfirm}
                 className="bg-portfolio-accent-mauve hover:bg-portfolio-accent-mauve/80 text-portfolio-bg-dark font-semibold px-4 py-2 rounded-lg transition-all duration-300 whitespace-nowrap"
               >
-                <span className="hidden sm:inline">Confirm & Continue to Payment</span>
-                <span className="sm:hidden">Continue to Payment</span>
+                Pay Now
               </Button>
             )}
           </div>
