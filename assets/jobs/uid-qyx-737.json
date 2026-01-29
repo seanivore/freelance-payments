@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-29T13:19:32.798418Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Tesr",
+                "signed_date": "Jan 29, 2026"
             }
         }
     },
@@ -54,7 +54,7 @@
         },
         "client_status": {
             "logged_in": "2026-01-29T14:42:31.941Z",
-            "contract_signed": null,
+            "contract_signed": "2026-01-29T15:06:27.106Z",
             "invoice": null,
             "payment_1": null,
             "balance": null,
