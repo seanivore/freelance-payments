@@ -207,7 +207,7 @@ export default function App() {
     const handleUnload = () => {
       if (unloadHandled) return;
       if (eventBufferRef.current.length === 0) return;
-      
+
       unloadHandled = true;
       const jobId = window.location.pathname.substring(1);
       if (jobId && jobId !== '/') {
@@ -217,12 +217,23 @@ export default function App() {
         sendEvents(eventsToSend, true).catch(() => {});
       }
     };
-    
+
+    // BUG_06_00_001 FIX: Reset unloadHandled when page is restored from BFCache
+    // On iOS Safari, opening a PDF in a new tab fires pagehide on the original page.
+    // When user returns, the page is restored from BFCache with unloadHandled still true,
+    // which prevents subsequent pagehide events from flushing the buffer.
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        // Page was restored from BFCache - reset the unload flag
+        unloadHandled = false;
+      }
+    };
+
     // NOTE: We intentionally do NOT flush on visibilitychange anymore.
     // visibilitychange fires too aggressively (slow page loads, tab switches, etc.)
     // and was causing events to flush individually instead of batched.
     // We rely on pagehide/beforeunload for actual page exits.
-    
+
     // Handle back button / popstate - flush events so they're not lost
     const handlePopState = () => {
       if (eventBufferRef.current.length === 0) return;
@@ -231,11 +242,12 @@ export default function App() {
       // Use sendBeacon for reliability during navigation
       sendEvents(eventsToSend, true).catch(() => {});
     };
-    
+
     // Only listen for actual page unload events, not visibility changes
     window.addEventListener('pagehide', handleUnload);
     window.addEventListener('beforeunload', handleUnload);
     window.addEventListener('popstate', handlePopState);
+    window.addEventListener('pageshow', handlePageShow);
 
     resetTimer();
 
@@ -245,6 +257,7 @@ export default function App() {
       window.removeEventListener('pagehide', handleUnload);
       window.removeEventListener('beforeunload', handleUnload);
       window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('pageshow', handlePageShow);
     };
   }, [resetTimer, sendEvents]);
 

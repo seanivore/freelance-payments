@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-29T09:54:46.177290Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Josiah Spencer",
+                "signed_date": "2026-01-29"
             }
         }
     },
@@ -54,8 +54,8 @@
         },
         "client_status": {
             "logged_in": "2026-01-29T09:58:29.320Z",
-            "contract_signed": null,
-            "invoice": null,
+            "contract_signed": "2026-01-29T09:58:29.320Z",
+            "invoice": "2026-01-29T09:58:29.320Z",
             "payment_1": "2026-01-29T10:00:09.562Z",
             "balance": null,
             "payment_2": null
