@@ -203,29 +203,26 @@ export default function App() {
     
     activityEvents.forEach(e => window.addEventListener(e, handleActivity));
     
-    let unloadHandled = false;
+    // BUG_06_00_002 FIX: Use flush cooldown instead of boolean flag
+    // On iOS Safari, opening a PDF in a new tab fires pagehide on the original page.
+    // Using a timestamp-based cooldown prevents rapid consecutive flushes when
+    // tab-switching for PDF viewing, while still allowing eventual flushing.
+    // Events aren't lost - they stay in buffer until next flush opportunity.
+    let lastFlushTimestamp = 0;
+    const FLUSH_COOLDOWN_MS = 3000; // 3 second cooldown between flushes
+
     const handleUnload = () => {
-      if (unloadHandled) return;
+      // Skip if we just flushed recently (prevents rapid tab-switch flushes)
+      if (Date.now() - lastFlushTimestamp < FLUSH_COOLDOWN_MS) return;
       if (eventBufferRef.current.length === 0) return;
 
-      unloadHandled = true;
+      lastFlushTimestamp = Date.now();
       const jobId = window.location.pathname.substring(1);
       if (jobId && jobId !== '/') {
         const eventsToSend = [...eventBufferRef.current];
         // Clear buffer immediately to prevent double-sends
         eventBufferRef.current = [];
         sendEvents(eventsToSend, true).catch(() => {});
-      }
-    };
-
-    // BUG_06_00_001 FIX: Reset unloadHandled when page is restored from BFCache
-    // On iOS Safari, opening a PDF in a new tab fires pagehide on the original page.
-    // When user returns, the page is restored from BFCache with unloadHandled still true,
-    // which prevents subsequent pagehide events from flushing the buffer.
-    const handlePageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) {
-        // Page was restored from BFCache - reset the unload flag
-        unloadHandled = false;
       }
     };
 
@@ -247,7 +244,6 @@ export default function App() {
     window.addEventListener('pagehide', handleUnload);
     window.addEventListener('beforeunload', handleUnload);
     window.addEventListener('popstate', handlePopState);
-    window.addEventListener('pageshow', handlePageShow);
 
     resetTimer();
 
@@ -257,7 +253,6 @@ export default function App() {
       window.removeEventListener('pagehide', handleUnload);
       window.removeEventListener('beforeunload', handleUnload);
       window.removeEventListener('popstate', handlePopState);
-      window.removeEventListener('pageshow', handlePageShow);
     };
   }, [resetTimer, sendEvents]);
 
@@ -296,9 +291,25 @@ export default function App() {
       .then(res => res.json())
       .then(sessionData => {
         console.log('📊 Session status response:', sessionData);
+
+        // BUG_06_00_003 FIX: CRITICAL - Validate session belongs to THIS job
+        // A stale session_id from a different job could cause incorrect payment recording
+        const currentJobId = window.location.pathname.substring(1);
+        const sessionJobId = sessionData.metadata?.job_id;
+
+        if (sessionJobId && sessionJobId !== currentJobId) {
+          console.warn('⚠️ Session job_id mismatch! Session is for', sessionJobId, 'but current job is', currentJobId);
+          console.warn('⚠️ Ignoring stale session to prevent incorrect payment recording');
+          // Clear the session state to prevent routing issues
+          setSessionId(null);
+          setSessionStatus(null);
+          setSessionPaymentNumber(null);
+          return;
+        }
+
         setSessionStatus(sessionData.status as 'complete' | 'open');
-        
-        const paymentNumber = sessionData.metadata?.payment_number 
+
+        const paymentNumber = sessionData.metadata?.payment_number
           ? parseInt(sessionData.metadata.payment_number, 10) as 1 | 2
           : null;
         console.log('📊 Parsed paymentNumber:', paymentNumber);
