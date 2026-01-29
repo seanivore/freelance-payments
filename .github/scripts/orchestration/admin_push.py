@@ -52,9 +52,9 @@ except ImportError:
     print(json.dumps({"error": "Google libraries not installed. Run: pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client"}), file=sys.stderr)
     sys.exit(2)
 
-# Import pypdf for combining PDFs
+# Import pypdf for combining PDFs (using PdfWriter - PdfMerger was deprecated)
 try:
-    from pypdf import PdfMerger
+    from pypdf import PdfWriter
 except Exception as e:
     import traceback
     print(f"ERROR: Failed to import pypdf: {type(e).__name__}: {e}", file=sys.stderr)
@@ -1313,13 +1313,12 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
             if len(pdfs_to_merge) >= 2:  # Need at least contract + invoice
                 try:
                     print(f"Generating Combined PDF for {job_id}...", file=sys.stderr)
-                    merger = PdfMerger()
+                    writer = PdfWriter()
                     for pdf_path in pdfs_to_merge:
-                        merger.append(str(pdf_path))
+                        writer.append(str(pdf_path))
 
                     with open(combined_path, 'wb') as output_file:
-                        merger.write(output_file)
-                    merger.close()
+                        writer.write(output_file)
 
                     # Calculate SHA256 of combined PDF
                     with open(combined_path, 'rb') as f:
