@@ -74,7 +74,7 @@ export const GateBar: React.FC<GateBarProps> = ({
           <div className="flex items-center gap-3 min-w-0">
             <span
               className="font-agency text-portfolio-text-primary tracking-wide truncate"
-              style={{ fontSize: '1.3rem', textTransform: 'none' }}
+              style={{ fontSize: '1.5rem', textTransform: 'none' }}
             >
               {message}
             </span>
