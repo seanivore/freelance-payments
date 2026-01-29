@@ -58,12 +58,12 @@
             "invoice": "2026-01-29T12:36:25.794Z",
             "payment_1": "2026-01-29T12:36:36.524Z",
             "balance": "2026-01-29T13:47:58.781Z",
-            "payment_2": null
+            "payment_2": "2026-01-29T13:48:20.815Z"
         }
     },
     "product": {
         "name": "Website Store",
-        "active": true,
+        "active": false,
         "description": "DJ's Bakery needs a website store for their bakery business",
         "id": "uid-dnj-781",
         "login_name": "Smith",
@@ -121,7 +121,7 @@
         "count": 2,
         "currency": "usd",
         "unit_amount": 26005,
-        "active": true,
+        "active": false,
         "billing_scheme": "per_unit",
         "pay_by": "before project launch",
         "pay_days": 14,
