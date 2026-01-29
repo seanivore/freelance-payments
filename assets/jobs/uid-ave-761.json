@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-29T10:58:22.236995Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-ave-761",
+      "pdf": "assets/pdf/contract/kon-ave-761.pdf",
+      "file_id": "1n4vv5NGq6nrOX5lvw_Tq1K_4KTdOppqtDWQkyESP1ms",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-ave-761.pdf",
+      "sha256": "c4fd98b925f78862c311f5f529fbb67184afe885c3d89440f83936970a37bd34",
+      "created": "2026-01-29T10:58:29.527858Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-ave-761",
+      "pdf": "assets/pdf/invoice/inv-ave-761.pdf",
+      "file_id": "1Mhwy9d7l4Ns17apm8bnw5UQofOJyCWJYLe0CGqPOx0o",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-ave-761.pdf",
+      "sha256": "b4961ba91d6c0f4307ed7dd84cb747531c33b94b19cec3b594ba100303254f87",
+      "created": "2026-01-29T10:58:35.736182Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-ave-761",
+      "pdf": "assets/pdf/balance/bal-ave-761.pdf",
+      "file_id": "1A4_Y3v_dYzMMKRYVVTAtPK80_c5-DP5QeC6IGqVB-B4",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-ave-761.pdf",
+      "sha256": "aa8fa14360e527246ff26dab1c77e94046e70cbab59ab71bb94ef3dbffef68ff",
+      "created": "2026-01-29T10:58:41.362078Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-29T10:58:22.236995Z",
+      "product": "uid-ave-761",
+      "price_1": "price_1Susva9fljwH26CPYXsvYm86",
+      "price_2": "price_1Susva9fljwH26CPSJ2sKibU",
+      "customer": "cus-ave-761",
+      "coupon": "cou-ave-761"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-ave-761"
       ]
     },
-    "id": ""
+    "id": "price_1Susva9fljwH26CPYXsvYm86"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-ave-761"
       ]
     },
-    "id": ""
+    "id": "price_1Susva9fljwH26CPSJ2sKibU"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Susva9fljwH26CPYXsvYm86",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Susva9fljwH26CPSJ2sKibU",
         "quantity": 1
       }
     ],

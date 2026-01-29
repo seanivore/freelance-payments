@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "smith-kitchen-and-bath": {
-      "file_path": "assets/jobs/uid-xna-608.json",
-      "job_id": "uid-xna-608",
-      "login_keyword": "kitchen-and-bath",
-      "login_name": "Smith"
+    "voss-tech-pro-shop": {
+      "file_path": "assets/jobs/uid-ave-761.json",
+      "job_id": "uid-ave-761",
+      "login_keyword": "tech-pro-shop",
+      "login_name": "Voss"
     }
   },
-  "generated_at": "2026-01-29T10:51:09.998556Z"
+  "generated_at": "2026-01-29T10:58:41.363205Z"
 }
