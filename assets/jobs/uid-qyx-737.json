@@ -1,171 +1,171 @@
 {
-  "project": "Edit Video Shorts from Rex's Youtube Channel",
-  "contract": {
-    "work_start": "2026-01-30",
-    "work_end": "2026-02-28",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-29T13:19:32.798418Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Edit Video Shorts from Rex's Youtube Channel",
     "contract": {
-      "id": "kon-qyx-737",
-      "pdf": "assets/pdf/contract/kon-qyx-737.pdf",
-      "file_id": "18Qh11YNyDv32LKZ_2_jUsfo0TvfVRXLgJivSTHQHa0E",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-qyx-737.pdf",
-      "sha256": "917233cf15c9c046ccbdc1b3edcc381e76556e6c3a49e12d6e9e3beb5c0c9b11",
-      "created": "2026-01-29T13:20:17.529023Z"
+        "work_start": "2026-01-30",
+        "work_end": "2026-02-28",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-29T13:19:32.798418Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-qyx-737",
-      "pdf": "assets/pdf/invoice/inv-qyx-737.pdf",
-      "file_id": "1IbqthcGPLlbGg3Afl-spUI7nXQ66PlR3WghQb17-o9Q",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-qyx-737.pdf",
-      "sha256": "4072be554dcf29df2552ffc0d22206887b5cd0d219b01c7ef533ef152ccf8d96",
-      "created": "2026-01-29T13:20:22.361413Z"
+    "docs": {
+        "contract": {
+            "id": "kon-qyx-737",
+            "pdf": "assets/pdf/contract/kon-qyx-737.pdf",
+            "file_id": "18Qh11YNyDv32LKZ_2_jUsfo0TvfVRXLgJivSTHQHa0E",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-qyx-737.pdf",
+            "sha256": "917233cf15c9c046ccbdc1b3edcc381e76556e6c3a49e12d6e9e3beb5c0c9b11",
+            "created": "2026-01-29T13:20:17.529023Z"
+        },
+        "invoice": {
+            "id": "inv-qyx-737",
+            "pdf": "assets/pdf/invoice/inv-qyx-737.pdf",
+            "file_id": "1IbqthcGPLlbGg3Afl-spUI7nXQ66PlR3WghQb17-o9Q",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-qyx-737.pdf",
+            "sha256": "4072be554dcf29df2552ffc0d22206887b5cd0d219b01c7ef533ef152ccf8d96",
+            "created": "2026-01-29T13:20:22.361413Z"
+        },
+        "balance": {
+            "id": "bal-qyx-737",
+            "pdf": "assets/pdf/balance/bal-qyx-737.pdf",
+            "file_id": "1-blWZXsi1JQDILLG2KKterDAF27zuj4qQFpBLiMu36k",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-qyx-737.pdf",
+            "sha256": "77ccefb9be0c948d7791f3faa81ed4c80c670299bcaf612c281e988711301310",
+            "created": "2026-01-29T13:20:28.859004Z"
+        }
     },
-    "balance": {
-      "id": "bal-qyx-737",
-      "pdf": "assets/pdf/balance/bal-qyx-737.pdf",
-      "file_id": "1-blWZXsi1JQDILLG2KKterDAF27zuj4qQFpBLiMu36k",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-qyx-737.pdf",
-      "sha256": "77ccefb9be0c948d7791f3faa81ed4c80c670299bcaf612c281e988711301310",
-      "created": "2026-01-29T13:20:28.859004Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-29T13:19:32.798418Z",
-      "product": "uid-qyx-737",
-      "price_1": "price_1Suv8D9fljwH26CP9VsQM0G6",
-      "price_2": "price_1Suv8D9fljwH26CPa3y94RrM",
-      "customer": "cus-qyx-737",
-      "coupon": "cou-qyx-737"
+    "state": {
+        "objects": {
+            "created": "2026-01-29T13:19:32.798418Z",
+            "product": "uid-qyx-737",
+            "price_1": "price_1Suv8D9fljwH26CP9VsQM0G6",
+            "price_2": "price_1Suv8D9fljwH26CPa3y94RrM",
+            "customer": "cus-qyx-737",
+            "coupon": "cou-qyx-737"
+        },
+        "client_status": {
+            "logged_in": "2026-01-29T14:42:31.941Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Edit Video Shorts",
-    "active": true,
-    "description": "Rex Smith needs edit video shorts for his youtube channel",
-    "id": "uid-qyx-737",
-    "login_name": "Smith",
-    "login_keyword": "rex-youtube",
-    "service_usd": 34050,
-    "total_payments": 2,
-    "discount_usd": 8000,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Rex Smith",
-    "business": "Rex Smith",
-    "title": "Owner",
-    "email": "rex@rex.com",
-    "phone": "555-555-5555",
-    "id": "cus-qyx-737",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02101",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 8000,
-    "applies_to": {
-      "products": [
-        "uid-qyx-737"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-qyx-737",
-    "max_redemptions": 1,
-    "name": "QYX-REX-YOUTUBE-DISCOUNT"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 17025,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-qyx-737"
-      ]
+        "name": "Edit Video Shorts",
+        "active": true,
+        "description": "Rex Smith needs edit video shorts for his youtube channel",
+        "id": "uid-qyx-737",
+        "login_name": "Smith",
+        "login_keyword": "rex-youtube",
+        "service_usd": 34050,
+        "total_payments": 2,
+        "discount_usd": 8000,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1Suv8D9fljwH26CP9VsQM0G6"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 17025,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-qyx-737"
-      ]
+    "customer": {
+        "name": "Rex Smith",
+        "business": "Rex Smith",
+        "title": "Owner",
+        "email": "rex@rex.com",
+        "phone": "555-555-5555",
+        "id": "cus-qyx-737",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02101",
+            "country": "US"
+        }
     },
-    "id": "price_1Suv8D9fljwH26CPa3y94RrM"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-qyx-737"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Suv8D9fljwH26CP9VsQM0G6",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-qyx-737?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Suv8D9fljwH26CPa3y94RrM",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-qyx-737?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Rex Smith needs edit video shorts for his youtube channel",
-  "project_scope_full": "Rex Smith needs edit video shorts for his youtube channel. The video shorts will be edited using AI generative intelligence and will be custom tailored to his needs. The video shorts will be edited using AI generative intelligence and will be custom tailored to his needs."
+    "coupon": {
+        "amount_off": 8000,
+        "applies_to": {
+            "products": [
+                "uid-qyx-737"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-qyx-737",
+        "max_redemptions": 1,
+        "name": "QYX-REX-YOUTUBE-DISCOUNT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 17025,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-qyx-737"
+            ]
+        },
+        "id": "price_1Suv8D9fljwH26CP9VsQM0G6"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 17025,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-qyx-737"
+            ]
+        },
+        "id": "price_1Suv8D9fljwH26CPa3y94RrM"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-qyx-737"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Suv8D9fljwH26CP9VsQM0G6",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-qyx-737?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Suv8D9fljwH26CPa3y94RrM",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-qyx-737?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Rex Smith needs edit video shorts for his youtube channel",
+    "project_scope_full": "Rex Smith needs edit video shorts for his youtube channel. The video shorts will be edited using AI generative intelligence and will be custom tailored to his needs. The video shorts will be edited using AI generative intelligence and will be custom tailored to his needs."
 }
