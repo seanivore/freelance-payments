@@ -22,7 +22,6 @@ export default {
       fontFamily: {
         sans: ["-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "sans-serif"],
         agency: ["'Agency FB'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        "agency-compressed": ["'Agency FB Compressed'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
       colors: {
         // Portfolio color palette

@@ -8,16 +8,8 @@
 
 @font-face {
   font-family: 'Agency FB';
-  src: url('/assets/font/AgencyFB-RegularCondensed.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Agency FB Compressed';
-  src: url('/assets/font/AgencyFB-RegularCompressed.otf') format('opentype');
-  font-weight: normal;
+  src: url('/assets/font/AgencyFB-Bold.otf') format('opentype');
+  font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
@@ -118,11 +110,7 @@ body {
   letter-spacing: 0.05em;
 }
 
-.font-agency-compressed {
-  font-family: 'Agency FB Compressed', -apple-system, BlinkMacSystemFont, sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
+
 
 /* ============================================
    GLOW EFFECT UTILITIES
