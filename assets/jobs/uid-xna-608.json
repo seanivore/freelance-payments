@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-29T09:54:47.222621Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Sam Smith",
+                "signed_date": "Jan 29, 2026"
             }
         }
     },
@@ -54,8 +54,8 @@
         },
         "client_status": {
             "logged_in": "2026-01-29T10:48:10.983Z",
-            "contract_signed": null,
-            "invoice": null,
+            "contract_signed": "2026-01-29T10:47:32.416Z",
+            "invoice": "2026-01-29T10:47:45.806Z",
             "payment_1": "2026-01-29T10:48:11.410Z",
             "balance": null,
             "payment_2": null
