@@ -330,9 +330,9 @@ Complete this AFTER the dev environment is fully working.
 - [x] Collect feedback on UX issues
 
 ### Self-Testing
-- [ ] Complete full flow on mobile (record screen)
-- [ ] Complete full flow on desktop (record screen)
-- [ ] Save recordings for portfolio/documentation
+- [x] Complete full flow on mobile (record screen)
+- [x] Complete full flow on desktop (record screen)
+- [x] Save recordings for portfolio/documentation
 
 ### Verify
 - [ ] All events trigger correctly
