@@ -1,171 +1,171 @@
 {
-  "project": "Website Store for Yae's Baked Goods",
-  "contract": {
-    "work_start": "2026-01-30",
-    "work_end": "2026-02-28",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-29T12:15:01.929125Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Website Store for Yae's Baked Goods",
     "contract": {
-      "id": "kon-yae-576",
-      "pdf": "assets/pdf/contract/kon-yae-576.pdf",
-      "file_id": "10SFLRhds1-AdA647z5vAowwyrNJGNQpmPd5DE-VWQ6E",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-yae-576.pdf",
-      "sha256": "9438728d2d9893a13ef1c0bff09b01560b72e4ee57489f96a2d46d687840eeb0",
-      "created": "2026-01-29T12:15:09.182005Z"
+        "work_start": "2026-01-30",
+        "work_end": "2026-02-28",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-29T12:15:01.929125Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-yae-576",
-      "pdf": "assets/pdf/invoice/inv-yae-576.pdf",
-      "file_id": "1ecky559aQAtjT7elXZn4mDDdkYMn5IlkhNSFfNH-ieE",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-yae-576.pdf",
-      "sha256": "2e56866ef91a492b53a7e4d090a758837e4ce99c5b2365eef96ab6bd988b7180",
-      "created": "2026-01-29T12:15:15.064727Z"
+    "docs": {
+        "contract": {
+            "id": "kon-yae-576",
+            "pdf": "assets/pdf/contract/kon-yae-576.pdf",
+            "file_id": "10SFLRhds1-AdA647z5vAowwyrNJGNQpmPd5DE-VWQ6E",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-yae-576.pdf",
+            "sha256": "9438728d2d9893a13ef1c0bff09b01560b72e4ee57489f96a2d46d687840eeb0",
+            "created": "2026-01-29T12:15:09.182005Z"
+        },
+        "invoice": {
+            "id": "inv-yae-576",
+            "pdf": "assets/pdf/invoice/inv-yae-576.pdf",
+            "file_id": "1ecky559aQAtjT7elXZn4mDDdkYMn5IlkhNSFfNH-ieE",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-yae-576.pdf",
+            "sha256": "2e56866ef91a492b53a7e4d090a758837e4ce99c5b2365eef96ab6bd988b7180",
+            "created": "2026-01-29T12:15:15.064727Z"
+        },
+        "balance": {
+            "id": "bal-yae-576",
+            "pdf": "assets/pdf/balance/bal-yae-576.pdf",
+            "file_id": "1mOaC9Zjggke6mScMNF_REp-KzSdFtgNAvOT6N5AA2q0",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-yae-576.pdf",
+            "sha256": "0e90d5755eb20b25e8ff56b90ad298636ae6fa6177955be6efe4e579e5dca07e",
+            "created": "2026-01-29T12:15:19.538710Z"
+        }
     },
-    "balance": {
-      "id": "bal-yae-576",
-      "pdf": "assets/pdf/balance/bal-yae-576.pdf",
-      "file_id": "1mOaC9Zjggke6mScMNF_REp-KzSdFtgNAvOT6N5AA2q0",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-yae-576.pdf",
-      "sha256": "0e90d5755eb20b25e8ff56b90ad298636ae6fa6177955be6efe4e579e5dca07e",
-      "created": "2026-01-29T12:15:19.538710Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-29T12:15:01.929125Z",
-      "product": "uid-yae-576",
-      "price_1": "price_1Suu7m9fljwH26CPlPzytYZH",
-      "price_2": "price_1Suu7m9fljwH26CP9J6JktoE",
-      "customer": "cus-yae-576",
-      "coupon": "cou-yae-576"
+    "state": {
+        "objects": {
+            "created": "2026-01-29T12:15:01.929125Z",
+            "product": "uid-yae-576",
+            "price_1": "price_1Suu7m9fljwH26CPlPzytYZH",
+            "price_2": "price_1Suu7m9fljwH26CP9J6JktoE",
+            "customer": "cus-yae-576",
+            "coupon": "cou-yae-576"
+        },
+        "client_status": {
+            "logged_in": "2026-01-29T12:22:30.472Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": "2026-01-29T12:22:31.171Z",
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Website Store",
-    "active": true,
-    "description": "Yae's Baked Goods needs a website store for their baked goods business",
-    "id": "uid-yae-576",
-    "login_name": "Jameson",
-    "login_keyword": "yaes-baked-goods",
-    "service_usd": 610910,
-    "total_payments": 2,
-    "discount_usd": 71100,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Yae Jameson",
-    "business": "Yae's Baked Goods",
-    "title": "Owner",
-    "email": "yae@yaesbakedgoods.com",
-    "phone": "555-555-5555",
-    "id": "cus-yae-576",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02101",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 71100,
-    "applies_to": {
-      "products": [
-        "uid-yae-576"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-yae-576",
-    "max_redemptions": 1,
-    "name": "YAES-JAMESON-DISCOUNT"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 305455,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-yae-576"
-      ]
+        "name": "Website Store",
+        "active": true,
+        "description": "Yae's Baked Goods needs a website store for their baked goods business",
+        "id": "uid-yae-576",
+        "login_name": "Jameson",
+        "login_keyword": "yaes-baked-goods",
+        "service_usd": 610910,
+        "total_payments": 2,
+        "discount_usd": 71100,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1Suu7m9fljwH26CPlPzytYZH"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 305455,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-yae-576"
-      ]
+    "customer": {
+        "name": "Yae Jameson",
+        "business": "Yae's Baked Goods",
+        "title": "Owner",
+        "email": "yae@yaesbakedgoods.com",
+        "phone": "555-555-5555",
+        "id": "cus-yae-576",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02101",
+            "country": "US"
+        }
     },
-    "id": "price_1Suu7m9fljwH26CP9J6JktoE"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-yae-576"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Suu7m9fljwH26CPlPzytYZH",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-yae-576?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Suu7m9fljwH26CP9J6JktoE",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-yae-576?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Yae's Baked Goods needs a website store for their baked goods business",
-  "project_scope_full": "Yae's Baked Goods needs a website store for their baked goods business. The website will be a modern, responsive website store for their baked goods business. The website will be built using Shopify and will be custom tailored to their needs. The website will be built using Shopify and will be custom tailored to their needs."
+    "coupon": {
+        "amount_off": 71100,
+        "applies_to": {
+            "products": [
+                "uid-yae-576"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-yae-576",
+        "max_redemptions": 1,
+        "name": "YAES-JAMESON-DISCOUNT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 305455,
+        "active": false,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-yae-576"
+            ]
+        },
+        "id": "price_1Suu7m9fljwH26CPlPzytYZH"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 305455,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-yae-576"
+            ]
+        },
+        "id": "price_1Suu7m9fljwH26CP9J6JktoE"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-yae-576"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Suu7m9fljwH26CPlPzytYZH",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-yae-576?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Suu7m9fljwH26CP9J6JktoE",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-yae-576?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Yae's Baked Goods needs a website store for their baked goods business",
+    "project_scope_full": "Yae's Baked Goods needs a website store for their baked goods business. The website will be a modern, responsive website store for their baked goods business. The website will be built using Shopify and will be custom tailored to their needs. The website will be built using Shopify and will be custom tailored to their needs."
 }
