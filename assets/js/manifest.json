@@ -12,6 +12,12 @@
       "login_keyword": "liruns-furniture",
       "login_name": "Smith"
     },
+    "wallace-qdw-portfolio": {
+      "file_path": "assets/jobs/uid-qdw-666.json",
+      "job_id": "uid-qdw-666",
+      "login_keyword": "qdw-portfolio",
+      "login_name": "Wallace"
+    },
     "jameson-yaes-baked-goods": {
       "file_path": "assets/jobs/uid-yae-576.json",
       "job_id": "uid-yae-576",
@@ -19,5 +25,5 @@
       "login_name": "Jameson"
     }
   },
-  "generated_at": "2026-01-29T12:33:22.566991Z"
+  "generated_at": "2026-01-29T12:43:15.781000Z"
 }
