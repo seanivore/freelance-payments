@@ -56,7 +56,7 @@
             "logged_in": "2026-01-29T14:18:41.860Z",
             "contract_signed": "2026-01-29T14:18:59.737Z",
             "invoice": "2026-01-29T14:19:02.393Z",
-            "payment_1": null,
+            "payment_1": "2026-01-29T14:19:13.716Z",
             "balance": null,
             "payment_2": null
         }
@@ -106,7 +106,7 @@
         "count": 1,
         "currency": "usd",
         "unit_amount": 64965,
-        "active": true,
+        "active": false,
         "billing_scheme": "per_unit",
         "pay_by": "start of work",
         "nickname": "Initial Payment",
