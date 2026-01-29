@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-29T09:54:46.177290Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-kxn-851",
+      "pdf": "assets/pdf/contract/kon-kxn-851.pdf",
+      "file_id": "1jQP8T9THdVRbBlcbdZpQKdwvEdmyXizGBk3fKckiD0U",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-kxn-851.pdf",
+      "sha256": "f7e084c18054d8a39c50dd0513aec65f3f827623aa6c41f2583bbbc79857b8d5",
+      "created": "2026-01-29T09:55:10.789950Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-kxn-851",
+      "pdf": "assets/pdf/invoice/inv-kxn-851.pdf",
+      "file_id": "18wnH09LcKfsp2dHT_xi0PXI0qp3NDDSPNgIMIRMD-tU",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-kxn-851.pdf",
+      "sha256": "3896eedfc0a8e76e2a3610abc909ffb45bc5b90827eb492e0d7668996dc81d70",
+      "created": "2026-01-29T09:55:15.782343Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-kxn-851",
+      "pdf": "assets/pdf/balance/bal-kxn-851.pdf",
+      "file_id": "1TBu1jS_3w0WrIdSf2OBY7tZ1LOTRqVYsYP9Lf72qQT0",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-kxn-851.pdf",
+      "sha256": "9ddbfb4a474a1d72a9c352ca482b2b080127f95fb8c73296771ff80f552bb198",
+      "created": "2026-01-29T09:55:19.765545Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-29T09:54:46.177290Z",
+      "product": "uid-kxn-851",
+      "price_1": "price_1Surw29fljwH26CPXNpbCIvV",
+      "price_2": "price_1Surw29fljwH26CPXRJmhNHg",
+      "customer": "cus-kxn-851",
+      "coupon": "cou-kxn-851"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-kxn-851"
       ]
     },
-    "id": ""
+    "id": "price_1Surw29fljwH26CPXNpbCIvV"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-kxn-851"
       ]
     },
-    "id": ""
+    "id": "price_1Surw29fljwH26CPXRJmhNHg"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Surw29fljwH26CPXNpbCIvV",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Surw29fljwH26CPXRJmhNHg",
         "quantity": 1
       }
     ],

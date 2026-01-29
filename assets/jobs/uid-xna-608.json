@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-29T09:54:47.222621Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-xna-608",
+      "pdf": "assets/pdf/contract/kon-xna-608.pdf",
+      "file_id": "1nYOQiWyPGSTlXAqWlPhhfeAt7gjZV0w-bc06sr6oqYA",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-xna-608.pdf",
+      "sha256": "20b9d5c0d17aa2299f375229691570cdec499fb55a3de44791e3305d35247412",
+      "created": "2026-01-29T09:54:54.259831Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-xna-608",
+      "pdf": "assets/pdf/invoice/inv-xna-608.pdf",
+      "file_id": "14nWsvdtUBVd2fnAqqFWJi4VXcLVsor6i_6hfr46STQ4",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-xna-608.pdf",
+      "sha256": "a73047ecbec036850acad0630496e95e3ddb912242f9b99add67ec4edf223575",
+      "created": "2026-01-29T09:54:59.473490Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-xna-608",
+      "pdf": "assets/pdf/balance/bal-xna-608.pdf",
+      "file_id": "1ewSTrw3SzRtWH0c4FsIh5G7AyxgkEMiTyba_nl5S2Js",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-xna-608.pdf",
+      "sha256": "11b56ed886cebcc73c8fb4763e5188402ef63a2886086b6be2128666fb43f9ac",
+      "created": "2026-01-29T09:55:04.707973Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-29T09:54:47.222621Z",
+      "product": "uid-xna-608",
+      "price_1": "price_1Surw39fljwH26CPCtK436hh",
+      "price_2": "price_1Surw39fljwH26CPtPfKvMTv",
+      "customer": "cus-xna-608",
+      "coupon": "cou-xna-608"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +115,7 @@
         "uid-xna-608"
       ]
     },
-    "id": ""
+    "id": "price_1Surw39fljwH26CPCtK436hh"
   },
   "price2": {
     "count": 2,
@@ -132,7 +132,7 @@
         "uid-xna-608"
       ]
     },
-    "id": ""
+    "id": "price_1Surw39fljwH26CPtPfKvMTv"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +142,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Surw39fljwH26CPCtK436hh",
         "quantity": 1
       }
     ],
@@ -158,7 +158,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1Surw39fljwH26CPtPfKvMTv",
         "quantity": 1
       }
     ],
