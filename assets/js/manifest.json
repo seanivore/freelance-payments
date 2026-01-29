@@ -6,6 +6,12 @@
       "login_keyword": "egl-website",
       "login_name": "Linton"
     },
+    "dave-gmq-website": {
+      "file_path": "assets/jobs/uid-gmq-600.json",
+      "job_id": "uid-gmq-600",
+      "login_keyword": "gmq-website",
+      "login_name": "Dave"
+    },
     "williams-pww-social-media": {
       "file_path": "assets/jobs/uid-pww-926.json",
       "job_id": "uid-pww-926",
@@ -25,5 +31,5 @@
       "login_name": "McFarland"
     }
   },
-  "generated_at": "2026-01-29T16:42:06.553832Z"
+  "generated_at": "2026-01-29T16:47:55.049089Z"
 }
