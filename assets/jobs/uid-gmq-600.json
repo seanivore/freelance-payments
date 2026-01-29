@@ -1,0 +1,171 @@
+{
+  "project": "Website, Online Store, and Marketing Production & Execution Automations",
+  "contract": {
+    "work_start": "2026-01-30",
+    "work_end": "2026-02-28",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": null
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
+    "contract": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "invoice": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "balance": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    }
+  },
+  "state": {
+    "objects": {
+      "created": null,
+      "product": null,
+      "price_1": null,
+      "price_2": null,
+      "customer": null,
+      "coupon": null
+    },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "Digital Media Architecture",
+    "active": true,
+    "description": "Development and launch of website for client company online store along with marketing production and execution automations.",
+    "id": "uid-gmq-600",
+    "login_name": "Dave",
+    "login_keyword": "gmq-website",
+    "service_usd": 21598000,
+    "total_payments": 2,
+    "discount_usd": 224010,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Dave Mason",
+    "business": "Dogtail Media",
+    "title": "CMO",
+    "email": "dave@davemason.com",
+    "phone": "555-555-5555",
+    "id": "cus-gmq-600",
+    "address": {
+      "city": "Boston",
+      "line1": "123 Main St",
+      "state": "MA",
+      "postal_code": "02101",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 224010,
+    "applies_to": {
+      "products": [
+        "uid-gmq-600"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-gmq-600",
+    "max_redemptions": 1,
+    "name": "GQM-WEBSITE-DISCOUNT"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 10799000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
+    "product": {
+      "products": [
+        "uid-gmq-600"
+      ]
+    },
+    "id": ""
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 10799000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-gmq-600"
+      ]
+    },
+    "id": ""
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-gmq-600"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-gmq-600?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-gmq-600?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "The client needs a website store for their media business.",
+  "project_scope_full": "The client needs a website store for their media business. The website will be a modern, responsive website store for their media business. The website will be built using Shopify and will be custom tailored to their needs. The website will be built using Shopify and will be custom tailored to their needs."
+}
