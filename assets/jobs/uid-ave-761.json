@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-29T10:58:22.236995Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Andrew Voss",
+                "signed_date": "Jan 29, 2026"
             }
         }
     },
@@ -54,7 +54,7 @@
         },
         "client_status": {
             "logged_in": "2026-01-29T11:02:48.685Z",
-            "contract_signed": null,
+            "contract_signed": "2026-01-29T11:04:00.410Z",
             "invoice": null,
             "payment_1": null,
             "balance": null,
