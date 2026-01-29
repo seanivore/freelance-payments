@@ -1,171 +1,171 @@
 {
-  "project": "Social Media Marketing Automations with AI Generative Intelligence",
-  "contract": {
-    "work_start": "2026-01-30",
-    "work_end": "2026-02-28",
-    "legal_jurisdiction": "Massachusetts",
-    "maintenance_period_months": 3,
-    "maintenance_monthly_fee": 150,
-    "signatures": {
-      "contractor": {
-        "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-29T13:19:36.562646Z"
-      },
-      "client": {
-        "legal_name": null,
-        "signed_date": null
-      }
-    }
-  },
-  "docs": {
+    "project": "Social Media Marketing Automations with AI Generative Intelligence",
     "contract": {
-      "id": "kon-pww-926",
-      "pdf": "assets/pdf/contract/kon-pww-926.pdf",
-      "file_id": "1TFSX-P_ihnqDJRBSw4lfFrOcyllKMo-SX2oh-h7xQhA",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-pww-926.pdf",
-      "sha256": "5cafadb829d001df5318d3d433f014fefd825023bab1c0b3b9fc29b8bb2590bf",
-      "created": "2026-01-29T13:20:00.931448Z"
+        "work_start": "2026-01-30",
+        "work_end": "2026-02-28",
+        "legal_jurisdiction": "Massachusetts",
+        "maintenance_period_months": 3,
+        "maintenance_monthly_fee": 150,
+        "signatures": {
+            "contractor": {
+                "legal_name": "Sean August Horvath",
+                "signed_date": "2026-01-29T13:19:36.562646Z"
+            },
+            "client": {
+                "legal_name": null,
+                "signed_date": null
+            }
+        }
     },
-    "invoice": {
-      "id": "inv-pww-926",
-      "pdf": "assets/pdf/invoice/inv-pww-926.pdf",
-      "file_id": "1jIOWp6WqpdwctNmViJqyllSMRDp1tHw7EIsCaeLp6gw",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-pww-926.pdf",
-      "sha256": "518ba12a26820e3f2ea31c1690bced7707d41adf39dd2fed34d78033e3c03ca1",
-      "created": "2026-01-29T13:20:05.875968Z"
+    "docs": {
+        "contract": {
+            "id": "kon-pww-926",
+            "pdf": "assets/pdf/contract/kon-pww-926.pdf",
+            "file_id": "1TFSX-P_ihnqDJRBSw4lfFrOcyllKMo-SX2oh-h7xQhA",
+            "url": "https://payments.august.style/assets/pdf/contract/kon-pww-926.pdf",
+            "sha256": "5cafadb829d001df5318d3d433f014fefd825023bab1c0b3b9fc29b8bb2590bf",
+            "created": "2026-01-29T13:20:00.931448Z"
+        },
+        "invoice": {
+            "id": "inv-pww-926",
+            "pdf": "assets/pdf/invoice/inv-pww-926.pdf",
+            "file_id": "1jIOWp6WqpdwctNmViJqyllSMRDp1tHw7EIsCaeLp6gw",
+            "url": "https://payments.august.style/assets/pdf/invoice/inv-pww-926.pdf",
+            "sha256": "518ba12a26820e3f2ea31c1690bced7707d41adf39dd2fed34d78033e3c03ca1",
+            "created": "2026-01-29T13:20:05.875968Z"
+        },
+        "balance": {
+            "id": "bal-pww-926",
+            "pdf": "assets/pdf/balance/bal-pww-926.pdf",
+            "file_id": "1uMFDAeOcGzdmeCsta99B2VkyTTCLsNAWIzA0Id4Auh4",
+            "url": "https://payments.august.style/assets/pdf/balance/bal-pww-926.pdf",
+            "sha256": "18ad20b0d1fa3e26a561f8bc25f5bd5fd6118e022dc9e2fb05eab4b8fcdeca58",
+            "created": "2026-01-29T13:20:12.016285Z"
+        }
     },
-    "balance": {
-      "id": "bal-pww-926",
-      "pdf": "assets/pdf/balance/bal-pww-926.pdf",
-      "file_id": "1uMFDAeOcGzdmeCsta99B2VkyTTCLsNAWIzA0Id4Auh4",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-pww-926.pdf",
-      "sha256": "18ad20b0d1fa3e26a561f8bc25f5bd5fd6118e022dc9e2fb05eab4b8fcdeca58",
-      "created": "2026-01-29T13:20:12.016285Z"
-    }
-  },
-  "state": {
-    "objects": {
-      "created": "2026-01-29T13:19:36.562646Z",
-      "product": "uid-pww-926",
-      "price_1": "price_1Suv8G9fljwH26CPESkqDxkH",
-      "price_2": "price_1Suv8H9fljwH26CPrxERrdmd",
-      "customer": "cus-pww-926",
-      "coupon": "cou-pww-926"
+    "state": {
+        "objects": {
+            "created": "2026-01-29T13:19:36.562646Z",
+            "product": "uid-pww-926",
+            "price_1": "price_1Suv8G9fljwH26CPESkqDxkH",
+            "price_2": "price_1Suv8H9fljwH26CPrxERrdmd",
+            "customer": "cus-pww-926",
+            "coupon": "cou-pww-926"
+        },
+        "client_status": {
+            "logged_in": "2026-01-29T18:33:52.857Z",
+            "contract_signed": null,
+            "invoice": null,
+            "payment_1": null,
+            "balance": null,
+            "payment_2": null
+        }
     },
-    "client_status": {
-      "logged_in": null,
-      "contract_signed": null,
-      "invoice": null,
-      "payment_1": null,
-      "balance": null,
-      "payment_2": null
-    }
-  },
-  "product": {
-    "name": "Social Media Marketing Automations with AI Generative Intelligence",
-    "active": true,
-    "description": "Pauline Whitaker Williams needs social media marketing automations with ai generative intelligence for her business",
-    "id": "uid-pww-926",
-    "login_name": "Williams",
-    "login_keyword": "pww-social-media",
-    "service_usd": 981750,
-    "total_payments": 2,
-    "discount_usd": 22000,
-    "type": "service",
-    "unit_label": "Payment"
-  },
-  "customer": {
-    "name": "Pauline Whitaker Williams",
-    "business": "Pauline Whitaker Williams",
-    "title": "Owner",
-    "email": "pauline@pww.com",
-    "phone": "555-555-5555",
-    "id": "cus-pww-926",
-    "address": {
-      "city": "Boston",
-      "line1": "123 Main St",
-      "state": "MA",
-      "postal_code": "02101",
-      "country": "US"
-    }
-  },
-  "coupon": {
-    "amount_off": 22000,
-    "applies_to": {
-      "products": [
-        "uid-pww-926"
-      ]
-    },
-    "currency": "usd",
-    "duration": "once",
-    "id": "cou-pww-926",
-    "max_redemptions": 1,
-    "name": "PWW-SOCIAL-MEDIA-DISCOUNT"
-  },
-  "price1": {
-    "count": 1,
-    "currency": "usd",
-    "unit_amount": 490875,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "start of work",
-    "nickname": "Initial Payment",
     "product": {
-      "products": [
-        "uid-pww-926"
-      ]
+        "name": "Social Media Marketing Automations with AI Generative Intelligence",
+        "active": true,
+        "description": "Pauline Whitaker Williams needs social media marketing automations with ai generative intelligence for her business",
+        "id": "uid-pww-926",
+        "login_name": "Williams",
+        "login_keyword": "pww-social-media",
+        "service_usd": 981750,
+        "total_payments": 2,
+        "discount_usd": 22000,
+        "type": "service",
+        "unit_label": "Payment"
     },
-    "id": "price_1Suv8G9fljwH26CPESkqDxkH"
-  },
-  "price2": {
-    "count": 2,
-    "currency": "usd",
-    "unit_amount": 490875,
-    "active": true,
-    "billing_scheme": "per_unit",
-    "pay_by": "before project launch",
-    "pay_days": 14,
-    "late_fee": 10000,
-    "nickname": "Final Payment",
-    "product": {
-      "products": [
-        "uid-pww-926"
-      ]
+    "customer": {
+        "name": "Pauline Whitaker Williams",
+        "business": "Pauline Whitaker Williams",
+        "title": "Owner",
+        "email": "pauline@pww.com",
+        "phone": "555-555-5555",
+        "id": "cus-pww-926",
+        "address": {
+            "city": "Boston",
+            "line1": "123 Main St",
+            "state": "MA",
+            "postal_code": "02101",
+            "country": "US"
+        }
     },
-    "id": "price_1Suv8H9fljwH26CPrxERrdmd"
-  },
-  "checkout_session_1": {
-    "discounts": [
-      {
-        "coupon": "cou-pww-926"
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Suv8G9fljwH26CPESkqDxkH",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-pww-926?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "checkout_session_2": {
-    "discounts": [
-      {
-        "coupon": null
-      }
-    ],
-    "line_items": [
-      {
-        "price": "price_1Suv8H9fljwH26CPrxERrdmd",
-        "quantity": 1
-      }
-    ],
-    "mode": "payment",
-    "return_url": "https://payments.august.style/uid-pww-926?session_id={CHECKOUT_SESSION_ID}",
-    "ui_mode": "custom"
-  },
-  "project_scope_summary": "Pauline Whitaker Williams needs social media marketing automations with ai generative intelligence for her business",
-  "project_scope_full": "Pauline Whitaker Williams needs social media marketing automations with ai generative intelligence for her business. The social media marketing automations will be built using AI generative intelligence and will be custom tailored to her needs. The social media marketing automations will be built using AI generative intelligence and will be custom tailored to her needs."
+    "coupon": {
+        "amount_off": 22000,
+        "applies_to": {
+            "products": [
+                "uid-pww-926"
+            ]
+        },
+        "currency": "usd",
+        "duration": "once",
+        "id": "cou-pww-926",
+        "max_redemptions": 1,
+        "name": "PWW-SOCIAL-MEDIA-DISCOUNT"
+    },
+    "price1": {
+        "count": 1,
+        "currency": "usd",
+        "unit_amount": 490875,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "start of work",
+        "nickname": "Initial Payment",
+        "product": {
+            "products": [
+                "uid-pww-926"
+            ]
+        },
+        "id": "price_1Suv8G9fljwH26CPESkqDxkH"
+    },
+    "price2": {
+        "count": 2,
+        "currency": "usd",
+        "unit_amount": 490875,
+        "active": true,
+        "billing_scheme": "per_unit",
+        "pay_by": "before project launch",
+        "pay_days": 14,
+        "late_fee": 10000,
+        "nickname": "Final Payment",
+        "product": {
+            "products": [
+                "uid-pww-926"
+            ]
+        },
+        "id": "price_1Suv8H9fljwH26CPrxERrdmd"
+    },
+    "checkout_session_1": {
+        "discounts": [
+            {
+                "coupon": "cou-pww-926"
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Suv8G9fljwH26CPESkqDxkH",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-pww-926?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "checkout_session_2": {
+        "discounts": [
+            {
+                "coupon": null
+            }
+        ],
+        "line_items": [
+            {
+                "price": "price_1Suv8H9fljwH26CPrxERrdmd",
+                "quantity": 1
+            }
+        ],
+        "mode": "payment",
+        "return_url": "https://payments.august.style/uid-pww-926?session_id={CHECKOUT_SESSION_ID}",
+        "ui_mode": "custom"
+    },
+    "project_scope_summary": "Pauline Whitaker Williams needs social media marketing automations with ai generative intelligence for her business",
+    "project_scope_full": "Pauline Whitaker Williams needs social media marketing automations with ai generative intelligence for her business. The social media marketing automations will be built using AI generative intelligence and will be custom tailored to her needs. The social media marketing automations will be built using AI generative intelligence and will be custom tailored to her needs."
 }
