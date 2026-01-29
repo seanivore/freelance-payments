@@ -52,12 +52,16 @@ except ImportError:
     print(json.dumps({"error": "Google libraries not installed. Run: pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client"}), file=sys.stderr)
     sys.exit(2)
 
-# Import pypdf for combining PDFs
+# Import pypdf for combining PDFs (optional - will skip combined PDF if unavailable)
+PYPDF_AVAILABLE = False
+PdfMerger = None
 try:
     from pypdf import PdfMerger
-except ImportError:
-    print(json.dumps({"error": "pypdf library not installed. Run: pip install pypdf"}), file=sys.stderr)
-    sys.exit(2)
+    PYPDF_AVAILABLE = True
+except ImportError as e:
+    print(f"WARNING: pypdf not available ({e}), combined PDFs will be skipped", file=sys.stderr)
+except Exception as e:
+    print(f"WARNING: pypdf import failed ({e}), combined PDFs will be skipped", file=sys.stderr)
 
 
 # ============================================================================
@@ -1286,56 +1290,59 @@ def generate_pdfs_for_new_jobs(jobs_dir: str, new_job_ids: list) -> dict:
                 stats['warnings'].append(msg)
 
         # 4. COMBINED PDF (merge contract + invoice + balance into single download)
-        combined_dir = invoice_dir.parent / 'combined'
-        combined_dir.mkdir(parents=True, exist_ok=True)
-        combined_filename = f'{job_id}.pdf'
-        combined_path = combined_dir / combined_filename
+        if PYPDF_AVAILABLE:
+            combined_dir = invoice_dir.parent / 'combined'
+            combined_dir.mkdir(parents=True, exist_ok=True)
+            combined_filename = f'{job_id}.pdf'
+            combined_path = combined_dir / combined_filename
 
-        if not combined_path.exists():
-            # Collect paths of individual PDFs that exist
-            pdfs_to_merge = []
-            contract_pdf_path = contract_dir / f'kon-{clean_id}.pdf'
-            invoice_pdf_path = invoice_dir / f'inv-{clean_id}.pdf'
-            balance_pdf_path = invoice_dir.parent / 'balance' / f'bal-{clean_id}.pdf'
+            if not combined_path.exists():
+                # Collect paths of individual PDFs that exist
+                pdfs_to_merge = []
+                contract_pdf_path = contract_dir / f'kon-{clean_id}.pdf'
+                invoice_pdf_path = invoice_dir / f'inv-{clean_id}.pdf'
+                balance_pdf_path = invoice_dir.parent / 'balance' / f'bal-{clean_id}.pdf'
 
-            if contract_pdf_path.exists():
-                pdfs_to_merge.append(contract_pdf_path)
-            if invoice_pdf_path.exists():
-                pdfs_to_merge.append(invoice_pdf_path)
-            if balance_pdf_path.exists():
-                pdfs_to_merge.append(balance_pdf_path)
+                if contract_pdf_path.exists():
+                    pdfs_to_merge.append(contract_pdf_path)
+                if invoice_pdf_path.exists():
+                    pdfs_to_merge.append(invoice_pdf_path)
+                if balance_pdf_path.exists():
+                    pdfs_to_merge.append(balance_pdf_path)
 
-            if len(pdfs_to_merge) >= 2:  # Need at least contract + invoice
-                try:
-                    print(f"Generating Combined PDF for {job_id}...", file=sys.stderr)
-                    merger = PdfMerger()
-                    for pdf_path in pdfs_to_merge:
-                        merger.append(str(pdf_path))
+                if len(pdfs_to_merge) >= 2:  # Need at least contract + invoice
+                    try:
+                        print(f"Generating Combined PDF for {job_id}...", file=sys.stderr)
+                        merger = PdfMerger()
+                        for pdf_path in pdfs_to_merge:
+                            merger.append(str(pdf_path))
 
-                    with open(combined_path, 'wb') as output_file:
-                        merger.write(output_file)
-                    merger.close()
+                        with open(combined_path, 'wb') as output_file:
+                            merger.write(output_file)
+                        merger.close()
 
-                    # Calculate SHA256 of combined PDF
-                    with open(combined_path, 'rb') as f:
-                        combined_sha256 = calculate_sha256(f.read())
+                        # Calculate SHA256 of combined PDF
+                        with open(combined_path, 'rb') as f:
+                            combined_sha256 = calculate_sha256(f.read())
 
-                    # Ensure docs.combined structure exists
-                    if 'combined' not in job_data['docs']:
-                        job_data['docs']['combined'] = {}
+                        # Ensure docs.combined structure exists
+                        if 'combined' not in job_data['docs']:
+                            job_data['docs']['combined'] = {}
 
-                    job_data['docs']['combined'] = {
-                        'id': job_id,
-                        'pdf': f'assets/pdf/combined/{combined_filename}',
-                        'url': f'https://payments.august.style/assets/pdf/combined/{combined_filename}',
-                        'sha256': combined_sha256,
-                        'created': datetime.now(UTC).isoformat().replace('+00:00', 'Z')
-                    }
-                    print(f"Combined PDF generated: {combined_filename} ({len(pdfs_to_merge)} files merged)", file=sys.stderr)
-                except Exception as e:
-                    stats['errors'].append(f"Combined PDF generation failed for {job_id}: {str(e)}")
-            else:
-                print(f"Skipping Combined PDF for {job_id}: Not enough PDFs to merge ({len(pdfs_to_merge)} found)", file=sys.stderr)
+                        job_data['docs']['combined'] = {
+                            'id': job_id,
+                            'pdf': f'assets/pdf/combined/{combined_filename}',
+                            'url': f'https://payments.august.style/assets/pdf/combined/{combined_filename}',
+                            'sha256': combined_sha256,
+                            'created': datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+                        }
+                        print(f"Combined PDF generated: {combined_filename} ({len(pdfs_to_merge)} files merged)", file=sys.stderr)
+                    except Exception as e:
+                        stats['errors'].append(f"Combined PDF generation failed for {job_id}: {str(e)}")
+                else:
+                    print(f"Skipping Combined PDF for {job_id}: Not enough PDFs to merge ({len(pdfs_to_merge)} found)", file=sys.stderr)
+        else:
+            print(f"Skipping Combined PDF for {job_id}: pypdf not available", file=sys.stderr)
 
         # Save updated job JSON
         try:
