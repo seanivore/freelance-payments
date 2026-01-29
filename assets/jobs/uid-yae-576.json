@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-29T12:15:01.929125Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Yae Jameson",
+                "signed_date": "2026-01-29"
             }
         }
     },
@@ -54,8 +54,8 @@
         },
         "client_status": {
             "logged_in": "2026-01-29T12:22:30.472Z",
-            "contract_signed": null,
-            "invoice": null,
+            "contract_signed": "2026-01-29T12:22:30.472Z",
+            "invoice": "2026-01-29T12:22:30.472Z",
             "payment_1": "2026-01-29T12:22:31.171Z",
             "balance": null,
             "payment_2": null
