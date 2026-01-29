@@ -104,7 +104,7 @@
 
 ---
 
-## Test: "uid-ymf-021.json" 
+## Test: "uid-ymf-021.json" -- LEFT OFF HERE BECAUSE OF VERCEL DEPLOYMENT RATE LIMIT 🔴
 + McFarland, ymf-ai-podcast
 
 ### Events Needed
@@ -130,7 +130,7 @@
   - ⏭️ Skipping logged_in - already processed at 2026-01-29T14:18:41.860Z -- **WE MUST REMOVE THIS**
   - ✓ Updated payment_1: 2026-01-29T14:19:13.716Z
   - ✓ Deactivated price1
-+ Session #2 with PDF download behavior 
++ Session #2 with PDF download behavior -- **LEFT OFF HERE BECAUSE OF VERCEL DEPLOYMENT RATE LIMIT**
 
 ### Notes 
 
@@ -159,39 +159,50 @@
 
 ### Test 
 + Session #1 with PDF download behavior 
-
++ Session #2 with PDF download behavior 
 
 ### Notes 
 
+---
 
-+ Session #2 
+### Test: "uid-pww-926.json" 
++ Williams, pww-social-media
 
+### Events Needed
++ Session #1
+  - API call — `state.client_status.logged_in`, `state.client_status.invoice`, `state.client_status.contract_signed`, `contract.signatures.client.legal_name`, `contract.signatures.client.date_signed` 
+  - API call — `state.client_status.payment_1`, `price1.active = "false"`
++ Session #2
+  - API call — `state.client_status.balance` 
+  - API call — `state.client_status.payment_2`, `price2.active = "false"`, `product.active = "false"` 
 
-———
-Test: "uid-pww-926.json" 
-Williams, pww-social-media
-Events needed: 
-Session #1 - 
-API call — state.client_status.logged_in, state.client_status.invoice, state.client_status.contract_signed, contract.signatures.client.legal_name, contract.signatures.client.date_signed 
-API call — state.client_status.payment_1, price1.active = "false" 
-Session #2 - 
-API call — state.client_status.balance 
-API call — state.client_status.payment_2, price2.active = "false", product.active = "false" 
+### Environment
++ Mobile, incognito window, Safari, iOS 26.2.1
 
+### Test 
++ Session #1 with PDF download behavior 
++ Session #2 with PDF download behavior 
 
+### Notes 
 
-———
-Test: "uid-egl-627.json" 
-Linton, egl-website
-Events needed: 
-Session #1 - 
-API call — state.client_status.logged_in, state.client_status.invoice, state.client_status.contract_signed, contract.signatures.client.legal_name, contract.signatures.client.date_signed 
-API call — state.client_status.payment_1, price1.active = "false" 
-Session #2 - 
-API call — state.client_status.balance 
-API call — state.client_status.payment_2, price2.active = "false", product.active = "false" 
+---
 
+## Test: "uid-egl-627.json" 
++ Linton, egl-website
 
+### Events Needed
++ Session #1
+  - API call — `state.client_status.logged_in`, `state.client_status.invoice`, `state.client_status.contract_signed`, `contract.signatures.client.legal_name`, `contract.signatures.client.date_signed` 
+  - API call — `state.client_status.payment_1`, `price1.active = "false"`
++ Session #2
+  - API call — `state.client_status.balance` 
+  - API call — `state.client_status.payment_2`, `price2.active = "false"`, `product.active = "false"` 
 
+### Environment
++ Mobile, incognito window, Safari, iOS 26.2.1
 
+### Test 
++ Session #1 with PDF download behavior 
++ Session #2 with PDF download behavior 
 
+### Notes 
