@@ -1,4 +1,11 @@
 {
-  "jobs": {},
-  "generated_at": "2026-01-30T12:37:06.351937Z"
+  "jobs": {
+    "hoff-emy-everlastings": {
+      "file_path": "assets/jobs/uid-uoa-049.json",
+      "job_id": "uid-uoa-049",
+      "login_keyword": "emy-everlastings",
+      "login_name": "Hoff"
+    }
+  },
+  "generated_at": "2026-01-30T14:09:24.767735Z"
 }
