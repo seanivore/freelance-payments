@@ -90,7 +90,7 @@
 
 ### Test 
 
-+ Session #2 *without* PDF download behavior; **all behavior was as expected** 
++ Session #1 *without* PDF download behavior; **all behavior was as expected** 
 + Session #2 *with* PDF download behavior; **all behavior was as expected** 
 
 ### Notes 
@@ -130,7 +130,7 @@
   - ⏭️ Skipping logged_in - already processed at 2026-01-29T14:18:41.860Z -- **WE MUST REMOVE THIS**
   - ✓ Updated payment_1: 2026-01-29T14:19:13.716Z
   - ✓ Deactivated price1
-+ Session #2 with PDF download behavior -- **LEFT OFF HERE BECAUSE OF VERCEL DEPLOYMENT RATE LIMIT**
++ Session #2 with PDF download behavior; **all behavior was as expected** 
 
 ### Notes 
 
