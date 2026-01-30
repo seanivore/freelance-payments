@@ -321,7 +321,7 @@ git push -u origin freelance-payments
 
 Complete this AFTER the dev environment is fully working.
 
-## Pre-Launch Testing
+## Pre-Launch Testing -- DONE ✅
 
 ### Friend Testing
 - [x] Create 2-3 test jobs for friends
@@ -335,15 +335,15 @@ Complete this AFTER the dev environment is fully working.
 - [x] Save recordings for portfolio/documentation
 
 ### Verify
-- [ ] All events trigger correctly
-- [ ] JSON updates properly
-- [ ] Routing works at each step
-- [ ] PDFs display correctly
-- [ ] Stripe checkout works smoothly
+- [x] All events trigger correctly
+- [x] JSON updates properly
+- [x] Routing works at each step
+- [x] PDFs display correctly
+- [x] Stripe checkout works smoothly
 
 ---
 
-## Step 1: Switch Stripe to Live Mode
+## Step 1: Switch Stripe to Live Mode -- DONE ✅
 
 ### Get Live Keys
 1. Go to: https://dashboard.stripe.com/apikeys
@@ -360,7 +360,7 @@ Complete this AFTER the dev environment is fully working.
 
 ---
 
-## Step 2: Update Vercel Environment Variables
+## Step 2: Update Vercel Environment Variables -- DONE ✅
 
 **Navigate to**: Vercel → freelance-payments → Settings → Environment Variables
 
@@ -374,7 +374,7 @@ Complete this AFTER the dev environment is fully working.
 
 ---
 
-## Step 3: Clean Up Test Data from Live Repo
+## Step 3: Clean Up Test Data from Live Repo -- DONE ✅
 
 ### Delete Test Jobs
 ```bash
@@ -397,7 +397,7 @@ touch assets/pdf/balance/.gitkeep
 echo '{"jobs":[]}' > assets/js/manifest.json
 ```
 
-### Delete Version History (Live Repo Only)
+### Delete Version History (Live Repo Only) -- DONE ✅
 
 These directories should only exist in the dev repo:
 
@@ -426,7 +426,7 @@ rm assets/docs/v6/PAYMENTS_LOGIN_SPEC.md
 
 ---
 
-## Step 4: Verify Configuration
+## Step 4: Verify Configuration -- DONE ✅
 
 **File**: `CNAME`
 ```

@@ -526,26 +526,26 @@ const sentEventsRef = useRef<Set<string>>(new Set());
 
 ### Flush Triggers (Multiple Layers)
 
-| Trigger | When It Fires | Behavior | Purpose |
-|---------|---------------|----------|---------|
-| **Proactive flush on checkout load** | User clicks "Continue to Checkout" | Flush all buffered events via `fetch` | **Primary** - ensures pre-payment events are sent before Stripe redirect |
-| **Payment completion** | User completes Stripe payment | Send payment event (+ any remaining buffered) | Records payment confirmation |
-| **`pagehide`** | Page unload | Flush via `sendBeacon` | Backup for non-payment exits |
-| **`beforeunload`** | Tab/window closing | Flush via `sendBeacon` | Desktop backup |
-| **`popstate`** | Back button navigation | Flush via `sendBeacon` | Catches back-button exits |
-| **Inactivity timer (5 min)** | No user activity for 5 minutes | Flush via `fetch` | Safety net for abandoned sessions |
+| Trigger                      | When It Fires           | Behavior               | Purpose                       |
+|------------------------------|-------------------------|------------------------|-------------------------------|
+| **Proactive checkout flush** | User clicks "Checkout"  | `fetch` flush buffered | Send events before redirect   |
+| **Payment completion**       | Stripe payment complete | Send payment event     | Records payment confirmation  |
+| **`pagehide`**               | Page unload             | Flush via `sendBeacon` | Backup for non-payment exits  |
+| **`beforeunload`**           | Tab/window closing      | Flush via `sendBeacon` | Desktop backup                |
+| **`popstate`**               | Back button navigation  | Flush via `sendBeacon` | Catches back-button exits     |
+| **5m inactivity timer**      | 5m no user activity     | Flush via `fetch`      | Abandoned sessions safety net |
 
 **NOT used**: `visibilitychange` (removed - too aggressive, fired on slow page loads and tab switches)
 
 ### Expected Event Flow (Two API Calls)
 
-| Step | User Action | What Happens |
-|------|-------------|--------------|
-| 1 | Login, sign contract, acknowledge invoice | Events buffered: `[logged_in, contract_signed, invoice]` |
-| 2 | Click "Continue to Checkout" | **Proactive flush** sends `[logged_in, contract_signed, invoice]` |
-| 3 | Fill in payment details, click Pay | Stripe processes payment |
-| 4 | Stripe redirects back | Fresh page load, payment confirmed |
-| 5 | Payment confirmed | **Payment flush** sends `[payment_1]` |
+| Step | User Action                          | What Happens                                                |
+|------|--------------------------------------|-------------------------------------------------------------|
+| 1    | Login, sign contract, okay invoice   | Events buffered: `[logged_in, contract_signed, invoice]`    |
+| 2    | Click "Continue to Checkout"         | **Proactive flush** `[logged_in, contract_signed, invoice]` |
+| 3    | Fill in payment details, click Pay   | Stripe processes payment                                    |
+| 4    | Stripe redirects back                | Fresh page load, payment confirmed                          |
+| 5    | Payment confirmed                    | **Payment flush** sends `[payment_1]`                       |
 
 **Result**: Two API calls (correct behavior)
 - **API Call 1**: `logged_in`, `contract_signed`, `invoice` (proactive flush on checkout load)
@@ -553,14 +553,14 @@ const sentEventsRef = useRef<Set<string>>(new Set());
 
 ### Flush Scenarios
 
-| User Scenario | What Happens | Events Sent? |
-|---------------|--------------|--------------|
-| Completes full payment flow | Proactive flush + payment flush | ✅ Two batches as expected |
-| Opens PDF tab, comes back, completes payment | Proactive flush + payment flush | ✅ Two batches |
-| Abandons before clicking checkout | Inactivity timer (5 min) or pagehide | ✅ Buffered events sent |
-| Closes desktop browser tab | `beforeunload` flushes | ✅ Buffered events sent |
-| Clicks back button | `popstate` flushes | ✅ Buffered events sent |
-| Force-quits Safari app (swipe up to close) | No event fires - app terminated instantly | ❌ Events lost (unavoidable) |
+| User Scenario                          | What Happens                    | Events Sent?                |
+|----------------------------------------|---------------------------------|------------------------------|
+| Completes full payment flow            | Proactive flush + payment flush | ✅ Two batches as expected   |
+| Opens PDF, nav back, completes payment | Proactive flush + payment flush | ✅ Two batches               |
+| Abandons before clicking checkout      | 5m inactivity timer or pagehide | ✅ Buffered events sent      |
+| Closes desktop browser tab             | `beforeunload` flushes          | ✅ Buffered events sent      |
+| Clicks back button                     | `popstate` flushes              | ✅ Buffered events sent      |
+| Force-quits Browser app (swipe up)     | No event; app terminated        | ❌ Events lost (unavoidable) |
 
 **Note on force-quit**: When a user force-quits an iOS app (swipes up from app switcher), the app is immediately terminated with no graceful shutdown. No browser events fire. This is unavoidable, but the routing logic is resilient - if `payment_1` exists, user will be routed to balance/payment_2 regardless of whether other events were recorded.
 
