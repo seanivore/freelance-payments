@@ -1,5 +1,5 @@
 {
-  "project": "Everlastings by Emaline Website Storefront",
+  "project": "Website Storefront for Everlastings by Emaline",
   "contract": {
     "work_start": "2026-02-04",
     "work_end": "2026-02-20",
@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": "2026-01-30T14:09:05.901381Z"
+        "signed_date": null
       },
       "client": {
         "legal_name": null,
@@ -19,45 +19,38 @@
   },
   "docs": {
     "contract": {
-      "id": "kon-uoa-049",
-      "pdf": "assets/pdf/contract/kon-uoa-049.pdf",
-      "file_id": "1mVPWT0IWBl2NrgrqW5QZN_cnl6foaph7yjX_N0TT64Q",
-      "url": "https://payments.august.style/assets/pdf/contract/kon-uoa-049.pdf",
-      "sha256": "063f23b7524b4f65b99a18f50448bc43ad6b579cb73a2b5f774d3ecf77df69d5",
-      "created": "2026-01-30T14:09:14.532092Z"
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
     },
     "invoice": {
-      "id": "inv-uoa-049",
-      "pdf": "assets/pdf/invoice/inv-uoa-049.pdf",
-      "file_id": "1qZmqKhUafR2oRPcp2XG0WFR9SU6KSLyzq9XDFpJqJ8Q",
-      "url": "https://payments.august.style/assets/pdf/invoice/inv-uoa-049.pdf",
-      "sha256": "fe8f40e4efbe7957888c2c50ba6245d33bf929ca0357f0b5151f42d093678191",
-      "created": "2026-01-30T14:09:19.878343Z"
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
     },
     "balance": {
-      "id": "bal-uoa-049",
-      "pdf": "assets/pdf/balance/bal-uoa-049.pdf",
-      "file_id": "1knpSvaGDPtJJmAF6k1TLVyM3wu8ZQIqs1ZolOXuGagI",
-      "url": "https://payments.august.style/assets/pdf/balance/bal-uoa-049.pdf",
-      "sha256": "4404d7554e441d95f3b9a0a8280b0dc302ecbfa413724f5bdbb50f5da1926326",
-      "created": "2026-01-30T14:09:24.738233Z"
-    },
-    "combined": {
-      "id": "uid-uoa-049",
-      "pdf": "assets/pdf/combined/uid-uoa-049.pdf",
-      "url": "https://payments.august.style/assets/pdf/combined/uid-uoa-049.pdf",
-      "sha256": "1c41aa248028a639840839be654398d97b09b7539604e85e66177cbad75cb0f5",
-      "created": "2026-01-30T14:09:24.766417Z"
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
     }
   },
   "state": {
     "objects": {
-      "created": "2026-01-30T14:09:05.901381Z",
-      "product": "uid-uoa-049",
-      "price_1": "price_1SvINi4zGcNmpOAwzESMoSzL",
-      "price_2": "price_1SvINi4zGcNmpOAwIPqzRBY0",
-      "customer": "cus-uoa-049",
-      "coupon": "cou-uoa-049"
+      "created": null,
+      "product": null,
+      "price_1": null,
+      "price_2": null,
+      "customer": null,
+      "coupon": null
     },
     "client_status": {
       "logged_in": null,
@@ -69,12 +62,12 @@
     }
   },
   "product": {
-    "name": "Custom E-Commerce Website & Automation System",
+    "name": "Everlastings Miniatures Website & Store with Backend Automations",
     "active": true,
-    "description": "Emy needs a fully functional e-commerce website with live products, working checkout flow, newsletter collection, responsive design, and professional documentation.",
-    "id": "uid-uoa-049",
+    "description": "Emy needs a fully functional e-commerce website with live products, working checkout flow, newsletter collection, responsive design, and professional documentation",
+    "id": "uid-ltt-725",
     "login_name": "Hoff",
-    "login_keyword": "emy-everlastings",
+    "login_keyword": "emys-miniatures",
     "service_usd": 550000,
     "total_payments": 2,
     "discount_usd": 497500,
@@ -87,9 +80,9 @@
     "title": "Owner",
     "email": "emyh@everlastingsbyemaline.com",
     "phone": "978-996-7375",
-    "id": "cus-uoa-049",
+    "id": "cus-ltt-725",
     "address": {
-      "city": "Townsend,",
+      "city": "Townsend",
       "line1": "90 North End Rd",
       "state": "MA",
       "postal_code": "01469",
@@ -100,29 +93,29 @@
     "amount_off": 497500,
     "applies_to": {
       "products": [
-        "uid-uoa-049"
+        "uid-ltt-725"
       ]
     },
     "currency": "usd",
     "duration": "once",
-    "id": "cou-uoa-049",
+    "id": "cou-ltt-725",
     "max_redemptions": 1,
-    "name": "PORTFOLIO-DISCOUNT"
+    "name": "EMYS-DISCOUNT"
   },
   "price1": {
     "count": 1,
     "currency": "usd",
-    "unit_amount": 40000,
+    "unit_amount": 537500,
     "active": true,
     "billing_scheme": "per_unit",
     "pay_by": "start of work",
     "nickname": "Initial Payment",
     "product": {
       "products": [
-        "uid-uoa-049"
+        "uid-ltt-725"
       ]
     },
-    "id": "price_1SvINi4zGcNmpOAwzESMoSzL"
+    "id": ""
   },
   "price2": {
     "count": 2,
@@ -136,25 +129,25 @@
     "nickname": "Final Payment",
     "product": {
       "products": [
-        "uid-uoa-049"
+        "uid-ltt-725"
       ]
     },
-    "id": "price_1SvINi4zGcNmpOAwIPqzRBY0"
+    "id": ""
   },
   "checkout_session_1": {
     "discounts": [
       {
-        "coupon": "cou-uoa-049"
+        "coupon": "cou-ltt-725"
       }
     ],
     "line_items": [
       {
-        "price": "price_1SvINi4zGcNmpOAwzESMoSzL",
+        "price": "",
         "quantity": 1
       }
     ],
     "mode": "payment",
-    "return_url": "https://payments.august.style/uid-uoa-049?session_id={CHECKOUT_SESSION_ID}",
+    "return_url": "https://payments.august.style/uid-ltt-725?session_id={CHECKOUT_SESSION_ID}",
     "ui_mode": "custom"
   },
   "checkout_session_2": {
@@ -165,12 +158,12 @@
     ],
     "line_items": [
       {
-        "price": "price_1SvINi4zGcNmpOAwIPqzRBY0",
+        "price": "",
         "quantity": 1
       }
     ],
     "mode": "payment",
-    "return_url": "https://payments.august.style/uid-uoa-049?session_id={CHECKOUT_SESSION_ID}",
+    "return_url": "https://payments.august.style/uid-ltt-725?session_id={CHECKOUT_SESSION_ID}",
     "ui_mode": "custom"
   },
   "project_scope_summary": "Deliver a professional, custom-built e-commerce website for Everlastings by Emaline. The website should serve as a digital home for their miniature worlds' brand, where visitors can experience the magic, read the stories, and purchase a miniature world created by Emy for their own home.",
