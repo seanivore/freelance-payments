@@ -1,0 +1,171 @@
+{
+  "project": "Everlastings by Emaline Website Storefront",
+  "contract": {
+    "work_start": "2026-02-04",
+    "work_end": "2026-02-20",
+    "legal_jurisdiction": "Massachusetts",
+    "maintenance_period_months": 3,
+    "maintenance_monthly_fee": 150,
+    "signatures": {
+      "contractor": {
+        "legal_name": "Sean August Horvath",
+        "signed_date": null
+      },
+      "client": {
+        "legal_name": null,
+        "signed_date": null
+      }
+    }
+  },
+  "docs": {
+    "contract": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "invoice": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    },
+    "balance": {
+      "id": null,
+      "pdf": null,
+      "file_id": null,
+      "url": null,
+      "sha256": null,
+      "created": null
+    }
+  },
+  "state": {
+    "objects": {
+      "created": null,
+      "product": null,
+      "price_1": null,
+      "price_2": null,
+      "customer": null,
+      "coupon": null
+    },
+    "client_status": {
+      "logged_in": null,
+      "contract_signed": null,
+      "invoice": null,
+      "payment_1": null,
+      "balance": null,
+      "payment_2": null
+    }
+  },
+  "product": {
+    "name": "Custom E-Commerce Website & Automation System",
+    "active": true,
+    "description": "Emy needs a fully functional e-commerce website with live products, working checkout flow, newsletter collection, responsive design, and professional documentation.",
+    "id": "uid-uoa-049",
+    "login_name": "Hoff",
+    "login_keyword": "emy-everlastings",
+    "service_usd": 550000,
+    "total_payments": 2,
+    "discount_usd": 497500,
+    "type": "service",
+    "unit_label": "Payment"
+  },
+  "customer": {
+    "name": "Emy Hoff",
+    "business": "Everlastings by Emaline",
+    "title": "Owner",
+    "email": "emyh@everlastingsbyemaline.com",
+    "phone": "978-996-7375",
+    "id": "cus-uoa-049",
+    "address": {
+      "city": "Townsend,",
+      "line1": "90 North End Rd",
+      "state": "MA",
+      "postal_code": "01469",
+      "country": "US"
+    }
+  },
+  "coupon": {
+    "amount_off": 497500,
+    "applies_to": {
+      "products": [
+        "uid-uoa-049"
+      ]
+    },
+    "currency": "usd",
+    "duration": "once",
+    "id": "cou-uoa-049",
+    "max_redemptions": 1,
+    "name": "PORTFOLIO-DISCOUNT"
+  },
+  "price1": {
+    "count": 1,
+    "currency": "usd",
+    "unit_amount": 40000,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "start of work",
+    "nickname": "Initial Payment",
+    "product": {
+      "products": [
+        "uid-uoa-049"
+      ]
+    },
+    "id": ""
+  },
+  "price2": {
+    "count": 2,
+    "currency": "usd",
+    "unit_amount": 12500,
+    "active": true,
+    "billing_scheme": "per_unit",
+    "pay_by": "before project launch",
+    "pay_days": 14,
+    "late_fee": 10000,
+    "nickname": "Final Payment",
+    "product": {
+      "products": [
+        "uid-uoa-049"
+      ]
+    },
+    "id": ""
+  },
+  "checkout_session_1": {
+    "discounts": [
+      {
+        "coupon": "cou-uoa-049"
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-uoa-049?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "checkout_session_2": {
+    "discounts": [
+      {
+        "coupon": null
+      }
+    ],
+    "line_items": [
+      {
+        "price": "",
+        "quantity": 1
+      }
+    ],
+    "mode": "payment",
+    "return_url": "https://payments.august.style/uid-uoa-049?session_id={CHECKOUT_SESSION_ID}",
+    "ui_mode": "custom"
+  },
+  "project_scope_summary": "Deliver a professional, custom-built e-commerce website for Everlastings by Emaline. The website should serve as a digital home for their miniature worlds' brand, where visitors can experience the magic, read the stories, and purchase a miniature world created by Emy for their own home.",
+  "project_scope_full": "Everlastings by Emaline Website Storefront\n\nProject Scope\n\nOverview\nDeliver a professional, custom-built e-commerce website for Everlastings by Emaline. The website should serve as a digital home for their miniature worlds' brand, where visitors can experience the magic, read the stories, and purchase a miniature world created by Emy for their own home.\n\nDetails\nProject Name: Everlastings by Emaline Website Storefront\nProject Start: Wednesday, February 4, 2026\nTarget Launch: End of February 2026\n\nTimeline\nWEEK 1\nArchitecture and design system setup\nHomepage development\nCollection grid implementation\n\nWEEK 2\nProduct pages and Stripe integration\nTesting and quality assurance\nContent integration and polish\nLaunch preparation\n\nCost\nTOTAL $525.00\n$400.00 — payment due before development begins\n$125.00 — payment due before launch\n\nProfessional Value: $5,500\n44 hours\n$125/hour market rate\n\nOffer Details:\n90% off — portfolio discount\nBonus $425 — professional photography consulting\n\nNext Steps\nContract expands on this scope document\nFirst Payment charged with contract signing\nProduct Page Planning Create JSON schema\nInternal Architecture Planning Creating tags, types of featured content needed on JSON schema\nExternal Architecture Planning Sorting schema values to accommodate Stripe and other data output/inputs\nSchema Finalization Start adding products by creating JSON files, Plan out template pages\nLarger development Expanding to automations and outside platform integrations\n\nContracted Parties\n\nClient\nClient Name: Emy Hoff\nContact Email: emyh@everlastingsbyemaline.com\nBusiness Name: Everlastings by Emaline\nBusiness Address: 123 Main St, Anytown, USA\nContact Phone: 978-996-7375\n\nContractor\nContractor Name: Sean August Horvath\nContractor Email: sean@august.style\nBusiness Name: Sean August Horvath\nContractor Address: 102 Lunenburg Ave, West Townsend, MA 01474\nContractor Phone: 424-744-7687\n\nDeliverables\n\nAt Launch\nFully functional e-commerce website\n5-10 initial products live\nWorking checkout flow\nNewsletter collection system\nMobile-responsive design\nProfessional documentation\n\nPost-Launch (30 days included)\nBug fixes and technical support\nPerformance optimization\nContent update assistance\nQuick questions and guidance\n\nSupport & Documentation\nTraining on adding new products, photo quality consultation, and 30 days post-launch support\nComplete technical documentation, content template guidance\nPotential Google Form or Airtable or Notion → JSON pipeline option (Phase 2)\n\nSuccess Criteria\n\nLaunch Day\n✓ Website live and accessible\n✓ All 5-10 initial products visible\n✓ Checkout flow working\n✓ Newsletter signup functional\n✓ Mobile responsive\n✓ < 3 second load time\n\nFirst Month\n✓ No critical bugs\n✓ Forms delivering correctly\n✓ First sale through website\n✓ Newsletter list growing\n\nClient Responsibilities (finer details to come)\n\nPre-Development Preparation\nThings to prepare that you'll need handy when filling out JSON files for products\nInitial 5-10 product photos\nInitial 5-10 product descriptions/stories\nHero images for sections\nAssets to prepare that development will need while building pages\nAccent font selection from provided options\nLogo files (SVG preferred)\nSocial media URLs (Instagram, Facebook, Pinterest, TikTok)\n\nDuring Development\nContinue preparing the JSON files for products and other site sections they inform\nAdditional product content\nBrand copy refinements\nOrganize and prepare assets per section/topic\nShipping cost consultation\nTerms & Conditions, Privacy Policy, Returns Policy, etc.\nTimely feedback on work-in-progress\n\nBefore Launch\nAll product content finalized (5-10 minimum)\nFinal copy approval\nDomain DNS coordination (if needed)\nTest purchase review\n\nProject Details\n\nTechnical Infrastructure\nCustom-built dynamic website:\nJSON-based product catalog system\nGitHub Pages hosting (free, fast, reliable)\nCloudflare R2 CDN for images (~$1-5/month)\nAutomated deployment pipeline\nFuture-proof, AI-agent-ready architecture\nVercel serverless functions\n\nE-commerce integration:\nStripe Prebuilt Checkout (industry standard)\nAll payment methods (cards, Apple Pay, Google Pay, etc)\nAutomatic inventory updates\nWebhook integration for sold items\nMobile-optimized checkout experience\n\nOperating costs:\nDomain: $12/year (registered through Feb 2027 on Squarespace)\nGoogle Workspace: $72/year/seat (already active)\nImage CDN: ~$12-60/year\nStripe fees: 2.9% + $0.30 per transaction (standard)\nTotal: ~$96/year\n\nDesign & User Experience\nBrand-aligned visual design:\nYour color palette (plum, lavender, fog, cream, gold)\nMinimalist, elegant aesthetic\nTheatrical lighting effects\nMobile-first responsive design\nProfessional typography\n\nStrategic UX features:\nSingle landing page controlling narrative flow\nPrice above fold (conversion best practice)\nBuy Now buttons next to add to cart buttons\nProminent newsletter CTA in landing page and all footers\nProduct catalog grid view with multi-select tag filters\nProfessional template-based product pages\n\nWebsite Features\nHomepage:\nTheatrical opening, loading like a curtain opening on a stage or a book opening to show a story\nPerspective-motion UI lighting effects mimic stage spotlights crossing scene before curtain open\nSeasonal theme system that dynamically adjusts aesthetics pulling from selected featured product JSON files\nBrand story introduction using landing page structure best practices, including Newsletter, Contact, and Shop CTAs\nHomepage contact expands into modal with contact form and defaulted newsletter sign-up\n\nAll Pages:\nHeader, footer, and breadcrumbs making for easy navigation between pages and page sections\nMobile first design to accommodate social ad traffic purchase behavior\nHamburger menu for detailed navigation leaving room for 3-5 primary navigation links\n\nCollection Pages:\nSection-specific hero images that pull from the project JSON files for featured products\nFilterable product grid with multi-select tags, sort controls, smart filtering hiding irrelevant filters\nProduct cards with hover effects, quick view, add to cart, and buy now buttons\n\nProduct Pages:\nPhoto galleries with 7-15 images\nStory cards (2-8 paragraphs)\nFeature lists with icons, full product specifications\nRelated products connected using tagging system\n\nExternal Features:\nGoogle Analytics 4 setup with custom events that make sense for the business\nPixel tracking for Meta, TikTok, and Pinterest\nSocial media integration, image alt tags, social meta tags\nSEO optimization, potential innovative AI-driven solution; product description updates\n\nContent Management\nUnlimited scalability:\nAdd new products by creating JSON files; script to auto-generate prepped JSON file for new product entry\nNew sections appear automatically thanks to dynamic page generation using sections as type of tag\nTag system adapts to your creations; no rebuilding pages or touching code\n\nTerms & Conditions of Our Agreement\n\nIntellectual Property\nAll custom code and design work becomes your property upon final payment\nYou retain all rights to your content, photos, and stories\nOpen-source libraries remain under their respective licenses\n\nSupport Period\n30 days of post-launch support included\nResponse time: within 48 hours for non-critical issues\nCritical bugs addressed within 24 hours\n\nWarranty\nWebsite will function as specified at launch\nCode will be production-ready and well-documented\nAll features will work across modern browsers and devices\n\nLimitations\nNot responsible for third-party service outages (Stripe, GitHub, Cloudflare)\nContent creation is client responsibility\nMajor scope changes may require additional fees\n\nWhat's NOT Included\nThese features are available as separate add-ons when you're ready:\nBlog/newsletter platform setup — $200\nSocial media integrations — $300 for core four platforms\nMarketplace integrations (Etsy, Faire) — $200-500\nOngoing maintenance retainer — $100/month (optional)\n\nQuestions? Email Sean August Horvath\nThis scope document will be used as an outline or wireframe to expand upon with more detail as we move forward and build this project. Please email me with any questions or requests for clarification.\nUPDATED: 2026-01-29"
+}
