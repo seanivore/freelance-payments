@@ -1,5 +1,11 @@
 {
   "jobs": {
+    "wilson-alw-social-media": {
+      "file_path": "assets/jobs/uid-alw-779.json",
+      "job_id": "uid-alw-779",
+      "login_keyword": "alw-social-media",
+      "login_name": "Wilson"
+    },
     "linton-egl-website": {
       "file_path": "assets/jobs/uid-egl-627.json",
       "job_id": "uid-egl-627",
@@ -31,5 +37,5 @@
       "login_name": "McFarland"
     }
   },
-  "generated_at": "2026-01-29T19:06:07.488759Z"
+  "generated_at": "2026-01-30T04:59:05.528092Z"
 }
