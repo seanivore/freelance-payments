@@ -6,30 +6,12 @@
       "login_keyword": "alw-social-media",
       "login_name": "Wilson"
     },
-    "linton-egl-website": {
-      "file_path": "assets/jobs/uid-egl-627.json",
-      "job_id": "uid-egl-627",
-      "login_keyword": "egl-website",
-      "login_name": "Linton"
-    },
     "dave-gmq-website": {
       "file_path": "assets/jobs/uid-gmq-600.json",
       "job_id": "uid-gmq-600",
       "login_keyword": "gmq-website",
       "login_name": "Dave"
-    },
-    "williams-pww-social-media": {
-      "file_path": "assets/jobs/uid-pww-926.json",
-      "job_id": "uid-pww-926",
-      "login_keyword": "pww-social-media",
-      "login_name": "Williams"
-    },
-    "smith-rex-youtube": {
-      "file_path": "assets/jobs/uid-qyx-737.json",
-      "job_id": "uid-qyx-737",
-      "login_keyword": "rex-youtube",
-      "login_name": "Smith"
     }
   },
-  "generated_at": "2026-01-30T05:07:25.994874Z"
+  "generated_at": "2026-01-30T05:16:14.615594Z"
 }
