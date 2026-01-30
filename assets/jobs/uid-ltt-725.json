@@ -9,7 +9,7 @@
     "signatures": {
       "contractor": {
         "legal_name": "Sean August Horvath",
-        "signed_date": null
+        "signed_date": "2026-01-30T14:23:15.595510Z"
       },
       "client": {
         "legal_name": null,
@@ -19,38 +19,45 @@
   },
   "docs": {
     "contract": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "kon-ltt-725",
+      "pdf": "assets/pdf/contract/kon-ltt-725.pdf",
+      "file_id": "16beQyaxJAqHwMEjDA5z93v80wIk_1HWqWI5fAGp2CZI",
+      "url": "https://payments.august.style/assets/pdf/contract/kon-ltt-725.pdf",
+      "sha256": "b02ee5151f943092cfce7612583e28ec6d0eff8d36464953d2a78d1ef7c9073d",
+      "created": "2026-01-30T14:23:23.090147Z"
     },
     "invoice": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "inv-ltt-725",
+      "pdf": "assets/pdf/invoice/inv-ltt-725.pdf",
+      "file_id": "1slimnXh6z37cVgm9sKCMV8zwfHxI4FiWU8k-mkrvnbk",
+      "url": "https://payments.august.style/assets/pdf/invoice/inv-ltt-725.pdf",
+      "sha256": "3618da2cd604bf2454aafc8a09f91b321f1dd38bba5c6ae49bc6eb40af075424",
+      "created": "2026-01-30T14:23:28.618710Z"
     },
     "balance": {
-      "id": null,
-      "pdf": null,
-      "file_id": null,
-      "url": null,
-      "sha256": null,
-      "created": null
+      "id": "bal-ltt-725",
+      "pdf": "assets/pdf/balance/bal-ltt-725.pdf",
+      "file_id": "1-FAhgS9Ixsjds1oX_CgdEacr7Mq6LftEBx0zLfpG3UI",
+      "url": "https://payments.august.style/assets/pdf/balance/bal-ltt-725.pdf",
+      "sha256": "507e3f062dcd11a2c6b3face9f5e40e0b2a01c2dde0025e665e56245dd5b2baf",
+      "created": "2026-01-30T14:23:34.100135Z"
+    },
+    "combined": {
+      "id": "uid-ltt-725",
+      "pdf": "assets/pdf/combined/uid-ltt-725.pdf",
+      "url": "https://payments.august.style/assets/pdf/combined/uid-ltt-725.pdf",
+      "sha256": "f7720105c619a166bf5dde35c49ec5329e42899f06484a09c110efa827957b43",
+      "created": "2026-01-30T14:23:34.128311Z"
     }
   },
   "state": {
     "objects": {
-      "created": null,
-      "product": null,
-      "price_1": null,
-      "price_2": null,
-      "customer": null,
-      "coupon": null
+      "created": "2026-01-30T14:23:15.595510Z",
+      "product": "uid-ltt-725",
+      "price_1": "price_1SvIbP4zGcNmpOAwCpXvfPw2",
+      "price_2": "price_1SvIbQ4zGcNmpOAwlfRHJmr6",
+      "customer": "cus-ltt-725",
+      "coupon": "cou-ltt-725"
     },
     "client_status": {
       "logged_in": null,
@@ -115,7 +122,7 @@
         "uid-ltt-725"
       ]
     },
-    "id": ""
+    "id": "price_1SvIbP4zGcNmpOAwCpXvfPw2"
   },
   "price2": {
     "count": 2,
@@ -132,7 +139,7 @@
         "uid-ltt-725"
       ]
     },
-    "id": ""
+    "id": "price_1SvIbQ4zGcNmpOAwlfRHJmr6"
   },
   "checkout_session_1": {
     "discounts": [
@@ -142,7 +149,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1SvIbP4zGcNmpOAwCpXvfPw2",
         "quantity": 1
       }
     ],
@@ -158,7 +165,7 @@
     ],
     "line_items": [
       {
-        "price": "",
+        "price": "price_1SvIbQ4zGcNmpOAwlfRHJmr6",
         "quantity": 1
       }
     ],

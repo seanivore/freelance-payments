@@ -1,11 +1,11 @@
 {
   "jobs": {
-    "hoff-emy-everlastings": {
-      "file_path": "assets/jobs/uid-uoa-049.json",
-      "job_id": "uid-uoa-049",
-      "login_keyword": "emy-everlastings",
+    "hoff-emys-miniatures": {
+      "file_path": "assets/jobs/uid-ltt-725.json",
+      "job_id": "uid-ltt-725",
+      "login_keyword": "emys-miniatures",
       "login_name": "Hoff"
     }
   },
-  "generated_at": "2026-01-30T14:09:24.767735Z"
+  "generated_at": "2026-01-30T14:23:34.129660Z"
 }
