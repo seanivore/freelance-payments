@@ -1,17 +1,4 @@
 {
-  "jobs": {
-    "wilson-alw-social-media": {
-      "file_path": "assets/jobs/uid-alw-779.json",
-      "job_id": "uid-alw-779",
-      "login_keyword": "alw-social-media",
-      "login_name": "Wilson"
-    },
-    "dave-gmq-website": {
-      "file_path": "assets/jobs/uid-gmq-600.json",
-      "job_id": "uid-gmq-600",
-      "login_keyword": "gmq-website",
-      "login_name": "Dave"
-    }
-  },
-  "generated_at": "2026-01-30T05:16:14.615594Z"
+  "jobs": {},
+  "generated_at": "2026-01-30T05:35:19.193733Z"
 }
