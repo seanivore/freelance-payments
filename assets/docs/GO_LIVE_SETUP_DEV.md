@@ -712,35 +712,35 @@ Before each promotion:
 
 ## Initial Dev Setup Checklist
 
-- [ ] Create `freelance-payments-dev` repo on GitHub (PUBLIC)
-- [ ] Clone production repo locally as `freelance-payments-dev`
-- [ ] Change git remote to dev repo
-- [ ] Update `CNAME` to `dev.payments.august.style`
-- [ ] Update `vercel.json` CORS to dev domain
-- [ ] Update `src/lib/api.ts` to dev Vercel URL
-- [ ] Remove production JSON files and PDFs
-- [ ] Create test JSON files using `job` command
-- [ ] Verify DNS for `dev.payments.august.style` (already configured)
-- [ ] Enable GitHub Pages for dev repo (Source: GitHub Actions)
-- [ ] Create Vercel project for dev repo
-- [ ] Add environment variables to Vercel (test keys)
-- [ ] Create Stripe test webhook
-- [ ] Add GitHub secrets to dev repo
-- [ ] Push and verify full deployment
-- [ ] Test complete user flow on dev
+- [x] Create `freelance-payments-dev` repo on GitHub (PUBLIC)
+- [x] Clone production repo locally as `freelance-payments-dev`
+- [x] Change git remote to dev repo
+- [x] Update `CNAME` to `dev.payments.august.style`
+- [x] Update `vercel.json` CORS to dev domain
+- [x] Update `src/lib/api.ts` to dev Vercel URL
+- [x] Remove production JSON files and PDFs
+- [x] Create test JSON files using `job` command
+- [x] Verify DNS for `dev.payments.august.style` (already configured)
+- [x] Enable GitHub Pages for dev repo (Source: GitHub Actions)
+- [x] Create Vercel project for dev repo
+- [x] Add environment variables to Vercel (test keys)
+- [x] Create Stripe test webhook
+- [x] Add GitHub secrets to dev repo
+- [x] Push and verify full deployment
+- [x] Test complete user flow on dev
 
 ## Go-Live Checklist
 
-- [ ] Complete all friend testing on dev
-- [ ] Record screen captures (mobile + desktop)
-- [ ] Get Stripe live keys
-- [ ] Create live webhook in Stripe
-- [ ] Update Vercel environment variables to live keys
-- [ ] Clean up test data from live repo
-- [ ] Delete version history from live repo
-- [ ] Verify production configuration
-- [ ] Commit and push
-- [ ] Create first real client job
+- [x] Complete all friend testing on dev
+- [x] Record screen captures (mobile + desktop)
+- [x] Get Stripe live keys
+- [x] Create live webhook in Stripe
+- [x] Update Vercel environment variables to live keys
+- [x] Clean up test data from live repo
+- [x] Delete version history from live repo
+- [x] Verify production configuration
+- [x] Commit and push
+- [x] Create first real client job
 - [ ] Monitor first real payment
 
 ## Promotion Checklist (Recurring)
@@ -757,5 +757,3 @@ Before each promotion:
 - [ ] Mark changelog items as promoted
 
 ---
-
-_This document consolidates IMPL_DEV_BRANCH.md and IMPL_LAUNCH.md into a single sequential guide for setting up development and production environments._

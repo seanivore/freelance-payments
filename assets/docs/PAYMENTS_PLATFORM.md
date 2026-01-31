@@ -994,5 +994,3 @@ Use `git smart-push` for local pushes. It stashes any local changes, rebases fro
 - **Original Architecture**: `assets/docs/RESOURCES/OG_JSON_ARCH_PORTFOLIO.md`
 
 ---
-
-_This document consolidates information from `AI_CONTEXT_PRIMER.md`, `CURRENT_STATE.md`, `PROJECT_OVERVIEW.md`, `NECESSARY_CONTEXT.md`, and `EXEC_PLAN_FINAL.md`, eliminating outdated information, updating what needs to be updated, and outputting it into a single comprehensive reference for future AI agents and developers working on this project._
