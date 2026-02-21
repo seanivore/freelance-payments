@@ -12,8 +12,8 @@
                 "signed_date": "2026-01-30T14:23:15.595510Z"
             },
             "client": {
-                "legal_name": null,
-                "signed_date": null
+                "legal_name": "Emaline Hoff ",
+                "signed_date": "Feb 21, 2026"
             }
         }
     },
@@ -61,8 +61,8 @@
         },
         "client_status": {
             "logged_in": "2026-02-21T21:59:36.824Z",
-            "contract_signed": null,
-            "invoice": null,
+            "contract_signed": "2026-02-21T22:06:01.612Z",
+            "invoice": "2026-02-21T22:06:04.424Z",
             "payment_1": null,
             "balance": null,
             "payment_2": null
