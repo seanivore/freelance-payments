@@ -628,7 +628,9 @@ export default function App() {
           });
         }
 
-        setClientSecret(session.client_secret);
+        // Decode client_secret in case it contains URL-encoded characters
+        const decodedSecret = decodeURIComponent(session.client_secret);
+        setClientSecret(decodedSecret);
       } else {
         throw new Error('No client_secret in response');
       }
