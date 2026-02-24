@@ -2,6 +2,16 @@
 
 * **API Call Creates Checkout Session, Never Loads Payment Processor**
 
+After the contract is signed and the invoice acknowledged, the checkout session API is called and appears to be created successfully when you look in Stripe's logs, however, the loading screen never moves past the initial loading screen. 
+
+**NOTE**: This is only happening on the live app. I just tested a job at the dev URL and it worked fine from the dev repository and it worked fine. Frustrating because they're supposed to be copies of each other made at a stable bug-free point in time. Because of this, I'm not super sure how to proceed — the job is real and this bug was reported to me by a clint trying to make a payment. 
+
+I guess if it is an obvious fix, then we should do it. If not, then I can archive this job and create a totally new one. I guess we could copy the dev build over to the live app and make the necessary changes to the API keys and other environment variables. I wonder if this is where the original bug is coming from because I'm not sure what else could have changed since we created the live versus dev builds. 
+
+There is a "React" plugin on my Google Chrome and I've never used it before but I tried to grab some information from it and pasted it below along with the normal console logs. 
+
+Wdyt? Should we fix this or archive the job and create a new one? Though honestly if it isn't an easy fix then I'll probably just manually send a payment link to the client and focus on fixing this at some other time. 
+
 1. Console after login while payment session was called but never loads 
 
 uid-ltt-725:1  GET https://payments.august.style/uid-ltt-725 404 (Not Found)
