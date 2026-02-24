@@ -630,6 +630,8 @@ export default function App() {
 
         // Decode client_secret in case it contains URL-encoded characters
         const decodedSecret = decodeURIComponent(session.client_secret);
+        console.log('🔐 Original secret:', session.client_secret);
+        console.log('🔓 Decoded secret:', decodedSecret);
         setClientSecret(decodedSecret);
       } else {
         throw new Error('No client_secret in response');
