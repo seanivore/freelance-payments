@@ -1,5 +1,5 @@
 {
-  "project": "Tauri Desktop App",
+  "project": "Development of Desktop App",
   "contract": {
     "work_start": "2026-02-24",
     "work_end": "2026-03-03",
@@ -64,23 +64,23 @@
   "product": {
     "name": "Development of Desktop App",
     "active": true,
-    "description": "Zachary needs a desktop app developed for his business. The app will be used to manage his clients and projects. It will be developed using Tauri and Rust.",
-    "id": "uid-zob-936",
-    "login_name": "Zachary",
-    "login_keyword": "zacharybennett",
-    "service_usd": 32110000,
+    "description": "Quinn needs a desktop app developed for his business. The app will be used to manage his clients and projects. It will be developed using Tauri and Rust.",
+    "id": "uid-qes-700",
+    "login_name": "Quinn",
+    "login_keyword": "quinnesslinger",
+    "service_usd": 21881100,
     "total_payments": 2,
-    "discount_usd": 88810,
+    "discount_usd": 33300,
     "type": "service",
     "unit_label": "Payment"
   },
   "customer": {
-    "name": "Zachary Bennett",
-    "business": "Zachary Bennett",
+    "name": "Quinn Esslinger",
+    "business": "Quinn Esslinger",
     "title": "Owner",
-    "email": "zachary@zacharybennett.com",
+    "email": "quinn@quinnesslinger.com",
     "phone": "978-996-7375",
-    "id": "cus-zob-936",
+    "id": "cus-qes-700",
     "address": {
       "city": "West Townsend",
       "line1": "123 Main St",
@@ -90,29 +90,29 @@
     }
   },
   "coupon": {
-    "amount_off": 88810,
+    "amount_off": 33300,
     "applies_to": {
       "products": [
-        "uid-zob-936"
+        "uid-qes-700"
       ]
     },
     "currency": "usd",
     "duration": "once",
-    "id": "cou-zob-936",
+    "id": "cou-qes-700",
     "max_redemptions": 1,
-    "name": "DISCOUNT-ZACHARY"
+    "name": "DISCOUNT-QUINN"
   },
   "price1": {
     "count": 1,
     "currency": "usd",
-    "unit_amount": 16055000,
+    "unit_amount": 10940550,
     "active": true,
     "billing_scheme": "per_unit",
     "pay_by": "start of work",
     "nickname": "Initial Payment",
     "product": {
       "products": [
-        "uid-zob-936"
+        "uid-qes-700"
       ]
     },
     "id": ""
@@ -120,7 +120,7 @@
   "price2": {
     "count": 2,
     "currency": "usd",
-    "unit_amount": 16055000,
+    "unit_amount": 10940550,
     "active": true,
     "billing_scheme": "per_unit",
     "pay_by": "before project launch",
@@ -129,7 +129,7 @@
     "nickname": "Final Payment",
     "product": {
       "products": [
-        "uid-zob-936"
+        "uid-qes-700"
       ]
     },
     "id": ""
@@ -137,7 +137,7 @@
   "checkout_session_1": {
     "discounts": [
       {
-        "coupon": "cou-zob-936"
+        "coupon": "cou-qes-700"
       }
     ],
     "line_items": [
@@ -147,7 +147,7 @@
       }
     ],
     "mode": "payment",
-    "return_url": "https://payments.august.style/uid-zob-936?session_id={CHECKOUT_SESSION_ID}",
+    "return_url": "https://payments.august.style/uid-qes-700?session_id={CHECKOUT_SESSION_ID}",
     "ui_mode": "custom"
   },
   "checkout_session_2": {
@@ -163,9 +163,9 @@
       }
     ],
     "mode": "payment",
-    "return_url": "https://payments.august.style/uid-zob-936?session_id={CHECKOUT_SESSION_ID}",
+    "return_url": "https://payments.august.style/uid-qes-700?session_id={CHECKOUT_SESSION_ID}",
     "ui_mode": "custom"
   },
-  "project_scope_summary": "Zachary needs a desktop app developed for his business. The app will be used to manage his clients and projects. It will be developed using Tauri and Rust.",
-  "project_scope_full": "Zachary needs a desktop app developed for his business. The app will be used to manage his clients and projects. It will be developed using Tauri and Rust."
+  "project_scope_summary": "Quinn needs a desktop app developed for his business. The app will be used to manage his clients and projects. It will be developed using Tauri and Rust.",
+  "project_scope_full": "Quinn needs a desktop app developed for his business. The app will be used to manage his clients and projects. It will be developed using Tauri and Rust."
 }
