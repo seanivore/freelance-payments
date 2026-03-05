@@ -49,3 +49,6 @@ dist/
 # Testing screenshots (local only, named IMG-*)
 **/testing/IMG-*
 
+# Design Spec Images 
+.agent/apple-ui-design/**.jpeg
+.agent/apple-ui-design/**.jpg
